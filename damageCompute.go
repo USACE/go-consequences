@@ -16,7 +16,21 @@ type pairedData struct{
 	xvals []float64
 	yvals []float64
 }
-
+type valueSampler interface{
+	sampleValue(xval float64) float64
+}
+func (p pairedData) sampleValue(xval float64) float64{
+	if xval < p.xvals[0]{
+		return 0.0 //xval is less than lowest x value
+	}
+	size := len(p.xvals)
+	if xval >= p.xvals[size-1]{
+		return p.yvals[size-1] //xval yeilds largest y value
+	}
+	lower := sort.SearchFloat64s(p.xvals,xval)
+	//interpolate
+	return p.yvals[lower]
+}
 type structure struct{
 	occType occupancyType
 	damCat string
@@ -35,8 +49,6 @@ func main(){
 	//simplified compute
 	ret := computeStructureDamageAtStructure(s,d)
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
-
-
 
 	d.depth = 0.0 // test lower case
 	ret = computeStructureDamageAtStructure(s,d)
@@ -57,18 +69,8 @@ func main(){
 	d.depth = 5.0 //test upper case
 	ret = computeStructureDamageAtStructure(s,d)
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
-
-
 }
 func computeStructureDamageAtStructure(s structure,d depthEvent) float64{
-	if d.depth < s.occType.damfun.xvals[0]{
-		return 0.0 //depth is less than lowest damage value
-	}
-	size := len(s.occType.damfun.xvals)
-	if d.depth >= s.occType.damfun.xvals[size-1]{
-		return (s.occType.damfun.yvals[size-1]/100.0)*s.structVal //depth yeilds largest damage value
-	}
-	lower := sort.SearchFloat64s(s.occType.damfun.xvals,d.depth)
-	//interpolate
-	return (s.occType.damfun.yvals[lower]/100.0)*s.structVal
+	damagePercent := s.occType.damfun.sampleValue(d.depth)/100
+	return damagePercent*s.structVal
 }
