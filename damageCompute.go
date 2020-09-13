@@ -40,18 +40,30 @@ type structure struct{
 	damCat string
 	structVal, contVal, foundHt float64
 }
-type consequenceReceptor interface{
-	computeConsequences(event interface{}) float64
+type structureDamageResult struct{
+	structureDamage, contentDamage float64
 }
-func (s structure) computeConsequences(d interface{}) float64 {
+type consequenceDamageResult struct{
+	headers []string
+	results []interface{}
+}
+type consequenceReceptor interface{
+	computeConsequences(event interface{}) consequenceDamageResult
+}
+func (s structure) computeConsequences(d interface{}) consequenceDamageResult {
+	header := []string{"structure damage", "content damage"}
+	results :=[]interface{}{0.0,0.0}
+	var ret = consequenceDamageResult{headers:header, results:results}
 	de, ok := d.(depthEvent)
 	if ok{
 		depth := de.depth
 		depthAboveFFE := depth - s.foundHt
 		damagePercent := s.occType.damfun.sampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
-		return damagePercent*s.structVal
+		ret.results[0] = damagePercent*s.structVal
+		ret.results[1] = damagePercent*s.contVal
+		return ret
 	}else{
-		return 0.0
+		return ret
 	}
 }
 func main(){
@@ -61,7 +73,7 @@ func main(){
 	ys := []float64{10.0,20.0,30.0,40.0}
 	var dfun = pairedData{xvals:xs, yvals:ys}
 	var o = occupancyType{name:"test",damfun:dfun}
-	var s = structure{occType:o,damCat:"category",structVal:100.0, contVal:100.0, foundHt:0.0}
+	var s = structure{occType:o,damCat:"category",structVal:100.0, contVal:10.0, foundHt:0.0}
 	var d = depthEvent{depth:3.0}
 
 	//simplified compute
