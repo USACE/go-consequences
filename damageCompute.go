@@ -15,7 +15,7 @@ type pairedData struct{
 	yvals []float64
 }
 type valueSampler interface{
-	sampleValue(xval float64) float64
+	sampleValue(inputValue float64) float64
 }
 func (p pairedData) sampleValue(xval float64) float64{
 	if xval < p.xvals[0]{
@@ -48,7 +48,9 @@ func (s structure) computeConsequences(d interface{}) float64 {
 	default:
 		return 0.0
 	case depthEvent:
-		damagePercent := s.occType.damfun.sampleValue(d.(depthEvent).depth)/100
+		depth := d.(depthEvent).depth
+		depthAboveFFE := depth - s.foundHt
+		damagePercent := s.occType.damfun.sampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
 		return damagePercent*s.structVal
 	}
 }
@@ -103,6 +105,10 @@ func main(){
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
 	
 	d.depth = 5.0 //test upper case
+	ret = s.computeConsequences(d)
+	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+
+	s.foundHt = 1.1 //test interpolation due to foundation height putting depth back in range
 	ret = s.computeConsequences(d)
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
 }
