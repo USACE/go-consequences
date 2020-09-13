@@ -25,9 +25,15 @@ func (p pairedData) sampleValue(xval float64) float64{
 	if xval >= p.xvals[size-1]{
 		return p.yvals[size-1] //xval yeilds largest y value
 	}
-	lower := sort.SearchFloat64s(p.xvals,xval)
+	if xval == p.xvals[0]{
+		return p.yvals[0]
+	}
+	upper := sort.SearchFloat64s(p.xvals,xval)
 	//interpolate
-	return p.yvals[lower]
+	lower := upper - 1 // safe because we trapped the 0 case earlier
+	slope := (p.yvals[upper] - p.yvals[lower])/(p.xvals[upper] - p.xvals[lower])
+	a := p.yvals[lower]
+	return a + slope* (xval-p.xvals[lower])
 }
 type structure struct{
 	occType occupancyType
@@ -64,11 +70,31 @@ func main(){
 	ret = s.computeConsequences(d)
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
 
+	d.depth = .5 // should return 0
+	ret = s.computeConsequences(d)
+	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+
 	d.depth = 1.0 // test lowest valid case
 	ret = s.computeConsequences(d)
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
 
-	d.depth = 2.5 //test interpolation case (not passing currently)
+	d.depth = 1.0001 // test lowest interp case
+	ret = s.computeConsequences(d)
+	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+
+	d.depth = 2.25 //test interpolation case
+	ret = s.computeConsequences(d)
+	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	
+	d.depth = 2.5 //test interpolation case
+	ret = s.computeConsequences(d)
+	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+
+	d.depth = 2.75 //test interpolation case
+	ret = s.computeConsequences(d)
+	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+
+	d.depth = 3.99 // test highest interp case
 	ret = s.computeConsequences(d)
 	fmt.Println("for a depth of", d.depth, "the damage is",ret)
 
