@@ -44,14 +44,14 @@ type consequenceReceptor interface{
 	computeConsequences(event interface{}) float64
 }
 func (s structure) computeConsequences(d interface{}) float64 {
-	switch d.(type) {
-	default:
-		return 0.0
-	case depthEvent:
-		depth := d.(depthEvent).depth
+	de, ok := d.(depthEvent)
+	if ok{
+		depth := de.depth
 		depthAboveFFE := depth - s.foundHt
 		damagePercent := s.occType.damfun.sampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
 		return damagePercent*s.structVal
+	}else{
+		return 0.0
 	}
 }
 func main(){
