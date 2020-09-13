@@ -2,6 +2,7 @@ package main
 import(
 	"sort"
 	"fmt"
+	"strings"
 )
 type depthEvent struct{
 	depth float64
@@ -66,6 +67,16 @@ func (s structure) computeConsequences(d interface{}) consequenceDamageResult {
 		return ret
 	}
 }
+func (c consequenceDamageResult) String() string{
+	if len(c.headers)!=len(c.results){
+		return "mismatched lengths"
+	}
+	var ret string = "the consequences were:"
+	for i, h := range c.headers{
+		ret += " " + h + " = " + fmt.Sprintf("%f",c.results[i].(float64)) + ","
+	}
+	return strings.Trim(ret, ",")
+}
 func main(){
 
 	//fake data to test
@@ -78,49 +89,49 @@ func main(){
 
 	//simplified compute
 	ret := s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 0.0 // test lower case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth,ret)
 
 	d.depth = .5 // should return 0
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 1.0 // test lowest valid case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 1.0001 // test lowest interp case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 2.25 //test interpolation case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 	
 	d.depth = 2.5 //test interpolation case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 2.75 //test interpolation case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 3.99 // test highest interp case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	d.depth = 4.0 // test highest valid case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 	
 	d.depth = 5.0 //test upper case
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 
 	s.foundHt = 1.1 //test interpolation due to foundation height putting depth back in range
 	ret = s.computeConsequences(d)
-	fmt.Println("for a depth of", d.depth, "the damage is",ret)
+	fmt.Println("for a depth of", d.depth, ret)
 }
