@@ -10,6 +10,7 @@ type depthEvent struct{
 type occupancyType struct{
 	name string
 	damfun pairedData
+	contentdamfun pairedData
 }
 type pairedData struct{
 	xvals []float64
@@ -60,8 +61,9 @@ func (s structure) computeConsequences(d interface{}) consequenceDamageResult {
 		depth := de.depth
 		depthAboveFFE := depth - s.foundHt
 		damagePercent := s.occType.damfun.sampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
+		cdamagePercent := s.occType.contentdamfun.sampleValue(depthAboveFFE)/100
 		ret.results[0] = damagePercent*s.structVal
-		ret.results[1] = damagePercent*s.contVal
+		ret.results[1] = cdamagePercent*s.contVal
 		return ret
 	}else{
 		return ret
@@ -82,8 +84,11 @@ func main(){
 	//fake data to test
 	xs := []float64{1.0,2.0,3.0,4.0}
 	ys := []float64{10.0,20.0,30.0,40.0}
+	cxs := []float64{1.0,2.0,3.0,4.0}
+	cys := []float64{5.0,10.0,15.0,20.0}
 	var dfun = pairedData{xvals:xs, yvals:ys}
-	var o = occupancyType{name:"test",damfun:dfun}
+	var cdfun = pairedData{xvals:cxs, yvals:cys}
+	var o = occupancyType{name:"test",damfun:dfun,contentdamfun:cdfun}
 	var s = structure{occType:o,damCat:"category",structVal:100.0, contVal:10.0, foundHt:0.0}
 	var d = depthEvent{depth:3.0}
 
