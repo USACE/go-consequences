@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/paireddata"
 )
 
@@ -23,8 +23,8 @@ const (
 
 type occupancyType struct {
 	name            string
-	structuredamfun paireddata.ValueSampler
-	contentdamfun   paireddata.ValueSampler
+	structuredamfun consequences.ValueSampler
+	contentdamfun   consequences.ValueSampler
 }
 type fireDamageFunction struct {
 }
@@ -51,26 +51,19 @@ type Structure struct {
 	damCat                      string
 	structVal, contVal, foundHt float64
 }
-type ConsequenceDamageResult struct {
-	headers []string
-	results []interface{}
-}
-type ConsequenceReceptor interface {
-	ComputeConsequences(event interface{}) ConsequenceDamageResult
-}
 
-func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
+func (s Structure) ComputeConsequences(d interface{}) consequences.ConsequenceDamageResult {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
-	var ret = ConsequenceDamageResult{headers: header, results: results}
+	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
 	de, ok := d.(depthEvent)
 	if ok {
 		depth := de.depth
 		depthAboveFFE := depth - s.foundHt
 		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE) / 100
-		ret.results[0] = damagePercent * s.structVal
-		ret.results[1] = cdamagePercent * s.contVal
+		ret.Results[0] = damagePercent * s.structVal
+		ret.Results[1] = cdamagePercent * s.contVal
 		return ret
 	}
 	def, okd := d.(float64)
@@ -78,29 +71,19 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 		depthAboveFFE := def - s.foundHt
 		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE) / 100
-		ret.results[0] = damagePercent * s.structVal
-		ret.results[1] = cdamagePercent * s.contVal
+		ret.Results[0] = damagePercent * s.structVal
+		ret.Results[1] = cdamagePercent * s.contVal
 		return ret
 	}
 	fire, okf := d.(fireEvent)
 	if okf {
 		damagePercent := s.occType.structuredamfun.SampleValue(fire.intensity) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.occType.contentdamfun.SampleValue(fire.intensity) / 100
-		ret.results[0] = damagePercent * s.structVal
-		ret.results[1] = cdamagePercent * s.contVal
+		ret.Results[0] = damagePercent * s.structVal
+		ret.Results[1] = cdamagePercent * s.contVal
 		return ret
 	}
 	return ret
-}
-func (c ConsequenceDamageResult) String() string {
-	if len(c.headers) != len(c.results) {
-		return "mismatched lengths"
-	}
-	var ret string = "the consequences were:"
-	for i, h := range c.headers {
-		ret += " " + h + " = " + fmt.Sprintf("%f", c.results[i].(float64)) + ","
-	}
-	return strings.Trim(ret, ",")
 }
 func BaseStructure() Structure {
 	//fake data to test
