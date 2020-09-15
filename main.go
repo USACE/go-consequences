@@ -2,35 +2,16 @@ package main
 
 import (
 	"fmt"
-  
+
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/paireddata"
 )
 
-func BaseStructure() consequences.Structure {
-	//fake data to test
-	xs := []float64{1.0, 2.0, 3.0, 4.0}
-	ys := []float64{10.0, 20.0, 30.0, 40.0}
-	cxs := []float64{1.0, 2.0, 3.0, 4.0}
-	cys := []float64{5.0, 10.0, 15.0, 20.0}
-	var dfun = paireddata.PairedData{Xvals: xs, Yvals: ys}
-	var cdfun = paireddata.PairedData{Xvals: cxs, Yvals: cys}
-	var o = consequences.OccupancyType{Name: "test", Structuredamfun: dfun, Contentdamfun: cdfun}
-	var s = consequences.Structure{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
-	return s
-}
-func ConvertBaseStructureToFire(s consequences.Structure) consequences.Structure {
-	var fire = hazards.FireDamageFunction{}
-	s.OccType.Structuredamfun = fire
-	s.OccType.Contentdamfun = fire
-	return s
-}
 func main() {
 
-	var s = BaseStructure()
+	var s = consequences.BaseStructure()
 	var d = hazards.DepthEvent{Depth: 3.0}
-  
+
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25}
 	for idx := range depths {
 		d.Depth = depths[idx]
@@ -85,7 +66,7 @@ func main() {
 	fmt.Println("for a depth of", d.Depth, ret)
 
 	var f = hazards.FireEvent{Intensity: hazards.Low}
-	s = ConvertBaseStructureToFire(s)
+	s = consequences.ConvertBaseStructureToFire(s)
 	ret = s.ComputeConsequences(f)
 	fmt.Println("for a fire intensity of", f.Intensity, ret)
 
