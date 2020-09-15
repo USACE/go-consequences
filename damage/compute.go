@@ -1,4 +1,4 @@
-package main
+package damage
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"github.com/USACE/go-consequences/paireddata"
 )
 
-type depthEvent struct {
-	depth float64
+type DepthEvent struct {
+	Depth float64
 }
 type fireEvent struct {
 	intensity
@@ -63,9 +63,9 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = ConsequenceDamageResult{headers: header, results: results}
-	de, ok := d.(depthEvent)
+	de, ok := d.(DepthEvent)
 	if ok {
-		depth := de.depth
+		depth := de.Depth
 		depthAboveFFE := depth - s.foundHt
 		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE) / 100
@@ -119,73 +119,4 @@ func ConvertBaseStructureToFire(s Structure) Structure {
 	s.occType.structuredamfun = fire
 	s.occType.contentdamfun = fire
 	return s
-}
-func main() {
-
-	var s = BaseStructure()
-	var d = depthEvent{depth: 3.0}
-
-	//simplified compute
-	ret := s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 0.0 // test lower case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = .5 // should return 0
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 1.0 // test lowest valid case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 1.0001 // test lowest interp case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 2.25 //test interpolation case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 2.5 //test interpolation case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 2.75 //test interpolation case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 3.99 // test highest interp case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 4.0 // test highest valid case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	d.depth = 5.0 //test upper case
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	s.foundHt = 1.1 //test interpolation due to foundation height putting depth back in range
-	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
-
-	var f = fireEvent{intensity: low}
-	s = ConvertBaseStructureToFire(s)
-	ret = s.ComputeConsequences(f)
-	fmt.Println("for a fire intensity of", f.intensity, ret)
-
-	f = fireEvent{intensity: medium}
-	s = ConvertBaseStructureToFire(s)
-	ret = s.ComputeConsequences(f)
-	fmt.Println("for a fire intensity of", f.intensity, ret)
-
-	f = fireEvent{intensity: high}
-	s = ConvertBaseStructureToFire(s)
-	ret = s.ComputeConsequences(f)
-	fmt.Println("for a fire intensity of", f.intensity, ret)
-
 }
