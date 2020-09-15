@@ -1,3 +1,3 @@
-module Go_Consequences
+module github.com/USACE/go-consequences
 
 go 1.15
