@@ -4,21 +4,8 @@ import (
 	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
-)
-
-type depthEvent struct {
-	depth float64
-}
-type fireEvent struct {
-	intensity
-}
-type intensity int
-
-const (
-	low    intensity = iota //0
-	medium intensity = iota // 1
-	high   intensity = iota // 2
 )
 
 type occupancyType struct {
@@ -27,23 +14,6 @@ type occupancyType struct {
 	contentdamfun   consequences.ValueSampler
 }
 type fireDamageFunction struct {
-}
-
-func (f fireDamageFunction) SampleValue(inputValue interface{}) float64 {
-	input, ok := inputValue.(intensity)
-	if !ok {
-		return 0.0
-	}
-	if input == low {
-		return 33.3
-	}
-	if input == medium {
-		return 50.0
-	}
-	if input == high {
-		return 100.0
-	}
-	return 0.0
 }
 
 type Structure struct {
@@ -56,9 +26,9 @@ func (s Structure) ComputeConsequences(d interface{}) consequences.ConsequenceDa
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
-	de, ok := d.(depthEvent)
+	de, ok := d.(hazards.DepthEvent)
 	if ok {
-		depth := de.depth
+		depth := de.Depth
 		depthAboveFFE := depth - s.foundHt
 		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE) / 100
@@ -75,10 +45,10 @@ func (s Structure) ComputeConsequences(d interface{}) consequences.ConsequenceDa
 		ret.Results[1] = cdamagePercent * s.contVal
 		return ret
 	}
-	fire, okf := d.(fireEvent)
+	fire, okf := d.(hazards.FireEvent)
 	if okf {
-		damagePercent := s.occType.structuredamfun.SampleValue(fire.intensity) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.SampleValue(fire.intensity) / 100
+		damagePercent := s.occType.structuredamfun.SampleValue(fire.Intensity) / 100 //assumes what type the damage array is in
+		cdamagePercent := s.occType.contentdamfun.SampleValue(fire.Intensity) / 100
 		ret.Results[0] = damagePercent * s.structVal
 		ret.Results[1] = cdamagePercent * s.contVal
 		return ret
@@ -98,7 +68,7 @@ func BaseStructure() Structure {
 	return s
 }
 func ConvertBaseStructureToFire(s Structure) Structure {
-	var fire = fireDamageFunction{}
+	var fire = hazards.FireDamageFunction{}
 	s.occType.structuredamfun = fire
 	s.occType.contentdamfun = fire
 	return s
@@ -106,69 +76,67 @@ func ConvertBaseStructureToFire(s Structure) Structure {
 func main() {
 
 	var s = BaseStructure()
-	var d = depthEvent{depth: 3.0}
+	var d = hazards.DepthEvent{Depth: 3.0}
 
 	//simplified compute
 	ret := s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 0.0 // test lower case
+	d.Depth = 0.0 // test lower case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = .5 // should return 0
+	d.Depth = .5 // should return 0
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 1.0 // test lowest valid case
+	d.Depth = 1.0 // test lowest valid case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 1.0001 // test lowest interp case
+	d.Depth = 1.0001 // test lowest interp case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 2.25 //test interpolation case
+	d.Depth = 2.25 //test interpolation case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 2.5 //test interpolation case
+	d.Depth = 2.5 //test interpolation case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 2.75 //test interpolation case
+	d.Depth = 2.75 //test interpolation case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 3.99 // test highest interp case
+	d.Depth = 3.99 // test highest interp case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 4.0 // test highest valid case
+	d.Depth = 4.0 // test highest valid case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	d.depth = 5.0 //test upper case
+	d.Depth = 5.0 //test upper case
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
 	s.foundHt = 1.1 //test interpolation due to foundation height putting depth back in range
 	ret = s.ComputeConsequences(d)
-	fmt.Println("for a depth of", d.depth, ret)
+	fmt.Println("for a depth of", d.Depth, ret)
 
-	var f = fireEvent{intensity: low}
+	var f = hazards.FireEvent{Intensity: hazards.Low}
 	s = ConvertBaseStructureToFire(s)
 	ret = s.ComputeConsequences(f)
-	fmt.Println("for a fire intensity of", f.intensity, ret)
+	fmt.Println("for a fire intensity of", f.Intensity, ret)
 
-	f = fireEvent{intensity: medium}
-	s = ConvertBaseStructureToFire(s)
+	f.Intensity = hazards.Medium
 	ret = s.ComputeConsequences(f)
-	fmt.Println("for a fire intensity of", f.intensity, ret)
+	fmt.Println("for a fire intensity of", f.Intensity, ret)
 
-	f = fireEvent{intensity: high}
-	s = ConvertBaseStructureToFire(s)
+	f.Intensity = hazards.High
 	ret = s.ComputeConsequences(f)
-	fmt.Println("for a fire intensity of", f.intensity, ret)
+	fmt.Println("for a fire intensity of", f.Intensity, ret)
 
 }
