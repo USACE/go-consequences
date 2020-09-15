@@ -4,11 +4,14 @@ import (
 	"sort"
 )
 
+
+// PairedData is paired data
 type PairedData struct {
 	Xvals []float64
 	Yvals []float64
 }
 
+// SampleValue implements ValueSampler
 func (p PairedData) SampleValue(inputValue interface{}) float64 {
 	xval, ok := inputValue.(float64)
 	if !ok {

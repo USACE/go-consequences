@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-
+  
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
@@ -30,7 +30,12 @@ func main() {
 
 	var s = BaseStructure()
 	var d = hazards.DepthEvent{Depth: 3.0}
-
+  
+	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25}
+	for idx := range depths {
+		d.Depth = depths[idx]
+		fmt.Println("for a depth of", d.Depth, s.ComputeConsequences(d))
+	}
 	//simplified compute
 	ret := s.ComputeConsequences(d)
 	fmt.Println("for a depth of", d.Depth, ret)
@@ -91,5 +96,4 @@ func main() {
 	f.Intensity = hazards.High
 	ret = s.ComputeConsequences(f)
 	fmt.Println("for a fire intensity of", f.Intensity, ret)
-
 }
