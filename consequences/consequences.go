@@ -4,16 +4,16 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
-type occupancyType struct {
-	name            string
-	structuredamfun ValueSampler
-	contentdamfun   ValueSampler
+type OccupancyType struct {
+	Name            string
+	Structuredamfun ValueSampler
+	Contentdamfun   ValueSampler
 }
 
 type Structure struct {
-	occType                     occupancyType
-	damCat                      string
-	structVal, contVal, foundHt float64
+	OccType                     OccupancyType
+	DamCat                      string
+	StructVal, ContVal, FoundHt float64
 }
 
 func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
@@ -23,28 +23,28 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	de, ok := d.(hazards.DepthEvent)
 	if ok {
 		depth := de.Depth
-		depthAboveFFE := depth - s.foundHt
-		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE) / 100
-		ret.Results[0] = damagePercent * s.structVal
-		ret.Results[1] = cdamagePercent * s.contVal
+		depthAboveFFE := depth - s.FoundHt
+		damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+		cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
+		ret.Results[0] = damagePercent * s.StructVal
+		ret.Results[1] = cdamagePercent * s.ContVal
 		return ret
 	}
 	def, okd := d.(float64)
 	if okd {
-		depthAboveFFE := def - s.foundHt
-		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE) / 100
-		ret.Results[0] = damagePercent * s.structVal
-		ret.Results[1] = cdamagePercent * s.contVal
+		depthAboveFFE := def - s.FoundHt
+		damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+		cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
+		ret.Results[0] = damagePercent * s.StructVal
+		ret.Results[1] = cdamagePercent * s.ContVal
 		return ret
 	}
 	fire, okf := d.(hazards.FireEvent)
 	if okf {
-		damagePercent := s.occType.structuredamfun.SampleValue(fire.Intensity) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.SampleValue(fire.Intensity) / 100
-		ret.Results[0] = damagePercent * s.structVal
-		ret.Results[1] = cdamagePercent * s.contVal
+		damagePercent := s.OccType.Structuredamfun.SampleValue(fire.Intensity) / 100 //assumes what type the damage array is in
+		cdamagePercent := s.OccType.Contentdamfun.SampleValue(fire.Intensity) / 100
+		ret.Results[0] = damagePercent * s.StructVal
+		ret.Results[1] = cdamagePercent * s.ContVal
 		return ret
 	}
 	return ret
