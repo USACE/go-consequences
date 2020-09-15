@@ -2,7 +2,7 @@ package main
 import(
 	"fmt"
 	"strings"
-	"sort"
+	"Go_Consequences/paireddata"
 )
 type depthEvent struct{
 	depth float64
@@ -18,19 +18,12 @@ const(
 )
 type occupancyType struct{
 	name string
-	structuredamfun valueSampler
-	contentdamfun valueSampler
-}
-type pairedData struct{
-	xvals []float64
-	yvals []float64
-}
-type valueSampler interface{
-	sampleValue(inputValue interface{}) float64
+	structuredamfun paireddata.ValueSampler
+	contentdamfun paireddata.ValueSampler
 }
 type fireDamageFunction struct{
 }
-func (f fireDamageFunction) sampleValue(inputValue interface{}) float64{
+func (f fireDamageFunction) SampleValue(inputValue interface{}) float64{
 	input, ok := inputValue.(intensity)
 	if !ok{
 		return 0.0
@@ -45,28 +38,6 @@ func (f fireDamageFunction) sampleValue(inputValue interface{}) float64{
 		return 100.0
 	}
 	return 0.0
-}
-func (p pairedData) sampleValue(inputValue interface{}) float64{
-	xval, ok := inputValue.(float64)
-	if !ok{
-		return 0.0
-	}
-	if xval < p.xvals[0]{
-		return 0.0 //xval is less than lowest x value
-	}
-	size := len(p.xvals)
-	if xval >= p.xvals[size-1]{
-		return p.yvals[size-1] //xval yeilds largest y value
-	}
-	if xval == p.xvals[0]{
-		return p.yvals[0]
-	}
-	upper := sort.SearchFloat64s(p.xvals,xval)
-	//interpolate
-	lower := upper - 1 // safe because we trapped the 0 case earlier
-	slope := (p.yvals[upper] - p.yvals[lower])/(p.xvals[upper] - p.xvals[lower])
-	a := p.yvals[lower]
-	return a + slope* (xval-p.xvals[lower])
 }
 type Structure struct{
 	occType occupancyType
@@ -88,8 +59,8 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	if ok{
 		depth := de.depth
 		depthAboveFFE := depth - s.foundHt
-		damagePercent := s.occType.structuredamfun.sampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.sampleValue(depthAboveFFE)/100
+		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
+		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE)/100
 		ret.results[0] = damagePercent*s.structVal
 		ret.results[1] = cdamagePercent*s.contVal
 		return ret
@@ -97,16 +68,16 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	def, okd := d.(float64)
 	if okd{
 		depthAboveFFE := def - s.foundHt
-		damagePercent := s.occType.structuredamfun.sampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.sampleValue(depthAboveFFE)/100
+		damagePercent := s.occType.structuredamfun.SampleValue(depthAboveFFE)/100 //assumes what type the damage array is in
+		cdamagePercent := s.occType.contentdamfun.SampleValue(depthAboveFFE)/100
 		ret.results[0] = damagePercent*s.structVal
 		ret.results[1] = cdamagePercent*s.contVal
 		return ret
 	}
 	fire, okf := d.(fireEvent)
 	if okf{
-		damagePercent := s.occType.structuredamfun.sampleValue(fire.intensity)/100 //assumes what type the damage array is in
-		cdamagePercent := s.occType.contentdamfun.sampleValue(fire.intensity)/100
+		damagePercent := s.occType.structuredamfun.SampleValue(fire.intensity)/100 //assumes what type the damage array is in
+		cdamagePercent := s.occType.contentdamfun.SampleValue(fire.intensity)/100
 		ret.results[0] = damagePercent*s.structVal
 		ret.results[1] = cdamagePercent*s.contVal
 		return ret
@@ -129,8 +100,8 @@ func BaseStructure() Structure{
 	ys := []float64{10.0,20.0,30.0,40.0}
 	cxs := []float64{1.0,2.0,3.0,4.0}
 	cys := []float64{5.0,10.0,15.0,20.0}
-	var dfun = pairedData{xvals:xs, yvals:ys}
-	var cdfun = pairedData{xvals:cxs, yvals:cys}
+	var dfun = paireddata.PairedData{Xvals:xs, Yvals:ys}
+	var cdfun = paireddata.PairedData{Xvals:cxs, Yvals:cys}
 	var o = occupancyType{name:"test",structuredamfun:dfun,contentdamfun:cdfun}
 	var s = Structure{occType:o,damCat:"category",structVal:100.0, contVal:10.0, foundHt:0.0}
 	return s
