@@ -1,8 +1,8 @@
 package main
 import(
-	"sort"
 	"fmt"
 	"strings"
+	"sort"
 )
 type depthEvent struct{
 	depth float64

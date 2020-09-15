@@ -1,2 +1,2 @@
-# Go_Consequences
+# go-consequences
 An Economic Consequences Library written in Golang
