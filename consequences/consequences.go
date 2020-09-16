@@ -2,7 +2,6 @@ package consequences
 
 import (
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/paireddata"
 )
 
 type Structure struct {
@@ -45,14 +44,10 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	return ret
 }
 func BaseStructure() Structure {
-	//fake data to test
-	xs := []float64{1.0, 2.0, 3.0, 4.0}
-	ys := []float64{10.0, 20.0, 30.0, 40.0}
-	cxs := []float64{1.0, 2.0, 3.0, 4.0}
-	cys := []float64{5.0, 10.0, 15.0, 20.0}
-	var dfun = paireddata.PairedData{Xvals: xs, Yvals: ys}
-	var cdfun = paireddata.PairedData{Xvals: cxs, Yvals: cys}
-	var o = OccupancyType{Name: "test", Structuredamfun: dfun, Contentdamfun: cdfun}
+	//get the occupancy type map
+	m := OccupancyTypeMap()
+	// select a base structure type for testing
+	var o = m["RES1-1SNB"]
 	var s = Structure{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
 	return s
 }
