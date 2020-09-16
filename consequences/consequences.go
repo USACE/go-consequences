@@ -5,12 +5,6 @@ import (
 	"github.com/USACE/go-consequences/paireddata"
 )
 
-type OccupancyType struct {
-	Name            string
-	Structuredamfun ValueSampler
-	Contentdamfun   ValueSampler
-}
-
 type Structure struct {
 	OccType                     OccupancyType
 	DamCat                      string
