@@ -5,6 +5,7 @@ import (
 )
 
 type Structure struct {
+	Name                        string
 	OccType                     OccupancyType
 	DamCat                      string
 	StructVal, ContVal, FoundHt float64

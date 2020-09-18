@@ -11,13 +11,38 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 )
 
-type NSIproperties struct {
-	Name string  `json:"fd_id"`
-	X    float64 `json:"x"`
-	Y    float64 `json:"y"`
+type NsiProperties struct {
+	Name      string  `json:"fd_id"`
+	X         float64 `json:"x"`
+	Y         float64 `json:"y"`
+	Occtype   string  `json:"occtype"`
+	FoundHt   float64 `json:"found_ht"`
+	DamCat    string  `json:"st_damcat"`
+	StructVal float64 `json:"val_struct"`
+	ContVal   float64 `json:"val_cont"`
 }
-type NSIfeature struct {
-	Properties NSIproperties `json:"properties"`
+type NsiFeature struct {
+	Properties NsiProperties `json:"properties"`
+}
+type NsiInventory struct {
+	Features []NsiFeature
+}
+
+func (i NsiInventory) toStructures() []consequences.Structure {
+	m := consequences.OccupancyTypeMap()
+	defaultOcctype := m["RES1-1SNB"]
+	structures := make([]consequences.Structure, len(i.Features))
+	for idx, feature := range i.Features {
+		structures[idx] = consequences.Structure{
+			Name:      feature.Properties.Name,
+			OccType:   defaultOcctype,
+			DamCat:    feature.Properties.DamCat,
+			StructVal: feature.Properties.StructVal,
+			ContVal:   feature.Properties.ContVal,
+			FoundHt:   feature.Properties.FoundHt,
+		}
+	}
+	return structures
 }
 
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
@@ -29,7 +54,6 @@ func GetByBbox(bbox string) []consequences.Structure {
 	}
 	client := &http.Client{Transport: transCfg}
 	url := fmt.Sprintf("%s?bbox=%s", apiUrl, bbox)
-	fmt.Println(url)
 	response, err := client.Get(url)
 
 	if err != nil {
@@ -39,15 +63,14 @@ func GetByBbox(bbox string) []consequences.Structure {
 	defer response.Body.Close()
 	// UnmarshalJSON implements UnmarshalJSON interface
 	jsonData, err := ioutil.ReadAll(response.Body)
-	c := make([]NSIfeature, 0)
-	if err := json.Unmarshal(jsonData, &c); err != nil {
+	features := make([]NsiFeature, 0)
+
+	if err := json.Unmarshal(jsonData, &features); err != nil {
+		fmt.Println(err)
 		return structures
 	}
-	m := consequences.OccupancyTypeMap()
-	defaultOcctype := m["RES1-1SNB"]
-	fmt.Print(defaultOcctype)
-
-	fmt.Print(string(c[0].Properties.Name))
+	inventory := NsiInventory{Features: features}
+	structures = inventory.toStructures()
 	return structures
 
 }

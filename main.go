@@ -9,8 +9,6 @@ import (
 )
 
 func main() {
-	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
-	nsi.GetByBbox(bbox)
 
 	var s = consequences.BaseStructure()
 	var d = hazards.DepthEvent{Depth: 3.0}
@@ -19,6 +17,7 @@ func main() {
 		d.Depth = depths[idx]
 		fmt.Println("for a depth of", d.Depth, s.ComputeConsequences(d))
 	}
+
 	s.FoundHt = 1.1 //test interpolation due to foundation height putting depth back in range
 	ret := s.ComputeConsequences(d)
 	fmt.Println("for a depth of", d.Depth, ret)
@@ -35,4 +34,12 @@ func main() {
 	f.Intensity = hazards.High
 	ret = s.ComputeConsequences(f)
 	fmt.Println("for a fire intensity of", f.Intensity, ret)
+
+	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
+	structures := nsi.GetByBbox(bbox)
+
+	for i, str := range structures {
+		fmt.Println(i, "at structure", str.Name, "for a depth of", d.Depth, str.ComputeConsequences(d))
+	}
+
 }
