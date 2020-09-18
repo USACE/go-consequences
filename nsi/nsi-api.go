@@ -6,11 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/USACE/go-consequences/consequences"
 )
 
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures"
 
-func GetByBbox(bbox string) {
+func GetByBbox(bbox string) []consequences.Structure {
+	structures := make([]consequences.Structure, 0)
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -30,7 +33,10 @@ func GetByBbox(bbox string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	m := consequences.OccupancyTypeMap()
+	defaultOcctype := m["RES1-1SNB"]
+	fmt.Print(defaultOcctype)
 	fmt.Print(string(jsonData))
+	return structures
 
 }
