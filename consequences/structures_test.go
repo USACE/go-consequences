@@ -29,11 +29,13 @@ func TestComputeConsequences(t *testing.T) {
 			t.Errorf("ComputeConsequences(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
 		}
 	}
-
-	s.FoundHt = 1.1 //test interpolation due to foundation height putting depth back in range
+	//test interpolation due to foundation height putting depth back in range
+	s.FoundHt = 1.1
 	got := s.ComputeConsequences(d).Results[0].(float64)
 	if got != 39.0 {
 		t.Errorf("ComputeConsequences(%f) = %f; expected %f", 39.0, got, 39.0)
 	}
 
+	//add a test for content value as well
+	//add a test for different hazard types (float64 and fire?)
 }

@@ -5,10 +5,10 @@ import (
 )
 
 type Structure struct {
-	Name                        string
-	OccType                     OccupancyType
-	DamCat                      string
-	StructVal, ContVal, FoundHt float64
+	Name                              string
+	OccType                           OccupancyType
+	DamCat                            string
+	StructVal, ContVal, FoundHt, X, Y float64
 }
 
 func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {

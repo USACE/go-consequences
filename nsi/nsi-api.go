@@ -40,6 +40,8 @@ func (i NsiInventory) toStructures() []consequences.Structure {
 			StructVal: feature.Properties.StructVal,
 			ContVal:   feature.Properties.ContVal,
 			FoundHt:   feature.Properties.FoundHt,
+			X:         feature.Properties.X,
+			Y:         feature.Properties.Y,
 		}
 	}
 	return structures
