@@ -18,21 +18,11 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult { 
 	de, ok := d.(hazards.DepthEvent)
 	if ok {
 		depth := de.Depth
-		depthAboveFFE := depth - s.FoundHt
-		damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
-		ret.Results[0] = damagePercent * s.StructVal
-		ret.Results[1] = cdamagePercent * s.ContVal
-		return ret
+		return computeFloodConsequences(depth, s)
 	}
 	def, okd := d.(float64)
 	if okd {
-		depthAboveFFE := def - s.FoundHt
-		damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
-		ret.Results[0] = damagePercent * s.StructVal
-		ret.Results[1] = cdamagePercent * s.ContVal
-		return ret
+		return computeFloodConsequences(def, s)
 	}
 	fire, okf := d.(hazards.FireEvent)
 	if okf {
@@ -42,6 +32,17 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult { 
 		ret.Results[1] = cdamagePercent * s.ContVal
 		return ret
 	}
+	return ret
+}
+func computeFloodConsequences(d float64, s Structure) ConsequenceDamageResult {
+	header := []string{"structure damage", "content damage"}
+	results := []interface{}{0.0, 0.0}
+	var ret = ConsequenceDamageResult{Headers: header, Results: results}
+	depthAboveFFE := d - s.FoundHt
+	damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+	cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
+	ret.Results[0] = damagePercent * s.StructVal
+	ret.Results[1] = cdamagePercent * s.ContVal
 	return ret
 }
 func BaseStructure() Structure {
