@@ -11,7 +11,7 @@ type Structure struct {
 	StructVal, ContVal, FoundHt, X, Y float64
 }
 
-func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
+func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = ConsequenceDamageResult{Headers: header, Results: results}
