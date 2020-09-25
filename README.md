@@ -23,6 +23,10 @@ The NSI package provides access to the NSI api bounding box endpoint so that str
 ### paireddata
 The paireddata object provides a linear interpolation of x and y data. This is used in the representation of depth damage relationships for the occupancy types described by the NSI structures. 
 
+
+## Testing
+Tests have been developed for most of the code related to flood damage estimation. The tests can be compiled using the general calls listed below on a package level. 
+
 ```
 C:\Examples\Go_Consequences>go test ./paireddata -c
 C:\Examples\Go_Consequences>.\paireddata.test -test.v
