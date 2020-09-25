@@ -16,6 +16,9 @@ type ConsequenceDamageResult struct {
 	Results []interface{}
 }
 
+func (c ConsequenceDamageResult) MarshalJSON() ([]byte, error) {
+	return make([]byte, 0), nil
+}
 func (c ConsequenceDamageResult) String() string {
 	if len(c.Headers) != len(c.Results) {
 		return "mismatched lengths"
