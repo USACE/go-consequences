@@ -6,8 +6,8 @@ import (
 
 type OccupancyType struct {
 	Name            string
-	Structuredamfun ValueSampler
-	Contentdamfun   ValueSampler
+	Structuredamfun paireddata.ValueSampler
+	Contentdamfun   paireddata.ValueSampler
 }
 
 func OccupancyTypeMap() map[string]OccupancyType {

@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-type ValueSampler interface {
-	SampleValue(inputValue interface{}) float64
-}
 type ConsequenceReceptor interface {
 	ComputeConsequences(event interface{}) ConsequenceDamageResult
 }
