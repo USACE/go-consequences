@@ -31,11 +31,21 @@ type NsiInventory struct {
 func (i NsiInventory) toStructures() []consequences.Structure {
 	m := consequences.OccupancyTypeMap()
 	defaultOcctype := m["RES1-1SNB"]
+	var occtype = defaultOcctype
 	structures := make([]consequences.Structure, len(i.Features))
 	for idx, feature := range i.Features {
+
+		if ot, ok := m[feature.Properties.Occtype]; ok {
+			occtype = ot
+		} else {
+			occtype = defaultOcctype
+			msg := "Using default " + feature.Properties.Occtype + " not found"
+			panic(msg)
+		}
+
 		structures[idx] = consequences.Structure{
 			Name:      feature.Properties.Name,
-			OccType:   defaultOcctype,
+			OccType:   occtype,
 			DamCat:    feature.Properties.DamCat,
 			StructVal: feature.Properties.StructVal,
 			ContVal:   feature.Properties.ContVal,

@@ -43,12 +43,12 @@ func OccupancyTypeMap() map[string]OccupancyType {
 	m["RES1-SLNB"] = res1slnb()
 	m["RES1-SLWB"] = res1slwb()
 	m["RES2"] = res2()
-	m["RES3AI"] = res3ai()
-	m["RES3BI"] = res3bi()
-	m["RES3CI"] = res3ci()
-	m["RES3DI"] = res3di()
-	m["RES3EI"] = res3ei()
-	m["RES3FI"] = res3fi()
+	m["RES3A"] = res3a()
+	m["RES3B"] = res3b()
+	m["RES3C"] = res3c()
+	m["RES3D"] = res3d()
+	m["RES3E"] = res3e()
+	m["RES3F"] = res3f()
 	m["RES4"] = res4()
 	m["RES5"] = res5()
 	m["RES6"] = res6()
@@ -335,59 +335,59 @@ func res2() OccupancyType {
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
 	return OccupancyType{Name: "RES2", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
-func res3ai() OccupancyType {
+func res3a() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 5, 28, 29, 31, 36, 37, 39, 40, 41, 42, 44, 46, 48, 52, 55, 58, 61, 64, 68, 69, 70, 71, 72, 73, 74}
 	contentxs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyType{Name: "RES3AI", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	return OccupancyType{Name: "RES3A", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
-func res3bi() OccupancyType {
+func res3b() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 5, 28, 29, 31, 36, 37, 39, 40, 41, 42, 44, 46, 48, 52, 55, 58, 61, 64, 68, 69, 70, 71, 72, 73, 74}
 	contentxs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyType{Name: "RES3BI", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	return OccupancyType{Name: "RES3B", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
-func res3ci() OccupancyType {
+func res3c() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 5, 28, 29, 31, 36, 37, 39, 40, 41, 42, 44, 46, 48, 52, 55, 58, 61, 64, 68, 69, 70, 71, 72, 73, 74}
 	contentxs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyType{Name: "RES3CI", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	return OccupancyType{Name: "RES3C", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
-func res3di() OccupancyType {
+func res3d() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 5, 28, 29, 31, 36, 37, 39, 40, 41, 42, 44, 46, 48, 52, 55, 58, 61, 64, 68, 69, 70, 71, 72, 73, 74}
 	contentxs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyType{Name: "RES3DI", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	return OccupancyType{Name: "RES3D", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
-func res3ei() OccupancyType {
+func res3e() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 5, 28, 29, 31, 36, 37, 39, 40, 41, 42, 44, 46, 48, 52, 55, 58, 61, 64, 68, 69, 70, 71, 72, 73, 74}
 	contentxs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyType{Name: "RES3EI", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	return OccupancyType{Name: "RES3E", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
-func res3fi() OccupancyType {
+func res3f() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 5, 28, 29, 31, 36, 37, 39, 40, 41, 42, 44, 46, 48, 52, 55, 58, 61, 64, 68, 69, 70, 71, 72, 73, 74}
 	contentxs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyType{Name: "RES3FI", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	return OccupancyType{Name: "RES3F", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
 }
 func res4() OccupancyType {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
