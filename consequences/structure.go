@@ -1,6 +1,7 @@
 package consequences
 
 import (
+	"github.com/HenryGeorgist/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 )
 
@@ -9,6 +10,27 @@ type Structure struct {
 	OccType                           OccupancyType
 	DamCat                            string
 	StructVal, ContVal, FoundHt, X, Y float64
+}
+type ParameterValue struct {
+	Value interface{}
+}
+
+//SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
+func (p ParameterValue) SampleValue(input interface{}) float64 {
+
+	pval, okf := p.Value.(float64) //if the ParameterValue.Value is a float - pass it on back.
+	if okf {
+		return pval
+	}
+	pvaldist, okd := p.Value.(statistics.ContinuousDistribution)
+	if okd {
+		inval, ok := input.(float64)
+		if ok {
+			return pvaldist.InvCDF(inval)
+		}
+	}
+
+	return 0
 }
 
 func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
