@@ -12,7 +12,7 @@ type UncertaintyPairedData struct {
 	Yvals []statistics.ContinuousDistribution
 }
 
-// SampleValue implements ValueSampler
+// SampleValue implements UncertianValueSampler
 func (p UncertaintyPairedData) SampleValue(inputValue interface{}, randomValue float64) float64 {
 	xval, ok := inputValue.(float64)
 	if !ok {

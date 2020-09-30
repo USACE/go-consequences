@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
@@ -35,11 +36,17 @@ func main() {
 	ret = s.ComputeConsequences(f)
 	fmt.Println("for a fire intensity of", f.Intensity, ret)
 
-	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
-	structures := nsi.GetByBbox(bbox)
-
+	//var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
+	//structures := nsi.GetByBbox(bbox)
+	startnsi := time.Now()
+	var fips string = "11"
+	structures := nsi.GetByFips(fips)
+	elapsedNsi := time.Since(startnsi)
+	startcompute := time.Now()
 	for i, str := range structures {
 		fmt.Println(i, "at structure", str.Name, "for a depth of", d.Depth, str.ComputeConsequences(d))
 	}
+	elapsed := time.Since(startcompute)
+	fmt.Println(fmt.Sprintf("NSI Fetching took %s Compute and Printing took %s", elapsedNsi, elapsed))
 
 }

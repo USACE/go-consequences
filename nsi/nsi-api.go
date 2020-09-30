@@ -58,14 +58,21 @@ func (i NsiInventory) toStructures() []consequences.Structure {
 }
 
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
-
+func GetByFips(fips string) []consequences.Structure {
+	url := fmt.Sprintf("%s?fips=%s", apiUrl, fips)
+	return nsiApi(url)
+}
 func GetByBbox(bbox string) []consequences.Structure {
+	url := fmt.Sprintf("%s?bbox=%s", apiUrl, bbox)
+	return nsiApi(url)
+}
+func nsiApi(url string) []consequences.Structure {
 	structures := make([]consequences.Structure, 0)
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
 	client := &http.Client{Transport: transCfg}
-	url := fmt.Sprintf("%s?bbox=%s", apiUrl, bbox)
+
 	response, err := client.Get(url)
 
 	if err != nil {
@@ -84,5 +91,4 @@ func GetByBbox(bbox string) []consequences.Structure {
 	inventory := NsiInventory{Features: features}
 	structures = inventory.toStructures()
 	return structures
-
 }
