@@ -14,8 +14,8 @@ func TestComputeConsequences(t *testing.T) {
 	x := []float64{1.0, 2.0, 3.0, 4.0}
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	pd := paireddata.PairedData{Xvals: x, Yvals: y}
-	var o = OccupancyType{Name: "test", Structuredamfun: pd, Contentdamfun: pd}
-	var s = Structure{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0}
+	var o = OccupancyTypeM{Name: "test", Structuredamfun: pd, Contentdamfun: pd}
+	var s = StructureM{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0}
 
 	//test depth values
 	var d = hazards.DepthEvent{Depth: 0.0}
