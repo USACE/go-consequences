@@ -12,6 +12,9 @@ type ConsequenceDamageResult struct {
 	Headers []string
 	Results []interface{}
 }
+type UncertaintyOccupancyTypeSampler interface {
+	SampleOccupancyType(rand int64) OccupancyType
+}
 
 func (c ConsequenceDamageResult) MarshalJSON() ([]byte, error) {
 	return make([]byte, 0), nil

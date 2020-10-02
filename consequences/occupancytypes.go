@@ -1,6 +1,8 @@
 package consequences
 
 import (
+	"math/rand"
+
 	"github.com/USACE/go-consequences/paireddata"
 )
 
@@ -9,7 +11,18 @@ type OccupancyType struct {
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
 }
+type OccupancyTypeWithUncertainty struct {
+	Name            string
+	Structuredamfun paireddata.UncertaintyValueSamplerSampler
+	Contentdamfun   paireddata.UncertaintyValueSamplerSampler
+}
 
+func (o OccupancyTypeWithUncertainty) SampleOccupancyType(seed int64) OccupancyType {
+	rand.Seed(seed)
+	sd := o.Structuredamfun.SampleValueSampler(rand.Float64())
+	cd := o.Contentdamfun.SampleValueSampler(rand.Float64())
+	return OccupancyType{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+}
 func OccupancyTypeMap() map[string]OccupancyType {
 	m := make(map[string]OccupancyType)
 	m["AGR1"] = agr1()

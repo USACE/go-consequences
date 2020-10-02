@@ -11,6 +11,13 @@ type Structure struct {
 	DamCat                            string
 	StructVal, ContVal, FoundHt, X, Y float64
 }
+type UncertaintyStructure struct {
+	Name                        string
+	Occtype                     OccupancyTypeWithUncertainty
+	DamCat                      string
+	StructVal, ContVal, FoundHt ParameterValue
+	X, Y                        float64
+}
 type ParameterValue struct {
 	Value interface{}
 }

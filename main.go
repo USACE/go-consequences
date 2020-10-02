@@ -39,14 +39,19 @@ func main() {
 	//var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	//structures := nsi.GetByBbox(bbox)
 	startnsi := time.Now()
-	var fips string = "11"
+	var fips string = "06"
+	d.Depth = 5.324 //testing cost of interpolation.
 	structures := nsi.GetByFips(fips)
 	elapsedNsi := time.Since(startnsi)
 	startcompute := time.Now()
+	var count = 0
 	for i, str := range structures {
-		fmt.Println(i, "at structure", str.Name, "for a depth of", d.Depth, str.ComputeConsequences(d))
+		str.ComputeConsequences(d)
+		//fmt.Println(i, "at structure", str.Name, "for a depth of", d.Depth, str.ComputeConsequences(d))
+		count = i
 	}
+	count += 1
 	elapsed := time.Since(startcompute)
-	fmt.Println(fmt.Sprintf("NSI Fetching took %s Compute and Printing took %s", elapsedNsi, elapsed))
+	fmt.Println(fmt.Sprintf("NSI Fetching took %s Compute took %s for %d structures", elapsedNsi, elapsed, count))
 
 }
