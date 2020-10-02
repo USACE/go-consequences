@@ -1,8 +1,6 @@
 package paireddata
 
 import (
-	"sort"
-
 	"github.com/HenryGeorgist/go-statistics/statistics"
 )
 
@@ -12,6 +10,7 @@ type UncertaintyPairedData struct {
 	Yvals []statistics.ContinuousDistribution
 }
 
+/* Needs work - this confuses things elsewhere..
 // SampleValue implements UncertianValueSampler
 func (p UncertaintyPairedData) SampleValue(inputValue interface{}, randomValue float64) float64 {
 	xval, ok := inputValue.(float64)
@@ -36,6 +35,7 @@ func (p UncertaintyPairedData) SampleValue(inputValue interface{}, randomValue f
 	slope := (upperY - lowerY) / (p.Xvals[upper] - p.Xvals[lower])
 	return lowerY + slope*(xval-p.Xvals[lower])
 }
+*/
 func (p UncertaintyPairedData) SampleValueSampler(randomValue float64) ValueSampler {
 	yVals := make([]float64, len(p.Yvals))
 	for idx, dist := range p.Yvals {

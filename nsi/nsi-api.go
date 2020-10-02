@@ -42,14 +42,13 @@ func (i NsiInventory) toStructures() []consequences.Structure {
 			msg := "Using default " + feature.Properties.Occtype + " not found"
 			panic(msg)
 		}
-
 		structures[idx] = consequences.Structure{
 			Name:      feature.Properties.Name,
 			OccType:   occtype,
 			DamCat:    feature.Properties.DamCat,
-			StructVal: feature.Properties.StructVal,
-			ContVal:   feature.Properties.ContVal,
-			FoundHt:   feature.Properties.FoundHt,
+			StructVal: consequences.ParameterValue{Value: feature.Properties.StructVal},
+			ContVal:   consequences.ParameterValue{Value: feature.Properties.ContVal},
+			FoundHt:   consequences.ParameterValue{Value: feature.Properties.FoundHt},
 			X:         feature.Properties.X,
 			Y:         feature.Properties.Y,
 		}

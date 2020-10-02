@@ -1,25 +1,36 @@
 package consequences
 
 import (
+	"math/rand"
+
 	"github.com/HenryGeorgist/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 )
 
 type Structure struct {
-	Name                              string
-	OccType                           OccupancyType
-	DamCat                            string
-	StructVal, ContVal, FoundHt, X, Y float64
-}
-type UncertaintyStructure struct {
 	Name                        string
-	Occtype                     OccupancyTypeWithUncertainty
+	OccType                     OccupancyType
 	DamCat                      string
 	StructVal, ContVal, FoundHt ParameterValue
 	X, Y                        float64
 }
+type StructureM struct {
+	Name                        string
+	OccType                     OccupancyTypeM
+	DamCat                      string
+	StructVal, ContVal, FoundHt float64
+	X, Y                        float64
+}
 type ParameterValue struct {
 	Value interface{}
+}
+
+func (s Structure) SampleStructure(seed int64) StructureM {
+	ot := s.OccType.SampleOccupancyType(seed)
+	sv := s.StructVal.SampleValue(rand.Float64())
+	cv := s.ContVal.SampleValue(rand.Float64())
+	fh := s.FoundHt.SampleValue(rand.Float64())
+	return StructureM{OccType: ot, DamCat: s.DamCat, StructVal: sv, ContVal: cv, FoundHt: fh}
 }
 
 //SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
@@ -39,8 +50,10 @@ func (p ParameterValue) SampleValue(input interface{}) float64 {
 
 	return 0
 }
-
-func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
+	return s.SampleStructure(rand.Int63()).ComputeConsequences(d) //this needs work so seeds can be controlled.
+}
+func (s StructureM) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = ConsequenceDamageResult{Headers: header, Results: results}
@@ -63,7 +76,7 @@ func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult { 
 	}
 	return ret
 }
-func computeFloodConsequences(d float64, s Structure) ConsequenceDamageResult {
+func computeFloodConsequences(d float64, s StructureM) ConsequenceDamageResult {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = ConsequenceDamageResult{Headers: header, Results: results}
@@ -74,15 +87,29 @@ func computeFloodConsequences(d float64, s Structure) ConsequenceDamageResult {
 	ret.Results[1] = cdamagePercent * s.ContVal
 	return ret
 }
-func BaseStructure() Structure {
+func BaseStructure() StructureM {
 	//get the occupancy type map
 	m := OccupancyTypeMap()
 	// select a base structure type for testing
 	var o = m["RES1-1SNB"]
-	var s = Structure{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
+	var s = StructureM{OccType: o.SampleOccupancyType(1), DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
 	return s
 }
-func ConvertBaseStructureToFire(s Structure) Structure {
+
+func BaseStructureU() Structure {
+	//get the occupancy type map
+	m := OccupancyTypeMap()
+	// select a base structure type for testing
+	var o = m["RES1-1SNB"]
+	sv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
+	cv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
+	spv := ParameterValue{Value: sv}
+	cpv := ParameterValue{Value: cv}
+	fhpv := ParameterValue{Value: 0}
+	var s = Structure{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
+	return s
+}
+func ConvertBaseStructureToFire(s StructureM) StructureM {
 	var fire = hazards.FireDamageFunction{}
 	s.OccType.Structuredamfun = fire
 	s.OccType.Contentdamfun = fire

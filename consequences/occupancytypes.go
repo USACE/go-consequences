@@ -8,20 +8,54 @@ import (
 
 type OccupancyType struct {
 	Name            string
+	Structuredamfun interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
+	Contentdamfun   interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
+}
+type OccupancyTypeM struct {
+	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
 }
-type OccupancyTypeWithUncertainty struct {
-	Name            string
-	Structuredamfun paireddata.UncertaintyValueSamplerSampler
-	Contentdamfun   paireddata.UncertaintyValueSamplerSampler
-}
 
-func (o OccupancyTypeWithUncertainty) SampleOccupancyType(seed int64) OccupancyType {
+func (o OccupancyType) SampleOccupancyType(seed int64) OccupancyTypeM {
+	sd, oks := o.Structuredamfun.(paireddata.ValueSampler)
+	cd, okc := o.Contentdamfun.(paireddata.ValueSampler)
+	if oks && okc {
+		return OccupancyTypeM{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	}
 	rand.Seed(seed)
-	sd := o.Structuredamfun.SampleValueSampler(rand.Float64())
-	cd := o.Contentdamfun.SampleValueSampler(rand.Float64())
-	return OccupancyType{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	if oks {
+		cd2, okc1 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if okc1 {
+			cd = cd2.SampleValueSampler(rand.Float64())
+		} else {
+			cd = nil
+		}
+	} else {
+		sd2, oks1 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if oks1 {
+			sd = sd2.SampleValueSampler(rand.Float64())
+		} else {
+			sd = nil
+		}
+	}
+	if okc {
+		sd3, oks2 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if oks2 {
+			sd = sd3.SampleValueSampler(rand.Float64())
+		} else {
+			sd = nil
+		}
+	} else {
+		cd3, okc2 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if okc2 {
+			cd = cd3.SampleValueSampler(rand.Float64())
+		} else {
+			cd = nil
+		}
+	}
+
+	return OccupancyTypeM{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
 }
 func OccupancyTypeMap() map[string]OccupancyType {
 	m := make(map[string]OccupancyType)
