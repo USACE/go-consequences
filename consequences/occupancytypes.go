@@ -6,12 +6,12 @@ import (
 	"github.com/USACE/go-consequences/paireddata"
 )
 
-type OccupancyType struct {
+type OccupancyType struct { //this is mutable
 	Name            string
 	Structuredamfun interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 	Contentdamfun   interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 }
-type OccupancyTypeM struct {
+type OccupancyTypeM struct { //need to swap - this is immutable not mutable
 	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
