@@ -13,7 +13,7 @@ type ConsequenceDamageResult struct {
 	Results []interface{}
 }
 type UncertaintyOccupancyTypeSampler interface {
-	SampleOccupancyType(rand int64) OccupancyType
+	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
 }
 
 func (c ConsequenceDamageResult) MarshalJSON() ([]byte, error) {

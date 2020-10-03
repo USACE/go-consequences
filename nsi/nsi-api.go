@@ -27,11 +27,11 @@ type NsiInventory struct {
 	Features []NsiFeature
 }
 
-func (i NsiInventory) toStructures() []consequences.Structure {
+func (i NsiInventory) toStructures() []consequences.StructureStochastic {
 	m := consequences.OccupancyTypeMap()
 	defaultOcctype := m["RES1-1SNB"]
 	var occtype = defaultOcctype
-	structures := make([]consequences.Structure, len(i.Features))
+	structures := make([]consequences.StructureStochastic, len(i.Features))
 	for idx, feature := range i.Features {
 
 		if ot, ok := m[feature.Properties.Occtype]; ok {
@@ -41,7 +41,7 @@ func (i NsiInventory) toStructures() []consequences.Structure {
 			msg := "Using default " + feature.Properties.Occtype + " not found"
 			panic(msg)
 		}
-		structures[idx] = consequences.Structure{
+		structures[idx] = consequences.StructureStochastic{
 			Name:      feature.Properties.Name,
 			OccType:   occtype,
 			DamCat:    feature.Properties.DamCat,
@@ -56,16 +56,16 @@ func (i NsiInventory) toStructures() []consequences.Structure {
 }
 
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
-func GetByFips(fips string) []consequences.Structure {
+func GetByFips(fips string) []consequences.StructureStochastic {
 	url := fmt.Sprintf("%s?fips=%s", apiUrl, fips)
 	return nsiApi(url)
 }
-func GetByBbox(bbox string) []consequences.Structure {
+func GetByBbox(bbox string) []consequences.StructureStochastic {
 	url := fmt.Sprintf("%s?bbox=%s", apiUrl, bbox)
 	return nsiApi(url)
 }
-func nsiApi(url string) []consequences.Structure {
-	structures := make([]consequences.Structure, 0)
+func nsiApi(url string) []consequences.StructureStochastic {
+	structures := make([]consequences.StructureStochastic, 0)
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}

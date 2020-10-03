@@ -7,16 +7,16 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
-type Structure struct {
+type StructureStochastic struct {
 	Name                        string
-	OccType                     OccupancyType
+	OccType                     OccupancyTypeStochastic
 	DamCat                      string
 	StructVal, ContVal, FoundHt ParameterValue
 	X, Y                        float64
 }
-type StructureM struct {
+type StructureDeterministic struct {
 	Name                        string
-	OccType                     OccupancyTypeM
+	OccType                     OccupancyTypeDeterministic
 	DamCat                      string
 	StructVal, ContVal, FoundHt float64
 	X, Y                        float64
@@ -25,12 +25,12 @@ type ParameterValue struct {
 	Value interface{}
 }
 
-func (s Structure) SampleStructure(seed int64) StructureM {
+func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
 	ot := s.OccType.SampleOccupancyType(seed)
 	sv := s.StructVal.SampleValue(rand.Float64())
 	cv := s.ContVal.SampleValue(rand.Float64())
 	fh := s.FoundHt.SampleValue(rand.Float64())
-	return StructureM{OccType: ot, DamCat: s.DamCat, StructVal: sv, ContVal: cv, FoundHt: fh}
+	return StructureDeterministic{OccType: ot, DamCat: s.DamCat, StructVal: sv, ContVal: cv, FoundHt: fh}
 }
 
 //SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
@@ -50,10 +50,10 @@ func (p ParameterValue) SampleValue(input interface{}) float64 {
 
 	return 0
 }
-func (s Structure) ComputeConsequences(d interface{}) ConsequenceDamageResult {
+func (s StructureStochastic) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	return s.SampleStructure(rand.Int63()).ComputeConsequences(d) //this needs work so seeds can be controlled.
 }
-func (s StructureM) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s StructureDeterministic) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = ConsequenceDamageResult{Headers: header, Results: results}
@@ -76,7 +76,7 @@ func (s StructureM) ComputeConsequences(d interface{}) ConsequenceDamageResult {
 	}
 	return ret
 }
-func computeFloodConsequences(d float64, s StructureM) ConsequenceDamageResult {
+func computeFloodConsequences(d float64, s StructureDeterministic) ConsequenceDamageResult {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = ConsequenceDamageResult{Headers: header, Results: results}
@@ -87,16 +87,16 @@ func computeFloodConsequences(d float64, s StructureM) ConsequenceDamageResult {
 	ret.Results[1] = cdamagePercent * s.ContVal
 	return ret
 }
-func BaseStructure() StructureM {
+func BaseStructure() StructureDeterministic {
 	//get the occupancy type map
 	m := OccupancyTypeMap()
 	// select a base structure type for testing
 	var o = m["RES1-1SNB"]
-	var s = StructureM{OccType: o.SampleOccupancyType(1), DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
+	var s = StructureDeterministic{OccType: o.SampleOccupancyType(1), DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
 	return s
 }
 
-func BaseStructureU() Structure {
+func BaseStructureU() StructureStochastic {
 	//get the occupancy type map
 	m := OccupancyTypeMap()
 	// select a base structure type for testing
@@ -106,10 +106,10 @@ func BaseStructureU() Structure {
 	spv := ParameterValue{Value: sv}
 	cpv := ParameterValue{Value: cv}
 	fhpv := ParameterValue{Value: 0}
-	var s = Structure{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
+	var s = StructureStochastic{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
 	return s
 }
-func ConvertBaseStructureToFire(s StructureM) StructureM {
+func ConvertBaseStructureToFire(s StructureDeterministic) StructureDeterministic {
 	var fire = hazards.FireDamageFunction{}
 	s.OccType.Structuredamfun = fire
 	s.OccType.Contentdamfun = fire
