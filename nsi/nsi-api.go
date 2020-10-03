@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -75,11 +74,10 @@ func nsiApi(url string) []consequences.Structure {
 	response, err := client.Get(url)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return structures
 	}
-
 	defer response.Body.Close()
-	// UnmarshalJSON implements UnmarshalJSON interface
 	jsonData, err := ioutil.ReadAll(response.Body)
 	features := make([]NsiFeature, 0)
 
