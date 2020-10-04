@@ -11,7 +11,7 @@ type OccupancyTypeStochastic struct { //this is mutable
 	Structuredamfun interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 	Contentdamfun   interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 }
-type OccupancyTypeDeterministic struct { //need to swap - this is immutable not mutable
+type OccupancyTypeDeterministic struct { 
 	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
