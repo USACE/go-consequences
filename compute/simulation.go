@@ -29,7 +29,6 @@ type NSIStructureSimulation struct {
 }
 type Computeable interface {
 	Compute(args ComputeArgs)
-	GetResults() consequences.ConsequenceDamageResult
 }
 
 type ProgressReportable interface {
