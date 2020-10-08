@@ -9,7 +9,8 @@ import (
 )
 
 type ComputeArgs struct {
-	Args interface{}
+	Args       interface{}
+	HazardArgs interface{}
 }
 type FipsCode struct {
 	FIPS string
@@ -48,14 +49,6 @@ func (s StructureSimulation) ReportProgress() string {
 	return s.Status
 }
 
-/*
-func (s StructureSimulation) Compute(args ComputeArgs){
-	fips, okfips := args.Args.(FipsCode)
-	if okfips {
-		s.Structures = nsi.GetByFips(fips.FIPS)
-	}
-}
-*/
 func (s NSIStructureSimulation) Compute(args ComputeArgs) {
 	fips, okfips := args.Args.(FipsCode)
 	if okfips {
@@ -69,7 +62,12 @@ func (s NSIStructureSimulation) Compute(args ComputeArgs) {
 	}
 	s.Status = "Computing Depths"
 	//depths
-	d := hazards.DepthEvent{Depth: 5.32}
+	depthevent, okd := args.HazardArgs.(hazards.DepthEvent)
+	var d = hazards.DepthEvent{Depth: 5.32}
+	if okd {
+		d = depthevent
+	}
+
 	//ideally get from some sort of source.
 	rmap := make(map[string]SimulationSummary)
 	s.Status = fmt.Sprintf("Computing Damages %d of %d", 0, len(s.Structures))

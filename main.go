@@ -41,20 +41,19 @@ func main() {
 	ret = s.ComputeConsequences(f)
 	fmt.Println("for a fire intensity of", f.Intensity, ret)
 
-	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
-	
+	//var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 
 	startnsi := time.Now()
-	//var fips string = "06"
+	var fips string = "06"
 	d.Depth = 5.324 //testing cost of interpolation.
-	//structures := nsi.GetByFips(fips)
-	structures := nsi.GetByBbox(bbox)
+	structures := nsi.GetByFips(fips)
+	//structures := nsi.GetByBbox(bbox)
 	elapsedNsi := time.Since(startnsi)
 	startcompute := time.Now()
 	var count = 0
 	for i, str := range structures {
-		//str.ComputeConsequences(d)
-		fmt.Println(i, "at structure", str.Name, "for a depth of", d.Depth, str.ComputeConsequences(d))
+		str.ComputeConsequences(d)
+		//fmt.Println(i, "at structure", str.Name, "for a depth of", d.Depth, str.ComputeConsequences(d))
 		count = i
 	}
 	count += 1
