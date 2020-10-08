@@ -42,14 +42,14 @@ type SimulationSummary struct {
 	ContentDamage   float64
 }
 
-func (s NSIStructureSimulation) ReportProgress() string {
+func (s *NSIStructureSimulation) ReportProgress() string {
 	return s.Status
 }
 func (s StructureSimulation) ReportProgress() string {
 	return s.Status
 }
 
-func (s NSIStructureSimulation) Compute(args ComputeArgs) {
+func (s *NSIStructureSimulation) Compute(args ComputeArgs) {
 	fips, okfips := args.Args.(FipsCode)
 	if okfips {
 		s.Status = "Downloading NSI by fips " + fips.FIPS
@@ -91,5 +91,6 @@ func (s NSIStructureSimulation) Compute(args ComputeArgs) {
 		ret.Results[idx] = val
 		idx++
 	}
+	s.Status = "Complete"
 	s.Result = ret
 }
