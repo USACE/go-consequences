@@ -30,7 +30,7 @@ type ResultsRequest struct {
 type StructureSimulation struct {
 	Structures []consequences.StructureStochastic
 	Status     string
-	Result     consequences.ConsequenceDamageResult
+	Result     SimulationSummary
 }
 type NSIStructureSimulation struct {
 	RequestArgs
@@ -43,11 +43,15 @@ type Computable interface {
 type ProgressReportable interface {
 	ReportProgress() string
 }
+type SimulationSummaryRow struct {
+	RowHeader       string  `json:"rowheader"`
+	StructureCount  int64   `json:"structurecount"`
+	StructureDamage float64 `json:"structuredamage"`
+	ContentDamage   float64 `json:"contentdamage"`
+}
 type SimulationSummary struct {
-	RowHeader       string
-	StructureCount  int64
-	StructureDamage float64
-	ContentDamage   float64
+	ColumnNames []string               `json:"columnnames"`
+	Rows        []SimulationSummaryRow `json:"rows"`
 }
 
 func (s NSIStructureSimulation) ReportProgress() string {
@@ -81,7 +85,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) {
 	}
 
 	//ideally get from some sort of source.
-	rmap := make(map[string]SimulationSummary)
+	rmap := make(map[string]SimulationSummaryRow)
 	s.Status = fmt.Sprintf("Computing Damages %d of %d", 0, len(s.Structures))
 	for i, str := range s.Structures {
 		r := str.ComputeConsequences(d)
@@ -90,19 +94,18 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) {
 			val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
 			val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
 		} else {
-			rmap[str.DamCat] = SimulationSummary{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
+			rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
 		}
 		s.Status = fmt.Sprintf("Computing Damages %d of %d", i, len(s.Structures))
 	}
 	header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
-	rows := make([]SimulationSummary, len(rmap))
-	results := []interface{}{rows}
-	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
+	rows := make([]SimulationSummaryRow, len(rmap))
 	idx := 0
 	for _, val := range rmap {
-		ret.Results[idx] = val
+		rows[idx] = val
 		idx++
 	}
+	var ret = SimulationSummary{ColumnNames: header, Rows: rows}
 	s.Status = "Complete"
 	s.Result = ret
 }
