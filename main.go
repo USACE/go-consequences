@@ -24,7 +24,7 @@ var computeMap map[string]compute.NSIStructureSimulation
 func init() {
 	computeMap = make(map[string]compute.NSIStructureSimulation)
 }
-func handleComputeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
+func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 	f := census.StateToCountyFipsMap()
 	a, ok := args.Args.(compute.FipsCodeCompute)
 	if ok {
@@ -47,10 +47,10 @@ func handleComputeConcurrentEvent(r compute.Computable, args compute.RequestArgs
 		r.Compute(args)
 	}
 }
-func handleComputeEvent(r compute.Computable, args compute.RequestArgs) {
+func computeEvent(r compute.Computable, args compute.RequestArgs) {
 	r.Compute(args)
 }
-func HandleLambdaEvent(args compute.RequestArgs) (string, error) {
+func HandleRequestArgs(args compute.RequestArgs) (string, error) {
 
 	switch t := args.Args.(type) {
 	case compute.FipsCodeCompute:
@@ -58,7 +58,7 @@ func HandleLambdaEvent(args compute.RequestArgs) (string, error) {
 		if ok {
 			var r = compute.NSIStructureSimulation{}
 			computeMap[a.ID] = r
-			go handleComputeConcurrentEvent(r, args)
+			go computeConcurrentEvent(r, args)
 			return "computing", nil
 		}
 
@@ -67,7 +67,7 @@ func HandleLambdaEvent(args compute.RequestArgs) (string, error) {
 		if ok {
 			var r = compute.NSIStructureSimulation{}
 			computeMap[a.ID] = r
-			go handleComputeEvent(r, args)
+			go computeEvent(r, args)
 			return "computing", nil
 		}
 
@@ -93,7 +93,7 @@ func main() {
 	var cfg Config
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")
-		lambda.Start(HandleLambdaEvent)
+		lambda.Start(HandleRequestArgs)
 	} else {
 		log.Print("Not on Lambda")
 	}
