@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/USACE/go-consequences/census"
 	"github.com/USACE/go-consequences/compute"
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -24,7 +25,27 @@ func init() {
 	computeMap = make(map[string]compute.NSIStructureSimulation)
 }
 func handleComputeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
-	r.Compute(args) //make this concurrent with the fips code loop.
+	f := census.StateToCountyFipsMap()
+	a, ok := args.Args.(compute.FipsCodeCompute)
+	if ok {
+		fips := a.FIPS
+		if len(fips) == 2 {
+			counties, exists := f[a.FIPS]
+			if exists {
+				for _, ccc := range counties {
+					b := compute.FipsCodeCompute{FIPS: ccc, ID: a.ID, HazardArgs: a.HazardArgs}
+					cargs := compute.RequestArgs{Args: b}
+					go r.Compute(cargs)
+				}
+			} else {
+				r.Compute(args)
+			}
+		} else {
+			r.Compute(args)
+		}
+	} else {
+		r.Compute(args)
+	}
 }
 func handleComputeEvent(r compute.Computable, args compute.RequestArgs) {
 	r.Compute(args)
@@ -37,7 +58,7 @@ func HandleLambdaEvent(args compute.RequestArgs) (string, error) {
 		if ok {
 			var r = compute.NSIStructureSimulation{}
 			computeMap[a.ID] = r
-			handleComputeConcurrentEvent(r, args) //still think this blocks the thread.
+			go handleComputeConcurrentEvent(r, args)
 			return "computing", nil
 		}
 
@@ -46,7 +67,7 @@ func HandleLambdaEvent(args compute.RequestArgs) (string, error) {
 		if ok {
 			var r = compute.NSIStructureSimulation{}
 			computeMap[a.ID] = r
-			handleComputeEvent(r, args) //still think this blocks the thread.
+			go handleComputeEvent(r, args)
 			return "computing", nil
 		}
 
