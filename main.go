@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/USACE/go-consequences/compute"
-	"github.com/USACE/go-consequences/consequences"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -18,10 +18,55 @@ type Config struct {
 	DBSSLMode     string
 }
 
-func HandleLambdaEvent(args compute.ComputeArgs) (consequences.ConsequenceDamageResult, error) {
-	var r = compute.NSIStructureSimulation{}
+var computeMap map[string]compute.NSIStructureSimulation
+
+func init() {
+	computeMap = make(map[string]compute.NSIStructureSimulation)
+}
+func handleComputeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
+	r.Compute(args) //make this concurrent with the fips code loop.
+}
+func handleComputeEvent(r compute.Computable, args compute.RequestArgs) {
 	r.Compute(args)
-	return r.Result, nil
+}
+func HandleLambdaEvent(args compute.RequestArgs) (string, error) {
+
+	switch t := args.Args.(type) {
+	case compute.FipsCodeCompute:
+		a, ok := args.Args.(compute.FipsCodeCompute)
+		if ok {
+			var r = compute.NSIStructureSimulation{}
+			computeMap[a.ID] = r
+			handleComputeConcurrentEvent(r, args) //still think this blocks the thread.
+			return "computing", nil
+		}
+
+	case compute.BboxCompute:
+		a, ok := args.Args.(compute.BboxCompute)
+		if ok {
+			var r = compute.NSIStructureSimulation{}
+			computeMap[a.ID] = r
+			handleComputeEvent(r, args) //still think this blocks the thread.
+			return "computing", nil
+		}
+
+	case compute.StatusReportRequest:
+		a, ok := args.Args.(compute.StatusReportRequest)
+		if ok {
+			return computeMap[a.ID].Status, nil
+		}
+	case compute.ResultsRequest:
+		a, ok := args.Args.(compute.ResultsRequest)
+		if ok {
+			s := computeMap[a.ID].Result
+			return "somehow convert the result to string " + s.String(), nil
+		}
+
+	default:
+		s := fmt.Sprintf("I am de fault of your request %T\n.", t)
+		return s, nil //Error{Error: "cannot handle it any longer."}
+	}
+	return "umm. shouldnt get here.", nil
 }
 func main() {
 	var cfg Config

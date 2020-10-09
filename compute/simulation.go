@@ -8,28 +8,36 @@ import (
 	"github.com/USACE/go-consequences/nsi"
 )
 
-type ComputeArgs struct {
-	Args       interface{}
+type RequestArgs struct {
+	Args interface{}
+}
+type FipsCodeCompute struct {
+	ID         string
+	FIPS       string
 	HazardArgs interface{}
 }
-type FipsCode struct {
-	FIPS string
+type BboxCompute struct {
+	ID         string
+	BBOX       string
+	HazardArgs interface{}
 }
-type Bbox struct {
-	BBOX string
+type StatusReportRequest struct {
+	ID string
 }
-
+type ResultsRequest struct {
+	ID string
+}
 type StructureSimulation struct {
 	Structures []consequences.StructureStochastic
 	Status     string
 	Result     consequences.ConsequenceDamageResult
 }
 type NSIStructureSimulation struct {
-	ComputeArgs
+	RequestArgs
 	StructureSimulation
 }
-type Computeable interface {
-	Compute(args ComputeArgs)
+type Computable interface {
+	Compute(args RequestArgs)
 }
 
 type ProgressReportable interface {
@@ -42,27 +50,31 @@ type SimulationSummary struct {
 	ContentDamage   float64
 }
 
-func (s *NSIStructureSimulation) ReportProgress() string {
+func (s NSIStructureSimulation) ReportProgress() string {
 	return s.Status
 }
 func (s StructureSimulation) ReportProgress() string {
 	return s.Status
 }
 
-func (s *NSIStructureSimulation) Compute(args ComputeArgs) {
-	fips, okfips := args.Args.(FipsCode)
+func (s NSIStructureSimulation) Compute(args RequestArgs) {
+	var depthevent = hazards.DepthEvent{Depth: 5.32}
+	okd := false
+	fips, okfips := args.Args.(FipsCodeCompute)
 	if okfips {
 		s.Status = "Downloading NSI by fips " + fips.FIPS
 		s.Structures = nsi.GetByFips(fips.FIPS)
-	}
-	bbox, okbbox := args.Args.(Bbox)
-	if okbbox {
-		s.Status = "Downloading NSI by bbox " + bbox.BBOX
-		s.Structures = nsi.GetByBbox(bbox.BBOX)
+		depthevent, okd = fips.HazardArgs.(hazards.DepthEvent)
+	} else {
+		bbox, okbbox := args.Args.(BboxCompute)
+		if okbbox {
+			s.Status = "Downloading NSI by bbox " + bbox.BBOX
+			s.Structures = nsi.GetByBbox(bbox.BBOX)
+			depthevent, okd = bbox.HazardArgs.(hazards.DepthEvent)
+		}
 	}
 	s.Status = "Computing Depths"
 	//depths
-	depthevent, okd := args.HazardArgs.(hazards.DepthEvent)
 	var d = hazards.DepthEvent{Depth: 5.32}
 	if okd {
 		d = depthevent
