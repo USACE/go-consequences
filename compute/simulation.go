@@ -66,6 +66,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 		}
 	}
 	elapsedNsi := time.Since(startnsi)
+	fmt.Println(fmt.Sprintf("FIPS %s retrieved %d structures from the NSI in %d", fips.FIPS, len(s.Structures), elapsedNsi))
 	//s.Status = "Computing Depths"
 	//depths
 	fmt.Println("Computing depths for" + fips.FIPS)
@@ -77,10 +78,10 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	//ideally get from some sort of source.
 	rmap := make(map[string]SimulationSummaryRow)
 	//s.Status = fmt.Sprintf("Computing Damages %d of %d", 0, len(s.Structures))
-	for idx, str := range s.Structures {
+	for _, str := range s.Structures {
 		r := str.ComputeConsequences(d)
 		if val, ok := rmap[str.DamCat]; ok {
-			fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
+			//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
 			val.StructureCount += 1
 			val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
 			val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
