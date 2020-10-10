@@ -1,7 +1,10 @@
 package nsi
 
 import (
+	"sync"
 	"testing"
+
+	"github.com/USACE/go-consequences/census"
 )
 
 func TestNsiByFips(t *testing.T) {
@@ -16,5 +19,30 @@ func TestNsiByBbox(t *testing.T) {
 	structures := GetByBbox(bbox)
 	if len(structures) != 1939 {
 		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1939", bbox, len(structures))
+	}
+}
+func TestNSI_FIPS_CA_ERRORS(t *testing.T) {
+	f := census.StateToCountyFipsMap()
+	var wg sync.WaitGroup
+	counties := f["06"]
+	fails := make([]string, 0)
+	wg.Add(len(counties))
+	for _, ccc := range counties {
+		go func(county string) {
+			defer wg.Done()
+			structures := GetByFips(county)
+			if len(structures) == 0 {
+				fails = append(fails, county)
+				//t.Errorf("GetByFips(%s) yeilded %d structures; expected more than zero", county, len(structures))
+			}
+		}(ccc)
+	}
+	wg.Wait()
+	if len(fails) > 0 {
+		s := "Counties: "
+		for _, f := range fails {
+			s += f + ", "
+		}
+		t.Errorf("There were %d failures %s", len(fails), s)
 	}
 }
