@@ -31,12 +31,15 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 			if exists {
 				var wg sync.WaitGroup
 				wg.Add(len(counties))
-				var sdam = 0.0
-				var cdam = 0.0
 				var count int64
+				var cdam float64
+				var sdam float64
 				var startTime = time.Now()
 				var nsitime = time.Now()
 				var computetime = time.Now()
+				//header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
+				rowMap := make(map[string]compute.SimulationSummaryRow)
+
 				for _, ccc := range counties {
 					go func(county string) {
 						defer wg.Done()
@@ -44,23 +47,42 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 						cargs := compute.RequestArgs{Args: b}
 						rr := r.Compute(cargs)
 						for _, row := range rr.Rows {
+							if val, ok := rowMap[row.RowHeader]; ok {
+								//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
+								val.StructureCount += row.StructureCount
+								val.StructureDamage += row.StructureDamage
+								val.ContentDamage += row.ContentDamage
+								rowMap[row.RowHeader] = val
+							} else {
+								rowMap[row.RowHeader] = compute.SimulationSummaryRow{RowHeader: row.RowHeader, StructureCount: row.StructureCount, StructureDamage: row.StructureDamage, ContentDamage: row.ContentDamage}
+							}
+							count += row.StructureCount
 							sdam += row.StructureDamage
 							cdam += row.ContentDamage
-							count += row.StructureCount
 						}
 						nsitime = nsitime.Add(rr.NSITime)
 						computetime = computetime.Add(rr.Computetime)
 					}(ccc)
 				}
 				wg.Wait()
+
 				fmt.Println("COMPLETE FOR SIMULATION")
 				elapsedNSI := startTime.Sub(nsitime)
 				elapsedCompute := startTime.Sub(computetime)
 				fmt.Println(fmt.Sprintf("NSI Took %s", elapsedNSI))
 				fmt.Println(fmt.Sprintf("Compute Took %s", elapsedCompute))
-				fmt.Println(fmt.Sprintf("Structure Count %d", count))
-				fmt.Println(fmt.Sprintf("Structure Damage %f", sdam))
-				fmt.Println(fmt.Sprintf("Content Damage %f", cdam))
+				fmt.Println(fmt.Sprintf("Total Structure Count %d", count))
+				fmt.Println(fmt.Sprintf("Total Structure Damage %f", sdam))
+				fmt.Println(fmt.Sprintf("Total Content Damage %f", cdam))
+				fmt.Println("*****************SUMMMARY*****************")
+				rows := make([]compute.SimulationSummaryRow, len(rowMap))
+				idx := 0
+				for _, val := range rowMap {
+					fmt.Println(fmt.Sprintf("for %s, there were %d structures with %f structure damages %f content damages for damage category %s", fips, val.StructureCount, val.StructureDamage, val.ContentDamage, val.RowHeader))
+					rows[idx] = val
+					idx++
+				}
+				//var ret = SimulationSummary{ColumnNames: header, Rows: rows, NSITime: elapsedNsi, Computetime: elapsed}
 			} else {
 				r.Compute(args)
 			}

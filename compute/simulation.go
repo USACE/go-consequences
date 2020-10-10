@@ -85,6 +85,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 			val.StructureCount += 1
 			val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
 			val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
+			rmap[str.DamCat] = val
 		} else {
 			rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
 		}
@@ -94,7 +95,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	rows := make([]SimulationSummaryRow, len(rmap))
 	idx := 0
 	for _, val := range rmap {
-		fmt.Println(fmt.Sprintf("for %s, there were %d structures with %f structure damages %f content damages for damage category %s", fips.FIPS, val.StructureCount, val.StructureDamage, val.ContentDamage, val.RowHeader))
+		//fmt.Println(fmt.Sprintf("for %s, there were %d structures with %f structure damages %f content damages for damage category %s", fips.FIPS, val.StructureCount, val.StructureDamage, val.ContentDamage, val.RowHeader))
 		rows[idx] = val
 		idx++
 	}
