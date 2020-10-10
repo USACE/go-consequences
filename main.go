@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"sync"
+	"time"
 
 	"github.com/USACE/go-consequences/census"
 	"github.com/USACE/go-consequences/compute"
@@ -19,11 +21,6 @@ type Config struct {
 	DBSSLMode     string
 }
 
-var computeMap map[string]compute.NSIStructureSimulation
-
-func init() {
-	computeMap = make(map[string]compute.NSIStructureSimulation)
-}
 func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 	f := census.StateToCountyFipsMap()
 	a, ok := args.Args.(compute.FipsCodeCompute)
@@ -32,11 +29,38 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 		if len(fips) == 2 {
 			counties, exists := f[a.FIPS]
 			if exists {
+				var wg sync.WaitGroup
+				wg.Add(len(counties))
+				var sdam = 0.0
+				var cdam = 0.0
+				var count int64
+				var startTime = time.Now()
+				var nsitime = time.Now()
+				var computetime = time.Now()
 				for _, ccc := range counties {
-					b := compute.FipsCodeCompute{FIPS: ccc, ID: a.ID, HazardArgs: a.HazardArgs}
-					cargs := compute.RequestArgs{Args: b}
-					go r.Compute(cargs)
+					go func(county string) {
+						defer wg.Done()
+						b := compute.FipsCodeCompute{FIPS: county, ID: a.ID, HazardArgs: a.HazardArgs}
+						cargs := compute.RequestArgs{Args: b}
+						rr := r.Compute(cargs)
+						for _, row := range rr.Rows {
+							sdam += row.StructureDamage
+							cdam += row.ContentDamage
+							count += row.StructureCount
+						}
+						nsitime = nsitime.Add(rr.NSITime)
+						computetime = computetime.Add(rr.Computetime)
+					}(ccc)
 				}
+				wg.Wait()
+				fmt.Println("COMPLETE FOR SIMULATION")
+				elapsedNSI := startTime.Sub(nsitime)
+				elapsedCompute := startTime.Sub(computetime)
+				fmt.Println(fmt.Sprintf("NSI Took %s", elapsedNSI))
+				fmt.Println(fmt.Sprintf("Compute Took %s", elapsedCompute))
+				fmt.Println(fmt.Sprintf("Structure Count %d", count))
+				fmt.Println(fmt.Sprintf("Structure Damage %f", sdam))
+				fmt.Println(fmt.Sprintf("Content Damage %f", cdam))
 			} else {
 				r.Compute(args)
 			}
@@ -51,36 +75,22 @@ func computeEvent(r compute.Computable, args compute.RequestArgs) {
 	r.Compute(args)
 }
 func HandleRequestArgs(args compute.RequestArgs) (string, error) {
-
+	fmt.Print(args)
 	switch t := args.Args.(type) {
 	case compute.FipsCodeCompute:
-		a, ok := args.Args.(compute.FipsCodeCompute)
+		_, ok := args.Args.(compute.FipsCodeCompute)
 		if ok {
 			var r = compute.NSIStructureSimulation{}
-			computeMap[a.ID] = r
-			go computeConcurrentEvent(r, args)
+			computeConcurrentEvent(r, args)
 			return "computing", nil
 		}
 
 	case compute.BboxCompute:
-		a, ok := args.Args.(compute.BboxCompute)
+		_, ok := args.Args.(compute.BboxCompute)
 		if ok {
 			var r = compute.NSIStructureSimulation{}
-			computeMap[a.ID] = r
 			go computeEvent(r, args)
 			return "computing", nil
-		}
-
-	case compute.StatusReportRequest:
-		a, ok := args.Args.(compute.StatusReportRequest)
-		if ok {
-			return computeMap[a.ID].Status, nil
-		}
-	case compute.ResultsRequest:
-		a, ok := args.Args.(compute.ResultsRequest)
-		if ok {
-			s := computeMap[a.ID].Result
-			return "somehow convert the result to string " + s.String(), nil
 		}
 
 	default:
@@ -88,6 +98,7 @@ func HandleRequestArgs(args compute.RequestArgs) (string, error) {
 		return s, nil //Error{Error: "cannot handle it any longer."}
 	}
 	return "umm. shouldnt get here.", nil
+
 }
 func main() {
 	var cfg Config

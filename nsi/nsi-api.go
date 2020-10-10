@@ -82,7 +82,7 @@ func nsiApi(url string) []consequences.StructureStochastic {
 	features := make([]NsiFeature, 0)
 
 	if err := json.Unmarshal(jsonData, &features); err != nil {
-		fmt.Println(err)
+		fmt.Println("error unmarshalling NSI json " + err.Error())
 		return structures
 	}
 	inventory := NsiInventory{Features: features}
