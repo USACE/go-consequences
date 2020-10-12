@@ -43,6 +43,6 @@ func TestNSI_FIPS_CA_ERRORS(t *testing.T) {
 		for _, f := range fails {
 			s += f + ", "
 		}
-		t.Errorf("There were %d failures %s", len(fails), s)
+		t.Errorf("There were %d failures of %d total counties, failed counties were: %s", len(fails), len(counties), s)
 	}
 }
