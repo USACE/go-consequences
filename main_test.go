@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 	"time"
 
@@ -19,6 +18,7 @@ func TestSampleSimulation(t *testing.T) {
 
 }
 
+/* Honestly, this is why i can't have nice things.
 func TestNationalSimulationConcurrent(t *testing.T) {
 	f := census.StateToCountyFipsMap()
 	var hazard = hazards.DepthEvent{Depth: 12.34}
@@ -38,12 +38,12 @@ func TestNationalSimulationConcurrent(t *testing.T) {
 	fmt.Println(fmt.Sprintf("Simulation complete, took: %s", elapsed))
 
 }
+*/
 func TestNationalSimulation(t *testing.T) {
 	f := census.StateToCountyFipsMap()
 	var hazard = hazards.DepthEvent{Depth: 12.34}
 	start := time.Now()
 	for key, _ := range f {
-
 		var args = compute.FipsCodeCompute{ID: "123", FIPS: key, HazardArgs: hazard}
 		var rargs = compute.RequestArgs{Args: args}
 		HandleRequestArgs(rargs)
