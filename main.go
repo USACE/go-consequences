@@ -39,7 +39,7 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 				var computetime = time.Now()
 				//header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
 				rowMap := make(map[string]compute.SimulationSummaryRow)
-				/*
+				if !args.Concurrent {
 					rr := r.Compute(args)
 					for _, row := range rr.Rows {
 						if val, ok := rowMap[row.RowHeader]; ok {
@@ -57,33 +57,35 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 					}
 					nsitime = nsitime.Add(rr.NSITime)
 					computetime = computetime.Add(rr.Computetime)
-					//}
-				*/
-				for _, ccc := range counties {
-					go func(county string) {
-						defer wg.Done()
-						b := compute.FipsCodeCompute{FIPS: county, ID: a.ID, HazardArgs: a.HazardArgs}
-						cargs := compute.RequestArgs{Args: b}
-						rr := r.Compute(cargs)
-						for _, row := range rr.Rows {
-							if val, ok := rowMap[row.RowHeader]; ok {
-								//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
-								val.StructureCount += row.StructureCount
-								val.StructureDamage += row.StructureDamage
-								val.ContentDamage += row.ContentDamage
-								rowMap[row.RowHeader] = val
-							} else {
-								rowMap[row.RowHeader] = compute.SimulationSummaryRow{RowHeader: row.RowHeader, StructureCount: row.StructureCount, StructureDamage: row.StructureDamage, ContentDamage: row.ContentDamage}
+				} else {
+					for _, ccc := range counties {
+						go func(county string) {
+							defer wg.Done()
+							b := compute.FipsCodeCompute{FIPS: county, ID: a.ID, HazardArgs: a.HazardArgs}
+							cargs := compute.RequestArgs{Args: b}
+							rr := r.Compute(cargs)
+							for _, row := range rr.Rows {
+								if val, ok := rowMap[row.RowHeader]; ok {
+									//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
+									val.StructureCount += row.StructureCount
+									val.StructureDamage += row.StructureDamage
+									val.ContentDamage += row.ContentDamage
+									rowMap[row.RowHeader] = val
+								} else {
+									rowMap[row.RowHeader] = compute.SimulationSummaryRow{RowHeader: row.RowHeader, StructureCount: row.StructureCount, StructureDamage: row.StructureDamage, ContentDamage: row.ContentDamage}
+								}
+								count += row.StructureCount
+								sdam += row.StructureDamage
+								cdam += row.ContentDamage
 							}
-							count += row.StructureCount
-							sdam += row.StructureDamage
-							cdam += row.ContentDamage
-						}
-						nsitime = nsitime.Add(rr.NSITime)
-						computetime = computetime.Add(rr.Computetime)
-					}(ccc)
+							nsitime = nsitime.Add(rr.NSITime)
+							computetime = computetime.Add(rr.Computetime)
+						}(ccc)
+					}
+					wg.Wait()
 				}
-				wg.Wait()
+
+				//}
 
 				fmt.Println("COMPLETE FOR SIMULATION")
 				elapsedNSI := startTime.Sub(nsitime)

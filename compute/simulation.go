@@ -11,6 +11,7 @@ import (
 
 type RequestArgs struct {
 	Args interface{}
+	Concurrent bool
 }
 type FipsCodeCompute struct {
 	ID         string      `json:"id"`
