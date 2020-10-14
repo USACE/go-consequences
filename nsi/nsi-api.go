@@ -3,7 +3,9 @@ package nsi
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -90,4 +92,64 @@ func nsiApi(url string) []consequences.StructureStochastic {
 	inventory := NsiInventory{Features: features}
 	structures = inventory.toStructures()
 	return structures
+}
+
+type NsiStreamProcessor func(str consequences.StructureStochastic)
+
+/*
+memory effecient structure compute methods
+*/
+func GetByFipsStream(fips string, nsp NsiStreamProcessor) error {
+	url := fmt.Sprintf("%s?fips=%s&stream=true", apiUrl, fips)
+	return nsiApiStream(url, nsp)
+}
+func GetByBboxStream(bbox string, nsp NsiStreamProcessor) error {
+	url := fmt.Sprintf("%s?bbox=%s&stream=true", apiUrl, bbox)
+	return nsiApiStream(url, nsp)
+}
+func nsiApiStream(url string, nsp NsiStreamProcessor) error {
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
+	}
+	client := &http.Client{Transport: transCfg}
+
+	response, err := client.Get(url)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer response.Body.Close()
+	dec := json.NewDecoder(response.Body)
+
+	m := consequences.OccupancyTypeMap()
+	defaultOcctype := m["RES1-1SNB"]
+	var occtype = defaultOcctype
+	for {
+		var n NsiFeature
+		if err := dec.Decode(&n); err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
+			return err
+		}
+		if ot, ok := m[n.Properties.Occtype]; ok {
+			occtype = ot
+		} else {
+			occtype = defaultOcctype
+			msg := "Using default " + n.Properties.Occtype + " not found"
+			return errors.New(msg)
+		}
+		nsp(consequences.StructureStochastic{
+			Name:      n.Properties.Name,
+			OccType:   occtype,
+			DamCat:    n.Properties.DamCat,
+			StructVal: consequences.ParameterValue{Value: n.Properties.StructVal},
+			ContVal:   consequences.ParameterValue{Value: n.Properties.ContVal},
+			FoundHt:   consequences.ParameterValue{Value: n.Properties.FoundHt},
+			X:         n.Properties.X,
+			Y:         n.Properties.Y,
+		})
+	}
+	return nil
 }
