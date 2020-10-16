@@ -100,11 +100,11 @@ type NsiStreamProcessor func(str consequences.StructureStochastic)
 memory effecient structure compute methods
 */
 func GetByFipsStream(fips string, nsp NsiStreamProcessor) error {
-	url := fmt.Sprintf("%s?fips=%s&stream=true", apiUrl, fips)
+	url := fmt.Sprintf("%s?fips=%s&fmt=fs", apiUrl, fips)
 	return nsiApiStream(url, nsp)
 }
 func GetByBboxStream(bbox string, nsp NsiStreamProcessor) error {
-	url := fmt.Sprintf("%s?bbox=%s&stream=true", apiUrl, bbox)
+	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", apiUrl, bbox)
 	return nsiApiStream(url, nsp)
 }
 func nsiApiStream(url string, nsp NsiStreamProcessor) error {
