@@ -40,7 +40,7 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 				//header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
 				rowMap := make(map[string]compute.SimulationSummaryRow)
 				if !args.Concurrent {
-					rr := r.Compute(args)
+					rr := r.ComputeStream(args)
 					for _, row := range rr.Rows {
 						if val, ok := rowMap[row.RowHeader]; ok {
 							//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
@@ -63,7 +63,7 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) {
 							defer wg.Done()
 							b := compute.FipsCodeCompute{FIPS: county, ID: a.ID, HazardArgs: a.HazardArgs}
 							cargs := compute.RequestArgs{Args: b}
-							rr := r.Compute(cargs)
+							rr := r.ComputeStream(cargs)
 							for _, row := range rr.Rows {
 								if val, ok := rowMap[row.RowHeader]; ok {
 									//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
