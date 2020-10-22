@@ -124,7 +124,9 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 	if okfips {
 		fmt.Println("Downloading NSI by fips " + fips.FIPS)
 		depthevent, okd = fips.HazardArgs.(hazards.DepthEvent)
-		fmt.Println(okd)
+		if !okd {
+			depthevent = hazards.DepthEvent{Depth: 5.32}
+		}
 		fmt.Println("Computing depths for" + fips.FIPS)
 		nsi.GetByFipsStream(fips.FIPS, func(str consequences.StructureStochastic) {
 			r := str.ComputeConsequences(depthevent)

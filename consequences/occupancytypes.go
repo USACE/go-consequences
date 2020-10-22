@@ -1,7 +1,6 @@
 package consequences
 
 import (
-	"github.com/HenryGeorgist/go-statistics/statistics"
 	"math/rand"
 
 	"github.com/USACE/go-consequences/paireddata"
@@ -12,7 +11,7 @@ type OccupancyTypeStochastic struct { //this is mutable
 	Structuredamfun interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 	Contentdamfun   interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 }
-type OccupancyTypeDeterministic struct { 
+type OccupancyTypeDeterministic struct {
 	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
@@ -109,15 +108,6 @@ func res11snb() OccupancyTypeStochastic {
 	//structureydists := make([]statistics.ContinuousDistribution,19)//maybe investigate if this is right
 	//structureydists[0] = statistics.NormalDistribution{Mean: 0.0, StandardDeviation: 0}
 	//structureydists[1] = statistics.NormalDistribution{Mean: 2.4000000953674316, StandardDeviation: 0.30000001192092896}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	contentxs := []float64{-2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0}
 	contentys := []float64{0.0, 2.4000000953674316, 8.1000003814697266, 13.300000190734863, 17.899999618530273, 22.0, 25.700000762939453, 28.799999237060547, 31.5, 33.799999237060547, 35.700000762939453, 37.200000762939453, 38.400001525878906, 39.200000762939453, 39.700000762939453, 40.0}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
