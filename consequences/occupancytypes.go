@@ -30,14 +30,14 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 		if okc1 {
 			cd = cd2.SampleValueSampler(rand.Float64())
 		} else {
-			cd = nil
+			//cd = nil
 		}
 	} else {
 		sd2, oks1 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
 		if oks1 {
 			sd = sd2.SampleValueSampler(rand.Float64())
 		} else {
-			sd = nil
+			//sd = nil
 		}
 	}
 	if okc {
@@ -45,14 +45,14 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 		if oks2 {
 			sd = sd3.SampleValueSampler(rand.Float64())
 		} else {
-			sd = nil
+			//sd = nil
 		}
 	} else {
 		cd3, okc2 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
 		if okc2 {
 			cd = cd3.SampleValueSampler(rand.Float64())
 		} else {
-			cd = nil
+			//cd = nil
 		}
 	}
 
