@@ -1,4 +1,4 @@
-package consequences
+package hazard_providers
 
 /*
 import (

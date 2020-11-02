@@ -12,6 +12,7 @@ type ConsequenceDamageResult struct {
 	Headers []string
 	Results []interface{}
 }
+
 type UncertaintyOccupancyTypeSampler interface {
 	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
 }
