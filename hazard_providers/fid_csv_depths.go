@@ -2,6 +2,7 @@ package hazard_providers
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -34,6 +35,7 @@ func ConvertFile(file string) map[string]Record {
 	scanner.Scan()
 	//fmt.Println(scanner.Text()) //header row
 	m := make(map[string]Record)
+	count := 0
 	for scanner.Scan() {
 		lines := strings.Split(scanner.Text(), ",")
 		fd_id := lines[0]
@@ -82,13 +84,32 @@ func ConvertFile(file string) map[string]Record {
 		futurepluvial := FrequencyData{fluvial: false, year: 2050, Values: fpvals}
 		currentfluvial := FrequencyData{fluvial: true, year: 2020, Values: cfvals}
 		currentpluvial := FrequencyData{fluvial: false, year: 2020, Values: cpvals}
-		if ffvals[4] == 0 {
-			//fmt.Println(fmt.Sprintf("skipping %s", fd_id))
-		} else {
+		if hasNonZeroValues(ffvals, fpvals, cfvals, cpvals) {
 			r := Record{Fd_id: fd_id, FutureFluvial: futurefluvial, FuturePluvial: futurepluvial, CurrentFluvial: currentfluvial, CurrentPluvial: currentpluvial}
 			m[fd_id] = r
+			count++
+		} else {
+			//skipping.
 		}
 
 	}
+	fmt.Println(count)
 	return m
+}
+func hasNonZeroValues(ffvals []float64, fpvals []float64, cfvals []float64, cpvals []float64) bool {
+	for i := 0; i < 5; i++ {
+		if ffvals[i] > 0 {
+			return true
+		}
+		if fpvals[i] > 0 {
+			return true
+		}
+		if cfvals[i] > 0 {
+			return true
+		}
+		if cpvals[i] > 0 {
+			return true
+		}
+	}
+	return false
 }
