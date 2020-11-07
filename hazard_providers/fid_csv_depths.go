@@ -33,7 +33,7 @@ func ConvertFile(file string) map[string]Record {
 		return nil
 	}
 	scanner.Scan()
-	//fmt.Println(scanner.Text()) //header row
+	fmt.Println(scanner.Text()) //header row
 	m := make(map[string]Record)
 	count := 0
 	for scanner.Scan() {
@@ -112,4 +112,19 @@ func hasNonZeroValues(ffvals []float64, fpvals []float64, cfvals []float64, cpva
 		}
 	}
 	return false
+}
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+func WriteBackToDisk(m map[string]Record) {
+	f, err := os.Create("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
+	check(err)
+	defer f.Close()
+	//write header.
+	//FD_ID,fluv_2020_5yr,pluv_2020_5yr,fluv_2020_20yr,pluv_2020_20yr,fluv_2020_100yr,pluv_2020_100yr,fluv_2020_250yr,pluv_2020_250yr,fluv_2020_500yr,pluv_2020_500yr,fluv_2050_5yr,pluv_2050_5yr,fluv_2050_20yr,pluv_2050_20yr,fluv_2050_100yr,pluv_2050_100yr,fluv_2050_250yr,pluv_2050_250yr,fluv_2050_500yr,pluv_2050_500yr
+	w := bufio.NewWriter(f)
+	w.WriteString("FD_ID,fluv_2020_5yr,pluv_2020_5yr,fluv_2020_20yr,pluv_2020_20yr,fluv_2020_100yr,pluv_2020_100yr,fluv_2020_250yr,pluv_2020_250yr,fluv_2020_500yr,pluv_2020_500yr,fluv_2050_5yr,pluv_2050_5yr,fluv_2050_20yr,pluv_2050_20yr,fluv_2050_100yr,pluv_2050_100yr,fluv_2050_250yr,pluv_2050_250yr,fluv_2050_500yr,pluv_2050_500yr\n")
+	w.Flush()
 }
