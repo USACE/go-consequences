@@ -54,9 +54,11 @@ func ConvertFile(file string) map[string]Record {
 				//2050
 				if fluvial {
 					ffvals[ffidx], err = strconv.ParseFloat(lines[i], 64)
+					ffvals[ffidx] = ffvals[ffidx] / 30.48 //centimeters to feet
 					ffidx++
 				} else {
 					fpvals[fpidx], err = strconv.ParseFloat(lines[i], 64)
+					fpvals[fpidx] = fpvals[fpidx] / 30.48 //centimeters to feet
 					fpidx++
 				}
 			} else {
@@ -64,9 +66,11 @@ func ConvertFile(file string) map[string]Record {
 				if fluvial {
 					cfvals[cfidx], err = strconv.ParseFloat(lines[i], 64)
 					//fmt.Println("current fluvial")
+					cfvals[cfidx] = cfvals[cfidx] / 30.48 //centimeters to feet
 					cfidx++
 				} else {
 					cpvals[cpidx], err = strconv.ParseFloat(lines[i], 64)
+					cpvals[cpidx] = cpvals[cpidx] / 30.48 //centimeters to feet
 					//fmt.Println("current pluvial")
 					cpidx++
 				}
