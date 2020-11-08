@@ -54,16 +54,17 @@ func ComputeCSVDepthsStream() {
 	fips := "11"
 	okfips := true
 	fmt.Println("Reading Depths")
-	depthMap := hazard_providers.ConvertFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths.csv")
+	ds := hazard_providers.ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
 	fmt.Println("Finished Reading Depths")
 	//startnsi := time.Now()
 	rmap := make(map[string]SimulationSummaryRow)
 	if okfips {
 		fmt.Println("Downloading NSI by fips " + fips)
 		nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
-			d, okd := depthMap[str.Name] //500y
+			fe := hazard_providers.FathomEvent{Fd_id: str.Name, Year: 2020, Frequency: 500, Fluvial: true}
+			okd := false
+			depthevent, okd = ds.ProvideHazard(fe).(hazards.DepthEvent)
 			if okd {
-				depthevent = hazards.DepthEvent{Depth: d.CurrentFluvial.Values[4]}
 				r := str.ComputeConsequences(depthevent)
 				if val, ok := rmap[str.DamCat]; ok {
 					val.StructureCount += 1

@@ -621,7 +621,7 @@ func res13swb() OccupancyTypeStochastic {
 }
 func res1slnb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-	structureydists := make([]statistics.ContinuousDistribution, 19)
+	structureydists := make([]statistics.ContinuousDistribution, 20)
 	structureydists[0] = statistics.NormalDistribution{Mean: 0, StandardDeviation: 0}
 	structureydists[1] = statistics.NormalDistribution{Mean: 6.4000000953674316, StandardDeviation: 0}
 	structureydists[2] = statistics.NormalDistribution{Mean: 7.1999998092651367, StandardDeviation: 0.039999999105930328}
@@ -642,7 +642,7 @@ func res1slnb() OccupancyTypeStochastic {
 	structureydists[17] = statistics.NormalDistribution{Mean: 83.800003051757812, StandardDeviation: 1.8999999761581421}
 	structureydists[18] = statistics.NormalDistribution{Mean: 84.4000015258789, StandardDeviation: 1.8999999761581421}
 	contentxs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-	contentydists := make([]statistics.ContinuousDistribution, 19)
+	contentydists := make([]statistics.ContinuousDistribution, 20)
 	contentydists[0] = statistics.NormalDistribution{Mean: 0, StandardDeviation: 0}
 	contentydists[1] = statistics.NormalDistribution{Mean: 2.2000000476837158, StandardDeviation: 0}
 	contentydists[2] = statistics.NormalDistribution{Mean: 2.9000000953674316, StandardDeviation: 0.059999998658895493}
