@@ -243,6 +243,24 @@ func hasNonZeroValues(ffvals []float64, fpvals []float64, cfvals []float64, cpva
 	}
 	return false
 }
+func hasValidData(ffvals []float64, fpvals []float64, cfvals []float64, cpvals []float64) bool {
+	//ff
+	for i := 1; i < 5; i++ {
+		if ffvals[i] > ffvals[i-1] {
+			return true
+		}
+		if fpvals[i] > 0 {
+			return true
+		}
+		if cfvals[i] > 0 {
+			return true
+		}
+		if cpvals[i] > 0 {
+			return true
+		}
+	}
+	return false
+}
 func check(e error) {
 	if e != nil {
 		panic(e)

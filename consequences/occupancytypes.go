@@ -621,7 +621,7 @@ func res13swb() OccupancyTypeStochastic {
 }
 func res1slnb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-	structureydists := make([]statistics.ContinuousDistribution, 20)
+	structureydists := make([]statistics.ContinuousDistribution, 19)
 	structureydists[0] = statistics.NormalDistribution{Mean: 0, StandardDeviation: 0}
 	structureydists[1] = statistics.NormalDistribution{Mean: 6.4000000953674316, StandardDeviation: 0}
 	structureydists[2] = statistics.NormalDistribution{Mean: 7.1999998092651367, StandardDeviation: 0.039999999105930328}
@@ -642,26 +642,26 @@ func res1slnb() OccupancyTypeStochastic {
 	structureydists[17] = statistics.NormalDistribution{Mean: 83.800003051757812, StandardDeviation: 1.8999999761581421}
 	structureydists[18] = statistics.NormalDistribution{Mean: 84.4000015258789, StandardDeviation: 1.8999999761581421}
 	contentxs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-	contentydists := make([]statistics.ContinuousDistribution, 20)
+	contentydists := make([]statistics.ContinuousDistribution, 19)
 	contentydists[0] = statistics.NormalDistribution{Mean: 0, StandardDeviation: 0}
 	contentydists[1] = statistics.NormalDistribution{Mean: 2.2000000476837158, StandardDeviation: 0}
 	contentydists[2] = statistics.NormalDistribution{Mean: 2.9000000953674316, StandardDeviation: 0.059999998658895493}
 	contentydists[3] = statistics.NormalDistribution{Mean: 4.6999998092651367, StandardDeviation: 0.25}
 	contentydists[4] = statistics.NormalDistribution{Mean: 7.5, StandardDeviation: 0.60000002384185791}
-	contentydists[6] = statistics.NormalDistribution{Mean: 11.100000381469727, StandardDeviation: 1}
-	contentydists[7] = statistics.NormalDistribution{Mean: 15.300000190734863, StandardDeviation: 1.5}
-	contentydists[8] = statistics.NormalDistribution{Mean: 20.100000381469727, StandardDeviation: 1.6000000238418579}
-	contentydists[9] = statistics.NormalDistribution{Mean: 25.200000762939453, StandardDeviation: 1.7999999523162842}
-	contentydists[10] = statistics.NormalDistribution{Mean: 30.5, StandardDeviation: 2.0999999046325684}
-	contentydists[11] = statistics.NormalDistribution{Mean: 35.700000762939453, StandardDeviation: 2.5}
-	contentydists[12] = statistics.NormalDistribution{Mean: 40.900001525878906, StandardDeviation: 3}
-	contentydists[13] = statistics.NormalDistribution{Mean: 45.799999237060547, StandardDeviation: 3.5}
-	contentydists[14] = statistics.NormalDistribution{Mean: 50.200000762939453, StandardDeviation: 4}
-	contentydists[15] = statistics.NormalDistribution{Mean: 54.099998474121094, StandardDeviation: 4.4000000953674316}
-	contentydists[16] = statistics.NormalDistribution{Mean: 57.200000762939453, StandardDeviation: 4.75}
-	contentydists[17] = statistics.NormalDistribution{Mean: 59.400001525878906, StandardDeviation: 4.8000001907348633}
+	contentydists[5] = statistics.NormalDistribution{Mean: 11.100000381469727, StandardDeviation: 1}
+	contentydists[6] = statistics.NormalDistribution{Mean: 15.300000190734863, StandardDeviation: 1.5}
+	contentydists[7] = statistics.NormalDistribution{Mean: 20.100000381469727, StandardDeviation: 1.6000000238418579}
+	contentydists[8] = statistics.NormalDistribution{Mean: 25.200000762939453, StandardDeviation: 1.7999999523162842}
+	contentydists[9] = statistics.NormalDistribution{Mean: 30.5, StandardDeviation: 2.0999999046325684}
+	contentydists[10] = statistics.NormalDistribution{Mean: 35.700000762939453, StandardDeviation: 2.5}
+	contentydists[11] = statistics.NormalDistribution{Mean: 40.900001525878906, StandardDeviation: 3}
+	contentydists[12] = statistics.NormalDistribution{Mean: 45.799999237060547, StandardDeviation: 3.5}
+	contentydists[13] = statistics.NormalDistribution{Mean: 50.200000762939453, StandardDeviation: 4}
+	contentydists[14] = statistics.NormalDistribution{Mean: 54.099998474121094, StandardDeviation: 4.4000000953674316}
+	contentydists[15] = statistics.NormalDistribution{Mean: 57.200000762939453, StandardDeviation: 4.75}
+	contentydists[16] = statistics.NormalDistribution{Mean: 59.400001525878906, StandardDeviation: 4.8000001907348633}
+	contentydists[17] = statistics.NormalDistribution{Mean: 60.5, StandardDeviation: 4.8000001907348633}
 	contentydists[18] = statistics.NormalDistribution{Mean: 60.5, StandardDeviation: 4.8000001907348633}
-	contentydists[19] = statistics.NormalDistribution{Mean: 60.5, StandardDeviation: 4.8000001907348633}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
 	return OccupancyTypeStochastic{Name: "RES1-SLNB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
