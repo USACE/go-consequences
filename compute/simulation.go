@@ -61,19 +61,24 @@ func ComputeCSVDepthsStream() {
 	if okfips {
 		fmt.Println("Downloading NSI by fips " + fips)
 		nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
-			fe := hazard_providers.FathomEvent{Fd_id: str.Name, Year: 2020, Frequency: 500, Fluvial: true}
+			fe := hazard_providers.FathomEvent{Fd_id: str.Name, Year: 2020, Frequency: 20, Fluvial: true}
 			okd := false
 			depthevent, okd = ds.ProvideHazard(fe).(hazards.DepthEvent)
 			if okd {
-				r := str.ComputeConsequences(depthevent)
-				if val, ok := rmap[str.DamCat]; ok {
-					val.StructureCount += 1
-					val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
-					val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
-					rmap[str.DamCat] = val
+				if depthevent.Depth <= 0 {
+					//skip
 				} else {
-					rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
+					r := str.ComputeConsequences(depthevent)
+					if val, ok := rmap[str.DamCat]; ok {
+						val.StructureCount += 1
+						val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
+						val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
+						rmap[str.DamCat] = val
+					} else {
+						rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
+					}
 				}
+
 			}
 
 		})
