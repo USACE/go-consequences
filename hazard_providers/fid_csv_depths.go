@@ -27,14 +27,17 @@ type Record struct {
 	CurrentPluvial FrequencyData
 }
 type FathomEvent struct {
-	Fd_id     string
 	Year      int
 	Fluvial   bool
 	Frequency int //5,20,100,250,500
 }
+type FathomQuery struct {
+	Fd_id string
+	FathomEvent
+}
 
-func (ds DataSet) ProvideHazard(args interface{}) interface{} {
-	fd_id, ok := args.(FathomEvent)
+func (ds DataSet) ProvideHazard(args interface{}) (interface{}, error) {
+	fd_id, ok := args.(FathomQuery)
 	if ok {
 		r, found := ds.Data[fd_id.Fd_id]
 		if found {
@@ -45,7 +48,7 @@ func (ds DataSet) ProvideHazard(args interface{}) interface{} {
 					return generateDepthEvent(fd_id.Frequency, r.FutureFluvial)
 				} else {
 					//throw error?
-					return nil
+					return nil, HazardError{Input: "Bad Year Argument"}
 				}
 
 			} else {
@@ -55,30 +58,30 @@ func (ds DataSet) ProvideHazard(args interface{}) interface{} {
 					return generateDepthEvent(fd_id.Frequency, r.FuturePluvial)
 				} else {
 					//throw error?
-					return nil
+					return nil, HazardError{Input: "Bad Year Argument"}
 				}
 			}
 		} else {
-			return nil
+			return nil, NoHazardFoundError{Input: fd_id.Fd_id}
 		}
 	} else {
-		return nil
+		return nil, HazardError{Input: "Unable to parse args to hazard_providers.FathomQuery"}
 	}
 }
-func generateDepthEvent(frequency int, data FrequencyData) hazards.DepthEvent {
+func generateDepthEvent(frequency int, data FrequencyData) (hazards.DepthEvent, error) {
 	switch frequency {
 	case 5:
-		return hazards.DepthEvent{Depth: data.Values[0]}
+		return hazards.DepthEvent{Depth: data.Values[0]}, nil
 	case 20:
-		return hazards.DepthEvent{Depth: data.Values[1]}
+		return hazards.DepthEvent{Depth: data.Values[1]}, nil
 	case 100:
-		return hazards.DepthEvent{Depth: data.Values[2]}
+		return hazards.DepthEvent{Depth: data.Values[2]}, nil
 	case 250:
-		return hazards.DepthEvent{Depth: data.Values[3]}
+		return hazards.DepthEvent{Depth: data.Values[3]}, nil
 	case 500:
-		return hazards.DepthEvent{Depth: data.Values[4]}
+		return hazards.DepthEvent{Depth: data.Values[4]}, nil
 	default:
-		return hazards.DepthEvent{}
+		return hazards.DepthEvent{}, NoFrequencyFoundError{Input: fmt.Sprintf("%n", frequency)} //bad frequency
 	}
 }
 func ConvertFile(file string) DataSet {

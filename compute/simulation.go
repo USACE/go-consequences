@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/USACE/go-consequences/consequences"
-	"github.com/USACE/go-consequences/hazard_providers"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/nsi"
 )
@@ -29,7 +28,7 @@ type StructureSimulation struct {
 }
 type NSIStructureSimulation struct {
 	RequestArgs
-	StructureSimulation
+	//StructureSimulation
 }
 type Computable interface {
 	Compute(args RequestArgs) SimulationSummary
@@ -49,54 +48,6 @@ type SimulationSummary struct {
 	Computetime time.Duration
 }
 
-func ComputeCSVDepthsStream() {
-	var depthevent = hazards.DepthEvent{Depth: 5.32}
-	fips := "11"
-	okfips := true
-	fmt.Println("Reading Depths")
-	ds := hazard_providers.ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
-	fmt.Println("Finished Reading Depths")
-	//startnsi := time.Now()
-	rmap := make(map[string]SimulationSummaryRow)
-	if okfips {
-		fmt.Println("Downloading NSI by fips " + fips)
-		nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
-			fe := hazard_providers.FathomEvent{Fd_id: str.Name, Year: 2020, Frequency: 20, Fluvial: true}
-			okd := false
-			depthevent, okd = ds.ProvideHazard(fe).(hazards.DepthEvent)
-			if okd {
-				if depthevent.Depth <= 0 {
-					//skip
-				} else {
-					r := str.ComputeConsequences(depthevent)
-					if val, ok := rmap[str.DamCat]; ok {
-						val.StructureCount += 1
-						val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
-						val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
-						rmap[str.DamCat] = val
-					} else {
-						rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
-					}
-				}
-
-			}
-
-		})
-	}
-	//elapsedNsi := time.Since(startnsi)
-	//header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
-	rows := make([]SimulationSummaryRow, len(rmap))
-	idx := 0
-	//s := "COMPLETE FOR SIMULATION" + "\n"
-	for _, val := range rmap {
-		fmt.Println(fmt.Sprintf("for %s, there were %d structures with %f structure damages %f content damages for damage category %s", fips, val.StructureCount, val.StructureDamage, val.ContentDamage, val.RowHeader))
-		//s += fmt.Sprintf("for %s, there were %d structures with %f structure damages %f content damages for damage category %s", fips, val.StructureCount, val.StructureDamage, val.ContentDamage, val.RowHeader) + "\n"
-		rows[idx] = val
-		idx++
-	}
-	//elapsed := time.Since(startnsi)
-	fmt.Println("Complete for" + fips)
-}
 func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	var depthevent = hazards.DepthEvent{Depth: 5.32}
 	okd := false
