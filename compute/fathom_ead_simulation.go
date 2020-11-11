@@ -10,7 +10,7 @@ import (
 )
 
 func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
-	//rmapMap := make(map[string]SimulationSummaryRow)
+	//rmapMap := make(map[string]map[string]SimulationRow)
 	fmt.Println("Downloading NSI by fips " + fips)
 	years := [2]int{2020, 2050}
 	frequencies := [5]int{5, 20, 100, 250, 500}

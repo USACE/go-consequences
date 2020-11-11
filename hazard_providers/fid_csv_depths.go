@@ -81,7 +81,7 @@ func generateDepthEvent(frequency int, data FrequencyData) (hazards.DepthEvent, 
 	case 500:
 		return hazards.DepthEvent{Depth: data.Values[4]}, nil
 	default:
-		return hazards.DepthEvent{}, NoFrequencyFoundError{Input: fmt.Sprintf("%n", frequency)} //bad frequency
+		return hazards.DepthEvent{}, NoFrequencyFoundError{Input: fmt.Sprintf("%v", frequency)} //bad frequency
 	}
 }
 func ConvertFile(file string) DataSet {
@@ -217,9 +217,13 @@ func ReadFeetFile(file string) DataSet {
 		currentfluvial := FrequencyData{fluvial: true, year: 2020, Values: cfvals}
 		currentpluvial := FrequencyData{fluvial: false, year: 2020, Values: cpvals}
 		if hasNonZeroValues(ffvals, fpvals, cfvals, cpvals) {
+			//if hasValidData(fd_id, ffvals, fpvals, cfvals, cpvals) {
 			r := Record{Fd_id: fd_id, FutureFluvial: futurefluvial, FuturePluvial: futurepluvial, CurrentFluvial: currentfluvial, CurrentPluvial: currentpluvial}
 			m[fd_id] = r
 			count++
+			//} else {
+			//skipping
+			//}
 		} else {
 			//skipping.
 		}
@@ -246,23 +250,50 @@ func hasNonZeroValues(ffvals []float64, fpvals []float64, cfvals []float64, cpva
 	}
 	return false
 }
-func hasValidData(ffvals []float64, fpvals []float64, cfvals []float64, cpvals []float64) bool {
+func hasValidData(fd_id string, ffvals []float64, fpvals []float64, cfvals []float64, cpvals []float64) bool {
 	//ff
+	ffvalid := true
+	fpvalid := true
+	cfvalid := true
+	cpvalid := true
+	datasetvalid := true
 	for i := 1; i < 5; i++ {
-		if ffvals[i] > ffvals[i-1] {
-			return true
+		if ffvals[i] < ffvals[i-1] {
+			ffvalid = false
+			datasetvalid = false
 		}
-		if fpvals[i] > 0 {
-			return true
+		if fpvals[i] < fpvals[i-1] {
+			fpvalid = false
+			datasetvalid = false
 		}
-		if cfvals[i] > 0 {
-			return true
+		if cfvals[i] < cfvals[i-1] {
+			cfvalid = false
+			datasetvalid = false
 		}
-		if cpvals[i] > 0 {
-			return true
+		if cpvals[i] < cpvals[i-1] {
+			cpvalid = false
+			datasetvalid = false
 		}
 	}
-	return false
+	if !datasetvalid {
+		s := fd_id + " is not valid for: "
+		if !ffvalid {
+			s += "future fluvial,"
+		}
+		if !fpvalid {
+			s += "future pluvial,"
+		}
+		if !cfvalid {
+			s += "current fluvial,"
+		}
+		if !cpvalid {
+			s += "current pluvial,"
+		}
+		s = strings.Trim(s, ",")
+		fmt.Println(s)
+		return false
+	}
+	return true
 }
 func check(e error) {
 	if e != nil {

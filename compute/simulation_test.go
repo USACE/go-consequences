@@ -14,3 +14,9 @@ func TestSingleEvent(t *testing.T) {
 	fe := hazard_providers.FathomEvent{Year: 2050, Frequency: 5, Fluvial: true}
 	ComputeSingleEvent_NSIStream(ds, "11", fe)
 }
+func TestMultiEvent(t *testing.T) {
+	fmt.Println("Reading Depths")
+	ds := hazard_providers.ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
+	fmt.Println("Finished Reading Depths")
+	ComputeMultiEvent_NSIStream(ds, "11")
+}
