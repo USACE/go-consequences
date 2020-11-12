@@ -22,10 +22,13 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 		_, err := ds.ProvideHazard(fq)
 		if err == nil {
 			//structure presumably exists?
+			cfdam := make([]float64, 5)
+			cpdam := make([]float64, 5)
+			ffdam := make([]float64, 5)
+			fpdam := make([]float64, 5)
 			for _, flu := range fluvial {
 				for _, y := range years {
 					for _, f := range frequencies {
-						rmap := make(map[string]SimulationSummaryRow)
 						fe = hazard_providers.FathomEvent{Year: y, Frequency: f, Fluvial: flu}
 						fq.FathomEvent = fe
 						result, _ := ds.ProvideHazard(fq)
@@ -33,28 +36,64 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 						if okd {
 							if depthevent.Depth <= 0 {
 								//skip
+								recordDamage(flu, y, f, 0, ffdam, fpdam, cfdam, cpdam)
 							} else {
 								r := str.ComputeConsequences(depthevent)
-								if val, ok := rmap[str.DamCat]; ok {
-									val.StructureCount += 1
-									val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
-									val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
-									rmap[str.DamCat] = val
-								} else {
-									rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
-								}
+								StructureDamage := r.Results[0].(float64) //based on convention - super risky
+								ContentDamage := r.Results[1].(float64)   //based on convention - super risky
+								recordDamage(flu, y, f, StructureDamage+ContentDamage, ffdam, fpdam, cfdam, cpdam)
 							}
 						}
 					}
 
 				}
 			}
-
+			//compute ead's for each of the 4 caases.
+			fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeEAD(cfdam), computeEAD(cpdam), computeEAD(ffdam), computeEAD(fpdam)))
 		}
 	})
 
 }
+func frequencyIndex(frequency int) int {
+	switch frequency {
+	case 5:
+		return 0
+	case 20:
+		return 1
+	case 100:
+		return 2
+	case 250:
+		return 3
+	case 500:
+		return 4
+	default:
+		return -1 //bad frequency
+	}
+}
+func recordDamage(fluvial bool, year int, frequency int, damage float64, ffdam []float64, fpdam []float64, cfdam []float64, cpdam []float64) {
+	if fluvial {
+		if year == 2020 {
+			cfdam[frequencyIndex(frequency)] = damage
+		} else if year == 2050 {
+			ffdam[frequencyIndex(frequency)] = damage
+		}
+	} else {
+		if year == 2020 {
+			cpdam[frequencyIndex(frequency)] = damage
+		} else if year == 2050 {
+			fpdam[frequencyIndex(frequency)] = damage
+		}
+	}
 
+}
+func computeEAD(damages []float64) float64 {
+	frequencyWeight := [5]float64{.2, .05, .01, .004, .002} //5,20,100,250,500
+	ead := 0.0
+	for i, d := range damages {
+		ead += d * frequencyWeight[i] //not trapazoidal.
+	}
+	return ead
+}
 func ComputeSingleEvent_NSIStream(ds hazard_providers.DataSet, fips string, fe hazard_providers.FathomEvent) {
 	rmap := make(map[string]SimulationSummaryRow)
 	fmt.Println("Downloading NSI by fips " + fips)
