@@ -2,13 +2,21 @@ package compute
 
 import (
 	"fmt"
+	"math"
 
+	"github.com/USACE/go-consequences/census"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazard_providers"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/nsi"
 )
 
+func ComputeMultiFips_MultiEvent(ds hazard_providers.DataSet) {
+	fmap := census.StateToCountyFipsMap()
+	for ss, _ := range fmap {
+		ComputeMultiEvent_NSIStream(ds, ss) //should run the nation at the state level. //probbably could make this concurrent
+	}
+}
 func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 	//rmapMap := make(map[string]map[string]SimulationRow)
 	fmt.Println("Downloading NSI by fips " + fips)
@@ -88,11 +96,30 @@ func recordDamage(fluvial bool, year int, frequency int, damage float64, ffdam [
 }
 func computeEAD(damages []float64) float64 {
 	frequencyWeight := [5]float64{.2, .05, .01, .004, .002} //5,20,100,250,500
-	ead := 0.0
-	for i, d := range damages {
-		ead += d * frequencyWeight[i] //not trapazoidal.
+	//ead := 0.0
+
+	//sum product
+	/*
+		for i, d := range damages {
+			ead += d * frequencyWeight[i] //not trapazoidal.
+		}
+
+	*/
+	//mocking in trapizoidal
+	triangle := 0.0
+	square := 0.0
+	x1 := 0.0
+	y1 := 0.0
+	eadT := 0.0
+	for i := 0; i < len(frequencyWeight); i++ {
+		square = x1 * y1
+		triangle = (math.Abs(x1-frequencyWeight[i]) * math.Abs(y1-damages[i])) / 2.0 // need to check on the x values, it probably should be 1-x
+		eadT = square + triangle
+		x1 = frequencyWeight[i]
+		y1 = damages[i]
 	}
-	return ead
+
+	return eadT
 }
 func ComputeSingleEvent_NSIStream(ds hazard_providers.DataSet, fips string, fe hazard_providers.FathomEvent) {
 	rmap := make(map[string]SimulationSummaryRow)
