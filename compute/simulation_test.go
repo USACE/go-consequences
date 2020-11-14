@@ -20,3 +20,11 @@ func TestMultiEvent(t *testing.T) {
 	fmt.Println("Finished Reading Depths")
 	ComputeMultiEvent_NSIStream(ds, "11")
 }
+func TestComputeEAD(t *testing.T) {
+	d := []float64{1, 2, 3, 4}
+	f := []float64{.75, .5, .25, 0}
+	val := computeEAD(d, f)
+	if val != 2.0 {
+		t.Errorf("computeEAD() yeilded %f; expected %f", val, 2.0)
+	}
+}

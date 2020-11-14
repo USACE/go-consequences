@@ -56,7 +56,8 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 				}
 			}
 			//compute ead's for each of the 4 caases.
-			fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeEAD(cfdam), computeEAD(cpdam), computeEAD(ffdam), computeEAD(fpdam)))
+			freq := []float64{.2, .05, .01, .004, .002} //5,20,100,250,500
+			fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeEAD(cfdam, freq), computeEAD(cpdam, freq), computeEAD(ffdam, freq), computeEAD(fpdam, freq)))
 		}
 	})
 
@@ -93,33 +94,22 @@ func recordDamage(fluvial bool, year int, frequency int, damage float64, ffdam [
 	}
 
 }
-func computeEAD(damages []float64) float64 {
-	frequencyWeight := [5]float64{.2, .05, .01, .004, .002} //5,20,100,250,500
-	//ead := 0.0
-
-	//sum product
-	/*
-		for i, d := range damages {
-			ead += d * frequencyWeight[i] //not trapazoidal.
-		}
-
-	*/
-	//mocking in trapizoidal
+func computeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
 	square := 0.0
 	x1 := 1.0
 	y1 := 0.0
 	eadT := 0.0
-	for i := 0; i < len(frequencyWeight); i++ {
-		square = x1 * y1
+	for i := 0; i < len(freq); i++ {
 		x1m1 := 1.0 - x1
-		x2m1 := 1.0 - frequencyWeight[i]
-		triangle = ((x1m1 - x2m1) * (y1 - damages[i])) / 2.0
+		x2m1 := 1.0 - freq[i]
+		xdelta := x1m1 - x2m1
+		square = -xdelta * y1
+		triangle = ((xdelta) * (y1 - damages[i])) / 2.0
 		eadT += square + triangle
-		x1 = frequencyWeight[i]
+		x1 = freq[i]
 		y1 = damages[i]
 	}
-
 	return eadT
 }
 func ComputeSingleEvent_NSIStream(ds hazard_providers.DataSet, fips string, fe hazard_providers.FathomEvent) {
