@@ -97,18 +97,21 @@ func recordDamage(fluvial bool, year int, frequency int, damage float64, ffdam [
 func computeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
 	square := 0.0
-	x1 := 1.0
+	x1 := 1.0 // create a triangle to the first probability space - linear interpolation is probably a problem, maybe use log linear interpolation for the triangle
 	y1 := 0.0
 	eadT := 0.0
 	for i := 0; i < len(freq); i++ {
-		x1m1 := 1.0 - x1
-		x2m1 := 1.0 - freq[i]
-		xdelta := x1m1 - x2m1
-		square = -xdelta * y1
-		triangle = ((xdelta) * (y1 - damages[i])) / 2.0
+		xdelta := x1 - freq[i]
+		square = xdelta * y1
+		triangle = ((xdelta) * -(y1 - damages[i])) / 2.0
 		eadT += square + triangle
 		x1 = freq[i]
 		y1 = damages[i]
+	}
+	if x1 != 0.0 {
+		xdelta := x1 - 0.0
+		eadT += xdelta * y1 //no extrapolation, just continue damages out as if it were truth for all remaining probability.
+
 	}
 	return eadT
 }
