@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/USACE/go-consequences/census"
 	"github.com/USACE/go-consequences/consequences"
@@ -108,13 +107,15 @@ func computeEAD(damages []float64) float64 {
 	//mocking in trapizoidal
 	triangle := 0.0
 	square := 0.0
-	x1 := 0.0
+	x1 := 1.0
 	y1 := 0.0
 	eadT := 0.0
 	for i := 0; i < len(frequencyWeight); i++ {
 		square = x1 * y1
-		triangle = (math.Abs(x1-frequencyWeight[i]) * math.Abs(y1-damages[i])) / 2.0 // need to check on the x values, it probably should be 1-x
-		eadT = square + triangle
+		x1m1 := 1.0 - x1
+		x2m1 := 1.0 - frequencyWeight[i]
+		triangle = ((x1m1 - x2m1) * (y1 - damages[i])) / 2.0
+		eadT += square + triangle
 		x1 = frequencyWeight[i]
 		y1 = damages[i]
 	}
