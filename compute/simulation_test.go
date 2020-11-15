@@ -28,3 +28,11 @@ func TestComputeEAD(t *testing.T) {
 		t.Errorf("computeEAD() yeilded %f; expected %f", val, 2.0)
 	}
 }
+func TestComputeSpecialEAD(t *testing.T) {
+	d := []float64{1, 2, 3, 4}
+	f := []float64{.75, .5, .25, 0}
+	val := computeSpecialEAD(d, f)
+	if val != 1.875 {
+		t.Errorf("computeEAD() yeilded %f; expected %f", val, 1.875)
+	}
+}
