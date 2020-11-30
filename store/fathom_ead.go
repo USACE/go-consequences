@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -18,6 +19,10 @@ type fathom_result struct {
 	content_Consequence   float64 `db:"content_consequence"`
 }
 
+func CreateResult(fd_id string, year int, hazard string, frequency string, structure_damage float64, content_damage float64) fathom_result {
+	result := fathom_result{fd_id: fd_id, hazard_Year: year, hazard_Type: hazard, frequency: frequency, structure_Consequence: structure_damage, content_Consequence: content_damage}
+	return result
+}
 func CreateDatabase() *sql.DB {
 	os.Remove("fathom-results.db")
 	fmt.Println("Creating fathom-results.db...")
@@ -52,6 +57,7 @@ func createTable(db *sql.DB) {
 	log.Println("fathom table created")
 }
 func CreateStatement(db *sql.DB) *sql.Stmt {
+	//https://golangbot.com/mysql-create-table-insert-row/
 	insertresult := `INSERT INTO fathom(fd_id, hazard_year, hazard_type, frequency, structure_consequence, content_consequence) VALUES (?, ?, ?, ?, ?, ?)`
 	statement, err := db.Prepare(insertresult)
 	if err != nil {
@@ -60,6 +66,26 @@ func CreateStatement(db *sql.DB) *sql.Stmt {
 		return statement
 	}
 	return nil
+}
+func WriteArrayToDatabase(db *sql.DB, results []interface{}) {
+	insertresult := `INSERT INTO fathom(fd_id, hazard_year, hazard_type, frequency, structure_consequence, content_consequence) VALUES `
+	var inserts []string
+	var params []interface{}
+	for _, result := range results {
+		res := result.(fathom_result)
+		inserts = append(inserts, "(?, ?, ?, ?, ?, ?)")
+		params = append(params, res.fd_id, res.hazard_Year, res.hazard_Type, res.frequency, res.structure_Consequence, res.content_Consequence)
+	}
+	queryVals := strings.Join(inserts, ",")
+	insertresult += queryVals
+	statement, err := db.Prepare(insertresult)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	_, err = statement.Exec(params...)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }
 func WriteToDatabase(stmt *sql.Stmt, fd_id string, year int, hazard string, frequency string, structure_damage float64, content_damage float64) {
 	_, err := stmt.Exec(fd_id, year, hazard, frequency, structure_damage, content_damage)

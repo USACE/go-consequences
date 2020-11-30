@@ -27,6 +27,10 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 	defer db.Close()
 	stmt := store.CreateStatement(db)
 	defer stmt.Close()
+
+	index := 0
+	maxTransaction := 500
+	transaction := make([]interface{}, maxTransaction)
 	nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
 		//check to see if the structure exists for a first "default event"
 		fe := hazard_providers.FathomEvent{Year: 2050, Frequency: 500, Fluvial: true}
@@ -60,7 +64,13 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 								StructureDamage := r.Results[0].(float64) //based on convention - super risky
 								ContentDamage := r.Results[1].(float64)   //based on convention - super risky
 								assignDamage(flu, y, f, StructureDamage+ContentDamage, ffdam, fpdam, cfdam, cpdam)
-								store.WriteToDatabase(stmt, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
+								transaction[index] = store.CreateResult(str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
+								index++
+								//store.WriteToDatabase(stmt, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
+								if index >= maxTransaction {
+									store.WriteArrayToDatabase(db, transaction)
+									index = 0
+								}
 							}
 						}
 					}
