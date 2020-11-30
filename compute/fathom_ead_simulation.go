@@ -24,6 +24,9 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 	frequencies := [5]int{5, 20, 100, 250, 500}
 	fluvial := [2]bool{true, false}
 	db := store.CreateDatabase()
+	defer db.Close()
+	stmt := store.CreateStatement(db)
+	defer stmt.Close()
 	nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
 		//check to see if the structure exists for a first "default event"
 		fe := hazard_providers.FathomEvent{Year: 2050, Frequency: 500, Fluvial: true}
@@ -35,6 +38,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 			cpdam := make([]float64, 5)
 			ffdam := make([]float64, 5)
 			fpdam := make([]float64, 5)
+
 			for _, flu := range fluvial {
 				hazard := "pluvial"
 				if flu {
@@ -56,7 +60,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 								StructureDamage := r.Results[0].(float64) //based on convention - super risky
 								ContentDamage := r.Results[1].(float64)   //based on convention - super risky
 								assignDamage(flu, y, f, StructureDamage+ContentDamage, ffdam, fpdam, cfdam, cpdam)
-								store.WriteToDatabase(db, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
+								store.WriteToDatabase(stmt, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
 							}
 						}
 					}
@@ -68,8 +72,6 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 			fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeSpecialEAD(cfdam, freq), computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
 		}
 	})
-	db.Close()
-
 }
 func frequencyIndex(frequency int) int {
 	switch frequency {

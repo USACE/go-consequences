@@ -51,21 +51,19 @@ func createTable(db *sql.DB) {
 	statement.Exec() // Execute SQL Statements
 	log.Println("fathom table created")
 }
-
-func WriteToDatabase(db *sql.DB, fd_id string, year int, hazard string, frequency string, structure_damage float64, content_damage float64) {
-	//f := fathom_result{fd_id: fd_id, hazard_Year: year, hazard_Type: hazard, frequency: frequency, structure_Consequence: structure_damage, content_Consequence: content_damage}
-	//db, _ := sql.Open("sqlite3", "./fathom-results.db")
-	//defer db.Close()
-
+func CreateStatement(db *sql.DB) *sql.Stmt {
 	insertresult := `INSERT INTO fathom(fd_id, hazard_year, hazard_type, frequency, structure_consequence, content_consequence) VALUES (?, ?, ?, ?, ?, ?)`
 	statement, err := db.Prepare(insertresult)
 	if err != nil {
 		log.Fatalln(err.Error())
+	} else {
+		return statement
 	}
-	_, err = statement.Exec(fd_id, year, hazard, frequency, structure_damage, content_damage)
+	return nil
+}
+func WriteToDatabase(stmt *sql.Stmt, fd_id string, year int, hazard string, frequency string, structure_damage float64, content_damage float64) {
+	_, err := stmt.Exec(fd_id, year, hazard, frequency, structure_damage, content_damage)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	//write to database.
-
 }
