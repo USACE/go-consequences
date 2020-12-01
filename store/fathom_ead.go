@@ -71,21 +71,31 @@ func WriteArrayToDatabase(db *sql.DB, results []interface{}) {
 	insertresult := `INSERT INTO fathom(fd_id, hazard_year, hazard_type, frequency, structure_consequence, content_consequence) VALUES `
 	var inserts []string
 	var params []interface{}
+	somethingtoadd := false
 	for _, result := range results {
-		res := result.(fathom_result)
-		inserts = append(inserts, "(?, ?, ?, ?, ?, ?)")
-		params = append(params, res.fd_id, res.hazard_Year, res.hazard_Type, res.frequency, res.structure_Consequence, res.content_Consequence)
+		res, ok := result.(fathom_result)
+		if ok {
+			somethingtoadd = true
+			inserts = append(inserts, "(?, ?, ?, ?, ?, ?)")
+			params = append(params, res.fd_id, res.hazard_Year, res.hazard_Type, res.frequency, res.structure_Consequence, res.content_Consequence)
+		}
+
 	}
-	queryVals := strings.Join(inserts, ",")
-	insertresult += queryVals
-	statement, err := db.Prepare(insertresult)
-	if err != nil {
-		log.Fatalln(err.Error())
+	if somethingtoadd {
+		queryVals := strings.Join(inserts, ",")
+		insertresult += queryVals
+		statement, err := db.Prepare(insertresult)
+		if err != nil {
+			fmt.Println(insertresult)
+			log.Fatalln("ERROR WITH DB PREPARE " + err.Error())
+		}
+		_, err = statement.Exec(params...)
+		if err != nil {
+			fmt.Println(params)
+			log.Fatalln("ERROR WITH EXECUTION " + err.Error())
+		}
 	}
-	_, err = statement.Exec(params...)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+
 }
 func WriteToDatabase(stmt *sql.Stmt, fd_id string, year int, hazard string, frequency string, structure_damage float64, content_damage float64) {
 	_, err := stmt.Exec(fd_id, year, hazard, frequency, structure_damage, content_damage)

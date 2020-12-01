@@ -1,7 +1,9 @@
 package compute
 
 import (
+	"database/sql"
 	"fmt"
+	"sync"
 
 	"github.com/USACE/go-consequences/census"
 	"github.com/USACE/go-consequences/consequences"
@@ -12,25 +14,33 @@ import (
 )
 
 func ComputeMultiFips_MultiEvent(ds hazard_providers.DataSet) {
+	db := store.CreateDatabase()
+	defer db.Close()
 	fmap := census.StateToCountyFipsMap()
+	var wg sync.WaitGroup
+	wg.Add(len(fmap))
 	for ss, _ := range fmap {
-		ComputeMultiEvent_NSIStream(ds, ss) //should run the nation at the state level. //probbably could make this concurrent
+		go func(state string) {
+			defer wg.Done()
+			ComputeMultiEvent_NSIStream(ds, state, db) //should run the nation at the state level. //probbably could make this concurrent
+		}(ss)
 	}
+	wg.Wait()
 }
-func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
+func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *sql.DB) bool {
 	//rmapMap := make(map[string]map[string]SimulationRow)
 	fmt.Println("Downloading NSI by fips " + fips)
 	years := [2]int{2020, 2050}
 	frequencies := [5]int{5, 20, 100, 250, 500}
 	fluvial := [2]bool{true, false}
-	db := store.CreateDatabase()
-	defer db.Close()
+	//db := store.CreateDatabase()
+	//defer db.Close()
 	stmt := store.CreateStatement(db)
 	defer stmt.Close()
 
 	index := 0
 	maxTransaction := 500
-	transaction := make([]interface{}, maxTransaction)
+	transaction := make([]interface{}, 500)
 	nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
 		//check to see if the structure exists for a first "default event"
 		fe := hazard_providers.FathomEvent{Year: 2050, Frequency: 500, Fluvial: true}
@@ -77,11 +87,18 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string) {
 
 				}
 			}
+			if index > 0 {
+				smalltransaction := transaction[0 : index-1]
+				store.WriteArrayToDatabase(db, smalltransaction)
+				index = 0
+			}
 			//compute ead's for each of the 4 caases.
-			freq := []float64{.2, .05, .01, .004, .002} //5,20,100,250,500
-			fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeSpecialEAD(cfdam, freq), computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
+			//freq := []float64{.2, .05, .01, .004, .002} //5,20,100,250,500
+			//fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeSpecialEAD(cfdam, freq), computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
 		}
 	})
+	fmt.Println("Completed Computing by fips " + fips)
+	return true
 }
 func frequencyIndex(frequency int) int {
 	switch frequency {

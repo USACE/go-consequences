@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/USACE/go-consequences/hazard_providers"
+	"github.com/USACE/go-consequences/store"
 )
 
 func TestSingleEvent(t *testing.T) {
@@ -18,7 +19,15 @@ func TestMultiEvent(t *testing.T) {
 	fmt.Println("Reading Depths")
 	ds := hazard_providers.ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
 	fmt.Println("Finished Reading Depths")
-	ComputeMultiEvent_NSIStream(ds, "11")
+	db := store.CreateDatabase()
+	defer db.Close()
+	ComputeMultiEvent_NSIStream(ds, "11", db)
+}
+func TestMultiEvent_MultiState(t *testing.T) {
+	fmt.Println("Reading Depths")
+	ds := hazard_providers.ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
+	fmt.Println("Finished Reading Depths")
+	ComputeMultiFips_MultiEvent(ds)
 }
 func TestComputeEAD(t *testing.T) {
 	d := []float64{1, 2, 3, 4}
