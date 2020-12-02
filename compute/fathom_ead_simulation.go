@@ -14,7 +14,7 @@ import (
 )
 
 func ComputeMultiFips_MultiEvent(ds hazard_providers.DataSet) {
-	db := store.CreateDatabase()
+	db := store.CreateWALDatabase()
 	defer db.Close()
 	fmap := census.StateToCountyFipsMap()
 	var wg sync.WaitGroup
@@ -52,7 +52,10 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 			cpdam := make([]float64, 5)
 			ffdam := make([]float64, 5)
 			fpdam := make([]float64, 5)
-
+			cfdamc := make([]float64, 5)
+			cpdamc := make([]float64, 5)
+			ffdamc := make([]float64, 5)
+			fpdamc := make([]float64, 5)
 			for _, flu := range fluvial {
 				hazard := "pluvial"
 				if flu {
@@ -69,11 +72,13 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 							if depthevent.Depth <= 0 {
 								//skip
 								assignDamage(flu, y, f, 0, ffdam, fpdam, cfdam, cpdam)
+								assignDamage(flu, y, f, 0, ffdamc, fpdamc, cfdamc, cpdamc)
 							} else {
 								r := str.ComputeConsequences(depthevent)
 								StructureDamage := r.Results[0].(float64) //based on convention - super risky
 								ContentDamage := r.Results[1].(float64)   //based on convention - super risky
-								assignDamage(flu, y, f, StructureDamage+ContentDamage, ffdam, fpdam, cfdam, cpdam)
+								assignDamage(flu, y, f, StructureDamage, ffdam, fpdam, cfdam, cpdam)
+								assignDamage(flu, y, f, ContentDamage, ffdamc, fpdamc, cfdamc, cpdamc)
 								transaction[index] = store.CreateResult(str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
 								index++
 								//store.WriteToDatabase(stmt, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
@@ -87,16 +92,50 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 
 				}
 			}
-			if index > 0 {
-				smalltransaction := transaction[0 : index-1]
-				store.WriteArrayToDatabase(db, smalltransaction)
+
+			//compute ead's for each of the 4 caases for structure and content.
+			freq := []float64{.2, .05, .01, .004, .002} //5,20,100,250,500
+			cfead := computeSpecialEAD(cfdam, freq)
+			cpead := computeSpecialEAD(cpdam, freq)
+			ffead := computeSpecialEAD(ffdam, freq)
+			fpead := computeSpecialEAD(fpdam, freq)
+
+			cfeadc := computeSpecialEAD(cfdamc, freq)
+			cpeadc := computeSpecialEAD(cpdamc, freq)
+			ffeadc := computeSpecialEAD(ffdamc, freq)
+			fpeadc := computeSpecialEAD(fpdamc, freq)
+			transaction[index] = store.CreateResult(str.Name, years[0], "fluvial", "EAD", cfead, cfeadc)
+			index++ //what if we exceed 500...
+			if index >= maxTransaction {
+				store.WriteArrayToDatabase(db, transaction)
 				index = 0
 			}
-			//compute ead's for each of the 4 caases.
-			//freq := []float64{.2, .05, .01, .004, .002} //5,20,100,250,500
-			//fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, computeSpecialEAD(cfdam, freq), computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
+			transaction[index] = store.CreateResult(str.Name, years[0], "pluvial", "EAD", cpead, cpeadc)
+			index++
+			if index >= maxTransaction {
+				store.WriteArrayToDatabase(db, transaction)
+				index = 0
+			}
+			transaction[index] = store.CreateResult(str.Name, years[1], "fluvial", "EAD", ffead, ffeadc)
+			index++
+			if index >= maxTransaction {
+				store.WriteArrayToDatabase(db, transaction)
+				index = 0
+			}
+			transaction[index] = store.CreateResult(str.Name, years[1], "pluvial", "EAD", fpead, fpeadc)
+			index++
+			if index >= maxTransaction {
+				store.WriteArrayToDatabase(db, transaction)
+				index = 0
+			}
+			//fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, , computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
 		}
 	})
+	if index > 0 {
+		smalltransaction := transaction[0 : index-1]
+		store.WriteArrayToDatabase(db, smalltransaction)
+		index = 0
+	}
 	fmt.Println("Completed Computing by fips " + fips)
 	return true
 }

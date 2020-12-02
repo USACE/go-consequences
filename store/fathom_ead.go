@@ -38,6 +38,22 @@ func CreateDatabase() *sql.DB {
 	createTable(db)
 	return db
 }
+func CreateWALDatabase() *sql.DB {
+	os.Remove("fathom-results.db")
+	fmt.Println("Creating fathom-results.db...")
+	file, err := os.Create("fathom-results.db")
+	if err != nil {
+		fmt.Println("error")
+	}
+	file.Close()
+	fmt.Println("fathom-results.db created")
+
+	db, _ := sql.Open("sqlite3", "./fathom-results.db?_journal_mode=WAL")//https://stackoverflow.com/questions/35804884/sqlite-concurrent-writing-performance/35805826
+	db.SetMaxOpenConns(1)
+	//defer db.Close()
+	createTable(db)
+	return db
+}
 func createTable(db *sql.DB) {
 	createfathom := `CREATE TABLE fathom (
 		"result_id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,

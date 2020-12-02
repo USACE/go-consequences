@@ -16,3 +16,6 @@
 
 # General output from testing.
 *.db
+*.db-shm
+*.db-wal
+*.db-journal
