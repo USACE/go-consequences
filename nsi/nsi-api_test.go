@@ -28,8 +28,8 @@ func TestNsiByFipsStream(t *testing.T) {
 func TestNsiByBbox(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	structures := GetByBbox(bbox)
-	if len(structures) != 1939 {
-		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1939", bbox, len(structures))
+	if len(structures) != 1959 {
+		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1959", bbox, len(structures))
 	}
 }
 func TestNsiByBboxStream(t *testing.T) {
@@ -38,8 +38,8 @@ func TestNsiByBboxStream(t *testing.T) {
 	GetByBboxStream(bbox, func(str consequences.StructureStochastic) {
 		index++
 	})
-	if index != 1939 {
-		t.Errorf("GetByBoxStream(%s) yeilded %d structures; expected 1939", bbox, index)
+	if index != 1959 {
+		t.Errorf("GetByBoxStream(%s) yeilded %d structures; expected 1959", bbox, index)
 	}
 }
 func TestNSI_FIPS_CA_ERRORS(t *testing.T) {

@@ -59,11 +59,11 @@ func (i NsiInventory) toStructures() []consequences.StructureStochastic {
 
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
 func GetByFips(fips string) []consequences.StructureStochastic {
-	url := fmt.Sprintf("%s?fips=%s", apiUrl, fips)
+	url := fmt.Sprintf("%s?fips=%s&fmt=fa", apiUrl, fips)
 	return nsiApi(url)
 }
 func GetByBbox(bbox string) []consequences.StructureStochastic {
-	url := fmt.Sprintf("%s?bbox=%s", apiUrl, bbox)
+	url := fmt.Sprintf("%s?bbox=%s&fmt=fa", apiUrl, bbox)
 	return nsiApi(url)
 }
 func nsiApi(url string) []consequences.StructureStochastic {
@@ -86,7 +86,7 @@ func nsiApi(url string) []consequences.StructureStochastic {
 	if err := json.Unmarshal(jsonData, &features); err != nil {
 		fmt.Println("error unmarshalling NSI json " + err.Error() + " URL: " + url)
 		s := string(jsonData)
-		fmt.Println("last 100 chars of jsonbody was: " + s[len(s)-10:])
+		fmt.Println("first 1000 chars of jsonbody was: " + s[0:1000]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
 		return structures
 	}
 	inventory := NsiInventory{Features: features}
