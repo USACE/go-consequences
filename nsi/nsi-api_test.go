@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/USACE/go-consequences/census"
+	"github.com/USACE/go-consequences/consequences"
 )
 
 func TestNsiByFips(t *testing.T) {
@@ -14,11 +15,31 @@ func TestNsiByFips(t *testing.T) {
 		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, len(structures))
 	}
 }
+func TestNsiByFipsStream(t *testing.T) {
+	var fips string = "15005" //Kalawao county (smallest county in the us by population)
+	index := 0
+	GetByFipsStream(fips, func(str consequences.StructureStochastic) {
+		index++
+	})
+	if index != 101 {
+		t.Errorf("GetByFipsStream(%s) yeilded %d structures; expected 101", fips, index)
+	}
+}
 func TestNsiByBbox(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	structures := GetByBbox(bbox)
 	if len(structures) != 1939 {
 		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1939", bbox, len(structures))
+	}
+}
+func TestNsiByBboxStream(t *testing.T) {
+	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
+	index := 0
+	GetByBboxStream(bbox, func(str consequences.StructureStochastic) {
+		index++
+	})
+	if index != 1939 {
+		t.Errorf("GetByBoxStream(%s) yeilded %d structures; expected 1939", bbox, index)
 	}
 }
 func TestNSI_FIPS_CA_ERRORS(t *testing.T) {
