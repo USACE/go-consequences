@@ -31,3 +31,20 @@ func TestPrintDatabase(t *testing.T) {
 		fmt.Println(fmt.Sprintf("result: %v, %v, %v, %v, %v, %f, %f", rid, fid, year, hazard, frequency, str, cont))
 	}
 }
+
+func TestPrintDatabaseSize(t *testing.T) {
+	fmt.Println("Reading Database")
+	db, _ := sql.Open("sqlite3", "./fathom-results.db")
+	defer db.Close()
+	row, err := db.Query("SELECT COUNT(*) as count FROM fathom")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer row.Close()
+	for row.Next() {
+		var count float64
+		row.Scan(&count)
+		fmt.Println(fmt.Sprintf("result: %v", count))
+	}
+
+}
