@@ -57,10 +57,10 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 			ffdamc := make([]float64, 5)
 			fpdamc := make([]float64, 5)
 			for _, flu := range fluvial {
-				hazard := "pluvial"
-				if flu {
-					hazard = "fluvial"
-				}
+				//hazard := "pluvial"
+				//if flu {
+				//hazard = "fluvial"
+				//}
 				for _, y := range years {
 					for _, f := range frequencies {
 
@@ -79,13 +79,13 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 								ContentDamage := r.Results[1].(float64)   //based on convention - super risky
 								assignDamage(flu, y, f, StructureDamage, ffdam, fpdam, cfdam, cpdam)
 								assignDamage(flu, y, f, ContentDamage, ffdamc, fpdamc, cfdamc, cpdamc)
-								transaction[index] = store.CreateResult(str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
-								index++
+								//transaction[index] = store.CreateResult(str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
+								//index++
 								//store.WriteToDatabase(stmt, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
-								if index >= maxTransaction {
-									store.WriteArrayToDatabase(db, transaction)
-									index = 0
-								}
+								//if index >= maxTransaction {
+								//store.WriteArrayToDatabase(db, transaction)
+								//index = 0
+								//}
 							}
 						}
 					}
@@ -104,29 +104,41 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 			cpeadc := computeSpecialEAD(cpdamc, freq)
 			ffeadc := computeSpecialEAD(ffdamc, freq)
 			fpeadc := computeSpecialEAD(fpdamc, freq)
-			transaction[index] = store.CreateResult(str.Name, years[0], "fluvial", "EAD", cfead, cfeadc)
-			index++ //what if we exceed 500...
-			if index >= maxTransaction {
-				store.WriteArrayToDatabase(db, transaction)
-				index = 0
+			if cfead > cpead {
+				transaction[index] = store.CreateResult(str.Name, years[0], "fluvial", "EAD", cfead, cfeadc)
+				index++ //what if we exceed 500...
+				if index >= maxTransaction {
+					store.WriteArrayToDatabase(db, transaction)
+					index = 0
+				}
+			} else {
+				if cpead > 0.0 { //should we exclude zero ead for one year but not the other?
+					transaction[index] = store.CreateResult(str.Name, years[0], "pluvial", "EAD", cpead, cpeadc)
+					index++
+					if index >= maxTransaction {
+						store.WriteArrayToDatabase(db, transaction)
+						index = 0
+					}
+				}
+
 			}
-			transaction[index] = store.CreateResult(str.Name, years[0], "pluvial", "EAD", cpead, cpeadc)
-			index++
-			if index >= maxTransaction {
-				store.WriteArrayToDatabase(db, transaction)
-				index = 0
-			}
-			transaction[index] = store.CreateResult(str.Name, years[1], "fluvial", "EAD", ffead, ffeadc)
-			index++
-			if index >= maxTransaction {
-				store.WriteArrayToDatabase(db, transaction)
-				index = 0
-			}
-			transaction[index] = store.CreateResult(str.Name, years[1], "pluvial", "EAD", fpead, fpeadc)
-			index++
-			if index >= maxTransaction {
-				store.WriteArrayToDatabase(db, transaction)
-				index = 0
+			if ffead > fpead {
+				transaction[index] = store.CreateResult(str.Name, years[1], "fluvial", "EAD", ffead, ffeadc)
+				index++
+				if index >= maxTransaction {
+					store.WriteArrayToDatabase(db, transaction)
+					index = 0
+				}
+			} else {
+				if fpead > 0.0 {
+					transaction[index] = store.CreateResult(str.Name, years[1], "pluvial", "EAD", fpead, fpeadc)
+					index++
+					if index >= maxTransaction {
+						store.WriteArrayToDatabase(db, transaction)
+						index = 0
+					}
+				}
+
 			}
 			//fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, , computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
 		}
