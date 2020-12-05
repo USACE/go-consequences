@@ -22,13 +22,16 @@ func TestPrintDatabase(t *testing.T) {
 	for row.Next() { // Iterate and fetch the records from result cursor
 		var rid int
 		var fid string
+		var x float64
+		var y float64
+		var fips string
 		var year int
 		var hazard string
 		var frequency string
 		var str float64
 		var cont float64
-		row.Scan(&rid, &fid, &year, &hazard, &frequency, &str, &cont)
-		fmt.Println(fmt.Sprintf("result: %v, %v, %v, %v, %v, %f, %f", rid, fid, year, hazard, frequency, str, cont))
+		row.Scan(&rid, &fid, &x, &y, &fips, &year, &hazard, &frequency, &str, &cont)
+		fmt.Println(fmt.Sprintf("result: %v, %v, %f, %f, %v, %v, %v, %v, %f, %f", rid, fid, x, y, fips, year, hazard, frequency, str, cont))
 	}
 }
 

@@ -105,7 +105,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 			ffeadc := computeSpecialEAD(ffdamc, freq)
 			fpeadc := computeSpecialEAD(fpdamc, freq)
 			if cfead > cpead {
-				transaction[index] = store.CreateResult(str.Name, years[0], "fluvial", "EAD", cfead, cfeadc)
+				transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[0], "fluvial", "EAD", cfead, cfeadc)
 				index++ //what if we exceed 500...
 				if index >= maxTransaction {
 					store.WriteArrayToDatabase(db, transaction)
@@ -113,7 +113,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 				}
 			} else {
 				if cpead > 0.0 { //should we exclude zero ead for one year but not the other?
-					transaction[index] = store.CreateResult(str.Name, years[0], "pluvial", "EAD", cpead, cpeadc)
+					transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[0], "pluvial", "EAD", cpead, cpeadc)
 					index++
 					if index >= maxTransaction {
 						store.WriteArrayToDatabase(db, transaction)
@@ -123,7 +123,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 
 			}
 			if ffead > fpead {
-				transaction[index] = store.CreateResult(str.Name, years[1], "fluvial", "EAD", ffead, ffeadc)
+				transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[1], "fluvial", "EAD", ffead, ffeadc)
 				index++
 				if index >= maxTransaction {
 					store.WriteArrayToDatabase(db, transaction)
@@ -131,7 +131,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 				}
 			} else {
 				if fpead > 0.0 {
-					transaction[index] = store.CreateResult(str.Name, years[1], "pluvial", "EAD", fpead, fpeadc)
+					transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[1], "pluvial", "EAD", fpead, fpeadc)
 					index++
 					if index >= maxTransaction {
 						store.WriteArrayToDatabase(db, transaction)
@@ -140,7 +140,6 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *s
 				}
 
 			}
-			//fmt.Println(fmt.Sprintf("FD_ID: %v has EADs: %f, %f, %f, %f", str.Name, , computeSpecialEAD(cpdam, freq), computeSpecialEAD(ffdam, freq), computeSpecialEAD(fpdam, freq)))
 		}
 	})
 	if index > 0 {
@@ -263,6 +262,6 @@ func ComputeSingleEvent_NSIStream(ds hazard_providers.DataSet, fips string, fe h
 		rows[idx] = val
 		idx++
 	}
-	//elapsed := time.Since(startnsi)
+
 	fmt.Println("Complete for" + fips)
 }

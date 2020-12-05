@@ -1,6 +1,7 @@
 package nsi
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 
@@ -23,6 +24,27 @@ func TestNsiByFipsStream(t *testing.T) {
 	})
 	if index != 101 {
 		t.Errorf("GetByFipsStream(%s) yeilded %d structures; expected 101", fips, index)
+	}
+}
+func TestNsiByFipsStream_MultiState(t *testing.T) {
+	f := census.StateToCountyFipsMap()
+	var wg sync.WaitGroup
+	wg.Add(len(f))
+	index := 0
+	for ss, _ := range f {
+		go func(sfips string) {
+			defer wg.Done()
+			GetByFipsStream(sfips, func(str consequences.StructureStochastic) {
+				index++
+			})
+			fmt.Println("Completed " + sfips)
+		}(ss)
+	}
+	wg.Wait()
+	if index != 109406858 {
+		t.Errorf("GetByFipsStream(%s) yeilded %d structures; expected 109,406,858", "all states", index)
+	} else {
+		fmt.Println("Completed 109,406,858 structures")
 	}
 }
 func TestNsiByBbox(t *testing.T) {
