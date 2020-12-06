@@ -10,6 +10,94 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type SQLDataSet struct {
+	db *sql.DB
+}
+
+func OpenSQLDepthDataSet() SQLDataSet {
+	db, _ := sql.Open("sqlite3", "./fathom-depths.db")
+
+	return SQLDataSet{db: db}
+}
+func (sds SQLDataSet) ProvideHazard(args interface{}) (interface{}, error) {
+	fd_id, ok := args.(FathomQuery)
+
+	if ok {
+		r, found := sds.getRecord(fd_id.Fd_id) //make a query for a row...
+
+		if found {
+			if fd_id.Fluvial {
+				if fd_id.Year == 2020 {
+					return generateDepthEvent(fd_id.Frequency, r.CurrentFluvial)
+				} else if fd_id.Year == 2050 {
+					return generateDepthEvent(fd_id.Frequency, r.FutureFluvial)
+				} else {
+					//throw error?
+					return nil, HazardError{Input: "Bad Year Argument"}
+				}
+
+			} else {
+				if fd_id.Year == 2020 {
+					return generateDepthEvent(fd_id.Frequency, r.CurrentPluvial)
+				} else if fd_id.Year == 2050 {
+					return generateDepthEvent(fd_id.Frequency, r.FuturePluvial)
+				} else {
+					//throw error?
+					return nil, HazardError{Input: "Bad Year Argument"}
+				}
+			}
+		} else {
+			return nil, NoHazardFoundError{Input: fd_id.Fd_id}
+		}
+	} else {
+		return nil, HazardError{Input: "Unable to parse args to hazard_providers.FathomQuery"}
+	}
+}
+func (sds SQLDataSet) getRecord(fd_id string) (Record, bool) {
+	row, err := sds.db.Query("SELECT * FROM fathom_depths WHERE fd_id = '" + fd_id + "'")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer row.Close()
+	for row.Next() { // Iterate and fetch the records from result cursor
+		var fid string
+		var fluv_2020_5yr float64
+		var pluv_2020_5yr float64
+		var fluv_2020_20yr float64
+		var pluv_2020_20yr float64
+		var fluv_2020_100yr float64
+		var pluv_2020_100yr float64
+		var fluv_2020_250yr float64
+		var pluv_2020_250yr float64
+		var fluv_2020_500yr float64
+		var pluv_2020_500yr float64
+		var fluv_2050_5yr float64
+		var pluv_2050_5yr float64
+		var fluv_2050_20yr float64
+		var pluv_2050_20yr float64
+		var fluv_2050_100yr float64
+		var pluv_2050_100yr float64
+		var fluv_2050_250yr float64
+		var pluv_2050_250yr float64
+		var fluv_2050_500yr float64
+		var pluv_2050_500yr float64
+		row.Scan(&fid, &fluv_2020_5yr, &pluv_2020_5yr, &fluv_2020_20yr, &pluv_2020_20yr, &fluv_2020_100yr, &pluv_2020_100yr, &fluv_2020_250yr, &pluv_2020_250yr, &fluv_2020_500yr, &pluv_2020_500yr, &fluv_2050_5yr, &pluv_2050_5yr, &fluv_2050_20yr, &pluv_2050_20yr, &fluv_2050_100yr, &pluv_2050_100yr, &fluv_2050_250yr, &pluv_2050_250yr, &fluv_2050_500yr, &pluv_2050_500yr)
+		cfvals := []float64{fluv_2020_5yr, fluv_2020_20yr, fluv_2020_100yr, fluv_2020_250yr, fluv_2020_500yr}
+		cpvals := []float64{pluv_2020_5yr, pluv_2020_20yr, pluv_2020_100yr, pluv_2020_250yr, pluv_2020_500yr}
+		ffvals := []float64{fluv_2050_5yr, fluv_2050_20yr, fluv_2050_100yr, fluv_2050_250yr, fluv_2050_500yr}
+		fpvals := []float64{pluv_2050_5yr, pluv_2050_20yr, pluv_2050_100yr, pluv_2050_250yr, pluv_2050_500yr}
+		futurefluvial := FrequencyData{fluvial: true, year: 2050, Values: ffvals}
+		futurepluvial := FrequencyData{fluvial: false, year: 2050, Values: fpvals}
+		currentfluvial := FrequencyData{fluvial: true, year: 2020, Values: cfvals}
+		currentpluvial := FrequencyData{fluvial: false, year: 2020, Values: cpvals}
+		if hasNonZeroValues(ffvals, fpvals, cfvals, cpvals) {
+			r := Record{Fd_id: fd_id, FutureFluvial: futurefluvial, FuturePluvial: futurepluvial, CurrentFluvial: currentfluvial, CurrentPluvial: currentpluvial}
+			return r, true
+		}
+	}
+
+	return Record{}, false
+}
 func (ds DataSet) WriteToSqlite() {
 	db := CreateDepthDatabase()
 	index := 0

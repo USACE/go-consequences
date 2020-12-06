@@ -13,7 +13,7 @@ import (
 	"github.com/USACE/go-consequences/store"
 )
 
-func ComputeMultiFips_MultiEvent(ds hazard_providers.DataSet) {
+func ComputeMultiFips_MultiEvent(ds hazard_providers.HazardProvider) {
 	db := store.CreateWALDatabase()
 	defer db.Close()
 	fmap := census.StateToCountyFipsMap()
@@ -27,7 +27,7 @@ func ComputeMultiFips_MultiEvent(ds hazard_providers.DataSet) {
 	}
 	wg.Wait()
 }
-func ComputeMultiEvent_NSIStream(ds hazard_providers.DataSet, fips string, db *sql.DB) bool {
+func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string, db *sql.DB) bool {
 	//rmapMap := make(map[string]map[string]SimulationRow)
 	fmt.Println("Downloading NSI by fips " + fips)
 	years := [2]int{2020, 2050}
