@@ -8,7 +8,9 @@ func TestOpen(t *testing.T) {
 func TestFeetFile(t *testing.T) {
 	ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv")
 }
-
+func TestConvertToSqlite(t *testing.T) {
+	ReadFeetFile("C:\\Users\\Q0HECWPL\\Documents\\NSI\\NSI_Fathom_depths\\NSI_Fathom_depths_Filtered_Feet.csv").WriteToSqlite()
+}
 func TestWrite(t *testing.T) {
 	WriteBackToDisk(DataSet{})
 }
