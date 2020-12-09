@@ -28,19 +28,14 @@ func ComputeMultiFips_MultiEvent(ds hazard_providers.HazardProvider) {
 	wg.Wait()
 }
 func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string, db *sql.DB) bool {
-	//rmapMap := make(map[string]map[string]SimulationRow)
 	fmt.Println("Downloading NSI by fips " + fips)
 	years := [2]int{2020, 2050}
 	frequencies := [5]int{5, 20, 100, 250, 500}
 	fluvial := [2]bool{true, false}
-	//db := store.CreateDatabase()
-	//defer db.Close()
-	stmt := store.CreateStatement(db)
-	defer stmt.Close()
-
+	tx, _ := db.Begin()
 	index := 0
-	maxTransaction := 500
-	transaction := make([]interface{}, 500)
+	maxTransaction := 1000
+	//transaction := make([]interface{}, maxTransaction)
 	nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
 		//check to see if the structure exists for a first "default event"
 		fe := hazard_providers.FathomEvent{Year: 2050, Frequency: 500, Fluvial: true}
@@ -82,6 +77,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string
 								//transaction[index] = store.CreateResult(str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
 								//index++
 								//store.WriteToDatabase(stmt, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
+								//store.WriteToTransaction(tx, str.Name, y, hazard, fmt.Sprint(f), StructureDamage, ContentDamage)
 								//if index >= maxTransaction {
 								//store.WriteArrayToDatabase(db, transaction)
 								//index = 0
@@ -105,36 +101,52 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string
 			ffeadc := computeSpecialEAD(ffdamc, freq)
 			fpeadc := computeSpecialEAD(fpdamc, freq)
 			if cfead > cpead {
-				transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[0], "fluvial", "EAD", cfead, cfeadc)
+				//transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[0], "fluvial", "EAD", cfead, cfeadc)
+				store.WriteToTransaction(tx, str.Name, str.X, str.Y, fips, years[0], "fluvial", "EAD", cfead, cfeadc)
 				index++ //what if we exceed 500...
 				if index >= maxTransaction {
-					store.WriteArrayToDatabase(db, transaction)
+					//store.WriteArrayToDatabase(db, transaction)
+					//store.WriteArrayToTransaction(tx, transaction)
+					tx.Commit()
+					tx, _ = db.Begin()
 					index = 0
 				}
 			} else {
 				if cpead > 0.0 { //should we exclude zero ead for one year but not the other?
-					transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[0], "pluvial", "EAD", cpead, cpeadc)
+					//transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[0], "pluvial", "EAD", cpead, cpeadc)
+					store.WriteToTransaction(tx, str.Name, str.X, str.Y, fips, years[0], "pluvial", "EAD", cpead, cpeadc)
 					index++
 					if index >= maxTransaction {
-						store.WriteArrayToDatabase(db, transaction)
+						//store.WriteArrayToDatabase(db, transaction)
+						//store.WriteArrayToTransaction(tx, transaction)
+						tx.Commit()
+						tx, _ = db.Begin()
 						index = 0
 					}
 				}
 
 			}
 			if ffead > fpead {
-				transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[1], "fluvial", "EAD", ffead, ffeadc)
+				//transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[1], "fluvial", "EAD", ffead, ffeadc)
+				store.WriteToTransaction(tx, str.Name, str.X, str.Y, fips, years[1], "fluvial", "EAD", ffead, ffeadc)
 				index++
 				if index >= maxTransaction {
-					store.WriteArrayToDatabase(db, transaction)
+					//store.WriteArrayToDatabase(db, transaction)
+					//store.WriteArrayToTransaction(tx, transaction)
+					tx.Commit()
+					tx, _ = db.Begin()
 					index = 0
 				}
 			} else {
 				if fpead > 0.0 {
-					transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[1], "pluvial", "EAD", fpead, fpeadc)
+					//transaction[index] = store.CreateResult(str.Name, str.X, str.Y, fips, years[1], "pluvial", "EAD", fpead, fpeadc)
+					store.WriteToTransaction(tx, str.Name, str.X, str.Y, fips, years[1], "pluvial", "EAD", fpead, fpeadc)
 					index++
 					if index >= maxTransaction {
-						store.WriteArrayToDatabase(db, transaction)
+						//store.WriteArrayToDatabase(db, transaction)
+						//store.WriteArrayToTransaction(tx, transaction)
+						tx.Commit()
+						tx, _ = db.Begin()
 						index = 0
 					}
 				}
@@ -143,10 +155,13 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string
 		}
 	})
 	if index > 0 {
-		smalltransaction := transaction[0 : index-1]
-		store.WriteArrayToDatabase(db, smalltransaction)
+		//smalltransaction := transaction[0 : index-1]
+		//store.WriteArrayToDatabase(db, smalltransaction)
+		tx.Commit()
+		//store.WriteArrayToTransaction(tx, smalltransaction)
 		index = 0
 	}
+	//tx.Commit()
 	fmt.Println("Completed Computing by fips " + fips)
 	return true
 }

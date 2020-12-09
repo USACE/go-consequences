@@ -119,6 +119,45 @@ func WriteArrayToDatabase(db *sql.DB, results []interface{}) {
 	}
 
 }
+func WriteArrayToTransaction(tx *sql.Tx, results []interface{}) {
+	insertresult := `INSERT INTO fathom(fd_id, x, y, fips, hazard_year, hazard_type, frequency, structure_consequence, content_consequence) VALUES `
+	var inserts []string
+	var params []interface{}
+	somethingtoadd := false
+	for _, result := range results {
+		res, ok := result.(fathom_result)
+		if ok {
+			somethingtoadd = true
+			inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+			params = append(params, res.fd_id, res.x, res.y, res.fips, res.hazard_Year, res.hazard_Type, res.frequency, res.structure_Consequence, res.content_Consequence)
+		}
+
+	}
+	if somethingtoadd {
+		queryVals := strings.Join(inserts, ",")
+		insertresult += queryVals
+		statement, err := tx.Prepare(insertresult)
+		if err != nil {
+			fmt.Println(insertresult)
+			log.Fatalln("ERROR WITH DB PREPARE " + err.Error())
+		}
+		_, err = statement.Exec(params...)
+		if err != nil {
+			fmt.Println(params)
+			log.Fatalln("ERROR WITH EXECUTION " + err.Error())
+		}
+	}
+
+}
+func WriteToTransaction(tx *sql.Tx, fd_id string, x float64, y float64, fips string, hazard_Year int, hazard_Type string, frequency string, structure_Consequence float64, content_Consequence float64) {
+	insertresult := `INSERT INTO fathom(fd_id, x, y, fips, hazard_year, hazard_type, frequency, structure_consequence, content_consequence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	//statement, err := tx.Prepare(insertresult)
+	_, err := tx.Exec(insertresult, fd_id, x, y, fips, hazard_Year, hazard_Type, frequency, structure_Consequence, content_Consequence)
+	if err != nil {
+		//fmt.Println(params)
+		log.Fatalln("ERROR WITH EXECUTION " + err.Error())
+	}
+}
 func WriteToDatabase(stmt *sql.Stmt, fd_id string, year int, hazard string, frequency string, structure_damage float64, content_damage float64) {
 	_, err := stmt.Exec(fd_id, year, hazard, frequency, structure_damage, content_damage)
 	if err != nil {

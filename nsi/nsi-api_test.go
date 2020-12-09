@@ -2,6 +2,7 @@ package nsi
 
 import (
 	"fmt"
+	"math"
 	"sync"
 	"testing"
 
@@ -14,6 +15,14 @@ func TestNsiByFips(t *testing.T) {
 	structures := GetByFips(fips)
 	if len(structures) != 101 {
 		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, len(structures))
+	}
+}
+func TestNsiStatsByFips(t *testing.T) {
+	var fips string = "15005" //Kalawao county (smallest county in the us by population)stats?bbox=-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165
+	stats := GetStatsByFips(fips)
+	fmt.Println(stats)
+	if stats.Sum_Struct_Val != 101.111 {
+		t.Errorf("GetByFips(%s) yeilded %f structures; expected 101", fips, stats.Sum_Struct_Val)
 	}
 }
 func TestNsiByFipsStream(t *testing.T) {
@@ -52,6 +61,14 @@ func TestNsiByBbox(t *testing.T) {
 	structures := GetByBbox(bbox)
 	if len(structures) != 1959 {
 		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1959", bbox, len(structures))
+	}
+}
+func TestNsiStatsByBbox(t *testing.T) {
+	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
+	stats := GetStatsByBbox(bbox)
+	diff := stats.Sum_Struct_Val - 953459824.285892
+	if math.Abs(diff) > 0.0000009 {
+		t.Errorf("GetByBox(%s) yeilded structure value of %f; expected 953459824.285892", bbox, stats.Sum_Struct_Val)
 	}
 }
 func TestNsiByBboxStream(t *testing.T) {
