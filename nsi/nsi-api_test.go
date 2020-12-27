@@ -7,14 +7,13 @@ import (
 	"testing"
 
 	"github.com/USACE/go-consequences/census"
-	"github.com/USACE/go-consequences/consequences"
 )
 
 func TestNsiByFips(t *testing.T) {
 	var fips string = "15005" //Kalawao county (smallest county in the us by population)
 	structures := GetByFips(fips)
-	if len(structures) != 101 {
-		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, len(structures))
+	if len(structures.Features) != 101 {
+		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, len(structures.Features))
 	}
 }
 func TestNsiStatsByFips(t *testing.T) {
@@ -28,7 +27,7 @@ func TestNsiStatsByFips(t *testing.T) {
 func TestNsiByFipsStream(t *testing.T) {
 	var fips string = "15005" //Kalawao county (smallest county in the us by population)
 	index := 0
-	GetByFipsStream(fips, func(str consequences.StructureStochastic) {
+	GetByFipsStream(fips, func(str NsiFeature) {
 		index++
 	})
 	if index != 101 {
@@ -43,7 +42,7 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 	for ss, _ := range f {
 		go func(sfips string) {
 			defer wg.Done()
-			GetByFipsStream(sfips, func(str consequences.StructureStochastic) {
+			GetByFipsStream(sfips, func(str NsiFeature) {
 				index++
 			})
 			fmt.Println("Completed " + sfips)
@@ -59,8 +58,8 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 func TestNsiByBbox(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	structures := GetByBbox(bbox)
-	if len(structures) != 1959 {
-		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1959", bbox, len(structures))
+	if len(structures.Features) != 1959 {
+		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1959", bbox, len(structures.Features))
 	}
 }
 func TestNsiStatsByBbox(t *testing.T) {
@@ -74,7 +73,7 @@ func TestNsiStatsByBbox(t *testing.T) {
 func TestNsiByBboxStream(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	index := 0
-	GetByBboxStream(bbox, func(str consequences.StructureStochastic) {
+	GetByBboxStream(bbox, func(str NsiFeature) {
 		index++
 	})
 	if index != 1959 {
@@ -91,7 +90,7 @@ func TestNSI_FIPS_CA_ERRORS(t *testing.T) {
 		go func(county string) {
 			defer wg.Done()
 			structures := GetByFips(county)
-			if len(structures) == 0 {
+			if len(structures.Features) == 0 {
 				fails = append(fails, county)
 				//t.Errorf("GetByFips(%s) yeilded %d structures; expected more than zero", county, len(structures))
 			}

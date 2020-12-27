@@ -3,13 +3,10 @@ package nsi
 import (
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/USACE/go-consequences/consequences"
 )
 
 type NsiProperties struct {
@@ -29,45 +26,19 @@ type NsiInventory struct {
 	Features []NsiFeature
 }
 
-func (i NsiInventory) toStructures() []consequences.StructureStochastic {
-	m := consequences.OccupancyTypeMap()
-	defaultOcctype := m["RES1-1SNB"]
-	var occtype = defaultOcctype
-	structures := make([]consequences.StructureStochastic, len(i.Features))
-	for idx, feature := range i.Features {
 
-		if ot, ok := m[feature.Properties.Occtype]; ok {
-			occtype = ot
-		} else {
-			occtype = defaultOcctype
-			msg := "Using default " + feature.Properties.Occtype + " not found"
-			panic(msg)
-		}
-		structures[idx] = consequences.StructureStochastic{
-			Name:      feature.Properties.Name,
-			OccType:   occtype,
-			DamCat:    feature.Properties.DamCat,
-			StructVal: consequences.ParameterValue{Value: feature.Properties.StructVal},
-			ContVal:   consequences.ParameterValue{Value: feature.Properties.ContVal},
-			FoundHt:   consequences.ParameterValue{Value: feature.Properties.FoundHt},
-			X:         feature.Properties.X,
-			Y:         feature.Properties.Y,
-		}
-	}
-	return structures
-}
 
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
-func GetByFips(fips string) []consequences.StructureStochastic {
+func GetByFips(fips string) NsiInventory {
 	url := fmt.Sprintf("%s?fips=%s&fmt=fa", apiUrl, fips)
 	return nsiApi(url)
 }
-func GetByBbox(bbox string) []consequences.StructureStochastic {
+func GetByBbox(bbox string) NsiInventory {
 	url := fmt.Sprintf("%s?bbox=%s&fmt=fa", apiUrl, bbox)
 	return nsiApi(url)
 }
-func nsiApi(url string) []consequences.StructureStochastic {
-	structures := make([]consequences.StructureStochastic, 0)
+func nsiApi(url string) NsiInventory {
+	inventory := NsiInventory{}
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -77,24 +48,22 @@ func nsiApi(url string) []consequences.StructureStochastic {
 
 	if err != nil {
 		fmt.Println(err)
-		return structures
+		return inventory
 	}
 	defer response.Body.Close()
 	jsonData, err := ioutil.ReadAll(response.Body)
 	features := make([]NsiFeature, 0)
-
 	if err := json.Unmarshal(jsonData, &features); err != nil {
 		fmt.Println("error unmarshalling NSI json " + err.Error() + " URL: " + url)
 		s := string(jsonData)
 		fmt.Println("first 1000 chars of jsonbody was: " + s[0:1000]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
-		return structures
+		return inventory
 	}
-	inventory := NsiInventory{Features: features}
-	structures = inventory.toStructures()
-	return structures
+	inventory.Features = features
+	return inventory
 }
 
-type NsiStreamProcessor func(str consequences.StructureStochastic)
+type NsiStreamProcessor func(str NsiFeature)
 
 /*
 memory effecient structure compute methods
@@ -122,9 +91,9 @@ func nsiApiStream(url string, nsp NsiStreamProcessor) error {
 	defer response.Body.Close()
 	dec := json.NewDecoder(response.Body)
 
-	m := consequences.OccupancyTypeMap()
-	defaultOcctype := m["RES1-1SNB"]
-	var occtype = defaultOcctype
+	//m := consequences.OccupancyTypeMap()
+	//defaultOcctype := m["RES1-1SNB"]
+	//var occtype = defaultOcctype
 	for {
 		var n NsiFeature
 		if err := dec.Decode(&n); err == io.EOF {
@@ -133,14 +102,15 @@ func nsiApiStream(url string, nsp NsiStreamProcessor) error {
 			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
 			return err
 		}
-		if ot, ok := m[n.Properties.Occtype]; ok {
+		/*if ot, ok := m[n.Properties.Occtype]; ok {
 			occtype = ot
 		} else {
 			occtype = defaultOcctype
 			msg := "Using default " + n.Properties.Occtype + " not found"
 			return errors.New(msg)
-		}
-		nsp(consequences.StructureStochastic{
+		}*/
+		nsp(n)
+		/*nsp(consequences.StructureStochastic{
 			Name:      n.Properties.Name,
 			OccType:   occtype,
 			DamCat:    n.Properties.DamCat,
@@ -149,7 +119,7 @@ func nsiApiStream(url string, nsp NsiStreamProcessor) error {
 			FoundHt:   consequences.ParameterValue{Value: n.Properties.FoundHt},
 			X:         n.Properties.X,
 			Y:         n.Properties.Y,
-		})
+		})*/
 	}
 	return nil
 }

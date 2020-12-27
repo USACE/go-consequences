@@ -48,6 +48,35 @@ type SimulationSummary struct {
 	Computetime time.Duration
 }
 
+func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]consequences.OccupancyTypeStochastic, defaultOcctype consequences.OccupancyTypeStochastic) consequences.StructureStochastic {
+	var occtype = defaultOcctype
+	if ot, ok := m[f.Properties.Occtype]; ok {
+		occtype = ot
+	} else {
+		occtype = defaultOcctype
+		msg := "Using default " + f.Properties.Occtype + " not found"
+		panic(msg)
+	}
+	return consequences.StructureStochastic{
+		Name:      f.Properties.Name,
+		OccType:   occtype,
+		DamCat:    f.Properties.DamCat,
+		StructVal: consequences.ParameterValue{Value: f.Properties.StructVal},
+		ContVal:   consequences.ParameterValue{Value: f.Properties.ContVal},
+		FoundHt:   consequences.ParameterValue{Value: f.Properties.FoundHt},
+		X:         f.Properties.X,
+		Y:         f.Properties.Y,
+	}
+}
+func nsiInventorytoStructures(i nsi.NsiInventory) []consequences.StructureStochastic {
+	m := consequences.OccupancyTypeMap()
+	defaultOcctype := m["RES1-1SNB"]
+	structures := make([]consequences.StructureStochastic, len(i.Features))
+	for idx, feature := range i.Features {
+		structures[idx] = nsiFeaturetoStructure(feature, m, defaultOcctype)
+	}
+	return structures
+}
 func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	var depthevent = hazards.DepthEvent{Depth: 5.32}
 	okd := false
@@ -57,14 +86,14 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	if okfips {
 		//s.Status = "Downloading NSI by fips " + fips.FIPS
 		fmt.Println("Downloading NSI by fips " + fips.FIPS)
-		structures = nsi.GetByFips(fips.FIPS)
+		structures = nsiInventorytoStructures(nsi.GetByFips(fips.FIPS))
 		depthevent, okd = fips.HazardArgs.(hazards.DepthEvent)
 	} else {
 		bbox, okbbox := args.Args.(BboxCompute)
 		if okbbox {
 			//s.Status = "Downloading NSI by bbox " + bbox.BBOX
 			fmt.Println("Downloading NSI by bbox " + bbox.BBOX)
-			structures = nsi.GetByBbox(bbox.BBOX)
+			structures = nsiInventorytoStructures(nsi.GetByBbox(bbox.BBOX))
 			depthevent, okd = bbox.HazardArgs.(hazards.DepthEvent)
 		}
 	}
@@ -128,7 +157,10 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 			depthevent = hazards.DepthEvent{Depth: 5.32}
 		}
 		fmt.Println("Computing depths for" + fips.FIPS)
-		nsi.GetByFipsStream(fips.FIPS, func(str consequences.StructureStochastic) {
+		m := consequences.OccupancyTypeMap()
+		defaultOcctype := m["RES1-1SNB"]
+		nsi.GetByFipsStream(fips.FIPS, func(f nsi.NsiFeature) {
+			str := nsiFeaturetoStructure(f, m, defaultOcctype)
 			r := str.ComputeConsequences(depthevent)
 			if val, ok := rmap[str.DamCat]; ok {
 				val.StructureCount += 1

@@ -29,13 +29,13 @@ func TestMultiEvent_MultiState(t *testing.T) {
 	fmt.Println("Finished Reading Depths")
 	ComputeMultiFips_MultiEvent(ds)
 }
-func TestSQLMultiEvent(t *testing.T) {
+func TestSQLMultiEvent_SingleState(t *testing.T) {
 	fmt.Println("Reading Depths")
 	ds := hazard_providers.OpenSQLDepthDataSet()
 	fmt.Println("Finished Reading Depths")
 	db := store.CreateDatabase()
 	defer db.Close()
-	ComputeMultiEvent_NSIStream(ds, "06", db)
+	ComputeMultiEvent_NSIStream(ds, "11", db)
 }
 func TestSQL_MultiEvent_MultiState(t *testing.T) {
 	fmt.Println("Reading Depths")

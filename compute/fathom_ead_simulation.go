@@ -36,7 +36,10 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string
 	index := 0
 	maxTransaction := 1000
 	//transaction := make([]interface{}, maxTransaction)
-	nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
+	nsi.GetByFipsStream(fips, func(feature nsi.NsiFeature) {
+		m := consequences.OccupancyTypeMap()
+		defaultOcctype := m["RES1-1SNB"]
+		str := nsiFeaturetoStructure(feature, m, defaultOcctype)
 		//check to see if the structure exists for a first "default event"
 		fe := hazard_providers.FathomEvent{Year: 2050, Frequency: 500, Fluvial: true}
 		fq := hazard_providers.FathomQuery{Fd_id: str.Name, FathomEvent: fe}
@@ -243,7 +246,10 @@ func computeSpecialEAD(damages []float64, freq []float64) float64 {
 func ComputeSingleEvent_NSIStream(ds hazard_providers.DataSet, fips string, fe hazard_providers.FathomEvent) {
 	rmap := make(map[string]SimulationSummaryRow)
 	fmt.Println("Downloading NSI by fips " + fips)
-	nsi.GetByFipsStream(fips, func(str consequences.StructureStochastic) {
+	nsi.GetByFipsStream(fips, func(feature nsi.NsiFeature) {
+		m := consequences.OccupancyTypeMap()
+		defaultOcctype := m["RES1-1SNB"]
+		str := nsiFeaturetoStructure(feature, m, defaultOcctype)
 		fq := hazard_providers.FathomQuery{Fd_id: str.Name, FathomEvent: fe}
 		result, err := ds.ProvideHazard(fq)
 		if err == nil {
