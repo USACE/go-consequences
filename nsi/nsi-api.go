@@ -26,8 +26,6 @@ type NsiInventory struct {
 	Features []NsiFeature
 }
 
-
-
 var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
 func GetByFips(fips string) NsiInventory {
 	url := fmt.Sprintf("%s?fips=%s&fmt=fa", apiUrl, fips)
@@ -90,10 +88,6 @@ func nsiApiStream(url string, nsp NsiStreamProcessor) error {
 	}
 	defer response.Body.Close()
 	dec := json.NewDecoder(response.Body)
-
-	//m := consequences.OccupancyTypeMap()
-	//defaultOcctype := m["RES1-1SNB"]
-	//var occtype = defaultOcctype
 	for {
 		var n NsiFeature
 		if err := dec.Decode(&n); err == io.EOF {
@@ -102,24 +96,7 @@ func nsiApiStream(url string, nsp NsiStreamProcessor) error {
 			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
 			return err
 		}
-		/*if ot, ok := m[n.Properties.Occtype]; ok {
-			occtype = ot
-		} else {
-			occtype = defaultOcctype
-			msg := "Using default " + n.Properties.Occtype + " not found"
-			return errors.New(msg)
-		}*/
 		nsp(n)
-		/*nsp(consequences.StructureStochastic{
-			Name:      n.Properties.Name,
-			OccType:   occtype,
-			DamCat:    n.Properties.DamCat,
-			StructVal: consequences.ParameterValue{Value: n.Properties.StructVal},
-			ContVal:   consequences.ParameterValue{Value: n.Properties.ContVal},
-			FoundHt:   consequences.ParameterValue{Value: n.Properties.FoundHt},
-			X:         n.Properties.X,
-			Y:         n.Properties.Y,
-		})*/
 	}
 	return nil
 }
