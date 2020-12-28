@@ -19,12 +19,34 @@ func NewProductionFunction(mc []float64, cs CropSchedule, hc float64, latePlanti
 	pf.productionCostLessHarvest = pclh
 	return pf
 }
+func isLeapYear(year int) bool{  
+	leapFlag := false  
+	if year%4 == 0 {  
+	 if year%100 == 0 {  
+	  if year%400 == 0 {  
+	   leapFlag = true  
+	  } else {  
+	   leapFlag = false  
+	  }  
+	 } else {  
+	  leapFlag = true  
+	 }  
+	} else {  
+	 leapFlag = false  
+	}  
+	return leapFlag  
+}
 func cumulateMonthlyCosts(mc []float64, cs CropSchedule) ([]float64, float64) {
 	//check for winter crops.
 	totalCosts := 0.0
 	cmc := make([]float64, 12)
 	if cs.StartPlantingDate.YearDay()+cs.DaysToMaturity > 365 {
 		//winter crop.
+		daysInYear := 365
+		if isLeapYear(cs.StartPlantingDate.Year()){
+			daysInYear +=1
+		}
+
 	} else {
 		//contained between 0 and 365 days
 		startMonth := cs.StartPlantingDate.Month() //iota "enum"

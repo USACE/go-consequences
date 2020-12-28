@@ -12,11 +12,11 @@ type CropSchedule struct {
 	DaysToMaturity    int
 }
 
-func (cs CropSchedule) ComputeCropDamageCase(h hazards.Hazard_Event) CropDamageCase {
+func (cs CropSchedule) ComputeCropDamageCase(h hazards.ArrivalandDurationEvent) CropDamageCase {
 	//determine day of year of the hazard.
-	hazard_start_doy := 0 //assign to zero to work through case logic.
+	hazard_start_doy := h.ArrivalTime.YearDay()
 	//determine duration of the hazard
-	hazard_duration_days := 10 //assignment to start testing
+	hazard_duration_days := h.DurationInDays
 	if hazard_start_doy <= cs.StartPlantingDate.YearDay() {
 		//flood before start of planting.
 		//determine if the crop start planting date is effected by the hazard

@@ -1,5 +1,7 @@
 package hazards
 
+import "time"
+
 type DepthEvent struct {
 	Depth     float64
 	parameter Parameter
@@ -7,4 +9,9 @@ type DepthEvent struct {
 
 func (h DepthEvent) Has(p Parameter) bool {
 	return h.parameter&p != 0
+}
+
+type ArrivalandDurationEvent struct {
+	ArrivalTime    time.Time
+	DurationInDays int
 }
