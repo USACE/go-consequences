@@ -30,6 +30,8 @@ func (cs CropSchedule) ComputeCropDamageCase(h hazards.ArrivalandDurationEvent) 
 				} else {
 					return NotImpactedDuringSeason
 				}
+			} else {
+				return NotImpactedDuringSeason
 			}
 		} else {
 			//determine if hazard happened before planting and impacted planting season
@@ -48,5 +50,4 @@ func (cs CropSchedule) ComputeCropDamageCase(h hazards.ArrivalandDurationEvent) 
 			return Impacted
 		}
 	}
-	return Unassigned
 }
