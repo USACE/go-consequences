@@ -21,10 +21,10 @@ func cumulateMonthlyCosts(mc []float64, cs CropSchedule) ([]float64, float64) {
 	//check for winter crops.
 	totalCosts := 0.0
 	cmc := make([]float64, 12)
-	if cs.StartPlantingDayOfYear+cs.DaysToMaturity > 365 {
+	if cs.StartPlantingDate.YearDay()+cs.DaysToMaturity > 365 {
 		//winter crop.
 	} else {
-		//within a year
+		//contained between 0 and 365 days
 
 	}
 
