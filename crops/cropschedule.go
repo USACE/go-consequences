@@ -6,31 +6,11 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
-type Crop struct {
-	ID                 int
-	Name               string
-	Yeild              float64
-	PricePerUnit       float64
-	ValuePerOutputUnit float64
-	ProductionFunction string
-	LossFunction       string
-	CropSchedule       CropSchedule
-}
 type CropSchedule struct {
 	StartPlantingDate time.Time
 	LastPlantingDate  time.Time
 	DaysToMaturity    int
 }
-type CropDamageCase byte
-
-const (
-	Unassigned              CropDamageCase = 0
-	Impacted                CropDamageCase = 1
-	NotImpactedDuringSeason CropDamageCase = 2
-	PlantingDelayed         CropDamageCase = 4
-	NotPlanted              CropDamageCase = 8
-	SubstituteCrop          CropDamageCase = 16
-)
 
 func (cs CropSchedule) ComputeCropDamageCase(h hazards.Hazard_Event) CropDamageCase {
 	//determine day of year of the hazard.

@@ -1,5 +1,7 @@
 package crops
 
+import "time"
+
 type productionFunction struct {
 	harvestCost                      float64
 	cumulativeMonthlyProductionCosts []float64
@@ -25,6 +27,19 @@ func cumulateMonthlyCosts(mc []float64, cs CropSchedule) ([]float64, float64) {
 		//winter crop.
 	} else {
 		//contained between 0 and 365 days
+		startMonth := cs.StartPlantingDate.Month() //iota "enum"
+		startMonthIndex := int(startMonth)
+		counter := 0
+		daysToMaturity := cs.DaysToMaturity
+		for ok := true; ok; ok = daysToMaturity > 0 {
+			//compute days in the current month https://yourbasic.org/golang/last-day-month-date/
+			t := time.Date(cs.StartPlantingDate.Year(), time.Month(startMonthIndex+counter+1), 0, 0, 0, 0, 0, time.UTC)
+			daysInMonth := t.Day() //subtract the days in the current month from days to maturity.
+			daysToMaturity -= daysInMonth
+			totalCosts += mc[startMonthIndex+counter]
+			cmc[startMonthIndex+counter] = totalCosts
+			counter++
+		}
 
 	}
 
