@@ -16,7 +16,7 @@ func (cs CropSchedule) ComputeCropDamageCase(h hazards.ArrivalandDurationEvent) 
 	//determine day of year of the hazard.
 	hazard_start_doy := h.ArrivalTime.YearDay()
 	//determine duration of the hazard
-	hazard_duration_days := h.DurationInDays
+	hazard_duration_days := int(h.DurationInDays)
 	if hazard_start_doy <= cs.StartPlantingDate.YearDay() {
 		//flood before start of planting.
 		//determine if the crop start planting date is effected by the hazard

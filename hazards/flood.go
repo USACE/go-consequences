@@ -13,5 +13,5 @@ func (h DepthEvent) Has(p Parameter) bool {
 
 type ArrivalandDurationEvent struct {
 	ArrivalTime    time.Time
-	DurationInDays int
+	DurationInDays float64
 }
