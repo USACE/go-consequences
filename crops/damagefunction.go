@@ -1,6 +1,8 @@
 package crops
 
 import (
+	"sort"
+
 	"github.com/USACE/go-consequences/hazards"
 )
 
@@ -16,7 +18,13 @@ func (df DamageFunction) ComputeDamagePercent(h hazards.ArrivalandDurationEvent)
 	//find the month of the event
 	hazardMonth := h.ArrivalTime.Month() //iota "enum"
 	hazardMonthIndex := int(hazardMonth) - 1
-	for k, v := range df.DurationDamageCurves {
+	keys := make([]float64, 0)
+	for k, _ := range df.DurationDamageCurves {
+		keys = append(keys, k)
+	}
+	sort.Float64s(keys)
+	for _, k := range keys {
+		v := df.DurationDamageCurves[k]
 		if k > h.DurationInDays {
 			if firstIteration {
 				//linearly interpolate to zero?
