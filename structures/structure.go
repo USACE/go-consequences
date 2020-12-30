@@ -1,9 +1,10 @@
-package consequences
+package structures
 
 import (
 	"math/rand"
 
 	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 )
 
@@ -11,7 +12,7 @@ type StructureStochastic struct {
 	Name                        string
 	OccType                     OccupancyTypeStochastic
 	DamCat                      string
-	StructVal, ContVal, FoundHt ParameterValue
+	StructVal, ContVal, FoundHt consequences.ParameterValue
 	X, Y                        float64
 }
 type StructureDeterministic struct {
@@ -20,9 +21,6 @@ type StructureDeterministic struct {
 	DamCat                      string
 	StructVal, ContVal, FoundHt float64
 	X, Y                        float64
-}
-type ParameterValue struct {
-	Value interface{}
 }
 
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
@@ -33,30 +31,13 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 	return StructureDeterministic{OccType: ot, DamCat: s.DamCat, StructVal: sv, ContVal: cv, FoundHt: fh}
 }
 
-//SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
-func (p ParameterValue) SampleValue(input interface{}) float64 {
-
-	pval, okf := p.Value.(float64) //if the ParameterValue.Value is a float - pass it on back.
-	if okf {
-		return pval
-	}
-	pvaldist, okd := p.Value.(statistics.ContinuousDistribution)
-	if okd {
-		inval, ok := input.(float64)
-		if ok {
-			return pvaldist.InvCDF(inval)
-		}
-	}
-
-	return 0
-}
-func (s StructureStochastic) ComputeConsequences(d interface{}) ConsequenceDamageResult {
+func (s StructureStochastic) ComputeConsequences(d interface{}) consequences.ConsequenceDamageResult {
 	return s.SampleStructure(rand.Int63()).ComputeConsequences(d) //this needs work so seeds can be controlled.
 }
-func (s StructureDeterministic) ComputeConsequences(d interface{}) ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s StructureDeterministic) ComputeConsequences(d interface{}) consequences.ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
-	var ret = ConsequenceDamageResult{Headers: header, Results: results}
+	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
 	de, ok := d.(hazards.DepthEvent)
 	if ok {
 		depth := de.Depth
@@ -76,10 +57,10 @@ func (s StructureDeterministic) ComputeConsequences(d interface{}) ConsequenceDa
 	}
 	return ret
 }
-func computeFloodConsequences(d float64, s StructureDeterministic) ConsequenceDamageResult {
+func computeFloodConsequences(d float64, s StructureDeterministic) consequences.ConsequenceDamageResult {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
-	var ret = ConsequenceDamageResult{Headers: header, Results: results}
+	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
 	depthAboveFFE := d - s.FoundHt
 	damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 	cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
@@ -103,9 +84,9 @@ func BaseStructureU() StructureStochastic {
 	var o = m["RES1-1SNB"]
 	sv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
 	cv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
-	spv := ParameterValue{Value: sv}
-	cpv := ParameterValue{Value: cv}
-	fhpv := ParameterValue{Value: 0}
+	spv := consequences.ParameterValue{Value: sv}
+	cpv := consequences.ParameterValue{Value: cv}
+	fhpv := consequences.ParameterValue{Value: 0}
 	var s = StructureStochastic{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
 	return s
 }

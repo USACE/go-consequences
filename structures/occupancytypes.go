@@ -1,4 +1,4 @@
-package consequences
+package structures
 
 import (
 	"math/rand"
@@ -16,6 +16,9 @@ type OccupancyTypeDeterministic struct {
 	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
+}
+type UncertaintyOccupancyTypeSampler interface {
+	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
 }
 
 func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDeterministic {

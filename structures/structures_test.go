@@ -1,4 +1,4 @@
-package consequences
+package structures
 
 import (
 	"math"

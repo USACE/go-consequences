@@ -7,6 +7,7 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/nsi"
+	"github.com/USACE/go-consequences/structures"
 )
 
 type RequestArgs struct {
@@ -48,7 +49,7 @@ type SimulationSummary struct {
 	Computetime time.Duration
 }
 
-func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]consequences.OccupancyTypeStochastic, defaultOcctype consequences.OccupancyTypeStochastic) consequences.StructureStochastic {
+func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
 	var occtype = defaultOcctype
 	if ot, ok := m[f.Properties.Occtype]; ok {
 		occtype = ot
@@ -57,7 +58,7 @@ func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]consequences.Occupancy
 		msg := "Using default " + f.Properties.Occtype + " not found"
 		panic(msg)
 	}
-	return consequences.StructureStochastic{
+	return structures.StructureStochastic{
 		Name:      f.Properties.Name,
 		OccType:   occtype,
 		DamCat:    f.Properties.DamCat,
@@ -68,10 +69,10 @@ func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]consequences.Occupancy
 		Y:         f.Properties.Y,
 	}
 }
-func nsiInventorytoStructures(i nsi.NsiInventory) []consequences.StructureStochastic {
-	m := consequences.OccupancyTypeMap()
+func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochastic {
+	m := structures.OccupancyTypeMap()
 	defaultOcctype := m["RES1-1SNB"]
-	structures := make([]consequences.StructureStochastic, len(i.Features))
+	structures := make([]structures.StructureStochastic, len(i.Features))
 	for idx, feature := range i.Features {
 		structures[idx] = nsiFeaturetoStructure(feature, m, defaultOcctype)
 	}
@@ -82,7 +83,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	okd := false
 	fips, okfips := args.Args.(FipsCodeCompute)
 	startnsi := time.Now()
-	var structures []consequences.StructureStochastic
+	var structures []structures.StructureStochastic
 	if okfips {
 		//s.Status = "Downloading NSI by fips " + fips.FIPS
 		fmt.Println("Downloading NSI by fips " + fips.FIPS)
@@ -157,7 +158,7 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 			depthevent = hazards.DepthEvent{Depth: 5.32}
 		}
 		fmt.Println("Computing depths for" + fips.FIPS)
-		m := consequences.OccupancyTypeMap()
+		m := structures.OccupancyTypeMap()
 		defaultOcctype := m["RES1-1SNB"]
 		nsi.GetByFipsStream(fips.FIPS, func(f nsi.NsiFeature) {
 			str := nsiFeaturetoStructure(f, m, defaultOcctype)

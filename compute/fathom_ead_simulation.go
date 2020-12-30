@@ -6,11 +6,11 @@ import (
 	"sync"
 
 	"github.com/USACE/go-consequences/census"
-	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazard_providers"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/nsi"
 	"github.com/USACE/go-consequences/store"
+	"github.com/USACE/go-consequences/structures"
 )
 
 func ComputeMultiFips_MultiEvent(ds hazard_providers.HazardProvider) {
@@ -37,7 +37,7 @@ func ComputeMultiEvent_NSIStream(ds hazard_providers.HazardProvider, fips string
 	maxTransaction := 1000
 	//transaction := make([]interface{}, maxTransaction)
 	nsi.GetByFipsStream(fips, func(feature nsi.NsiFeature) {
-		m := consequences.OccupancyTypeMap()
+		m := structures.OccupancyTypeMap()
 		defaultOcctype := m["RES1-1SNB"]
 		str := nsiFeaturetoStructure(feature, m, defaultOcctype)
 		//check to see if the structure exists for a first "default event"
@@ -247,7 +247,7 @@ func ComputeSingleEvent_NSIStream(ds hazard_providers.DataSet, fips string, fe h
 	rmap := make(map[string]SimulationSummaryRow)
 	fmt.Println("Downloading NSI by fips " + fips)
 	nsi.GetByFipsStream(fips, func(feature nsi.NsiFeature) {
-		m := consequences.OccupancyTypeMap()
+		m := structures.OccupancyTypeMap()
 		defaultOcctype := m["RES1-1SNB"]
 		str := nsiFeaturetoStructure(feature, m, defaultOcctype)
 		fq := hazard_providers.FathomQuery{Fd_id: str.Name, FathomEvent: fe}
