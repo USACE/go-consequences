@@ -22,15 +22,19 @@ type StatisticsResult struct {
 	ErrorMessage string          `json:"errorMessage"`
 	Rows         []StatisticsRow `json:"rows"`
 }
-type XmlResponse struct {
+type XmlURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLStatResponse"`
 	ReturnUrl string   `xml:"returnURL"`
 }
+type XmlCDLValueResponse struct {
+	XMLName xml.Name `xml:"GetCDLValueResponse"`
+	Result  string   `xml:"Result"`
+}
 
-var apiStatsUrl string = "http://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLStat"
+var apiStatsUrl string = "http://nassgeodata.gmu.edu/axis2/services/CDLService/"
 
 func GetStatsByBbox(year string, minx string, miny string, maxx string, maxy string) StatisticsResult {
-	url := fmt.Sprintf("%s?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsUrl, year, minx, miny, maxx, maxy)
+	url := fmt.Sprintf("%sGetCDLStat?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsUrl, year, minx, miny, maxx, maxy) //malformed json keys are not quoted.
 	return nassStatsApi(url)
 }
 func nassStatsApi(url string) StatisticsResult {
@@ -46,7 +50,7 @@ func nassStatsApi(url string) StatisticsResult {
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
-	var resultURL XmlResponse
+	var resultURL XmlURLResponse
 	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(xmlData)
@@ -77,4 +81,31 @@ func nassStatsApi(url string) StatisticsResult {
 	}
 
 	return stats
+}
+
+func GetCDLValue(year string, x string, y string) string {
+	url := fmt.Sprintf("%sGetCDLValue?year=%s&x=%s&y=%s", apiStatsUrl, year, x, y) //malformed json keys are not quoted.
+	return nassCDLValueApi(url)
+}
+func nassCDLValueApi(url string) string {
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
+	}
+	client := &http.Client{Transport: transCfg}
+	response, err := client.Get(url)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	defer response.Body.Close()
+	xmlData, err := ioutil.ReadAll(response.Body)
+	var result XmlCDLValueResponse
+	if err := xml.Unmarshal(xmlData, &result); err != nil {
+		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
+		s := string(xmlData)
+		fmt.Println(s)
+		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
+		return ""
+	}
+	return result.Result
 }
