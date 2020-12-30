@@ -23,7 +23,7 @@ func TestNassCDLValue(t *testing.T) {
 	fmt.Println(result)
 }
 func TestNassCDLFile(t *testing.T) {
-
+	//requires write access to C:\\Temp\\agtesting
 	result := GetCDLFileByFIPS("2018", "19015")
 	if !result {
 		t.Error("GetCDLFile() returned false;")
