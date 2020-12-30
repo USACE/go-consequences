@@ -14,7 +14,10 @@ type ConsequenceDamageResult struct {
 	Headers []string
 	Results []interface{}
 }
-
+type Locatable interface {
+	GetX() float64
+	GetY() float64
+}
 type ParameterValue struct {
 	Value interface{}
 }

@@ -8,27 +8,34 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
+type BaseStructure struct {
+	Name   string
+	DamCat string
+	X, Y   float64
+}
 type StructureStochastic struct {
-	Name                        string
+	BaseStructure
 	OccType                     OccupancyTypeStochastic
-	DamCat                      string
 	StructVal, ContVal, FoundHt consequences.ParameterValue
-	X, Y                        float64
 }
 type StructureDeterministic struct {
-	Name                        string
+	BaseStructure
 	OccType                     OccupancyTypeDeterministic
-	DamCat                      string
 	StructVal, ContVal, FoundHt float64
-	X, Y                        float64
 }
 
+func (s BaseStructure) GetX() float64 {
+	return s.X
+}
+func (s BaseStructure) GetY() float64 {
+	return s.Y
+}
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
 	ot := s.OccType.SampleOccupancyType(seed)
 	sv := s.StructVal.SampleValue(rand.Float64())
 	cv := s.ContVal.SampleValue(rand.Float64())
 	fh := s.FoundHt.SampleValue(rand.Float64())
-	return StructureDeterministic{OccType: ot, DamCat: s.DamCat, StructVal: sv, ContVal: cv, FoundHt: fh}
+	return StructureDeterministic{OccType: ot, StructVal: sv, ContVal: cv, FoundHt: fh, BaseStructure: BaseStructure{DamCat: s.DamCat}}
 }
 
 func (s StructureStochastic) ComputeConsequences(d interface{}) consequences.ConsequenceDamageResult {
@@ -68,16 +75,16 @@ func computeFloodConsequences(d float64, s StructureDeterministic) consequences.
 	ret.Results[1] = cdamagePercent * s.ContVal
 	return ret
 }
-func BaseStructure() StructureDeterministic {
+func DefaultStructure() StructureDeterministic {
 	//get the occupancy type map
 	m := OccupancyTypeMap()
 	// select a base structure type for testing
 	var o = m["RES1-1SNB"]
-	var s = StructureDeterministic{OccType: o.SampleOccupancyType(1), DamCat: "category", StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0}
+	var s = StructureDeterministic{OccType: o.SampleOccupancyType(1), StructVal: 100.0, ContVal: 10.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 	return s
 }
 
-func BaseStructureU() StructureStochastic {
+func DefaultStructureU() StructureStochastic {
 	//get the occupancy type map
 	m := OccupancyTypeMap()
 	// select a base structure type for testing
@@ -87,7 +94,7 @@ func BaseStructureU() StructureStochastic {
 	spv := consequences.ParameterValue{Value: sv}
 	cpv := consequences.ParameterValue{Value: cv}
 	fhpv := consequences.ParameterValue{Value: 0}
-	var s = StructureStochastic{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
+	var s = StructureStochastic{OccType: o, StructVal: spv, ContVal: cpv, FoundHt: fhpv, BaseStructure: BaseStructure{DamCat: "category"}}
 	return s
 }
 func ConvertBaseStructureToFire(s StructureDeterministic) StructureDeterministic {

@@ -59,14 +59,16 @@ func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]structures.OccupancyTy
 		panic(msg)
 	}
 	return structures.StructureStochastic{
-		Name:      f.Properties.Name,
 		OccType:   occtype,
-		DamCat:    f.Properties.DamCat,
 		StructVal: consequences.ParameterValue{Value: f.Properties.StructVal},
 		ContVal:   consequences.ParameterValue{Value: f.Properties.ContVal},
 		FoundHt:   consequences.ParameterValue{Value: f.Properties.FoundHt},
-		X:         f.Properties.X,
-		Y:         f.Properties.Y,
+		BaseStructure: structures.BaseStructure{
+			Name:   f.Properties.Name,
+			DamCat: f.Properties.DamCat,
+			X:      f.Properties.X,
+			Y:      f.Properties.Y,
+		},
 	}
 }
 func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochastic {
