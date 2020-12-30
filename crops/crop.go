@@ -6,7 +6,7 @@ type Crop struct {
 	Yeild              float64
 	PricePerUnit       float64
 	ValuePerOutputUnit float64
-	ProductionFunction string
-	LossFunction       string
+	ProductionFunction productionFunction
+	LossFunction       DamageFunction
 	CropSchedule       CropSchedule
 }

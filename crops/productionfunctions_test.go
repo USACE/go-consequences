@@ -15,7 +15,7 @@ func TestCreateProductionFunction(t *testing.T) {
 	pf := NewProductionFunction(mc, cs, 1.0, .1)
 
 	for idx := range mc {
-		got := pf.GetCumulativeMonthlyProductionCosts()[idx]
+		got := pf.GetCumulativeMonthlyProductionCostsEarly()[idx]
 		if got != expected[idx] {
 			t.Errorf("productionFunction.GetCumulativeMonthlyProductionCosts()[%v] = %f; expected %f", idx, got, expected[idx])
 		}
@@ -31,7 +31,7 @@ func TestCreateProductionFunctionWrapYear(t *testing.T) {
 	pf := NewProductionFunction(mc, cs, 1.0, .1)
 
 	for idx := range mc {
-		got := pf.GetCumulativeMonthlyProductionCosts()[idx]
+		got := pf.GetCumulativeMonthlyProductionCostsEarly()[idx]
 		if got != expected[idx] {
 			t.Errorf("productionFunction.GetCumulativeMonthlyProductionCosts()[%v] = %f; expected %f", idx, got, expected[idx])
 		}
@@ -47,7 +47,7 @@ func TestCreateProductionFunction_ShorterCropSchedule(t *testing.T) {
 	pf := NewProductionFunction(mc, cs, 1.0, .1)
 
 	for idx := range mc {
-		got := pf.GetCumulativeMonthlyProductionCosts()[idx]
+		got := pf.GetCumulativeMonthlyProductionCostsEarly()[idx]
 		if got != expected[idx] {
 			t.Errorf("productionFunction.GetCumulativeMonthlyProductionCosts()[%v] = %f; expected %f", idx, got, expected[idx])
 		}

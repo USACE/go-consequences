@@ -4,8 +4,10 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -22,8 +24,12 @@ type StatisticsResult struct {
 	ErrorMessage string          `json:"errorMessage"`
 	Rows         []StatisticsRow `json:"rows"`
 }
-type XmlURLResponse struct {
+type XmlStatsURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLStatResponse"`
+	ReturnUrl string   `xml:"returnURL"`
+}
+type XmlFileURLResponse struct {
+	XMLName   xml.Name `xml:"GetCDLFileResponse"`
 	ReturnUrl string   `xml:"returnURL"`
 }
 type XmlCDLValueResponse struct {
@@ -50,7 +56,7 @@ func nassStatsApi(url string) StatisticsResult {
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
-	var resultURL XmlURLResponse
+	var resultURL XmlStatsURLResponse
 	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(xmlData)
@@ -108,4 +114,46 @@ func nassCDLValueApi(url string) string {
 		return ""
 	}
 	return result.Result
+}
+func GetCDLFileByFIPS(year string, fips string) bool {
+	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsUrl, year, fips)
+	return nassFileApi(url)
+}
+func nassFileApi(url string) bool {
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
+	}
+	client := &http.Client{Transport: transCfg}
+	response, err := client.Get(url)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer response.Body.Close()
+	xmlData, err := ioutil.ReadAll(response.Body)
+	var resultURL XmlFileURLResponse
+	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
+		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
+		s := string(xmlData)
+		fmt.Println(s)
+		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
+		return false
+	}
+	response2, err2 := client.Get(resultURL.ReturnUrl)
+	if err2 != nil {
+		fmt.Println(err2)
+		return false
+	}
+	defer response2.Body.Close()
+	fileparts := strings.Split(resultURL.ReturnUrl, "/")
+	outfile := "C:\\Temp\\agtesting\\" + fileparts[len(fileparts)-1]
+	out, err := os.Create(outfile)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer out.Close()
+	io.Copy(out, response2.Body)
+
+	return true
 }
