@@ -3,7 +3,6 @@ package structures
 import (
 	"math/rand"
 
-	"github.com/HenryGeorgist/go-statistics/statistics"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 )
@@ -75,6 +74,8 @@ func computeFloodConsequences(d float64, s StructureDeterministic) consequences.
 	ret.Results[1] = cdamagePercent * s.ContVal
 	return ret
 }
+
+/*
 func DefaultStructure() StructureDeterministic {
 	//get the occupancy type map
 	m := OccupancyTypeMap()
@@ -102,4 +103,4 @@ func ConvertBaseStructureToFire(s StructureDeterministic) StructureDeterministic
 	s.OccType.Structuredamfun = fire
 	s.OccType.Contentdamfun = fire
 	return s
-}
+}*/

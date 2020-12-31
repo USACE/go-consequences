@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
 )
@@ -16,7 +17,7 @@ func TestComputeConsequences(t *testing.T) {
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	pd := paireddata.PairedData{Xvals: x, Yvals: y}
 	var o = OccupancyTypeDeterministic{Name: "test", Structuredamfun: pd, Contentdamfun: pd}
-	var s = StructureDeterministic{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
 	var d = hazards.DepthEvent{Depth: 0.0}
@@ -50,10 +51,10 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 
 	sv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
 	cv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
-	spv := ParameterValue{Value: sv}
-	cpv := ParameterValue{Value: cv}
-	fhpv := ParameterValue{Value: 0}
-	var s = StructureStochastic{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
+	spv := consequences.ParameterValue{Value: sv}
+	cpv := consequences.ParameterValue{Value: cv}
+	fhpv := consequences.ParameterValue{Value: 0}
+	var s = StructureStochastic{OccType: o, StructVal: spv, ContVal: cpv, FoundHt: fhpv, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
 	var d = hazards.DepthEvent{Depth: 0.0}

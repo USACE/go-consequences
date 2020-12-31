@@ -32,6 +32,10 @@ type XmlFileURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLFileResponse"`
 	ReturnUrl string   `xml:"returnURL"`
 }
+type XmlExtractResponse struct {
+	XMLName   xml.Name `xml:"ExtractCDLByValuesResponse"`
+	ReturnUrl string   `xml:"returnURL"`
+}
 type XmlCDLValueResponse struct {
 	XMLName xml.Name `xml:"GetCDLValueResponse"`
 	Result  string   `xml:"Result"`
@@ -154,6 +158,65 @@ func nassFileApi(url string) bool {
 	}
 	defer out.Close()
 	io.Copy(out, response2.Body)
+
+	return true
+}
+func GetCDLFileByFIPSFiltered(year string, fips string, cropType string) bool {
+	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsUrl, year, fips)
+	return nassFilteredFileApi(url, cropType)
+}
+func nassFilteredFileApi(url string, cropType string) bool {
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
+	}
+	client := &http.Client{Transport: transCfg}
+	response, err := client.Get(url)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer response.Body.Close()
+	xmlData, err := ioutil.ReadAll(response.Body)
+	var resultURL XmlFileURLResponse
+	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
+		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
+		s := string(xmlData)
+		fmt.Println(s)
+		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
+		return false
+	}
+	// now filter the file
+	url2 := fmt.Sprintf("%sExtractCDLByValues?file=%s&values=%s", apiStatsUrl, resultURL.ReturnUrl, cropType)
+	response2, err2 := client.Get(url2)
+	if err2 != nil {
+		fmt.Println(err2)
+		return false
+	}
+	defer response2.Body.Close()
+	filteredxmlData, err := ioutil.ReadAll(response2.Body)
+	var filteredresultURL XmlExtractResponse
+	if err := xml.Unmarshal(filteredxmlData, &filteredresultURL); err != nil {
+		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
+		s := string(filteredxmlData)
+		fmt.Println(s)
+		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
+		return false
+	}
+	response3, err3 := client.Get(filteredresultURL.ReturnUrl)
+	if err3 != nil {
+		fmt.Println(err3)
+		return false
+	}
+	defer response3.Body.Close()
+	fileparts := strings.Split(filteredresultURL.ReturnUrl, "/")
+	outfile := "C:\\Temp\\agtesting\\" + fileparts[len(fileparts)-1]
+	out, err := os.Create(outfile)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer out.Close()
+	io.Copy(out, response3.Body)
 
 	return true
 }
