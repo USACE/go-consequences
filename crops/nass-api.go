@@ -1,5 +1,7 @@
 package crops
 
+//Documentation: https://nassgeodata.gmu.edu/CropScape/devhelp/help.html
+
 import (
 	"crypto/tls"
 	"encoding/xml"

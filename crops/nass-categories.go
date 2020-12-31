@@ -1,5 +1,7 @@
 package crops
-
+func NASSCropMap() map[string]Crop {
+	m := make(map[string]Crop)
+	m["1"] = Crop{ID:1, Name:"Corn"}
 /*
 value,red,green,blue,category,opacity
 1	255	211	0	Corn	255

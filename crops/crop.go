@@ -10,6 +10,3 @@ type Crop struct {
 	LossFunction       DamageFunction
 	CropSchedule       CropSchedule
 }
-func (c Crop) GetX() float64{
-	
-}
