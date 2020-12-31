@@ -188,3 +188,46 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 	fmt.Println("Complete for" + fips.FIPS)
 	return ret
 }
+func computeEAD(damages []float64, freq []float64) float64 {
+	triangle := 0.0
+	square := 0.0
+	x1 := 1.0 // create a triangle to the first probability space - linear interpolation is probably a problem, maybe use log linear interpolation for the triangle
+	y1 := 0.0
+	eadT := 0.0
+	for i := 0; i < len(freq); i++ {
+		xdelta := x1 - freq[i]
+		square = xdelta * y1
+		triangle = ((xdelta) * (damages[i] - y1)) / 2.0
+		eadT += square + triangle
+		x1 = freq[i]
+		y1 = damages[i]
+	}
+	if x1 != 0.0 {
+		xdelta := x1 - 0.0
+		eadT += xdelta * y1 //no extrapolation, just continue damages out as if it were truth for all remaining probability.
+
+	}
+	return eadT
+}
+func computeSpecialEAD(damages []float64, freq []float64) float64 {
+	//this differs from computeEAD in that it specifically does not calculate the first triangle between 1 and the first frequency to interpolate damages to zero.
+	triangle := 0.0
+	square := 0.0
+	x1 := freq[0]
+	y1 := damages[0]
+	eadT := 0.0
+	for i := 1; i < len(freq); i++ {
+		xdelta := x1 - freq[i]
+		square = xdelta * y1
+		triangle = ((xdelta) * -(y1 - damages[i])) / 2.0
+		eadT += square + triangle
+		x1 = freq[i]
+		y1 = damages[i]
+	}
+	if x1 != 0.0 {
+		xdelta := x1 - 0.0
+		eadT += xdelta * y1 //no extrapolation, just continue damages out as if it were truth for all remaining probability.
+
+	}
+	return eadT
+}
