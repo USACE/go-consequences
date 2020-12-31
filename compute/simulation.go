@@ -76,7 +76,7 @@ func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochast
 	defaultOcctype := m["RES1-1SNB"]
 	structures := make([]structures.StructureStochastic, len(i.Features))
 	for idx, feature := range i.Features {
-		structures[idx] = nsiFeaturetoStructure(feature, m, defaultOcctype)
+		structures[idx] = NsiFeaturetoStructure(feature, m, defaultOcctype)
 	}
 	return structures
 }
@@ -163,7 +163,7 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 		m := structures.OccupancyTypeMap()
 		defaultOcctype := m["RES1-1SNB"]
 		nsi.GetByFipsStream(fips.FIPS, func(f nsi.NsiFeature) {
-			str := nsiFeaturetoStructure(f, m, defaultOcctype)
+			str := NsiFeaturetoStructure(f, m, defaultOcctype)
 			r := str.ComputeConsequences(depthevent)
 			if val, ok := rmap[str.DamCat]; ok {
 				val.StructureCount += 1
