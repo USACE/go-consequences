@@ -49,7 +49,7 @@ type SimulationSummary struct {
 	Computetime time.Duration
 }
 
-func nsiFeaturetoStructure(f nsi.NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
+func NsiFeaturetoStructure(f nsi.NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
 	var occtype = defaultOcctype
 	if ot, ok := m[f.Properties.Occtype]; ok {
 		occtype = ot
@@ -188,7 +188,7 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 	fmt.Println("Complete for" + fips.FIPS)
 	return ret
 }
-func computeEAD(damages []float64, freq []float64) float64 {
+func ComputeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
 	square := 0.0
 	x1 := 1.0 // create a triangle to the first probability space - linear interpolation is probably a problem, maybe use log linear interpolation for the triangle
@@ -209,7 +209,7 @@ func computeEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
-func computeSpecialEAD(damages []float64, freq []float64) float64 {
+func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	//this differs from computeEAD in that it specifically does not calculate the first triangle between 1 and the first frequency to interpolate damages to zero.
 	triangle := 0.0
 	square := 0.0
