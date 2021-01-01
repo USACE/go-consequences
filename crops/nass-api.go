@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+//StatisticsRow describes a row in the statistics result from the NASS stats endpoint
 type StatisticsRow struct {
 	Value    int     `json:"value"`
 	Count    int     `json:"count"`
@@ -19,35 +20,46 @@ type StatisticsRow struct {
 	Color    string  `json:"color"`
 	Acreage  float64 `json:"acreage"`
 }
+
+//StatisticsResult describes the structure of the result from the NASS stats endpoint
 type StatisticsResult struct {
 	Success      bool            `json:"success"`
 	ErrorMessage string          `json:"errorMessage"`
 	Rows         []StatisticsRow `json:"rows"`
 }
-type XmlStatsURLResponse struct {
+
+//XMLStatsURLResponse is the xml return for a stats endpoint query
+type XMLStatsURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLStatResponse"`
-	ReturnUrl string   `xml:"returnURL"`
+	ReturnURL string   `xml:"returnURL"`
 }
-type XmlFileURLResponse struct {
+
+//XMLFileURLResponse is the xml return for the File NASS endpoint
+type XMLFileURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLFileResponse"`
-	ReturnUrl string   `xml:"returnURL"`
+	ReturnURL string   `xml:"returnURL"`
 }
-type XmlExtractResponse struct {
+
+//XMLExtractResponse is the xml return for the Export NASS endpoint
+type XMLExtractResponse struct {
 	XMLName   xml.Name `xml:"ExtractCDLByValuesResponse"`
-	ReturnUrl string   `xml:"returnURL"`
+	ReturnURL string   `xml:"returnURL"`
 }
-type XmlCDLValueResponse struct {
+
+//XMLCDLValueResponse is the xml return for a getCDLValue response from the NASS API
+type XMLCDLValueResponse struct {
 	XMLName xml.Name `xml:"GetCDLValueResponse"`
 	Result  string   `xml:"Result"`
 }
 
-var apiStatsUrl string = "http://nassgeodata.gmu.edu/axis2/services/CDLService/"
+var apiStatsURL string = "http://nassgeodata.gmu.edu/axis2/services/CDLService/"
 
+//GetStatsByBbox returns the statistics of crops in a bounding box in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
 func GetStatsByBbox(year string, minx string, miny string, maxx string, maxy string) StatisticsResult {
-	url := fmt.Sprintf("%sGetCDLStat?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsUrl, year, minx, miny, maxx, maxy) //malformed json keys are not quoted.
-	return nassStatsApi(url)
+	url := fmt.Sprintf("%sGetCDLStat?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsURL, year, minx, miny, maxx, maxy) //malformed json keys are not quoted.
+	return nassStatsAPI(url)
 }
-func nassStatsApi(url string) StatisticsResult {
+func nassStatsAPI(url string) StatisticsResult {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -60,7 +72,7 @@ func nassStatsApi(url string) StatisticsResult {
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
-	var resultURL XmlStatsURLResponse
+	var resultURL XMLStatsURLResponse
 	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(xmlData)
@@ -68,7 +80,7 @@ func nassStatsApi(url string) StatisticsResult {
 		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
 		return stats
 	}
-	response2, err2 := client.Get(resultURL.ReturnUrl)
+	response2, err2 := client.Get(resultURL.ReturnURL)
 	if err2 != nil {
 		fmt.Println(err2)
 		return stats
@@ -93,11 +105,12 @@ func nassStatsApi(url string) StatisticsResult {
 	return stats
 }
 
+//GetCDLValue returns a crop type for a year and x,y coordinates in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
 func GetCDLValue(year string, x string, y string) string {
-	url := fmt.Sprintf("%sGetCDLValue?year=%s&x=%s&y=%s", apiStatsUrl, year, x, y) //malformed json keys are not quoted.
-	return nassCDLValueApi(url)
+	url := fmt.Sprintf("%sGetCDLValue?year=%s&x=%s&y=%s", apiStatsURL, year, x, y) //malformed json keys are not quoted.
+	return nassCDLValueAPI(url)
 }
-func nassCDLValueApi(url string) string {
+func nassCDLValueAPI(url string) string {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -109,7 +122,7 @@ func nassCDLValueApi(url string) string {
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
-	var result XmlCDLValueResponse
+	var result XMLCDLValueResponse
 	if err := xml.Unmarshal(xmlData, &result); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(xmlData)
@@ -119,11 +132,13 @@ func nassCDLValueApi(url string) string {
 	}
 	return result.Result
 }
+
+//GetCDLFileByFIPS stores a NASS CDL Geotif for a given year and county FIPS
 func GetCDLFileByFIPS(year string, fips string) bool {
-	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsUrl, year, fips)
-	return nassFileApi(url)
+	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsURL, year, fips)
+	return nassFileAPI(url)
 }
-func nassFileApi(url string) bool {
+func nassFileAPI(url string) bool {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -135,7 +150,7 @@ func nassFileApi(url string) bool {
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
-	var resultURL XmlFileURLResponse
+	var resultURL XMLFileURLResponse
 	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(xmlData)
@@ -143,13 +158,13 @@ func nassFileApi(url string) bool {
 		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
 		return false
 	}
-	response2, err2 := client.Get(resultURL.ReturnUrl)
+	response2, err2 := client.Get(resultURL.ReturnURL)
 	if err2 != nil {
 		fmt.Println(err2)
 		return false
 	}
 	defer response2.Body.Close()
-	fileparts := strings.Split(resultURL.ReturnUrl, "/")
+	fileparts := strings.Split(resultURL.ReturnURL, "/")
 	outfile := "C:\\Temp\\agtesting\\" + fileparts[len(fileparts)-1]
 	out, err := os.Create(outfile)
 	if err != nil {
@@ -161,11 +176,13 @@ func nassFileApi(url string) bool {
 
 	return true
 }
+
+//GetCDLFileByFIPSFiltered provides a filtered geotif for a fips code. croptype is the list of values to keep and can be provided as a comma separated array of values to include
 func GetCDLFileByFIPSFiltered(year string, fips string, cropType string) bool {
-	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsUrl, year, fips)
-	return nassFilteredFileApi(url, cropType)
+	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsURL, year, fips)
+	return nassFilteredFileAPI(url, cropType)
 }
-func nassFilteredFileApi(url string, cropType string) bool {
+func nassFilteredFileAPI(url string, cropType string) bool {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -177,7 +194,7 @@ func nassFilteredFileApi(url string, cropType string) bool {
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
-	var resultURL XmlFileURLResponse
+	var resultURL XMLFileURLResponse
 	if err := xml.Unmarshal(xmlData, &resultURL); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(xmlData)
@@ -186,7 +203,7 @@ func nassFilteredFileApi(url string, cropType string) bool {
 		return false
 	}
 	// now filter the file
-	url2 := fmt.Sprintf("%sExtractCDLByValues?file=%s&values=%s", apiStatsUrl, resultURL.ReturnUrl, cropType)
+	url2 := fmt.Sprintf("%sExtractCDLByValues?file=%s&values=%s", apiStatsURL, resultURL.ReturnURL, cropType)
 	response2, err2 := client.Get(url2)
 	if err2 != nil {
 		fmt.Println(err2)
@@ -194,7 +211,7 @@ func nassFilteredFileApi(url string, cropType string) bool {
 	}
 	defer response2.Body.Close()
 	filteredxmlData, err := ioutil.ReadAll(response2.Body)
-	var filteredresultURL XmlExtractResponse
+	var filteredresultURL XMLExtractResponse
 	if err := xml.Unmarshal(filteredxmlData, &filteredresultURL); err != nil {
 		fmt.Println("error unmarshalling NASS XML " + err.Error() + " URL: " + url)
 		s := string(filteredxmlData)
@@ -202,13 +219,13 @@ func nassFilteredFileApi(url string, cropType string) bool {
 		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
 		return false
 	}
-	response3, err3 := client.Get(filteredresultURL.ReturnUrl)
+	response3, err3 := client.Get(filteredresultURL.ReturnURL)
 	if err3 != nil {
 		fmt.Println(err3)
 		return false
 	}
 	defer response3.Body.Close()
-	fileparts := strings.Split(filteredresultURL.ReturnUrl, "/")
+	fileparts := strings.Split(filteredresultURL.ReturnURL, "/")
 	outfile := "C:\\Temp\\agtesting\\" + fileparts[len(fileparts)-1]
 	out, err := os.Create(outfile)
 	if err != nil {

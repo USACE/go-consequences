@@ -6,48 +6,45 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
+//CropSchedule stores the start and end of planting season, and time to maturity in days
 type CropSchedule struct {
 	StartPlantingDate time.Time
 	LastPlantingDate  time.Time
 	DaysToMaturity    int
 }
 
+//ComputeCropDamageCase evaluates a crop schedule against a hazard arrival and duration to determine impact on the crop season.
 func (cs CropSchedule) ComputeCropDamageCase(h hazards.ArrivalandDurationEvent) CropDamageCase {
 	//determine day of year of the hazard.
-	hazard_start_doy := h.ArrivalTime.YearDay()
+	hazardStartDoy := h.ArrivalTime.YearDay()
 	//determine duration of the hazard
-	hazard_duration_days := int(h.DurationInDays)
-	if hazard_start_doy <= cs.StartPlantingDate.YearDay() {
+	hazardDurationDays := int(h.DurationInDays)
+	if hazardStartDoy <= cs.StartPlantingDate.YearDay() {
 		//flood before start of planting.
 		//determine if the crop start planting date is effected by the hazard
-		if hazard_start_doy+hazard_duration_days < cs.StartPlantingDate.YearDay() {
+		if hazardStartDoy+hazardDurationDays < cs.StartPlantingDate.YearDay() {
 			//what if it is a winter crop?
 			if cs.StartPlantingDate.YearDay()+cs.DaysToMaturity > 365 {
 				//winter crop
 				harvestDoY := cs.StartPlantingDate.YearDay() + cs.DaysToMaturity - 365
-				if harvestDoY > hazard_start_doy {
+				if harvestDoY > hazardStartDoy {
 					return Impacted
-				} else {
-					return NotImpactedDuringSeason
 				}
-			} else {
 				return NotImpactedDuringSeason
+
 			}
-		} else {
-			//determine if hazard happened before planting and impacted planting season
-			if hazard_start_doy+hazard_duration_days < cs.LastPlantingDate.YearDay() {
-				return PlantingDelayed
-			} else {
-				return NotPlanted //what about substitutes?
-			}
-		}
-	} else {
-		//hazard after start of planting
-		if cs.StartPlantingDate.YearDay()+cs.DaysToMaturity < hazard_start_doy {
-			//hazard after harvest
 			return NotImpactedDuringSeason
-		} else {
-			return Impacted
 		}
+		//determine if hazard happened before planting and impacted planting season
+		if hazardStartDoy+hazardDurationDays < cs.LastPlantingDate.YearDay() {
+			return PlantingDelayed
+		}
+		return NotPlanted //what about substitutes?
 	}
+	//hazard after start of planting
+	if cs.StartPlantingDate.YearDay()+cs.DaysToMaturity < hazardStartDoy {
+		//hazard after harvest
+		return NotImpactedDuringSeason
+	}
+	return Impacted
 }

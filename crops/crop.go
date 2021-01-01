@@ -1,5 +1,6 @@
 package crops
 
+//Crop describes a crop that can be used to compute agricultural consequences
 type Crop struct {
 	id                 byte
 	name               string
@@ -12,19 +13,23 @@ type Crop struct {
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
 }
-//crops.CropType
+
+//GetCropID fulfils the crops.CropType interface
 func (c Crop) GetCropID() byte {
 	return c.id
 }
-//crops.CropType
+
+//GetCropName fulfils the crops.CropType interface
 func (c Crop) GetCropName() string {
 	return c.name
 }
-//consequences.Locatable
+
+//GetX fulfils the consequences.Locatable interface
 func (c Crop) GetX() float64 {
 	return c.x
 }
-//consequences.Locatable
+
+//GetY fulfils the consequences.Locatable interface
 func (c Crop) GetY() float64 {
 	return c.y
 }
