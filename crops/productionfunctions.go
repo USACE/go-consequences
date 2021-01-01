@@ -9,6 +9,7 @@ type productionFunction struct {
 	lossFromLatePlanting                  float64
 }
 
+//NewProductionFunction is the constructor for the unexported productionFunction which represents the costs associated with producing a crop
 func NewProductionFunction(mc []float64, cs CropSchedule, hc float64, latePlantingLoss float64) productionFunction {
 	pf := productionFunction{
 		harvestCost:          hc,
@@ -36,6 +37,8 @@ func isLeapYear(year int) bool {
 	}
 	return leapFlag
 }
+
+//GetCumulativeMonthlyProductionCostsEarly provides access to the productionFunction's cumulative monthly production costs based on planting on the early date of the planting season
 func (p productionFunction) GetCumulativeMonthlyProductionCostsEarly() []float64 {
 	return p.cumulativeMonthlyProductionCostsEarly
 }
@@ -45,7 +48,7 @@ func cumulateMonthlyCosts(mc []float64, start time.Time, daysToMaturity int) ([]
 	cmc := make([]float64, 12)
 	daysInYear := 365
 	if isLeapYear(start.Year()) {
-		daysInYear += 1
+		daysInYear++
 	}
 	if daysToMaturity > daysInYear {
 		panic("abort! abort! we hit an artery!")
