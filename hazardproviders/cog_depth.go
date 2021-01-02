@@ -1,4 +1,4 @@
-package hazard_providers
+package hazardproviders
 
 /*
 import (
