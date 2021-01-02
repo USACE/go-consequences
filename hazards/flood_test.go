@@ -3,33 +3,43 @@ package hazards
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
-func TestParameters(t *testing.T) {
-	d := DepthEvent{Depth: 2.5, parameter: Default}
-	//p := Depth
-	d.parameter = SetHasDepth(d.parameter)
-	d.parameter = SetHasVelocity(d.parameter)
-	//d.parameter = p
-	fmt.Println(d.parameter.String())
+func TestDepthEventParameters(t *testing.T) {
+	d := DepthEvent{Depth: 2.5}
 	if d.Has(Depth) {
-		fmt.Println("Has Depth")
-	} else {
-		fmt.Println("Hasnt depth")
+		fmt.Println("Depth")
 	}
 	if d.Has(ArrivalTime) {
-		fmt.Println("Has Arrival Time")
-	} else {
-		fmt.Println("Hasnt arrival time")
+		fmt.Println("Arrival Time")
 	}
 	if d.Has(ArrivalTime2ft) {
-		fmt.Println("Has Arrival Time 2ft")
-	} else {
-		fmt.Println("Hasnt arrival time 2ft")
+		fmt.Println("Arrival Time 2ft")
+	}
+	if d.Has(Duration) {
+		fmt.Println("Duration")
 	}
 	if d.Has(Velocity) {
-		fmt.Println("Has Velocity")
-	} else {
-		fmt.Println("Hasnt Velocity")
+		fmt.Println("Velocity")
+	}
+}
+func TestArrivalandDurationEventParameters(t *testing.T) {
+	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
+	d := ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 180}
+	if d.Has(Depth) {
+		fmt.Println("Depth")
+	}
+	if d.Has(ArrivalTime) {
+		fmt.Println("Arrival Time")
+	}
+	if d.Has(ArrivalTime2ft) {
+		fmt.Println("Arrival Time 2ft")
+	}
+	if d.Has(Duration) {
+		fmt.Println("Duration")
+	}
+	if d.Has(Velocity) {
+		fmt.Println("Velocity")
 	}
 }
