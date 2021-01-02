@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+//NsiProperties is a reflection of the JSON feature property attributes from the NSI-API
 type NsiProperties struct {
 	Name      string  `json:"fd_id"`
 	X         float64 `json:"x"`
@@ -19,23 +20,30 @@ type NsiProperties struct {
 	StructVal float64 `json:"val_struct"`
 	ContVal   float64 `json:"val_cont"`
 }
+
+//NsiFeature is a feature which contains the properties of a structure from the NSI API
 type NsiFeature struct {
 	Properties NsiProperties `json:"properties"`
 }
+
+//NsiInventory is a slice of NsiFeature that describes a complete json feature array return or feature collection return
 type NsiInventory struct {
 	Features []NsiFeature
 }
 
-var apiUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
+var apiURL string = "https://nsi-dev.sec.usace.army.mil/nsiapi/structures" //this will only work behind the USACE firewall -
+//GetByFips returns an NsiInventory for a FIPS code
 func GetByFips(fips string) NsiInventory {
-	url := fmt.Sprintf("%s?fips=%s&fmt=fa", apiUrl, fips)
-	return nsiApi(url)
+	url := fmt.Sprintf("%s?fips=%s&fmt=fa", apiURL, fips)
+	return nsiAPI(url)
 }
+
+//GetByBbox returns an NsiInventory for a Bounding Box
 func GetByBbox(bbox string) NsiInventory {
-	url := fmt.Sprintf("%s?bbox=%s&fmt=fa", apiUrl, bbox)
-	return nsiApi(url)
+	url := fmt.Sprintf("%s?bbox=%s&fmt=fa", apiURL, bbox)
+	return nsiAPI(url)
 }
-func nsiApi(url string) NsiInventory {
+func nsiAPI(url string) NsiInventory {
 	inventory := NsiInventory{}
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
@@ -61,20 +69,25 @@ func nsiApi(url string) NsiInventory {
 	return inventory
 }
 
+//NsiStreamProcessor is a function used to process an in memory NsiFeature through the NsiStreaming service endpoints
 type NsiStreamProcessor func(str NsiFeature)
 
 /*
 memory effecient structure compute methods
 */
+
+//GetByFipsStream a streaming service for NsiFeature based on a FIPs code
 func GetByFipsStream(fips string, nsp NsiStreamProcessor) error {
-	url := fmt.Sprintf("%s?fips=%s&fmt=fs", apiUrl, fips)
-	return nsiApiStream(url, nsp)
+	url := fmt.Sprintf("%s?fips=%s&fmt=fs", apiURL, fips)
+	return nsiAPIStream(url, nsp)
 }
+
+//GetByBboxStream a streaming service for NsiFeature based on a bounding box
 func GetByBboxStream(bbox string, nsp NsiStreamProcessor) error {
-	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", apiUrl, bbox)
-	return nsiApiStream(url, nsp)
+	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", apiURL, bbox)
+	return nsiAPIStream(url, nsp)
 }
-func nsiApiStream(url string, nsp NsiStreamProcessor) error {
+func nsiAPIStream(url string, nsp NsiStreamProcessor) error {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
