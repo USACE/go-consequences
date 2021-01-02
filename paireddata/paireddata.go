@@ -5,7 +5,7 @@ import (
 )
 
 
-// PairedData is paired data
+// PairedData is paired data x and y values 
 type PairedData struct {
 	Xvals []float64
 	Yvals []float64
