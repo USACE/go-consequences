@@ -7,20 +7,26 @@ import (
 	"github.com/USACE/go-consequences/paireddata"
 )
 
+//OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
 	Name            string
 	Structuredamfun interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 	Contentdamfun   interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 }
+
+//OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
 type OccupancyTypeDeterministic struct {
 	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
 }
+
+//UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
 type UncertaintyOccupancyTypeSampler interface {
 	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
 }
 
+//SampleOccupancyType implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
 func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDeterministic {
 	sd, oks := o.Structuredamfun.(paireddata.ValueSampler)
 	cd, okc := o.Contentdamfun.(paireddata.ValueSampler)
@@ -61,6 +67,8 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 
 	return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
 }
+
+//OccupancyTypeMap produces a map of all occupancy types as OccupancyTypeStochastic so they can be joined to the structure inventory to compute damage
 func OccupancyTypeMap() map[string]OccupancyTypeStochastic {
 	m := make(map[string]OccupancyTypeStochastic)
 	m["AGR1"] = agr1()
