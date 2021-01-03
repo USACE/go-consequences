@@ -1,9 +1,12 @@
 package results
 
+//Consequence is a container to store a list of headers and a list of results
 type Consequence struct {
 	Headers []string      `json:"headers"`
 	Results []interface{} `json:"results"`
 }
+
+//Consequences stores a consequence struct and a boolean flagging the result as a table or not
 type Consequences struct {
 	IsTable bool
 	Consequence
@@ -14,6 +17,7 @@ type ConsequenceAddable interface {
 	AddConsequence(c Consequence) //is this too confusing? it works, but is it confusing?
 }
 
+//AddConsequence fulfils the ConsequenceAddable interface on the Consequences struct
 func (c *Consequences) AddConsequence(cr Consequence) {
 	c.IsTable = true
 	c.Headers = cr.Headers
@@ -32,6 +36,8 @@ func (c Consequence) MarshalJSON() ([]byte, error) {
 	return []byte(s), nil
 }
 */
+
+//String converts consequences to string
 func (c Consequences) String() string {
 	if c.IsTable {
 		return "Im a table!" //todo implement me

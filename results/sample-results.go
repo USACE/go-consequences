@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+//SampleResult is a method to create a consequence result marshal it to json and print the original struct to string
 func SampleResult() {
 	header := []string{"structure fid", "structure damage", "content damage"}
 	results := []interface{}{1, 5.0, 10.0}
@@ -14,6 +15,7 @@ func SampleResult() {
 	fmt.Println(ret)
 }
 
+//SampleResults is similar to SampleResult but it stores and writes multiple consequence results in a single consequences struct
 func SampleResults() {
 	header := []string{"structure fid", "structure damage", "content damage"}
 	var rows []interface{}
