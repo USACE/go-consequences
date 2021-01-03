@@ -15,7 +15,6 @@ The following packages are in this library:
 - nsi
 - paireddata
 - results
-- store
 
 ### census
 The census package contains a map of state FIP codes to county FIP codes to support consequences computations and iteration across the entire United States.
@@ -43,9 +42,6 @@ The paireddata object provides a linear interpolation of x and y data. This is u
 
 ### results
 The results package is a partial attempt to manage the complexity of many different types of consequences computations and results storage.
-
-### store
-The store package is designed to interoperate with a local sqlite store to provide storage of results from national scale computes.
 
 ## Testing
 Tests have been developed for most of the code related to flood damage estimation. The tests can be compiled using the general calls listed below on a package level. 
