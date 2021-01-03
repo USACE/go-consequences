@@ -33,3 +33,4 @@ func (c Crop) GetX() float64 {
 func (c Crop) GetY() float64 {
 	return c.y
 }
+

@@ -48,15 +48,15 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 }
 
 //ComputeConsequences implements the consequences.ConsequencesReceptor interface on StrucutreStochastic
-func (s StructureStochastic) ComputeConsequences(d interface{}) consequences.ConsequenceDamageResult {
+func (s StructureStochastic) ComputeConsequences(d interface{}) consequences.Result {
 	return s.SampleStructure(rand.Int63()).ComputeConsequences(d) //this needs work so seeds can be controlled.
 }
 
 //ComputeConsequences implements the consequences.ConsequencesReceptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) ComputeConsequences(d interface{}) consequences.ConsequenceDamageResult { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s StructureDeterministic) ComputeConsequences(d interface{}) consequences.Result { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
-	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
+	var ret = consequences.Result{Headers: header, Result: results}
 	de, ok := d.(hazards.DepthEvent)
 	if ok {
 		depth := de.Depth
@@ -68,14 +68,14 @@ func (s StructureDeterministic) ComputeConsequences(d interface{}) consequences.
 	}
 	return ret
 }
-func computeFloodConsequences(d float64, s StructureDeterministic) consequences.ConsequenceDamageResult {
+func computeFloodConsequences(d float64, s StructureDeterministic) consequences.Result {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
-	var ret = consequences.ConsequenceDamageResult{Headers: header, Results: results}
+	var ret = consequences.Result{Headers: header, Result: results}
 	depthAboveFFE := d - s.FoundHt
 	damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 	cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
-	ret.Results[0] = damagePercent * s.StructVal
-	ret.Results[1] = cdamagePercent * s.ContVal
+	ret.Result[0] = damagePercent * s.StructVal
+	ret.Result[1] = cdamagePercent * s.ContVal
 	return ret
 }
