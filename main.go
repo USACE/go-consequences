@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+//Config describes the configuration settings for go-consequences.
 type Config struct {
 	SkipJWT       bool
 	LambdaContext bool
@@ -118,10 +119,9 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) stri
 				}
 				//var ret = SimulationSummary{ColumnNames: header, Rows: rows, NSITime: elapsedNsi, Computetime: elapsed}
 				return s
-			} else {
-				//2 characters but not a state?
-				r.Compute(args) //should fail
 			}
+			//2 characters but not a state?
+			r.Compute(args) //should fail
 		} else {
 			//not two characters
 			r.Compute(args) //should work
@@ -134,6 +134,8 @@ func computeConcurrentEvent(r compute.Computable, args compute.RequestArgs) stri
 func computeEvent(r compute.Computable, args compute.RequestArgs) {
 	r.Compute(args)
 }
+
+//HandleRequestArgs handles request args and returns a string and an error
 func HandleRequestArgs(args compute.RequestArgs) (string, error) {
 	fmt.Print(args)
 	switch t := args.Args.(type) {
