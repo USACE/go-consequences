@@ -10,38 +10,47 @@ import (
 	"github.com/USACE/go-consequences/structures"
 )
 
+//RequestArgs describes the request for a compute
 type RequestArgs struct {
 	Args       interface{}
 	Concurrent bool
 }
+
+//FipsCodeCompute describes a fips code based compute with the hazardArgs
 type FipsCodeCompute struct {
 	ID         string      `json:"id"`
 	FIPS       string      `json:"fips"`
 	HazardArgs interface{} `json:"hazardargs"`
 }
+
+//BboxCompute describes a boundingbox based compute with an argument for the hazard args.
 type BboxCompute struct {
 	ID         string      `json:"id"`
 	BBOX       string      `json:"bbox"`
 	HazardArgs interface{} `json:"hazardargs"`
 }
-type StructureSimulation struct {
-	//Structures []consequences.StructureStochastic
-}
+
+//NSIStructureSimulation is a structure that takes a requestargs and implements the computable interface.
 type NSIStructureSimulation struct {
 	RequestArgs
 	//StructureSimulation
 }
+
+//Computable is an interface that describes the ability for an object to compute or compute by streaming to produce a simulation summary.
 type Computable interface {
 	Compute(args RequestArgs) SimulationSummary
 	ComputeStream(args RequestArgs) SimulationSummary
 }
 
+//SimulationSummaryRow describes the result from a simulation for a row, the row header describes what the row means, and damages are provided in terms of count, and damage for structure and content
 type SimulationSummaryRow struct {
 	RowHeader       string  `json:"rowheader"`
 	StructureCount  int64   `json:"structurecount"`
 	StructureDamage float64 `json:"structuredamage"`
 	ContentDamage   float64 `json:"contentdamage"`
 }
+
+//SimulationSummary is a struct that keeps a list of simulation rows and timing information about the compute.
 type SimulationSummary struct {
 	ColumnNames []string               `json:"columnnames"`
 	Rows        []SimulationSummaryRow `json:"rows"`
@@ -49,6 +58,7 @@ type SimulationSummary struct {
 	Computetime time.Duration
 }
 
+//NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
 func NsiFeaturetoStructure(f nsi.NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
 	var occtype = defaultOcctype
 	if ot, ok := m[f.Properties.Occtype]; ok {
@@ -80,6 +90,8 @@ func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochast
 	}
 	return structures
 }
+
+//Compute computes a simulation on the NSI for a depth provided by request args.
 func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	var depthevent = hazards.DepthEvent{Depth: 5.32}
 	okd := false
@@ -117,7 +129,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 		r := str.ComputeConsequences(d)
 		if val, ok := rmap[str.DamCat]; ok {
 			//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
-			val.StructureCount += 1
+			val.StructureCount++
 			val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
 			val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
 			rmap[str.DamCat] = val
@@ -147,6 +159,8 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
  each point is processed as it is received
  from the server
 */
+
+//ComputeStream computes a simulation with the NSI using the streaming api, it fulfils the Computable interface on NSIStructureSimulation.
 func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummary {
 	var depthevent = hazards.DepthEvent{Depth: 5.32}
 	okd := false
@@ -166,7 +180,7 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 			str := NsiFeaturetoStructure(f, m, defaultOcctype)
 			r := str.ComputeConsequences(depthevent)
 			if val, ok := rmap[str.DamCat]; ok {
-				val.StructureCount += 1
+				val.StructureCount++
 				val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
 				val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
 				rmap[str.DamCat] = val
@@ -188,6 +202,8 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 	fmt.Println("Complete for" + fips.FIPS)
 	return ret
 }
+
+//ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
 func ComputeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
 	square := 0.0
@@ -209,6 +225,8 @@ func ComputeEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
+
+//ComputeSpecialEAD integrates under the damage frequency curve but does not calculate the first triangle between 1 and the first frequency.
 func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	//this differs from computeEAD in that it specifically does not calculate the first triangle between 1 and the first frequency to interpolate damages to zero.
 	triangle := 0.0
