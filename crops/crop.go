@@ -13,10 +13,46 @@ type Crop struct {
 	y                  float64
 	yeild              float64
 	pricePerUnit       float64
-	valuePerOutputUnit float64
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
+}
+
+//BuildCrop builds a crop since the properties of crop are not exported
+func BuildCrop(cropid byte, cropname string) Crop {
+	return Crop{id: cropid, name: cropname}
+}
+
+//WithLocation allows the construction of a location on a crop
+func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
+	c.x = xloc
+	c.y = yloc
+	return *c
+}
+
+//WithOutput allows the setting of the yeild per acre and price per unit of output
+func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
+	c.yeild = cropYeild
+	c.pricePerUnit = price
+	return *c
+}
+
+//WithProductionFunction allows the setting of the production function
+func (c *Crop) WithProductionFunction(pf productionFunction) Crop {
+	c.productionFunction = pf
+	return *c
+}
+
+//WithLossFunction allows the setting of the loss function
+func (c *Crop) WithLossFunction(lf DamageFunction) Crop {
+	c.lossFunction = lf
+	return *c
+}
+
+//WithCropSchedule allows the setting of the cropschedule
+func (c *Crop) WithCropSchedule(cs CropSchedule) Crop {
+	c.cropSchedule = cs
+	return *c
 }
 
 //GetCropID fulfils the crops.CropType interface
