@@ -5,6 +5,7 @@ import "time"
 type productionFunction struct {
 	harvestCost                           float64
 	cumulativeMonthlyProductionCostsEarly []float64
+	cumulativeMonthlyProductionCostsLate  []float64
 	productionCostLessHarvest             float64 //sum monthly or find max of cumulative...
 	lossFromLatePlanting                  float64
 }
@@ -15,9 +16,11 @@ func NewProductionFunction(mc []float64, cs CropSchedule, hc float64, latePlanti
 		harvestCost:          hc,
 		lossFromLatePlanting: latePlantingLoss,
 	}
-	cmc, pclh := cumulateMonthlyCosts(mc, cs.StartPlantingDate, cs.DaysToMaturity)
-	pf.cumulativeMonthlyProductionCostsEarly = cmc
-	pf.productionCostLessHarvest = pclh
+	cmce, pclhe := cumulateMonthlyCosts(mc, cs.StartPlantingDate, cs.DaysToMaturity)
+	pf.cumulativeMonthlyProductionCostsEarly = cmce
+	cmcl, _ := cumulateMonthlyCosts(mc, cs.LastPlantingDate, cs.DaysToMaturity)
+	pf.cumulativeMonthlyProductionCostsLate = cmcl
+	pf.productionCostLessHarvest = pclhe //is this appropriate should i store both to ensure proper accounting??
 	return pf
 }
 func isLeapYear(year int) bool {
@@ -43,6 +46,11 @@ func (p productionFunction) GetCumulativeMonthlyProductionCostsEarly() []float64
 	return p.cumulativeMonthlyProductionCostsEarly
 }
 func cumulateMonthlyCosts(mc []float64, start time.Time, daysToMaturity int) ([]float64, float64) {
+	//this process assumes days to maturity is less than 1 year.
+	fc := make([]float64, len(mc))
+	return cumulateMonthlyCostsWithFixedCosts(mc, fc, start, daysToMaturity)
+}
+func cumulateMonthlyCostsWithFixedCosts(mc []float64, fc []float64, start time.Time, daysToMaturity int) ([]float64, float64) {
 	//this process assumes days to maturity is less than 1 year.
 	totalCosts := 0.0
 	cmc := make([]float64, 12)
@@ -76,7 +84,7 @@ func cumulateMonthlyCosts(mc []float64, start time.Time, daysToMaturity int) ([]
 				updated = true
 			}
 		}
-		totalCosts += mc[startMonthIndex+counter]
+		totalCosts += mc[startMonthIndex+counter] + fc[startMonthIndex+counter]
 		cmc[startMonthIndex+counter] = totalCosts
 		counter++
 	}
