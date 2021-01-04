@@ -1,6 +1,11 @@
 package crops
 
 import (
+	"encoding/xml"
+	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 )
@@ -16,6 +21,30 @@ type Crop struct {
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
+}
+
+//xmlCrop is used for reading xml files not for any other real purpose
+type xmlCrop struct {
+	ID                    byte         `xml:"id"`
+	Name                  string       `xml:"name"`
+	Yeild                 float64      `xml:"Yield"`
+	Unit                  string       `xml:"Unit"`
+	PricePerUnit          float64      `xml:"UnitPrice"`
+	HarvestCost           float64      `xml:"HarvestCost"`
+	FirstPlantDate        string       `xml:"FirstPlantDate"`
+	LastPlantDate         string       `xml:"LastPlantDate"`
+	HarvestDate           string       `xml:"HarvestDate"`
+	MonthlyFixedCost      string       `xml:"MonthlyFixedCost"`
+	MonthlyFirstPlantCost string       `xml:"MonthlyFirstPlantCost"`
+	MonthlyLastPlantCost  string       `xml:"MonthlyLastPlantCost"`
+	PercentLossLastPlant  float64      `xml:"PctLossLastPlant"`
+	DryoutPeriod          int32        `xml:"DryoutPeriod"`
+	SubstituteCropID      byte         `xml:"SubstituteCrop"`
+	Durations             xmlDurations `xml:"Durations"`
+}
+type xmlDurations struct {
+	XMLName  xml.Name `xml:"Durations"`
+	Duration []string `xml:"Duration"`
 }
 
 //BuildCrop builds a crop since the properties of crop are not exported
@@ -53,6 +82,27 @@ func (c *Crop) WithLossFunction(lf DamageFunction) Crop {
 func (c *Crop) WithCropSchedule(cs CropSchedule) Crop {
 	c.cropSchedule = cs
 	return *c
+}
+
+//ReadFromXML is intended to read crop schedules loss functions and production functions from xml
+func ReadFromXML(filePath string) Crop {
+
+	xmlFile, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer xmlFile.Close()
+	bytes, _ := ioutil.ReadAll(xmlFile)
+
+	var c xmlCrop
+	if errxml := xml.Unmarshal(bytes, &c); err != nil {
+		fmt.Println(errxml)
+	}
+	ret := BuildCrop(c.ID, c.Name)
+	ret = ret.WithOutput(c.Yeild, c.PricePerUnit)
+	//parse the rest of the xmlCrop into a crop
+
+	return ret
 }
 
 //GetCropID fulfils the crops.CropType interface

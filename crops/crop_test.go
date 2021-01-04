@@ -11,8 +11,56 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	//setup
 	//hazard definition
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 180}
+	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
+	//construct a TestCrop
+	c := createTestCrop()
 
+	//compute
+	cd := c.ComputeConsequences(h)
+	//expected results
+	expectedcase := NotImpactedDuringSeason
+	expecteddamage := 0.0
+
+	//test
+	if cd.Result.Result[1] != expectedcase {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	}
+	if cd.Result.Result[2] != expecteddamage {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	}
+}
+
+func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
+	//setup
+	//hazard definition
+	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
+	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
+	//construct a TestCrop
+	c := createTestCrop()
+
+	//compute
+	cd := c.ComputeConsequences(h)
+	//expected results
+	expectedcase := Impacted
+	expecteddamage := 10.0 //temporary value for testing
+
+	//test
+	if cd.Result.Result[1] != expectedcase {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	}
+	if cd.Result.Result[2] != expecteddamage {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	}
+}
+func TestReadFromXML(t *testing.T) {
+	//"C:\\Temp\\agtesting\\Corn.crop"
+	path := "C:\\Temp\\agtesting\\Corn.crop"
+	c := ReadFromXML(path)
+	if c.GetCropName() != "Corn" {
+		t.Error("Did not parse corn")
+	}
+}
+func createTestCrop() Crop {
 	//Crop Schedule
 	st := time.Date(1984, time.Month(7), 22, 0, 0, 0, 0, time.UTC)
 	et := time.Date(1984, time.Month(7), 28, 0, 0, 0, 0, time.UTC)
@@ -43,17 +91,5 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	c = c.WithProductionFunction(pf)
 	c = c.WithLossFunction(df)
 	c = c.WithCropSchedule(cs)
-	//compute
-	cd := c.ComputeConsequences(h)
-	//expected results
-	expectedcase := NotImpactedDuringSeason
-	expecteddamage := 0.0
-
-	//test
-	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
-	}
-	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
-	}
+	return c
 }
