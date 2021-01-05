@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
@@ -100,9 +101,45 @@ func ReadFromXML(filePath string) Crop {
 	}
 	ret := BuildCrop(c.ID, c.Name)
 	ret = ret.WithOutput(c.Yeild, c.PricePerUnit)
-	//parse the rest of the xmlCrop into a crop
-
+	//parse the cropschedule
+	st := xmltoTime(c.FirstPlantDate)
+	et := xmltoTime(c.LastPlantDate)
+	ht := xmltoTime(c.HarvestDate)
+	dtm := st.YearDay() - ht.YearDay()
+	if dtm < 0 {
+		dtm += 365
+	}
+	cs := CropSchedule{StartPlantingDate: st, LastPlantingDate: et, DaysToMaturity: dtm}
+	ret.WithCropSchedule(cs)
+	//parse the loss function
+	//parse the production function
 	return ret
+}
+func xmltoTime(ddMMM string) time.Time {
+	//not sure how this handles leap years - it always assigns to year 0000 currently.
+	const layout = "02Jan"
+	t, err := time.Parse(layout, ddMMM)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(t)
+	return t
+	/*d := ddMMM[0:2]
+	switch m{
+	case JAN:
+	case FEB:
+	case MAR:
+	case APR:
+	case JAN:
+	case JAN:
+	case JAN:
+	case JAN:
+	case JAN:
+	case JAN:
+	case JAN:
+	case JAN:
+
+	}*/
 }
 
 //GetCropID fulfils the crops.CropType interface
