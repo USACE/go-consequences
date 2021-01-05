@@ -124,22 +124,6 @@ func xmltoTime(ddMMM string) time.Time {
 	}
 	fmt.Println(t)
 	return t
-	/*d := ddMMM[0:2]
-	switch m{
-	case JAN:
-	case FEB:
-	case MAR:
-	case APR:
-	case JAN:
-	case JAN:
-	case JAN:
-	case JAN:
-	case JAN:
-	case JAN:
-	case JAN:
-	case JAN:
-
-	}*/
 }
 
 //GetCropID fulfils the crops.CropType interface
