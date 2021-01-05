@@ -67,8 +67,10 @@ func createTestCrop() Crop {
 	cs := CropSchedule{StartPlantingDate: st, LastPlantingDate: et, DaysToMaturity: 100}
 
 	//Production Function
-	mc := []float64{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}
-	pf := NewProductionFunction(mc, cs, 1.0, .1)
+	mcfp := []float64{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}
+	mclp := []float64{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}
+	fc := []float64{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}
+	pf := NewProductionFunction(mcfp, mclp, fc, cs, 1.0, .1)
 
 	//Damage Function
 	one := []float64{1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1, 10.1, 11.1, 12.1}
