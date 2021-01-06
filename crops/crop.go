@@ -15,14 +15,16 @@ import (
 
 //Crop describes a crop that can be used to compute agricultural consequences
 type Crop struct {
-	ID                 int
-	Name               string
-	Yeild              float64
-	PricePerUnit       float64
-	ValuePerOutputUnit float64
-	ProductionFunction productionFunction
-	LossFunction       DamageFunction
-	CropSchedule       CropSchedule
+	id                 byte
+	name               string
+	x                  float64
+	y                  float64
+	yeild              float64
+	pricePerUnit       float64
+	valuePerOutputUnit float64
+	productionFunction productionFunction
+	lossFunction       DamageFunction
+	cropSchedule       CropSchedule
 }
 
 //xmlCrop is used for reading xml files not for any other real purpose
