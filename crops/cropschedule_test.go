@@ -61,3 +61,16 @@ func TestComputeCropDamageCase_FloodAfterPlanting(t *testing.T) {
 }
 
 //need a winter crop example.
+func TestComputeCropDamageCase_FloodAfterPlanting_WinterCrop(t *testing.T) {
+	at := time.Date(1984, time.Month(2), 1, 0, 0, 0, 0, time.UTC)
+	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 12}
+	st := time.Date(1983, time.Month(12), 25, 0, 0, 0, 0, time.UTC)
+	et := time.Date(1983, time.Month(12), 31, 0, 0, 0, 0, time.UTC)
+
+	cs := CropSchedule{StartPlantingDate: st, LastPlantingDate: et, DaysToMaturity: 100}
+	cdc := cs.ComputeCropDamageCase(h)
+	expected := Impacted
+	if cdc != expected {
+		t.Errorf("ComputeCropDamageCase() = %v; expected %v", cdc, expected)
+	}
+}
