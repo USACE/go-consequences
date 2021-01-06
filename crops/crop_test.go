@@ -52,6 +52,29 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
 	}
 }
+func TestCropDamage(t *testing.T) {
+	//get crop
+	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
+	path := "C:\\Temp\\agtesting\\" + cropFromNass.GetCropName() + ".crop"
+	c := ReadFromXML(path)
+	// construct hazard
+	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
+	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
+	//compute
+	cd := c.ComputeConsequences(h)
+	//expected results
+	expectedcase := Impacted
+	expecteddamage := 10.0 //temporary value for testing
+
+	//test
+	if cd.Result.Result[1] != expectedcase {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	}
+	if cd.Result.Result[2] != expecteddamage {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	}
+
+}
 func TestReadFromXML(t *testing.T) {
 	//"C:\\Temp\\agtesting\\Corn.crop"
 	path := "C:\\Temp\\agtesting\\Corn.crop"

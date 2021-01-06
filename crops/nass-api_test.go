@@ -17,10 +17,10 @@ func TestNassStatsByBbox(t *testing.T) {
 func TestNassCDLValue(t *testing.T) {
 	//https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLValue?year=2018&x=1551565.363&y=1909363.537
 	result := GetCDLValue("2018", "1551565.363", "1909363.537")
-	if result == "" {
+	if result.GetCropName() == "" {
 		t.Error("GetCDLValue() yeilded nothing;")
 	}
-	fmt.Println(result)
+	//fmt.Println(result)
 }
 func TestNassCDLFile(t *testing.T) {
 	//requires write access to C:\\Temp\\agtesting

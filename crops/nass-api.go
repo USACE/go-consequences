@@ -108,11 +108,11 @@ func nassStatsAPI(url string) StatisticsResult {
 }
 
 //GetCDLValue returns a crop type for a year and x,y coordinates in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
-func GetCDLValue(year string, x string, y string) string {
+func GetCDLValue(year string, x string, y string) Crop {
 	url := fmt.Sprintf("%sGetCDLValue?year=%s&x=%s&y=%s", apiStatsURL, year, x, y) //malformed json keys are not quoted.
 	return nassCDLValueAPI(url)
 }
-func nassCDLValueAPI(url string) string {
+func nassCDLValueAPI(url string) Crop {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -120,7 +120,7 @@ func nassCDLValueAPI(url string) string {
 	response, err := client.Get(url)
 	if err != nil {
 		fmt.Println(err)
-		return ""
+		return Crop{}
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
@@ -130,9 +130,18 @@ func nassCDLValueAPI(url string) string {
 		s := string(xmlData)
 		fmt.Println(s)
 		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
-		return ""
+		return Crop{}
 	}
-	return result.Result
+	nobrackets := strings.Trim(result.Result, "{}")
+	kvs := strings.Split(nobrackets, ", ")
+	value := strings.Split(kvs[2], ": ")[1]
+	category := strings.Trim(strings.Split(kvs[3], ": ")[1], "\"")
+	x, _ := strconv.ParseFloat(strings.Split(kvs[0], ": ")[1], 64)
+	y, _ := strconv.ParseFloat(strings.Split(kvs[1], ": ")[1], 64)
+	v, _ := strconv.Atoi(value)
+	c := BuildCrop(byte(v), category)
+	c = c.WithLocation(x, y)
+	return c
 }
 
 //GetCDLFileByFIPS stores a NASS CDL Geotif for a given year and county FIPS
