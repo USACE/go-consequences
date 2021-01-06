@@ -6,10 +6,12 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
+//DamageFunction manages the methodology for computing damages to crops based on a duration and seasonal damage curves
 type DamageFunction struct {
 	DurationDamageCurves map[float64][]float64 //[days]][]damages by month in percents
 }
 
+//ComputeDamagePercent takes an input Arrival time and duration based event and produces a duration damage based on the season of the start of the impact.
 func (df DamageFunction) ComputeDamagePercent(h hazards.ArrivalandDurationEvent) float64 {
 	//find the duration curves above and below the duration of the event
 	previousKey := 0.0
@@ -19,7 +21,7 @@ func (df DamageFunction) ComputeDamagePercent(h hazards.ArrivalandDurationEvent)
 	hazardMonth := h.ArrivalTime.Month() //iota "enum"
 	hazardMonthIndex := int(hazardMonth) - 1
 	keys := make([]float64, 0)
-	for k, _ := range df.DurationDamageCurves {
+	for k := range df.DurationDamageCurves {
 		keys = append(keys, k)
 	}
 	sort.Float64s(keys)
@@ -30,11 +32,10 @@ func (df DamageFunction) ComputeDamagePercent(h hazards.ArrivalandDurationEvent)
 				//linearly interpolate to zero?
 				factor := h.DurationInDays / k
 				return v[hazardMonthIndex] * factor //return the damage percentage.
-			} else {
-				//interpolate
-				factor := (k - h.DurationInDays) / (k - previousKey)
-				return previousValue[hazardMonthIndex] + factor*(v[hazardMonthIndex]-previousValue[hazardMonthIndex]) //return the damage percentage.
 			}
+			//interpolate
+			factor := (k - h.DurationInDays) / (k - previousKey)
+			return previousValue[hazardMonthIndex] + factor*(v[hazardMonthIndex]-previousValue[hazardMonthIndex]) //return the damage percentage.
 		}
 		previousKey = k
 		previousValue = v

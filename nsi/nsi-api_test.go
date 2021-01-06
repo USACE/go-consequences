@@ -20,8 +20,8 @@ func TestNsiStatsByFips(t *testing.T) {
 	var fips string = "15005" //Kalawao county (smallest county in the us by population)stats?bbox=-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165
 	stats := GetStatsByFips(fips)
 	fmt.Println(stats)
-	if stats.Sum_Struct_Val != 101.111 {
-		t.Errorf("GetByFips(%s) yeilded %f structures; expected 101", fips, stats.Sum_Struct_Val)
+	if stats.SumStructVal != 101.111 {
+		t.Errorf("GetByFips(%s) yeilded %f structures; expected 101", fips, stats.SumStructVal)
 	}
 }
 func TestNsiByFipsStream(t *testing.T) {
@@ -39,7 +39,7 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(len(f))
 	index := 0
-	for ss, _ := range f {
+	for ss := range f {
 		go func(sfips string) {
 			defer wg.Done()
 			GetByFipsStream(sfips, func(str NsiFeature) {
@@ -65,9 +65,9 @@ func TestNsiByBbox(t *testing.T) {
 func TestNsiStatsByBbox(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	stats := GetStatsByBbox(bbox)
-	diff := stats.Sum_Struct_Val - 953459824.285892
+	diff := stats.SumStructVal - 953459824.285892
 	if math.Abs(diff) > 0.0000009 {
-		t.Errorf("GetByBox(%s) yeilded structure value of %f; expected 953459824.285892", bbox, stats.Sum_Struct_Val)
+		t.Errorf("GetByBox(%s) yeilded structure value of %f; expected 953459824.285892", bbox, stats.SumStructVal)
 	}
 }
 func TestNsiByBboxStream(t *testing.T) {

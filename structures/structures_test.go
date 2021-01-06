@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
 )
@@ -16,7 +17,7 @@ func TestComputeConsequences(t *testing.T) {
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	pd := paireddata.PairedData{Xvals: x, Yvals: y}
 	var o = OccupancyTypeDeterministic{Name: "test", Structuredamfun: pd, Contentdamfun: pd}
-	var s = StructureDeterministic{OccType: o, DamCat: "category", StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
 	var d = hazards.DepthEvent{Depth: 0.0}
@@ -24,7 +25,7 @@ func TestComputeConsequences(t *testing.T) {
 	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0}
 	for idx := range depths {
 		d.Depth = depths[idx]
-		got := s.ComputeConsequences(d).Results[0].(float64)
+		got := s.ComputeConsequences(d).Result.Result[0].(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
 			t.Errorf("ComputeConsequences(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
@@ -32,7 +33,7 @@ func TestComputeConsequences(t *testing.T) {
 	}
 	//test interpolation due to foundation height putting depth back in range
 	s.FoundHt = 1.1
-	got := s.ComputeConsequences(d).Results[0].(float64)
+	got := s.ComputeConsequences(d).Result.Result[0].(float64)
 	if got != 39.0 {
 		t.Errorf("ComputeConsequences(%f) = %f; expected %f", 39.0, got, 39.0)
 	}
@@ -50,10 +51,10 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 
 	sv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
 	cv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
-	spv := ParameterValue{Value: sv}
-	cpv := ParameterValue{Value: cv}
-	fhpv := ParameterValue{Value: 0}
-	var s = StructureStochastic{OccType: o, DamCat: "category", StructVal: spv, ContVal: cpv, FoundHt: fhpv}
+	spv := consequences.ParameterValue{Value: sv}
+	cpv := consequences.ParameterValue{Value: cv}
+	fhpv := consequences.ParameterValue{Value: 0}
+	var s = StructureStochastic{OccType: o, StructVal: spv, ContVal: cpv, FoundHt: fhpv, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
 	var d = hazards.DepthEvent{Depth: 0.0}
@@ -61,7 +62,7 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	expectedResults := []float64{0.0, 0.0, -.052138, -0.030335, -0.122390, -0.088922, -0.146414, 0.205319, 0.108698, -0.625010}
 	for idx := range depths {
 		d.Depth = depths[idx]
-		got := s.ComputeConsequences(d).Results[0].(float64)
+		got := s.ComputeConsequences(d).Result.Result[0].(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .000001 {
 			t.Errorf("ComputeConsequences(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])

@@ -30,3 +30,11 @@ func TestNassCDLFile(t *testing.T) {
 	}
 	//fmt.Println(result)
 }
+func TestNassCDLFileFiltered(t *testing.T) {
+	//requires write access to C:\\Temp\\agtesting
+	result := GetCDLFileByFIPSFiltered("2018", "19015", "1,5")
+	if !result {
+		t.Error("GetCDLFileByFIPSFiltered() returned false;")
+	}
+	//fmt.Println(result)
+}

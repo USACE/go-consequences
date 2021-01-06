@@ -8,39 +8,43 @@ import (
 	"net/http"
 )
 
+//NSIStats is a struct describing the NSI Statistics endpoint json body return
 type NSIStats struct {
-	Count                 int     `json:"num_structures"`
-	Min_Year_Built        int     `json:"yrbuilt_min"`
-	Max_Year_Built        int     `json:"yrbuilt_max"`
-	Max_Median_Year_Built int     `json:"med_yr_blt_max"`
-	Max_Ground_Elevation  float64 `json:"ground_elv_max"`
-	Min_Ground_Elevation  float64 `json:"ground_elv_min"`
-	Sum_ResUnits          int     `json:"resunits_sum"`
-	Sum_Emp               int     `json:"empnum_sum"`
-	Sum_Teachers          int     `json:"teachers_sum"`
-	Sum_Sqft              float64 `json:"sqft_sum"`
-	Sum_PoP_2AMO65        int     `json:"pop2amo65_sum"`
-	Sum_PoP_2AMU65        int     `json:"pop2amu65_sum"`
-	Sum_PoP_2PMO65        int     `json:"pop2pmo65_sum"`
-	Sum_PoP_2PMU65        int     `json:"pop2pmu65_sum"`
-	Sum_Students          int     `json:"students_sum"`
-	Sum_Struct_Val        float64 `json:"val_struct_sum"`
-	Sum_Cont_Val          float64 `json:"val_cont_sum"`
-	Sum_Vehic_Val         float64 `json:"val_vehic_sum"`
-	Mean_NumStory         float64 `json:"num_story_mean"`
-	Mean_Sqft             float64 `json:"sqft_mean"`
+	Count              int     `json:"num_structures"`
+	MinYearBuilt       int     `json:"yrbuilt_min"`
+	MaxYearBuilt       int     `json:"yrbuilt_max"`
+	MedianYearBuilt    int     `json:"med_yr_blt_max"`
+	MaxGroundElevation float64 `json:"ground_elv_max"`
+	MinGroundElevation float64 `json:"ground_elv_min"`
+	SumResUnits        int     `json:"resunits_sum"`
+	SumEmp             int     `json:"empnum_sum"`
+	SumTeachers        int     `json:"teachers_sum"`
+	SumSqft            float64 `json:"sqft_sum"`
+	SumPoP2AMO65       int     `json:"pop2amo65_sum"`
+	SumPoP2AMU65       int     `json:"pop2amu65_sum"`
+	SumPoP2PMO65       int     `json:"pop2pmo65_sum"`
+	SumPoP2PMU65       int     `json:"pop2pmu65_sum"`
+	SumStudents        int     `json:"students_sum"`
+	SumStructVal       float64 `json:"val_struct_sum"`
+	SumContVal         float64 `json:"val_cont_sum"`
+	SumVehicVal        float64 `json:"val_vehic_sum"`
+	MeanNumStory       float64 `json:"num_story_mean"`
+	MeanSqft           float64 `json:"sqft_mean"`
 }
 
-var apiStatsUrl string = "https://nsi-dev.sec.usace.army.mil/nsiapi/stats" //this will only work behind the USACE firewall -
+var apiStatsURL string = "https://nsi-dev.sec.usace.army.mil/nsiapi/stats" //this will only work behind the USACE firewall -
+//GetStatsByFips is intended to return NSIStats for a FIPS code however, it currently does not work.
 func GetStatsByFips(fips string) NSIStats {
-	url := fmt.Sprintf("%s?fips=%s", apiStatsUrl, fips)
-	return nsiStatsApi(url)
+	url := fmt.Sprintf("%s?fips=%s", apiStatsURL, fips)
+	return nsiStatsAPI(url)
 }
+
+//GetStatsByBbox returns an NSIStats for a bounding box.
 func GetStatsByBbox(bbox string) NSIStats {
-	url := fmt.Sprintf("%s?bbox=%s", apiStatsUrl, bbox)
-	return nsiStatsApi(url)
+	url := fmt.Sprintf("%s?bbox=%s", apiStatsURL, bbox)
+	return nsiStatsAPI(url)
 }
-func nsiStatsApi(url string) NSIStats {
+func nsiStatsAPI(url string) NSIStats {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
