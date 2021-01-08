@@ -56,7 +56,6 @@ func (c *Crop) WithCropSchedule(cs CropSchedule) Crop {
 	return *c
 }
 
-
 //GetCropID fulfils the crops.CropType interface
 func (c Crop) GetCropID() byte {
 	return c.id
@@ -96,7 +95,7 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 			//huh?
 			damage = 0.0
 		case Impacted:
-			damage = 10
+			damage = c.computeImpactedCase(da)
 		case NotImpactedDuringSeason:
 			damage = 0.0
 		case PlantingDelayed:
@@ -114,4 +113,8 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 
 	r := consequences.Results{IsTable: false, Result: ret}
 	return r
+}
+func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
+	//USE FIA MANUAL TO FILL IN LOGIC
+	return 10
 }
