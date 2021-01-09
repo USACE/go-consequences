@@ -116,5 +116,18 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 }
 func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	//USE FIA MANUAL TO FILL IN LOGIC
+	if e.ArrivalTime.Before(c.cropSchedule.StartPlantingDate) {
+		println("arrival time is BEFORE planting")
+	}
+	if e.ArrivalTime.After(c.cropSchedule.StartPlantingDate) {
+		println("arrival time is AFTER planting, planting dates not impacted")
+		perdmg := c.lossFunction.ComputeDamagePercent(e)
+		println("damage percent is ", perdmg)
+		//cumcost := c.productionFunction.GetCumulativeMonthlyProductionCostsEarly()
+		prcunit := c.pricePerUnit
+		println("loss per unit is", prcunit)
+		loss := (perdmg / 100) * prcunit
+		println("Loss is:", loss)
+	}
 	return 10
 }
