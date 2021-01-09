@@ -130,11 +130,11 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 		if val, ok := rmap[str.DamCat]; ok {
 			//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
 			val.StructureCount++
-			val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
-			val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
+			val.StructureDamage += r.Result.Result[0].(float64) //based on convention - super risky
+			val.ContentDamage += r.Result.Result[1].(float64)   //based on convention - super risky
 			rmap[str.DamCat] = val
 		} else {
-			rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
+			rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Result.Result[0].(float64), ContentDamage: r.Result.Result[1].(float64)}
 		}
 		//s.Status = fmt.Sprintf("Computing Damages %d of %d", i, len(s.Structures))
 	}
@@ -181,11 +181,11 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 			r := str.ComputeConsequences(depthevent)
 			if val, ok := rmap[str.DamCat]; ok {
 				val.StructureCount++
-				val.StructureDamage += r.Results[0].(float64) //based on convention - super risky
-				val.ContentDamage += r.Results[1].(float64)   //based on convention - super risky
+				val.StructureDamage += r.Result.Result[0].(float64) //based on convention - super risky
+				val.ContentDamage += r.Result.Result[1].(float64)   //based on convention - super risky
 				rmap[str.DamCat] = val
 			} else {
-				rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Results[0].(float64), ContentDamage: r.Results[1].(float64)}
+				rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Result.Result[0].(float64), ContentDamage: r.Result.Result[1].(float64)}
 			}
 		})
 	}
