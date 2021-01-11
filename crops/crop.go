@@ -1,6 +1,8 @@
 package crops
 
 import (
+	"fmt"
+
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 )
@@ -121,13 +123,20 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	}
 	if e.ArrivalTime.After(c.cropSchedule.StartPlantingDate) {
 		println("arrival time is AFTER planting, planting dates not impacted")
+		// Determine damage percent based on damage dur curve and event dur
 		perdmg := c.lossFunction.ComputeDamagePercent(e)
-		println("damage percent is ", perdmg)
-		//cumcost := c.productionFunction.GetCumulativeMonthlyProductionCostsEarly()
-		prcunit := c.pricePerUnit
-		println("loss per unit is", prcunit)
-		loss := (perdmg / 100) * prcunit
-		println("Loss is:", loss)
+		fmt.Println("damage percent is ", perdmg)
+		// Seems like area of cell is required
+		area := 1.0
+		croploss := (perdmg / 100) * c.pricePerUnit * c.yeild * area
+		fmt.Println("Crop loss is : ", croploss)
+		// value added to field before loss.
+		fmt.Println("pruduction costs are:", c.productionFunction.productionCostLessHarvest)
+		loss := croploss + c.productionFunction.productionCostLessHarvest
+		fmt.Println("total loss is:", loss)
+		if loss > c.pricePerUnit*c.yeild*area {
+			// Throw some error
+		}
 	}
 	return 10
 }
