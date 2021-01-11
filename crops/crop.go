@@ -101,7 +101,7 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 		case NotImpactedDuringSeason:
 			damage = 0.0
 		case PlantingDelayed:
-			damage = 1.0
+			damage = c.computeDelayedCase(da)
 		case NotPlanted:
 			damage = 0.0 //fixed costs?
 		case SubstituteCrop:
@@ -117,26 +117,27 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 	return r
 }
 func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
-	//USE FIA MANUAL TO FILL IN LOGIC
-	if e.ArrivalTime.Before(c.cropSchedule.StartPlantingDate) {
-		println("arrival time is BEFORE planting")
-	}
-	if e.ArrivalTime.After(c.cropSchedule.StartPlantingDate) {
-		println("arrival time is AFTER planting, planting dates not impacted")
-		// Determine damage percent based on damage dur curve and event dur
-		perdmg := c.lossFunction.ComputeDamagePercent(e)
-		fmt.Println("damage percent is ", perdmg)
-		// Seems like area of cell is required
-		area := 1.0
-		croploss := (perdmg / 100) * c.pricePerUnit * c.yeild * area
-		fmt.Println("Crop loss is : ", croploss)
-		// value added to field before loss.
-		fmt.Println("pruduction costs are:", c.productionFunction.productionCostLessHarvest)
-		loss := croploss + c.productionFunction.productionCostLessHarvest
-		fmt.Println("total loss is:", loss)
-		if loss > c.pricePerUnit*c.yeild*area {
-			// Throw some error
-		}
+	// Determine damage percent based on damage dur curve and event dur
+	perdmg := c.lossFunction.ComputeDamagePercent(e)
+	fmt.Println("damage percent is ", perdmg)
+	area := 1.0 // Seems like area of cell is required
+	croploss := (perdmg / 100) * c.pricePerUnit * c.yeild * area
+	fmt.Println("Crop loss is : ", croploss)
+	// value added to field before loss by production
+	fmt.Println("pruduction costs are:", c.productionFunction.productionCostLessHarvest)
+	loss := croploss + c.productionFunction.productionCostLessHarvest
+	fmt.Println("total loss is:", loss)
+	if loss > c.pricePerUnit*c.yeild*area {
+		// Throw some error
 	}
 	return 10
+}
+func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
+	// This is equivalent to total marketable value less harvest cost, times one minus the percent loss due to late planting
+	area := 1.0 // Seems like area of cell is required
+	valuelessharvest := (c.pricePerUnit * c.yeild * area) - c.productionFunction.harvestCost
+	croploss := (valuelessharvest) * c.productionFunction.lossFromLatePlanting
+	fmt.Println("total loss is : ", croploss)
+
+	return 0.0
 }
