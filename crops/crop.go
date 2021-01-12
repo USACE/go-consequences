@@ -34,7 +34,7 @@ func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
 	return *c
 }
 
-//WithOutput allows the setting of the yeild per acre and price per unit of output
+//WithOutput allows the setting of the yeild per acre and price per unit of output and resulting value per output
 func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
 	c.yeild = cropYeild
 	c.pricePerUnit = price
@@ -80,6 +80,10 @@ func (c Crop) GetY() float64 {
 	return c.y
 }
 
+func (c Crop) GetValuePerOutputUnit() float64 {
+	return c.valuePerOutputUnit
+}
+
 //ComputeConsequences implements concequence receptor on crop
 func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 	//Check event to determine if it is an arrival time and duration event
@@ -123,11 +127,11 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Determine damage percent based on damage dur curve and event dur
 	perdmg := c.lossFunction.ComputeDamagePercent(e)
 	fmt.Println("damage percent is ", perdmg)
-	croploss := (perdmg / 100) * c.valuePerOutputUnit
+	croploss := (perdmg / 100) * c.GetValuePerOutputUnit()
 	fmt.Println("Crop loss is : ", croploss)
 	// value added to field before loss by production
 	fmt.Println("total pruduction costs are:", c.productionFunction.productionCostLessHarvest)
-	fmt.Println("fixed costs are: ", c.productionFunction.fixedCosts)
+	fmt.Println("fixed costs are: ", c.productionFunction.GetfixedCosts())
 	loss := croploss + c.productionFunction.productionCostLessHarvest
 	fmt.Println("total loss is:", loss)
 	if loss > c.valuePerOutputUnit {
@@ -138,7 +142,7 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 func (c Crop) computeDelayedCase() float64 {
 	// delayed loss is equivalent to total marketable value less harvest cost, times the percent loss due to late planting
 	// Not using interpolated % loss for late plant
-	valuelessharvest := (c.valuePerOutputUnit) - c.productionFunction.harvestCost
+	valuelessharvest := (c.GetValuePerOutputUnit()) - c.productionFunction.harvestCost
 	croploss := (valuelessharvest) * c.productionFunction.lossFromLatePlanting
 	fmt.Println("total loss is : ", croploss)
 	return croploss
@@ -146,7 +150,7 @@ func (c Crop) computeDelayedCase() float64 {
 
 func (c Crop) computeNotPlantedCase() float64 {
 	// Assume Loss is only fixed costs
-	return c.productionFunction.fixedCosts
+	return c.productionFunction.GetfixedCosts()
 }
 
 func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {

@@ -11,6 +11,10 @@ type productionFunction struct {
 	fixedCosts                            float64
 }
 
+func (p productionFunction) GetfixedCosts() float64 {
+	return p.fixedCosts
+}
+
 //NewProductionFunction is the constructor for the unexported productionFunction which represents the costs associated with producing a crop
 func NewProductionFunction(mcfp []float64, mclp []float64, mfc []float64, cs CropSchedule, hc float64, latePlantingLoss float64) productionFunction {
 	pf := productionFunction{
