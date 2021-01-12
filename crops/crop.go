@@ -80,6 +80,7 @@ func (c Crop) GetY() float64 {
 	return c.y
 }
 
+//GetValuePerOutputUnit returns valuePerOutputUnit
 func (c Crop) GetValuePerOutputUnit() float64 {
 	return c.valuePerOutputUnit
 }
