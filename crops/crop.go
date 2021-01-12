@@ -15,7 +15,7 @@ type Crop struct {
 	y                  float64
 	yeild              float64
 	pricePerUnit       float64
-	valuePerOutputUnit float64
+	valuePerOutputUnit float64 //Marketable value yeild *pricePerUnit
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
@@ -37,6 +37,7 @@ func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
 func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
 	c.yeild = cropYeild
 	c.pricePerUnit = price
+	c.valuePerOutputUnit = cropYeild * price
 	return *c
 }
 
@@ -120,22 +121,22 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Determine damage percent based on damage dur curve and event dur
 	perdmg := c.lossFunction.ComputeDamagePercent(e)
 	fmt.Println("damage percent is ", perdmg)
-	area := 1.0 // Seems like area of cell is required
-	croploss := (perdmg / 100) * c.pricePerUnit * c.yeild * area
+
+	croploss := (perdmg / 100) * c.valuePerOutputUnit
 	fmt.Println("Crop loss is : ", croploss)
 	// value added to field before loss by production
 	fmt.Println("pruduction costs are:", c.productionFunction.productionCostLessHarvest)
 	loss := croploss + c.productionFunction.productionCostLessHarvest
 	fmt.Println("total loss is:", loss)
-	if loss > c.pricePerUnit*c.yeild*area {
+	if loss > c.valuePerOutputUnit {
 		// Throw some error
 	}
 	return 10
 }
 func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// This is equivalent to total marketable value less harvest cost, times one minus the percent loss due to late planting
-	area := 1.0 // Seems like area of cell is required
-	valuelessharvest := (c.pricePerUnit * c.yeild * area) - c.productionFunction.harvestCost
+	// try switching to access modifiers
+	valuelessharvest := (c.valuePerOutputUnit) - c.productionFunction.harvestCost
 	croploss := (valuelessharvest) * c.productionFunction.lossFromLatePlanting
 	fmt.Println("total loss is : ", croploss)
 
