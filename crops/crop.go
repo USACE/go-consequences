@@ -14,8 +14,6 @@ type Crop struct {
 	substituteName     string
 	x                  float64
 	y                  float64
-	yeild              float64
-	pricePerUnit       float64
 	valuePerOutputUnit float64 //Marketable value yeild *pricePerUnit
 	productionFunction productionFunction
 	lossFunction       DamageFunction
@@ -36,8 +34,6 @@ func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
 
 //WithOutput allows the setting of the yeild per acre and price per unit of output and resulting value per output
 func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
-	c.yeild = cropYeild
-	c.pricePerUnit = price
 	c.valuePerOutputUnit = cropYeild * price
 	return *c
 }
