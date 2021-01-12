@@ -8,6 +8,7 @@ type productionFunction struct {
 	cumulativeMonthlyProductionCostsLate  []float64
 	productionCostLessHarvest             float64 //sum monthly or find max of cumulative...
 	lossFromLatePlanting                  float64
+	fixedCosts                            float64
 }
 
 //NewProductionFunction is the constructor for the unexported productionFunction which represents the costs associated with producing a crop
@@ -16,11 +17,12 @@ func NewProductionFunction(mcfp []float64, mclp []float64, mfc []float64, cs Cro
 		harvestCost:          hc,
 		lossFromLatePlanting: latePlantingLoss,
 	}
-	cmce, pclhe := cumulateMonthlyCosts(mcfp, mfc, cs.StartPlantingDate, cs.DaysToMaturity)
+	cmce, pclhe, fxe := cumulateMonthlyCosts(mcfp, mfc, cs.StartPlantingDate, cs.DaysToMaturity)
 	pf.cumulativeMonthlyProductionCostsEarly = cmce
-	cmcl, _ := cumulateMonthlyCosts(mclp, mfc, cs.LastPlantingDate, cs.DaysToMaturity)
+	cmcl, _, _ := cumulateMonthlyCosts(mclp, mfc, cs.LastPlantingDate, cs.DaysToMaturity)
 	pf.cumulativeMonthlyProductionCostsLate = cmcl
 	pf.productionCostLessHarvest = pclhe //is this appropriate should i store both to ensure proper accounting??
+	pf.fixedCosts = fxe
 	return pf
 }
 func isLeapYear(year int) bool {
@@ -45,9 +47,10 @@ func isLeapYear(year int) bool {
 func (p productionFunction) GetCumulativeMonthlyProductionCostsEarly() []float64 {
 	return p.cumulativeMonthlyProductionCostsEarly
 }
-func cumulateMonthlyCosts(mc []float64, fc []float64, start time.Time, daysToMaturity int) ([]float64, float64) {
+func cumulateMonthlyCosts(mc []float64, fc []float64, start time.Time, daysToMaturity int) ([]float64, float64, float64) {
 	//this process assumes days to maturity is less than 1 year.
 	totalCosts := 0.0
+	fixedCosts := 0.0
 	cmc := make([]float64, 12)
 	daysInYear := 365
 	if isLeapYear(start.Year()) {
@@ -79,9 +82,11 @@ func cumulateMonthlyCosts(mc []float64, fc []float64, start time.Time, daysToMat
 				updated = true
 			}
 		}
+		fixedCosts += fc[startMonthIndex+counter]
 		totalCosts += mc[startMonthIndex+counter] + fc[startMonthIndex+counter]
 		cmc[startMonthIndex+counter] = totalCosts
+
 		counter++
 	}
-	return cmc, totalCosts
+	return cmc, totalCosts, fixedCosts
 }

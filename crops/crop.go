@@ -11,6 +11,7 @@ import (
 type Crop struct {
 	id                 byte
 	name               string
+	substituteName     string
 	x                  float64
 	y                  float64
 	yeild              float64
@@ -102,10 +103,11 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 		case NotImpactedDuringSeason:
 			damage = 0.0
 		case PlantingDelayed:
-			damage = c.computeDelayedCase(da)
+			damage = c.computeDelayedCase()
 		case NotPlanted:
-			damage = 0.0 //fixed costs?
+			damage = c.computeDelayedCase()
 		case SubstituteCrop:
+			// case for sbustitute crop not yet implemented
 			//get the substitute, and compute damages on it... hope for no infinate loop.
 			damage = 0.0
 		default:
@@ -121,11 +123,11 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Determine damage percent based on damage dur curve and event dur
 	perdmg := c.lossFunction.ComputeDamagePercent(e)
 	fmt.Println("damage percent is ", perdmg)
-
 	croploss := (perdmg / 100) * c.valuePerOutputUnit
 	fmt.Println("Crop loss is : ", croploss)
 	// value added to field before loss by production
-	fmt.Println("pruduction costs are:", c.productionFunction.productionCostLessHarvest)
+	fmt.Println("total pruduction costs are:", c.productionFunction.productionCostLessHarvest)
+	fmt.Println("fixed costs are: ", c.productionFunction.fixedCosts)
 	loss := croploss + c.productionFunction.productionCostLessHarvest
 	fmt.Println("total loss is:", loss)
 	if loss > c.valuePerOutputUnit {
@@ -133,12 +135,20 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	}
 	return 10
 }
-func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
-	// This is equivalent to total marketable value less harvest cost, times one minus the percent loss due to late planting
-	// try switching to access modifiers
+func (c Crop) computeDelayedCase() float64 {
+	// delayed loss is equivalent to total marketable value less harvest cost, times the percent loss due to late planting
+	// Not using interpolated % loss for late plant
 	valuelessharvest := (c.valuePerOutputUnit) - c.productionFunction.harvestCost
 	croploss := (valuelessharvest) * c.productionFunction.lossFromLatePlanting
 	fmt.Println("total loss is : ", croploss)
+	return croploss
+}
 
+func (c Crop) computeNotPlantedCase() float64 {
+	// Assume Loss is only fixed costs
+	return c.productionFunction.fixedCosts
+}
+
+func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
 	return 0.0
 }
