@@ -106,11 +106,11 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 		case PlantingDelayed:
 			damage = c.computeDelayedCase()
 		case NotPlanted:
-			damage = c.computeDelayedCase()
+			damage = c.computeNotPlantedCase()
 		case SubstituteCrop:
 			// case for sbustitute crop not yet implemented
 			//get the substitute, and compute damages on it... hope for no infinate loop.
-			damage = 0.0
+			damage = c.computeSubstitueCase(da)
 		default:
 			damage = 0.0
 		}
