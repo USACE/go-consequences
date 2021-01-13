@@ -11,7 +11,7 @@ type productionFunction struct {
 	fixedCosts                            float64
 }
 
-func (p productionFunction) GetfixedCosts() float64 {
+func (p productionFunction) GetTotalFixedCosts() float64 {
 	return p.fixedCosts
 }
 
@@ -54,7 +54,7 @@ func (p productionFunction) GetCumulativeMonthlyProductionCostsEarly() []float64
 func cumulateMonthlyCosts(mc []float64, fc []float64, start time.Time, daysToMaturity int) ([]float64, float64, float64) {
 	//this process assumes days to maturity is less than 1 year.
 	totalCosts := 0.0
-	fixedCosts := 0.0
+	totalfixedCosts := 0.0
 	cmc := make([]float64, 12)
 	daysInYear := 365
 	if isLeapYear(start.Year()) {
@@ -86,11 +86,11 @@ func cumulateMonthlyCosts(mc []float64, fc []float64, start time.Time, daysToMat
 				updated = true
 			}
 		}
-		fixedCosts += fc[startMonthIndex+counter]
+		totalfixedCosts += fc[startMonthIndex+counter]
 		totalCosts += mc[startMonthIndex+counter] + fc[startMonthIndex+counter]
 		cmc[startMonthIndex+counter] = totalCosts
 
 		counter++
 	}
-	return cmc, totalCosts, fixedCosts
+	return cmc, totalCosts, totalfixedCosts
 }

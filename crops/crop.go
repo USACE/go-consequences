@@ -128,7 +128,7 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	fmt.Println("Crop loss is : ", croploss)
 	// value added to field before loss by production
 	fmt.Println("total pruduction costs are:", c.productionFunction.productionCostLessHarvest)
-	fmt.Println("fixed costs are: ", c.productionFunction.GetfixedCosts())
+	fmt.Println("fixed costs are: ", c.productionFunction.GetTotalFixedCosts())
 	loss := croploss + c.productionFunction.productionCostLessHarvest
 	fmt.Println("total loss is:", loss)
 	if loss > c.valuePerOutputUnit {
@@ -147,7 +147,7 @@ func (c Crop) computeDelayedCase() float64 {
 
 func (c Crop) computeNotPlantedCase() float64 {
 	// Assume Loss is only fixed costs
-	return c.productionFunction.GetfixedCosts()
+	return c.productionFunction.GetTotalFixedCosts()
 }
 
 func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
