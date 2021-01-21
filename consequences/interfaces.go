@@ -15,6 +15,16 @@ type Locatable interface {
 	GetY() float64
 }
 
+//BoundingBox represents a rectangular area by extents.
+type BoundingBox struct {
+	//need to support multiple needs here everyone treats this different...
+}
+
+//FIPS is the Federal Information Processing Standard
+type FIPS struct {
+	Code string
+}
+
 //ParameterValue is a way to allow parameters to be either a scalar or a distribution.
 type ParameterValue struct {
 	Value interface{}
