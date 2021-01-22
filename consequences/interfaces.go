@@ -17,11 +17,12 @@ type Receptor interface {
 type Inventory struct {
 	Inventory []Receptor
 }
+
 //ConsequencsProvider defines an interface to provide a consequences Inventory
 type Provider interface {
-	GetInventory(bb BoundingBox) (Inventory, error)
-	GetInventory(fc FIPS) (Inventory, error)
-	GetInventory(filePath string) (Inventory, error)
+	GetInventoryBoundingBox(bb BoundingBox) (Inventory, error)
+	GetInventoryFIPS(fc FIPS) (Inventory, error)
+	GetInventoryFile(filePath string) (Inventory, error)
 	//ProvideStructure(location Locatable) ConsequencesReceptor
 	//ProvideStructure(fdId string) ConsequencesReceptor
 }
