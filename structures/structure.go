@@ -49,7 +49,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 
 //Compute implements the consequences.Receptor interface on StrucutreStochastic
 func (s StructureStochastic) Compute(d interface{}) consequences.Results {
-	return s.SampleStructure(rand.Int63()).ComputeConsequences(d) //this needs work so seeds can be controlled.
+	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
