@@ -56,7 +56,6 @@ func (c *Crop) WithCropSchedule(cs CropSchedule) Crop {
 	return *c
 }
 
-
 //GetCropID fulfils the crops.CropType interface
 func (c Crop) GetCropID() byte {
 	return c.id
@@ -77,8 +76,8 @@ func (c Crop) GetY() float64 {
 	return c.y
 }
 
-//ComputeConsequences implements concequence receptor on crop
-func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
+//Compute implements concequence.Receptor on crop
+func (c Crop) Compute(event interface{}) consequences.Results {
 	//Check event to determine if it is an arrival time and duration event
 	header := []string{"Crop", "Damage Outcome", "Damage"}
 	results := []interface{}{c.name, Unassigned, 0.0}

@@ -126,7 +126,7 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	rmap := make(map[string]SimulationSummaryRow)
 	//s.Status = fmt.Sprintf("Computing Damages %d of %d", 0, len(s.Structures))
 	for _, str := range structures {
-		r := str.ComputeConsequences(d)
+		r := str.Compute(d)
 		if val, ok := rmap[str.DamCat]; ok {
 			//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
 			val.StructureCount++
@@ -178,7 +178,7 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 		defaultOcctype := m["RES1-1SNB"]
 		nsi.GetByFipsStream(fips.FIPS, func(f nsi.NsiFeature) {
 			str := NsiFeaturetoStructure(f, m, defaultOcctype)
-			r := str.ComputeConsequences(depthevent)
+			r := str.Compute(depthevent)
 			if val, ok := rmap[str.DamCat]; ok {
 				val.StructureCount++
 				val.StructureDamage += r.Result.Result[0].(float64) //based on convention - super risky

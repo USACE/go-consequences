@@ -4,10 +4,31 @@ import (
 	"github.com/HenryGeorgist/go-statistics/statistics"
 )
 
-//ConsequenceReceptor is an interface for all things that can have consequences from a hazard event
-type ConsequenceReceptor interface {
-	ComputeConsequences(event interface{}) Results
+//Receptor is an interface for all things that can have consequences from a hazard event
+type Receptor interface {
+	Compute(event interface{}) Results
 }
+
+//
+// work in progress
+//
+
+//Inventory provides a struct to allow for a slice of ConcequenceReceptor
+type Inventory struct {
+	Inventory []Receptor
+}
+//ConsequencsProvider defines an interface to provide a consequences Inventory
+type Provider interface {
+	GetInventory(bb BoundingBox) (Inventory, error)
+	GetInventory(fc FIPS) (Inventory, error)
+	GetInventory(filePath string) (Inventory, error)
+	//ProvideStructure(location Locatable) ConsequencesReceptor
+	//ProvideStructure(fdId string) ConsequencesReceptor
+}
+
+//
+// End work in progress
+//
 
 //Locatable is an interface that defines that a thing can have an x and y location
 type Locatable interface {
