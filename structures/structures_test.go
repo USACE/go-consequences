@@ -55,7 +55,7 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	cpv := consequences.ParameterValue{Value: cv}
 	fhpv := consequences.ParameterValue{Value: 0}
 	var s = StructureStochastic{OccType: o, StructVal: spv, ContVal: cpv, FoundHt: fhpv, BaseStructure: BaseStructure{DamCat: "category"}}
-
+	s.UseUncertainty = true
 	//test depth values
 	var d = hazards.DepthEvent{Depth: 0.0}
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5}

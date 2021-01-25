@@ -20,10 +20,10 @@ type NsiProperties struct {
 	StructVal float64 `json:"val_struct"`
 	ContVal   float64 `json:"val_cont"`
 	CB        string  `json:"cbfips"`
-	Pop2amu65 int32   `json:"pop2amu65`
-	Pop2amo65 int32   `json:"pop2amo65`
-	Pop2pmu65 int32   `json:"pop2pmu65`
-	Pop2pmo65 int32   `json:"pop2pmo65`
+	Pop2amu65 int32   `json:"pop2amu65"`
+	Pop2amo65 int32   `json:"pop2amo65"`
+	Pop2pmu65 int32   `json:"pop2pmu65"`
+	Pop2pmo65 int32   `json:"pop2pmo65"`
 }
 
 //NsiFeature is a feature which contains the properties of a structure from the NSI API

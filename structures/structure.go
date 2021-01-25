@@ -17,6 +17,7 @@ type BaseStructure struct {
 //StructureStochastic is a base structure with an occupancy type stochastic and parameter values for all parameters
 type StructureStochastic struct {
 	BaseStructure
+	UseUncertainty bool//defaults to false!
 	OccType                     OccupancyTypeStochastic
 	StructVal, ContVal, FoundHt consequences.ParameterValue
 }
@@ -40,10 +41,22 @@ func (s BaseStructure) GetY() float64 {
 
 //SampleStructure converts a structureStochastic into a structure deterministic based on an input seed
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
-	ot := s.OccType.SampleOccupancyType(seed)
-	sv := s.StructVal.SampleValue(rand.Float64())
-	cv := s.ContVal.SampleValue(rand.Float64())
-	fh := s.FoundHt.SampleValue(rand.Float64())
+	ot := OccupancyTypeDeterministic{}//Beware null errors!
+	sv := 0.0
+	cv := 0.0
+	fh := 0.0
+	if s.UseUncertainty{
+		ot = s.OccType.SampleOccupancyType(seed)
+		sv = s.StructVal.SampleValue(rand.Float64())
+		cv = s.ContVal.SampleValue(rand.Float64())
+		fh = s.FoundHt.SampleValue(rand.Float64())		
+	}else{
+		ot = s.OccType.CentralTendency()
+		sv = s.StructVal.CentralTendency()
+		cv = s.ContVal.CentralTendency()
+		fh = s.FoundHt.CentralTendency()	
+	}
+
 	return StructureDeterministic{OccType: ot, StructVal: sv, ContVal: cv, FoundHt: fh, BaseStructure: BaseStructure{DamCat: s.DamCat}}
 }
 

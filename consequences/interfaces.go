@@ -18,7 +18,7 @@ type Inventory struct {
 	Inventory []Receptor
 }
 
-//ConsequencsProvider defines an interface to provide a consequences Inventory
+//Provider defines an interface to provide a consequences Inventory
 type Provider interface {
 	GetInventoryBoundingBox(bb BoundingBox) (Inventory, error)
 	GetInventoryFIPS(fc FIPS) (Inventory, error)
@@ -52,9 +52,21 @@ type ParameterValue struct {
 	Value interface{}
 }
 
+//CentralTendency on a ParameterValue is intended to help set structure values content values and foundaiton heights to central tendencies.
+func (p ParameterValue) CentralTendency() float64 {
+	pval, okf := p.Value.(float64) //if the ParameterValue.Value is a float - pass it on back.
+	if okf {
+		return pval
+	}
+	pvaldist, okd := p.Value.(statistics.ContinuousDistribution)
+	if okd {
+		return pvaldist.CentralTendency()
+	}
+	return 0
+}
+
 //SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
 func (p ParameterValue) SampleValue(input interface{}) float64 {
-
 	pval, okf := p.Value.(float64) //if the ParameterValue.Value is a float - pass it on back.
 	if okf {
 		return pval
@@ -66,6 +78,5 @@ func (p ParameterValue) SampleValue(input interface{}) float64 {
 			return pvaldist.InvCDF(inval)
 		}
 	}
-
 	return 0
 }

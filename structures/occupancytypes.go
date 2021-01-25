@@ -24,6 +24,7 @@ type OccupancyTypeDeterministic struct {
 //UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
 type UncertaintyOccupancyTypeSampler interface {
 	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
+	CentralTendencyOccupancyType() OccupancyTypeDeterministic
 }
 
 //SampleOccupancyType implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
@@ -60,6 +61,48 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 		cd3, okc2 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
 		if okc2 {
 			cd = cd3.SampleValueSampler(rand.Float64())
+		} else {
+			//cd = nil
+		}
+	}
+
+	return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+}
+
+//CentralTendency implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
+func (o OccupancyTypeStochastic) CentralTendency() OccupancyTypeDeterministic {
+	sd, oks := o.Structuredamfun.(paireddata.ValueSampler)
+	cd, okc := o.Contentdamfun.(paireddata.ValueSampler)
+	if oks && okc {
+		return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	}
+	//rand.Seed(seed)
+	if oks {
+		cd2, okc1 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if okc1 {
+			cd = cd2.CentralTendency()
+		} else {
+			//cd = nil
+		}
+	} else {
+		sd2, oks1 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if oks1 {
+			sd = sd2.CentralTendency()
+		} else {
+			//sd = nil
+		}
+	}
+	if okc {
+		sd3, oks2 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if oks2 {
+			sd = sd3.CentralTendency()
+		} else {
+			//sd = nil
+		}
+	} else {
+		cd3, okc2 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
+		if okc2 {
+			cd = cd3.CentralTendency()
 		} else {
 			//cd = nil
 		}

@@ -4,8 +4,12 @@ package paireddata
 type ValueSampler interface {
 	SampleValue(inputValue interface{}) float64
 }
+type CentralTendencySampler interface {
+	CentralTendency() float64
+}
 
 //UncertaintyValueSamplerSampler provides an input random number and produces a value sampler (such as a paired data)
 type UncertaintyValueSamplerSampler interface {
 	SampleValueSampler(randomValue float64) ValueSampler
+	CentralTendency() ValueSampler
 }
