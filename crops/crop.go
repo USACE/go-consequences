@@ -104,9 +104,9 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 		case NotImpactedDuringSeason:
 			damage = 0.0
 		case PlantingDelayed:
-			damage = c.computeDelayedCase()
+			damage = c.computeDelayedCase(da)
 		case NotPlanted:
-			damage = c.computeNotPlantedCase()
+			damage = c.computeNotPlantedCase(da)
 		case SubstituteCrop:
 			// case for sbustitute crop not yet implemented
 			//get the substitute, and compute damages on it... hope for no infinate loop.
@@ -121,33 +121,39 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 	return r
 }
 func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
-	// Determine damage percent based on damage dur curve and event dur
+	// Determine crop damage percent based on damage dur curve and event dur
 	perdmg := c.lossFunction.ComputeDamagePercent(e)
-	fmt.Println("damage percent is ", perdmg)
 	croploss := (perdmg / 100) * c.GetValuePerOutputUnit()
-	fmt.Println("Crop loss is : ", croploss)
-	// value added to field before loss by production
-	fmt.Println("total pruduction costs are:", c.productionFunction.productionCostLessHarvest)
-	fmt.Println("fixed costs are: ", c.productionFunction.GetTotalFixedCosts())
-	loss := croploss + c.productionFunction.productionCostLessHarvest
-	fmt.Println("total loss is:", loss)
-	if loss > c.valuePerOutputUnit {
-		// Throw some error
+	// Determin value added to field by production before loss
+	hazardMonth := e.ArrivalTime.Month() //iota "enum"
+	hazardMonthIndex := int(hazardMonth) - 1
+	loss := croploss + c.productionFunction.cumulativeMonthlyProductionCostsEarly[hazardMonthIndex]
+	if croploss > c.GetValuePerOutputUnit() {
+		panic("Losses are greater than porduct value! GET SUBSIDY")
 	}
-	return 10
+	return loss
 }
-func (c Crop) computeDelayedCase() float64 {
+func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// delayed loss is equivalent to total marketable value less harvest cost, times the percent loss due to late planting
 	// Not using interpolated % loss for late plant
-	valuelessharvest := (c.GetValuePerOutputUnit()) - c.productionFunction.harvestCost
-	croploss := (valuelessharvest) * c.productionFunction.lossFromLatePlanting
-	fmt.Println("total loss is : ", croploss)
-	return croploss
+	plantingWindow := (c.cropSchedule.LastPlantingDate.Sub(c.cropSchedule.StartPlantingDate).Hours() / 24)
+	fmt.Println(plantingWindow)
+	actualPlant := (e.ArrivalTime.AddDate(0, 0, int(e.DurationInDays)))
+	fmt.Println(actualPlant)
+	daysLate := (actualPlant.Sub(c.cropSchedule.StartPlantingDate.AddDate(actualPlant.Year(), 0, 0))).Hours() / 24
+	fmt.Println(daysLate)
+	factor := (daysLate / plantingWindow) * c.productionFunction.lossFromLatePlanting / 100
+	fmt.Println("factor is : ", factor)
+	delayedValue := c.GetValuePerOutputUnit() * (1 - factor)
+	fmt.Println("total loss is : ", delayedValue)
+	return 0.0 //temp vlue to pass test before hand calc
 }
 
-func (c Crop) computeNotPlantedCase() float64 {
+func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Assume Loss is only fixed costs
-	return c.productionFunction.GetTotalFixedCosts()
+	hazardMonth := e.ArrivalTime.Month() //iota "enum"
+	hazardMonthIndex := int(hazardMonth) - 1
+	return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[hazardMonthIndex]
 }
 
 func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
