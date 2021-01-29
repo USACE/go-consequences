@@ -122,17 +122,15 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 }
 func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Determine crop damage percent based on damage dur curve and event dur
-	perdmg := c.lossFunction.ComputeDamagePercent(e)
-	croploss := (perdmg / 100) * c.GetValuePerOutputUnit()
+	dmgfactor := c.lossFunction.ComputeDamagePercent(e) / 100
 	// Determin value added to field by production before loss
 	hazardMonth := e.ArrivalTime.Month() //iota "enum"
 	hazardMonthIndex := int(hazardMonth) - 1
-	loss := croploss + c.productionFunction.cumulativeMonthlyProductionCostsEarly[hazardMonthIndex]
-	if croploss > c.GetValuePerOutputUnit() {
-		panic("Losses are greater than porduct value! GET SUBSIDY")
-	}
+	loss := dmgfactor * (c.GetValuePerOutputUnit() + c.productionFunction.cumulativeMonthlyProductionCostsEarly[hazardMonthIndex])
+	fmt.Println("loss = ", loss)
 	return loss
 }
+
 func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// delayed loss is equivalent to total marketable value less harvest cost, times the percent loss due to late planting
 	// Not using interpolated % loss for late plant
