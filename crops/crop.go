@@ -77,7 +77,7 @@ func (c Crop) GetY() float64 {
 }
 
 //Compute implements concequence.Receptor on crop
-func (c Crop) Compute(event interface{}) consequences.Results {
+func (c Crop) Compute(event hazards.HazardEvent) consequences.Results {
 	//Check event to determine if it is an arrival time and duration event
 	header := []string{"Crop", "Damage Outcome", "Damage"}
 	results := []interface{}{c.name, Unassigned, 0.0}

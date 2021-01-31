@@ -61,12 +61,12 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreStochastic
-func (s StructureStochastic) Compute(d interface{}) consequences.Results {
+func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Results {
 	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) Compute(d interface{}) consequences.Results { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Results { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
@@ -74,10 +74,6 @@ func (s StructureDeterministic) Compute(d interface{}) consequences.Results { //
 	if ok {
 		depth := de.Depth
 		return computeFloodConsequences(depth, s)
-	}
-	def, okd := d.(float64)
-	if okd {
-		return computeFloodConsequences(def, s)
 	}
 	ce, okc := d.(hazards.CoastalEvent)
 	if okc {

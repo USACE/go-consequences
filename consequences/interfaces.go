@@ -2,11 +2,12 @@ package consequences
 
 import (
 	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/USACE/go-consequences/hazards"
 )
 
 //Receptor is an interface for all things that can have consequences from a hazard event
 type Receptor interface {
-	Compute(event interface{}) Results
+	Compute(event hazards.HazardEvent) Results
 }
 
 //
