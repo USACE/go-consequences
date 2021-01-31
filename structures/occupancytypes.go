@@ -4,8 +4,15 @@ import (
 	"math/rand"
 
 	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
 )
+
+//OccupancyType interface allows for multiple hazards that integrate with structures
+type OccupancyType interface {
+	GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler
+	GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler
+}
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
@@ -19,6 +26,78 @@ type OccupancyTypeDeterministic struct {
 	Name            string
 	Structuredamfun paireddata.ValueSampler
 	Contentdamfun   paireddata.ValueSampler
+}
+
+//GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
+func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
+	ce, okc := h.(hazards.CoastalEvent)
+	//placeholder code needs to be developed
+	if okc {
+		//determine which curve to supply
+		if ce.Salinity {
+			//saltwater
+			if ce.WaveHeight < 1.0 {
+				//stillwater
+				return o.Structuredamfun
+			} else {
+				if ce.WaveHeight > 2.9 {
+					//high wave
+					return o.Structuredamfun
+				}
+				//medium wave
+				return o.Structuredamfun
+			}
+		}
+		//freshwater
+		if ce.WaveHeight < 1.0 {
+			//stillwater
+			return o.Structuredamfun
+		} else {
+			if ce.WaveHeight > 2.9 {
+				//high wave
+				return o.Structuredamfun
+			}
+			//medium wave
+			return o.Structuredamfun
+		}
+	}
+	return o.Structuredamfun
+}
+
+//GetContentDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
+func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
+	ce, okc := h.(hazards.CoastalEvent)
+	//placeholder code needs to be developed
+	if okc {
+		//determine which curve to supply
+		if ce.Salinity {
+			//saltwater
+			if ce.WaveHeight < 1.0 {
+				//stillwater
+				return o.Contentdamfun
+			} else {
+				if ce.WaveHeight > 2.9 {
+					//high wave
+					return o.Contentdamfun
+				}
+				//medium wave
+				return o.Contentdamfun
+			}
+		}
+		//freshwater
+		if ce.WaveHeight < 1.0 {
+			//stillwater
+			return o.Contentdamfun
+		} else {
+			if ce.WaveHeight > 2.9 {
+				//high wave
+				return o.Contentdamfun
+			}
+			//medium wave
+			return o.Contentdamfun
+		}
+	}
+	return o.Contentdamfun
 }
 
 //UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
