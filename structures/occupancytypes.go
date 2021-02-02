@@ -13,95 +13,49 @@ type OccupancyType interface {
 	GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler
 	GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler
 }
+
+//DamageFunctionFamily is to support a family of damage functions stored by hazard parameter types
 type DamageFunctionFamily struct {
 	DamageFunctions map[hazards.Parameter]paireddata.ValueSampler //parameter is a bitflag
+}
+
+//DamageFunctionFamilyStochastic is to support a family of damage functions stored by hazard parameter types that can represent uncertain paired data
+type DamageFunctionFamilyStochastic struct {
+	DamageFunctions map[hazards.Parameter]interface{} //parameter is a bitflag//if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
 }
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
 	Name            string
-	Structuredamfun interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
-	Contentdamfun   interface{} //if i make this an empty interface, it could be a value sampler, or an uncertainty valuesampler sampler...
+	Structuredamfun interface{}                    //needs to be deleted
+	StructureDFF    DamageFunctionFamilyStochastic //probably need one for deep foundation and shallow foundations...
+	ContentDFF      DamageFunctionFamilyStochastic
+	Contentdamfun   interface{} //needs to be deleted
 }
 
 //OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
 type OccupancyTypeDeterministic struct {
-	Name                        string
-	Structuredamfun             paireddata.ValueSampler
-	Structuredamfun_MW_Salinity paireddata.ValueSampler
-	Contentdamfun               paireddata.ValueSampler
+	Name         string
+	StructureDFF DamageFunctionFamily //probably need one for deep foundation and shallow foundations...
+	ContentDFF   DamageFunctionFamily
 }
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
-	ce, okc := h.(hazards.CoastalEvent)
-	//placeholder code needs to be developed
-	if okc {
-		//determine which curve to supply
-		if ce.Salinity {
-			//saltwater
-			if ce.WaveHeight < 1.0 {
-				//stillwater
-				return o.Structuredamfun
-			} else {
-				if ce.WaveHeight > 2.9 {
-					//high wave
-					return o.Structuredamfun
-				}
-				//medium wave
-				return o.Structuredamfun
-			}
-		}
-		//freshwater
-		if ce.WaveHeight < 1.0 {
-			//stillwater
-			return o.Structuredamfun
-		} else {
-			if ce.WaveHeight > 2.9 {
-				//high wave
-				return o.Structuredamfun
-			}
-			//medium wave
-			return o.Structuredamfun
-		}
+	result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
+	if ok {
+		return result
 	}
-	return o.Structuredamfun
+	return o.StructureDFF.DamageFunctions[hazards.Default]
 }
 
 //GetContentDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
-	ce, okc := h.(hazards.CoastalEvent)
-	//placeholder code needs to be developed
-	if okc {
-		//determine which curve to supply
-		if ce.Salinity {
-			//saltwater
-			if ce.WaveHeight < 1.0 {
-				//stillwater
-				return o.Contentdamfun
-			} else {
-				if ce.WaveHeight > 2.9 {
-					//high wave
-					return o.Contentdamfun
-				}
-				//medium wave
-				return o.Contentdamfun
-			}
-		}
-		//freshwater
-		if ce.WaveHeight < 1.0 {
-			//stillwater
-			return o.Contentdamfun
-		} else {
-			if ce.WaveHeight > 2.9 {
-				//high wave
-				return o.Contentdamfun
-			}
-			//medium wave
-			return o.Contentdamfun
-		}
+	result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
+	if ok {
+		return result
 	}
-	return o.Contentdamfun
+	return o.ContentDFF.DamageFunctions[hazards.Default]
 }
 
 //UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
@@ -112,86 +66,59 @@ type UncertaintyOccupancyTypeSampler interface {
 
 //SampleOccupancyType implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
 func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDeterministic {
-	sd, oks := o.Structuredamfun.(paireddata.ValueSampler)
-	cd, okc := o.Contentdamfun.(paireddata.ValueSampler)
-	if oks && okc {
-		return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	r := rand.New(rand.NewSource(seed))
+	//iterate through damage function family
+	sm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	var sdf = DamageFunctionFamily{DamageFunctions: sm}
+	for k, v := range o.StructureDFF.DamageFunctions {
+		sdf.DamageFunctions[k] = samplePairedDataValueSampler(r, v)
 	}
-	rand.Seed(seed)
-	if oks {
-		cd2, okc1 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if okc1 {
-			cd = cd2.SampleValueSampler(rand.Float64())
-		} else {
-			//cd = nil
-		}
-	} else {
-		sd2, oks1 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if oks1 {
-			sd = sd2.SampleValueSampler(rand.Float64())
-		} else {
-			//sd = nil
-		}
+	cm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	var cdf = DamageFunctionFamily{DamageFunctions: cm}
+	for k, v := range o.ContentDFF.DamageFunctions {
+		cdf.DamageFunctions[k] = samplePairedDataValueSampler(r, v)
 	}
-	if okc {
-		sd3, oks2 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if oks2 {
-			sd = sd3.SampleValueSampler(rand.Float64())
-		} else {
-			//sd = nil
-		}
-	} else {
-		cd3, okc2 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if okc2 {
-			cd = cd3.SampleValueSampler(rand.Float64())
-		} else {
-			//cd = nil
-		}
+	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
+}
+func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.ValueSampler {
+	retval, ok := df.(paireddata.ValueSampler)
+	if ok {
+		return retval
 	}
-
-	return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	//must be uncertain
+	retval2, ok2 := df.(paireddata.UncertaintyValueSamplerSampler)
+	if ok2 {
+		return retval2.SampleValueSampler(r.Float64())
+	}
+	return retval
+}
+func centralTendencyPairedDataValueSampler(df interface{}) paireddata.ValueSampler {
+	retval, ok := df.(paireddata.ValueSampler)
+	if ok {
+		return retval
+	}
+	//must be uncertain
+	retval2, ok2 := df.(paireddata.UncertaintyValueSamplerSampler)
+	if ok2 {
+		return retval2.CentralTendency()
+	}
+	return retval
 }
 
 //CentralTendency implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
 func (o OccupancyTypeStochastic) CentralTendency() OccupancyTypeDeterministic {
-	sd, oks := o.Structuredamfun.(paireddata.ValueSampler)
-	cd, okc := o.Contentdamfun.(paireddata.ValueSampler)
-	if oks && okc {
-		return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	//iterate through damage function family
+	sm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	var sdf = DamageFunctionFamily{DamageFunctions: sm}
+	for k, v := range o.StructureDFF.DamageFunctions {
+		sdf.DamageFunctions[k] = centralTendencyPairedDataValueSampler(v)
 	}
-	//rand.Seed(seed)
-	if oks {
-		cd2, okc1 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if okc1 {
-			cd = cd2.CentralTendency()
-		} else {
-			//cd = nil
-		}
-	} else {
-		sd2, oks1 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if oks1 {
-			sd = sd2.CentralTendency()
-		} else {
-			//sd = nil
-		}
+	cm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	var cdf = DamageFunctionFamily{DamageFunctions: cm}
+	for k, v := range o.ContentDFF.DamageFunctions {
+		cdf.DamageFunctions[k] = centralTendencyPairedDataValueSampler(v)
 	}
-	if okc {
-		sd3, oks2 := o.Structuredamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if oks2 {
-			sd = sd3.CentralTendency()
-		} else {
-			//sd = nil
-		}
-	} else {
-		cd3, okc2 := o.Contentdamfun.(paireddata.UncertaintyValueSamplerSampler)
-		if okc2 {
-			cd = cd3.CentralTendency()
-		} else {
-			//cd = nil
-		}
-	}
-
-	return OccupancyTypeDeterministic{Name: o.Name, Structuredamfun: sd, Contentdamfun: cd}
+	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
 }
 
 //OccupancyTypeMap produces a map of all occupancy types as OccupancyTypeStochastic so they can be joined to the structure inventory to compute damage
@@ -285,7 +212,27 @@ func res11snb() OccupancyTypeStochastic {
 	contentydists[18] = statistics.NormalDistribution{Mean: 40, StandardDeviation: 3.4100000858306885}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-1SNB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+
+	//build the curve for your specific hazard type...
+	sfh1sdffixs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0}
+	sfh1sdffiys := []float64{0, 0, 0, 0, 9, 22, 30, 34, 39, 43, 48, 51, 54, 57, 59, 61, 63, 64, 66, 68, 69}
+	var sfh1sdffidf = paireddata.PairedData{Xvals: sfh1sdffixs, Yvals: sfh1sdffiys}
+	//Depth,Salinity
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = sfh1sdffidf
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res11swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
