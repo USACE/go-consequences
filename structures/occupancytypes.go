@@ -13,6 +13,9 @@ type OccupancyType interface {
 	GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler
 	GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler
 }
+type DamageFunctionFamily struct {
+	DamageFunctions map[hazards.Parameter]paireddata.ValueSampler //parameter is a bitflag
+}
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
@@ -23,9 +26,10 @@ type OccupancyTypeStochastic struct { //this is mutable
 
 //OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
 type OccupancyTypeDeterministic struct {
-	Name            string
-	Structuredamfun paireddata.ValueSampler
-	Contentdamfun   paireddata.ValueSampler
+	Name                        string
+	Structuredamfun             paireddata.ValueSampler
+	Structuredamfun_MW_Salinity paireddata.ValueSampler
+	Contentdamfun               paireddata.ValueSampler
 }
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
