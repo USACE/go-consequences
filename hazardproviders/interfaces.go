@@ -1,10 +1,14 @@
 package hazardproviders
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/USACE/go-consequences/hazards"
+)
 
 //HazardProvider provides hazards as a return for an argument input
 type HazardProvider interface {
-	ProvideHazard(args interface{}) (interface{}, error)
+	ProvideHazard(args interface{}) (hazards.HazardEvent, error)
 }
 
 //NoHazardFoundError is an error for a situation where no hazard could be computed for the given args
