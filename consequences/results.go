@@ -32,7 +32,7 @@ func (c *Results) AddResult(cr Result) {
 
 //MarshalJSON a better printed version of results - this is my preferred way to print, but it is more complex
 func (c Results) MarshalJSON() ([]byte, error) {
-	s := "{\"consequences\":[\""
+	s := "{\"consequences\":["
 	for _, result := range c.Result.Result {
 		s += "{\"consequence\":{\""
 		vals, ok := result.([]interface{})
@@ -42,11 +42,11 @@ func (c Results) MarshalJSON() ([]byte, error) {
 				s += val + "\":" + string(value) + ",\""
 			}
 			s = strings.TrimRight(s, ",\"")
-			s += "}}"
+			s += "}},"
 		}
-		s += "]}"
 	}
-
+	s = strings.TrimRight(s, ",")
+	s += "]}"
 	return []byte(s), nil
 }
 
