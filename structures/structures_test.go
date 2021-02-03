@@ -53,7 +53,14 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	x := []float64{1.0, 2.0, 3.0, 4.0}
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	pd := paireddata.PairedData{Xvals: x, Yvals: y}
-	var o = OccupancyTypeStochastic{Name: "test", Structuredamfun: pd, Contentdamfun: pd}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+	sdf.DamageFunctions[hazards.Default] = pd
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	cdf.DamageFunctions[hazards.Default] = pd
+
+	var o = OccupancyTypeStochastic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
 
 	sv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
 	cv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}

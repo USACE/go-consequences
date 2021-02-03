@@ -26,11 +26,9 @@ type DamageFunctionFamilyStochastic struct {
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
-	Name            string
-	Structuredamfun interface{}                    //needs to be deleted
-	StructureDFF    DamageFunctionFamilyStochastic //probably need one for deep foundation and shallow foundations...
-	ContentDFF      DamageFunctionFamilyStochastic
-	Contentdamfun   interface{} //needs to be deleted
+	Name         string
+	StructureDFF DamageFunctionFamilyStochastic //probably need one for deep foundation and shallow foundations...
+	ContentDFF   DamageFunctionFamilyStochastic
 }
 
 //OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
@@ -291,7 +289,19 @@ func res11swb() OccupancyTypeStochastic {
 	contentydists[24] = statistics.NormalDistribution{Mean: 39.099998474121094, StandardDeviation: 2.4500000476837158}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-1SWB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+
+	return OccupancyTypeStochastic{Name: "RES1-1SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func agr1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -300,7 +310,19 @@ func agr1() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 6, 20, 43, 58, 65, 66, 66, 67, 70, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 79, 80, 80}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "AGR1", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "AGR1", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -309,7 +331,18 @@ func com1() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 2, 26, 42, 56, 68, 78, 83, 85, 87, 88, 89, 90, 91, 92, 92, 92, 93, 93, 94, 94, 94, 94, 94, 94, 94}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM1", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunction
+	return OccupancyTypeStochastic{Name: "COM1", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com2() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -318,7 +351,17 @@ func com2() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 3, 16, 27, 36, 49, 57, 63, 69, 72, 76, 80, 82, 84, 86, 87, 87, 88, 89, 89, 89, 89, 89, 89, 89, 89}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM2", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM2", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com3() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -327,7 +370,17 @@ func com3() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 29, 46, 67, 79, 85, 91, 92, 92, 93, 94, 96, 96, 97, 97, 98, 98, 98, 98, 98, 98, 98, 98, 98, 98}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM3", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM3", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com4() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -336,7 +389,17 @@ func com4() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 2, 18, 25, 35, 43, 49, 52, 55, 57, 58, 60, 65, 67, 68, 69, 70, 71, 71, 72, 72, 72, 72, 72, 72, 72}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM4", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM4", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com5() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -345,7 +408,17 @@ func com5() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 50, 74, 83, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM5", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM5", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com6() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -354,7 +427,17 @@ func com6() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 0, 0, 10, 20, 30, 65, 72, 78, 85, 95, 95, 95, 95, 96, 96, 96, 96, 96, 96, 96, 96, 96, 96, 96}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM6", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM6", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com7() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -363,7 +446,17 @@ func com7() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 28, 51, 60, 63, 67, 71, 72, 74, 77, 81, 86, 92, 94, 97, 99, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM7", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM7", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com8() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -372,7 +465,17 @@ func com8() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 13, 45, 55, 64, 73, 77, 80, 82, 83, 85, 87, 89, 90, 91, 92, 93, 94, 95, 96, 96, 96, 96, 96, 96, 96}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM8", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM8", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com9() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -381,7 +484,17 @@ func com9() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 4, 6, 8, 9, 10, 12, 17, 22, 30, 41, 57, 66, 73, 79, 84, 90, 97, 98, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM9", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM9", StructureDFF: sdf, ContentDFF: cdf}
 }
 func com10() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -390,7 +503,17 @@ func com10() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 11, 17, 20, 23, 25, 29, 35, 42, 51, 63, 77, 93, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "COM10", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "COM10", StructureDFF: sdf, ContentDFF: cdf}
 }
 func edu1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -399,7 +522,17 @@ func edu1() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 27, 38, 53, 64, 68, 70, 72, 75, 79, 83, 88, 94, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "EDU1", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "EDU1", StructureDFF: sdf, ContentDFF: cdf}
 }
 func edu2() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -408,7 +541,17 @@ func edu2() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 27, 38, 53, 64, 68, 70, 72, 75, 79, 83, 88, 94, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "EDU2", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "EDU2", StructureDFF: sdf, ContentDFF: cdf}
 }
 func gov1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -417,7 +560,17 @@ func gov1() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 30, 59, 74, 83, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "GOV1", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "GOV1", StructureDFF: sdf, ContentDFF: cdf}
 }
 func gov2() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -426,7 +579,17 @@ func gov2() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 8, 20, 38, 55, 70, 81, 89, 98, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "GOV2", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "GOV2", StructureDFF: sdf, ContentDFF: cdf}
 }
 func ind1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -435,7 +598,17 @@ func ind1() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 15, 24, 34, 41, 47, 52, 57, 60, 63, 64, 66, 68, 69, 72, 73, 73, 73, 74, 74, 74, 74, 75, 75, 75}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "IND1", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "IND1", StructureDFF: sdf, ContentDFF: cdf}
 }
 func ind2() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -444,7 +617,17 @@ func ind2() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 9, 23, 35, 44, 52, 58, 62, 65, 68, 70, 73, 74, 77, 78, 78, 79, 80, 80, 80, 80, 81, 81, 81, 81}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "IND2", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "IND2", StructureDFF: sdf, ContentDFF: cdf}
 }
 func ind3() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -453,7 +636,17 @@ func ind3() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 2, 20, 41, 51, 62, 67, 71, 73, 76, 78, 79, 82, 83, 84, 86, 87, 87, 88, 88, 88, 88, 88, 88, 88, 88}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "IND3", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "IND3", StructureDFF: sdf, ContentDFF: cdf}
 }
 func ind4() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -462,7 +655,17 @@ func ind4() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 15, 20, 26, 31, 37, 40, 44, 48, 53, 56, 57, 60, 62, 63, 63, 63, 64, 65, 65, 65, 65, 65, 65, 65, 65}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "IND4", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "IND4", StructureDFF: sdf, ContentDFF: cdf}
 }
 func ind5() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -471,7 +674,17 @@ func ind5() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 2, 20, 41, 51, 62, 67, 71, 73, 76, 78, 79, 82, 83, 84, 86, 87, 87, 88, 88, 88, 88, 88, 88, 88, 88}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "IND5", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "IND5", StructureDFF: sdf, ContentDFF: cdf}
 }
 func ind6() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -480,7 +693,17 @@ func ind6() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 20, 35, 47, 56, 59, 66, 69, 71, 72, 78, 79, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 83, 83}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "IND6", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "IND6", StructureDFF: sdf, ContentDFF: cdf}
 }
 func rel1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -489,7 +712,17 @@ func rel1() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 10, 52, 72, 85, 92, 95, 98, 99, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "REL1", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "REL1", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res12snb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -536,7 +769,18 @@ func res12snb() OccupancyTypeStochastic {
 	contentydists[18] = statistics.NormalDistribution{Mean: 37.200000762939453, StandardDeviation: 3.5999999046325684}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-2SNB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+	return OccupancyTypeStochastic{Name: "RES1-2SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res12swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -595,7 +839,18 @@ func res12swb() OccupancyTypeStochastic {
 	contentydists[24] = statistics.NormalDistribution{Mean: 52.599998474121094, StandardDeviation: 5}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-2SWB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+	return OccupancyTypeStochastic{Name: "RES1-2SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res13snb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -642,7 +897,18 @@ func res13snb() OccupancyTypeStochastic {
 	contentydists[18] = statistics.NormalDistribution{Mean: 37.200000762939453, StandardDeviation: 3.9000000953674316}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-3SNB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+	return OccupancyTypeStochastic{Name: "RES1-3SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res13swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -701,7 +967,18 @@ func res13swb() OccupancyTypeStochastic {
 	contentydists[24] = statistics.NormalDistribution{Mean: 52.599998474121094, StandardDeviation: 5}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-3SWB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+	return OccupancyTypeStochastic{Name: "RES1-3SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res1slnb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -748,7 +1025,18 @@ func res1slnb() OccupancyTypeStochastic {
 	contentydists[18] = statistics.NormalDistribution{Mean: 60.5, StandardDeviation: 4.8000001907348633}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-SLNB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+	return OccupancyTypeStochastic{Name: "RES1-SLNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res1slwb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -807,7 +1095,18 @@ func res1slwb() OccupancyTypeStochastic {
 	contentydists[24] = statistics.NormalDistribution{Mean: 26.299999237060547, StandardDeviation: 2.440000057220459}
 	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurexs, Yvals: structureydists}
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
-	return OccupancyTypeStochastic{Name: "RES1-SLWB", Structuredamfun: structuredamagefunctionStochastic, Contentdamfun: contentdamagefunctionStochastic}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
+	return OccupancyTypeStochastic{Name: "RES1-SLWB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res2() OccupancyTypeStochastic {
@@ -817,7 +1116,17 @@ func res2() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 3, 27, 49, 64, 70, 76, 78, 79, 81, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES2", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES2", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res3a() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -826,7 +1135,17 @@ func res3a() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES3A", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES3A", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res3b() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -835,7 +1154,17 @@ func res3b() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES3B", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES3B", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res3c() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -844,7 +1173,17 @@ func res3c() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES3C", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES3C", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res3d() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -853,7 +1192,17 @@ func res3d() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES3D", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES3D", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res3e() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -862,7 +1211,17 @@ func res3e() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES3E", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES3E", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res3f() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -871,7 +1230,17 @@ func res3f() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 4, 24, 34, 40, 47, 53, 56, 58, 58, 58, 61, 66, 68, 76, 81, 86, 91, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES3F", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES3F", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res4() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -880,7 +1249,17 @@ func res4() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 11, 19, 25, 29, 34, 39, 44, 49, 56, 65, 74, 82, 88, 98, 98, 98, 98, 98, 98, 98, 98, 98, 98, 98}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES4", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES4", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res5() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -889,7 +1268,17 @@ func res5() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 38, 60, 73, 81, 88, 94, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES5", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES5", StructureDFF: sdf, ContentDFF: cdf}
 }
 func res6() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -898,5 +1287,15 @@ func res6() OccupancyTypeStochastic {
 	contentys := []float64{0, 0, 0, 0, 0, 38, 60, 73, 81, 88, 94, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
 	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
-	return OccupancyTypeStochastic{Name: "RES6", Structuredamfun: structuredamagefunction, Contentdamfun: contentdamagefunction}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth] = structuredamagefunction
+	return OccupancyTypeStochastic{Name: "RES6", StructureDFF: sdf, ContentDFF: cdf}
 }
