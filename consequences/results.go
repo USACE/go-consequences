@@ -1,5 +1,10 @@
 package consequences
 
+import (
+	"encoding/json"
+	"strings"
+)
+
 //Result is a container to store a list of headers and a list of results
 type Result struct {
 	Headers []string      `json:"headers"`
@@ -25,18 +30,25 @@ func (c *Results) AddResult(cr Result) {
 	c.Result.Result = append(c.Result.Result, cr.Result)
 }
 
-/* a better printed version of results - this is my preferred way to print, but it is more complex
-func (c Consequence) MarshalJSON() ([]byte, error) {
-	s := "{\"consequence\":{\""
-	for i, val := range c.Headers {
-		value, _ := json.Marshal(c.Results[i])
-		s += val + "\":" + string(value) + ",\""
+//MarshalJSON a better printed version of results - this is my preferred way to print, but it is more complex
+func (c Results) MarshalJSON() ([]byte, error) {
+	s := "{\"consequences\":[\""
+	for _, result := range c.Result.Result {
+		s += "{\"consequence\":{\""
+		vals, ok := result.([]interface{})
+		if ok {
+			for i, val := range c.Headers {
+				value, _ := json.Marshal(vals[i])
+				s += val + "\":" + string(value) + ",\""
+			}
+			s = strings.TrimRight(s, ",\"")
+			s += "}}"
+		}
+		s += "]}"
 	}
-	s = strings.TrimRight(s, ",\"")
-	s += "}}"
+
 	return []byte(s), nil
 }
-*/
 
 /*
 //String converts a ConsequenceDamageResult to a string
@@ -51,7 +63,7 @@ func (c ConsequenceDamageResult) String() string {
 	return strings.Trim(ret, ",")
 }
 */
-
+//func (c Result) String() string
 //String converts consequences to string
 func (c Results) String() string {
 	if c.IsTable {
@@ -59,5 +71,3 @@ func (c Results) String() string {
 	}
 	return "I should be a single result"
 }
-
-
