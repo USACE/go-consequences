@@ -64,7 +64,31 @@ func TestCropDamage(t *testing.T) {
 	cd := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
-	expecteddamage := 10.0 //temporary value for testing
+	expecteddamage := 1285.98 //Based on corn
+
+	//test
+	if cd.Result.Result[1] != expectedcase {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	}
+	if cd.Result.Result[2] != expecteddamage {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	}
+
+}
+
+func TestCropDamage_DelayedPlant(t *testing.T) {
+	//get crop
+	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
+	path := "C:\\Temp\\agtesting\\" + cropFromNass.GetCropName() + ".crop"
+	c := ReadFromXML(path)
+	// construct hazard
+	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
+	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 15}
+	//compute
+	cd := c.ComputeConsequences(h)
+	//expected results
+	expectedcase := PlantingDelayed
+	expecteddamage := 0.0 //Based on corn
 
 	//test
 	if cd.Result.Result[1] != expectedcase {
