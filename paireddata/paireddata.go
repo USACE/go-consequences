@@ -11,7 +11,7 @@ type PairedData struct {
 	Yvals []float64
 }
 
-// SampleValue implements ValueSampler
+//SampleValue implements ValueSampler
 func (p PairedData) SampleValue(inputValue interface{}) float64 {
 	xval, ok := inputValue.(float64)
 	if !ok {

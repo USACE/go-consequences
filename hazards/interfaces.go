@@ -20,8 +20,8 @@ const (
 	ArrivalTime    Parameter = 4  //3
 	ArrivalTime2ft Parameter = 8  //4
 	Duration       Parameter = 16 //5
-	//next parameter
-	//next parameter
+	WaveHeight     Parameter = 32 //6
+	Salinity       Parameter = 64 //7
 	//next parameter
 	//fin
 
@@ -52,6 +52,15 @@ func SetHasDuration(h Parameter) Parameter {
 	return h | Duration
 }
 
+//SetHasWaveHeight turns on a bitflag for the Parameter WaveHeight
+func SetHasWaveHeight(h Parameter) Parameter {
+	return h | WaveHeight
+}
+
+//SetHasSalinity turns on a bitflag for the Parameter Salinity
+func SetHasSalinity(h Parameter) Parameter {
+	return h | Salinity
+}
 func (p Parameter) String() string {
 	s := ""
 	count := 0
@@ -88,6 +97,22 @@ func (p Parameter) String() string {
 			s += ", "
 		}
 		s += "Duration"
+
+		count++
+	}
+	if p&WaveHeight != 0 {
+		if count > 0 {
+			s += ", "
+		}
+		s += "WaveHeight"
+
+		count++
+	}
+	if p&Salinity != 0 {
+		if count > 0 {
+			s += ", "
+		}
+		s += "Salinity"
 
 		count++
 	}

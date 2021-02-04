@@ -18,3 +18,10 @@ func (p UncertaintyPairedData) SampleValueSampler(randomValue float64) ValueSamp
 	}
 	return PairedData{Xvals: p.Xvals, Yvals: yVals}
 }
+func (p UncertaintyPairedData) CentralTendency() ValueSampler {
+	yVals := make([]float64, len(p.Yvals))
+	for idx, dist := range p.Yvals {
+		yVals[idx] = dist.CentralTendency()
+	}
+	return PairedData{Xvals: p.Xvals, Yvals: yVals}
+}

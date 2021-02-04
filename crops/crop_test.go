@@ -16,17 +16,17 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	c := createTestCrop()
 
 	//compute
-	cd := c.ComputeConsequences(h)
+	cd := c.Compute(h)
 	//expected results
 	expectedcase := NotImpactedDuringSeason
 	expecteddamage := 0.0
 
 	//test
 	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[1], expectedcase)
 	}
 	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[2], expecteddamage)
 	}
 }
 
@@ -39,17 +39,17 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 	c := createTestCrop()
 
 	//compute
-	cd := c.ComputeConsequences(h)
+	cd := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
 	expecteddamage := 10.0 //temporary value for testing
 
 	//test
 	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[1], expectedcase)
 	}
 	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[2], expecteddamage)
 	}
 }
 func TestCropDamage(t *testing.T) {
@@ -61,7 +61,7 @@ func TestCropDamage(t *testing.T) {
 	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
 	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
 	//compute
-	cd := c.ComputeConsequences(h)
+	cd := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
 	expecteddamage := 1285.98 //Based on corn
@@ -92,10 +92,10 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 
 	//test
 	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[1], expectedcase)
 	}
 	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[2], expecteddamage)
 	}
 
 }

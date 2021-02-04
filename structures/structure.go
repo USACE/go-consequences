@@ -17,6 +17,7 @@ type BaseStructure struct {
 //StructureStochastic is a base structure with an occupancy type stochastic and parameter values for all parameters
 type StructureStochastic struct {
 	BaseStructure
+	UseUncertainty              bool //defaults to false!
 	OccType                     OccupancyTypeStochastic
 	StructVal, ContVal, FoundHt consequences.ParameterValue
 }
@@ -40,42 +41,71 @@ func (s BaseStructure) GetY() float64 {
 
 //SampleStructure converts a structureStochastic into a structure deterministic based on an input seed
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
-	ot := s.OccType.SampleOccupancyType(seed)
-	sv := s.StructVal.SampleValue(rand.Float64())
-	cv := s.ContVal.SampleValue(rand.Float64())
-	fh := s.FoundHt.SampleValue(rand.Float64())
+	ot := OccupancyTypeDeterministic{} //Beware null errors!
+	sv := 0.0
+	cv := 0.0
+	fh := 0.0
+	if s.UseUncertainty {
+		ot = s.OccType.SampleOccupancyType(seed)
+		sv = s.StructVal.SampleValue(rand.Float64())
+		cv = s.ContVal.SampleValue(rand.Float64())
+		fh = s.FoundHt.SampleValue(rand.Float64())
+	} else {
+		ot = s.OccType.CentralTendency()
+		sv = s.StructVal.CentralTendency()
+		cv = s.ContVal.CentralTendency()
+		fh = s.FoundHt.CentralTendency()
+	}
+
 	return StructureDeterministic{OccType: ot, StructVal: sv, ContVal: cv, FoundHt: fh, BaseStructure: BaseStructure{DamCat: s.DamCat}}
 }
 
-//ComputeConsequences implements the consequences.ConsequencesReceptor interface on StrucutreStochastic
-func (s StructureStochastic) ComputeConsequences(d interface{}) consequences.Results {
-	return s.SampleStructure(rand.Int63()).ComputeConsequences(d) //this needs work so seeds can be controlled.
+//Compute implements the consequences.Receptor interface on StrucutreStochastic
+func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Results {
+	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
-//ComputeConsequences implements the consequences.ConsequencesReceptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) ComputeConsequences(d interface{}) consequences.Results { //what if we invert this general model to hazard.damage(consequence receptor)
+//Compute implements the consequences.Receptor interface on StrucutreDeterminstic
+func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Results { //what if we invert this general model to hazard.damage(consequence receptor)
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	de, ok := d.(hazards.DepthEvent)
 	if ok {
-		depth := de.Depth
-		return computeFloodConsequences(depth, s)
+		//depth := de.Depth
+		return computeFloodConsequences(de, s)
 	}
-	def, okd := d.(float64)
-	if okd {
-		return computeFloodConsequences(def, s)
+	ce, okc := d.(hazards.CoastalEvent)
+	if okc {
+		return computeCoastalConsequences(ce, s)
 	}
 	r := consequences.Results{IsTable: false, Result: ret}
 	return r
 }
-func computeFloodConsequences(d float64, s StructureDeterministic) consequences.Results {
+
+//the following two methods are legitimately the same - it seems i need an interface rather than a struct for a depthevent
+//this area seems still in need of some refactoring for simplification.
+
+func computeFloodConsequences(e hazards.DepthEvent, s StructureDeterministic) consequences.Results {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
-	depthAboveFFE := d - s.FoundHt
-	damagePercent := s.OccType.Structuredamfun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-	cdamagePercent := s.OccType.Contentdamfun.SampleValue(depthAboveFFE) / 100
+	depthAboveFFE := e.Depth - s.FoundHt
+	damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+	cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
+	ret.Result[0] = damagePercent * s.StructVal
+	ret.Result[1] = cdamagePercent * s.ContVal
+	r := consequences.Results{IsTable: false, Result: ret}
+	return r
+}
+
+func computeCoastalConsequences(e hazards.CoastalEvent, s StructureDeterministic) consequences.Results {
+	header := []string{"structure damage", "content damage"}
+	results := []interface{}{0.0, 0.0}
+	var ret = consequences.Result{Headers: header, Result: results}
+	depthAboveFFE := e.Depth - s.FoundHt
+	damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+	cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
 	ret.Result[0] = damagePercent * s.StructVal
 	ret.Result[1] = cdamagePercent * s.ContVal
 	r := consequences.Results{IsTable: false, Result: ret}
