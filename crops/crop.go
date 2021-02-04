@@ -14,7 +14,7 @@ type Crop struct {
 	substituteName     string
 	x                  float64
 	y                  float64
-	totalMarketValue   float64 //Marketable value yeild *pricePerUnit
+	totalMarketValue   float64 //Marketable value, yeild *pricePerUnit
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
@@ -76,7 +76,7 @@ func (c Crop) GetY() float64 {
 	return c.y
 }
 
-//GetValuePerOutputUnit returns valuePerOutputUnit
+//GetTotalMarketValue returns crop.totalMarketValue
 func (c Crop) GetTotalMarketValue() float64 {
 	return c.totalMarketValue
 }
