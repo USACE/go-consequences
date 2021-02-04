@@ -1,6 +1,10 @@
 package crops
 
-import "time"
+import (
+	"time"
+
+	"github.com/USACE/go-consequences/hazards"
+)
 
 type productionFunction struct {
 	harvestCost                           float64
@@ -13,6 +17,14 @@ type productionFunction struct {
 
 func (p productionFunction) GetCumulativeMonthlyFixedCostsOnly() []float64 {
 	return p.cumulativeMonthlyFixedCostsOnly
+}
+
+func (p productionFunction) GetExposedValue(e hazards.ArrivalandDurationEvent) float64 {
+	hazardMonth := e.ArrivalTime.Month() //iota "enum"
+	hazardMonthIndex := int(hazardMonth) - 1
+	// We need to prorate monthly costs later
+	// This assumes planting on time. Cannot deal with case where you are delayed THEN impacted.
+	return p.cumulativeMonthlyProductionCostsEarly[hazardMonthIndex]
 }
 
 //NewProductionFunction is the constructor for the unexported productionFunction which represents the costs associated with producing a crop

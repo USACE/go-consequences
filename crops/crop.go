@@ -14,7 +14,7 @@ type Crop struct {
 	substituteName     string
 	x                  float64
 	y                  float64
-	valuePerOutputUnit float64 //Marketable value yeild *pricePerUnit
+	totalMarketValue   float64 //Marketable value yeild *pricePerUnit
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
@@ -34,7 +34,7 @@ func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
 
 //WithOutput allows the setting of the yeild per acre and price per unit of output and resulting value per output
 func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
-	c.valuePerOutputUnit = cropYeild * price
+	c.totalMarketValue = cropYeild * price
 	return *c
 }
 
@@ -77,8 +77,8 @@ func (c Crop) GetY() float64 {
 }
 
 //GetValuePerOutputUnit returns valuePerOutputUnit
-func (c Crop) GetValuePerOutputUnit() float64 {
-	return c.valuePerOutputUnit
+func (c Crop) GetTotalMarketValue() float64 {
+	return c.totalMarketValue
 }
 
 //ComputeConsequences implements concequence receptor on crop
@@ -123,10 +123,12 @@ func (c Crop) ComputeConsequences(event interface{}) consequences.Results {
 func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Determine crop damage percent based on damage dur curve and event dur
 	dmgfactor := c.lossFunction.ComputeDamagePercent(e) / 100
-	// Determin value added to field by production before loss
-	hazardMonth := e.ArrivalTime.Month() //iota "enum"
-	hazardMonthIndex := int(hazardMonth) - 1
-	loss := dmgfactor * (c.GetValuePerOutputUnit() + c.productionFunction.cumulativeMonthlyProductionCostsEarly[hazardMonthIndex])
+	exposedProductionValue := c.productionFunction.GetExposedValue(e)
+	totalProductionCost := c.productionFunction.productionCostLessHarvest
+	percentProductionValue := exposedProductionValue / totalProductionCost
+	totalMarketValue := c.GetTotalMarketValue()
+	totalMarketValueLessHarvestCost := totalMarketValue - c.productionFunction.harvestCost
+	loss := dmgfactor * percentProductionValue * totalMarketValueLessHarvestCost
 	fmt.Println("loss = ", loss)
 	return loss
 }
@@ -142,18 +144,15 @@ func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	fmt.Println(daysLate)
 	factor := (daysLate / plantingWindow) * c.productionFunction.lossFromLatePlanting / 100
 	fmt.Println("factor is : ", factor)
-	delayedValue := c.GetValuePerOutputUnit() * (1 - factor)
-	fmt.Println("total loss is : ", delayedValue)
-	return 0.0 //temp vlue to pass test before hand calc
+	return c.GetTotalMarketValue() * factor
 }
 
 func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) float64 {
-	// Assume Loss is only fixed costs
-	hazardMonth := e.ArrivalTime.Month() //iota "enum"
-	hazardMonthIndex := int(hazardMonth) - 1
-	return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[hazardMonthIndex]
+	// Assume Loss is only fixed costs for entire year
+	return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[12]
 }
 
 func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
+	// TODO
 	return 0.0
 }
