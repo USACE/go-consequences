@@ -85,7 +85,7 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
 	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 15}
 	//compute
-	cd := c.ComputeConsequences(h)
+	cd := c.Compute(h)
 	//expected results
 	expectedcase := PlantingDelayed
 	expecteddamage := 0.0 //Based on corn
