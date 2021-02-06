@@ -55,7 +55,7 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 func TestCropDamage(t *testing.T) {
 	//get crop
 	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
-	path := "C:\\Temp\\agtesting\\" + cropFromNass.GetCropName() + ".crop"
+	path := "./" + cropFromNass.GetCropName() + ".crop"
 	c := ReadFromXML(path)
 	// construct hazard
 	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
@@ -79,7 +79,7 @@ func TestCropDamage(t *testing.T) {
 func TestCropDamage_DelayedPlant(t *testing.T) {
 	//get crop
 	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
-	path := "C:\\Temp\\agtesting\\" + cropFromNass.GetCropName() + ".crop"
+	path := "./" + cropFromNass.GetCropName() + ".crop"
 	c := ReadFromXML(path)
 	// construct hazard
 	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
@@ -100,8 +100,7 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 
 }
 func TestReadFromXML(t *testing.T) {
-	//"C:\\Temp\\agtesting\\Corn.crop"
-	path := "C:\\Temp\\agtesting\\Corn.crop"
+	path := "./" + "Corn" + ".crop"
 	c := ReadFromXML(path)
 	if c.GetCropName() != "Corn" {
 		t.Error("Did not parse corn")
