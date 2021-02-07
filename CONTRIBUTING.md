@@ -3,9 +3,13 @@ I'm really glad you're reading this, because we need volunteer developers to hel
 
 If you haven't already, check out the current issues to see what we are working on and join in on the fun.
 
-Here are some important resources:
+Here are some areas that need improvement:
 
-- These need to be developed.
+- Adding Life Loss
+- Adding Time to First Alert
+- Adding Protective Action Initiation
+- Adding Indirect Economic Losses
+- Adding a ConsequencesReceptor Provider interface
 
 Testing
 We are targeting a robust test coverage for the code, please write tests for new code you create.
