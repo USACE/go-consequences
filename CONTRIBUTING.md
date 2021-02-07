@@ -11,15 +11,15 @@ Here are some areas that need improvement:
 - Adding Indirect Economic Losses
 - Adding a ConsequencesReceptor Provider interface
 
-Testing
+## Testing
 We are targeting a robust test coverage for the code, please write tests for new code you create.
 
-Submitting changes
+## Submitting changes
 Please create a GitHub Pull Request with a clear list of what you've done. We can always use more test coverage. Please follow our coding conventions (below) and make sure all of your commits are atomic (one feature per commit).
 
 Always write a clear log message for your commits. Feel free to tag @henrygeorgist for a review.
 
-Coding conventions
+## Coding conventions
 
 - Please consider the other people contributing to the code - make it readable and reusable.
 - Please add comments to explain assumptions and limitations of the code
