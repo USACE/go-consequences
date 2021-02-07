@@ -1,6 +1,8 @@
 package crops
 
 import (
+	"fmt"
+
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 )
@@ -9,11 +11,10 @@ import (
 type Crop struct {
 	id                 byte
 	name               string
+	substituteName     string
 	x                  float64
 	y                  float64
-	yeild              float64
-	pricePerUnit       float64
-	valuePerOutputUnit float64
+	totalMarketValue   float64 //Marketable value, yeild *pricePerUnit
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
@@ -31,10 +32,9 @@ func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
 	return *c
 }
 
-//WithOutput allows the setting of the yeild per acre and price per unit of output
+//WithOutput allows the setting of the yeild per acre and price per unit of output and resulting value per output
 func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
-	c.yeild = cropYeild
-	c.pricePerUnit = price
+	c.totalMarketValue = cropYeild * price
 	return *c
 }
 
@@ -75,7 +75,10 @@ func (c Crop) GetX() float64 {
 func (c Crop) GetY() float64 {
 	return c.y
 }
-
+//GetTotalMarketValue returns crop.totalMarketValue
+func (c Crop) GetTotalMarketValue() float64 {
+	return c.totalMarketValue
+}
 //Compute implements concequence.Receptor on crop
 func (c Crop) Compute(event hazards.HazardEvent) consequences.Results {
 	//Check event to determine if it is an arrival time and duration event
@@ -95,16 +98,17 @@ func (c Crop) Compute(event hazards.HazardEvent) consequences.Results {
 			//huh?
 			damage = 0.0
 		case Impacted:
-			damage = 10
+			damage = c.computeImpactedCase(da)
 		case NotImpactedDuringSeason:
 			damage = 0.0
 		case PlantingDelayed:
-			damage = 1.0
+			damage = c.computeDelayedCase(da)
 		case NotPlanted:
-			damage = 0.0 //fixed costs?
+			damage = c.computeNotPlantedCase(da)
 		case SubstituteCrop:
+			// case for sbustitute crop not yet implemented
 			//get the substitute, and compute damages on it... hope for no infinate loop.
-			damage = 0.0
+			damage = c.computeSubstitueCase(da)
 		default:
 			damage = 0.0
 		}
@@ -113,4 +117,40 @@ func (c Crop) Compute(event hazards.HazardEvent) consequences.Results {
 
 	r := consequences.Results{IsTable: false, Result: ret}
 	return r
+}
+func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
+	// Determine crop damage percent based on damage dur curve and event dur
+	dmgfactor := c.lossFunction.ComputeDamagePercent(e) / 100
+	exposedProductionValue := c.productionFunction.GetExposedValue(e)
+	totalProductionCost := c.productionFunction.productionCostLessHarvest
+	percentProductionValue := exposedProductionValue / totalProductionCost
+	totalMarketValue := c.GetTotalMarketValue()
+	totalMarketValueLessHarvestCost := totalMarketValue - c.productionFunction.harvestCost
+	loss := dmgfactor * percentProductionValue * totalMarketValueLessHarvestCost
+	fmt.Println("loss = ", loss)
+	return loss
+}
+
+func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
+	// delayed loss is equivalent to total marketable value less harvest cost, times the percent loss due to late planting
+	// Not using interpolated % loss for late plant
+	plantingWindow := (c.cropSchedule.LastPlantingDate.Sub(c.cropSchedule.StartPlantingDate).Hours() / 24)
+	fmt.Println(plantingWindow)
+	actualPlant := (e.ArrivalTime.AddDate(0, 0, int(e.DurationInDays)))
+	fmt.Println(actualPlant)
+	daysLate := (actualPlant.Sub(c.cropSchedule.StartPlantingDate.AddDate(actualPlant.Year(), 0, 0))).Hours() / 24
+	fmt.Println(daysLate)
+	factor := (daysLate / plantingWindow) * c.productionFunction.lossFromLatePlanting / 100
+	fmt.Println("factor is : ", factor)
+	return c.GetTotalMarketValue() * factor
+}
+
+func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) float64 {
+	// Assume Loss is only fixed costs for entire year
+	return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[12]
+}
+
+func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
+	// TODO
+	return 0.0
 }
