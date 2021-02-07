@@ -1,9 +1,25 @@
 package compute
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/USACE/go-consequences/nsi"
+	"github.com/USACE/go-consequences/structures"
 )
 
+func TestConvertNSIFeatureToStructure(t *testing.T) {
+	bbox := "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
+	//get a map of all occupancy types
+	m := structures.OccupancyTypeMap()
+	//define a default occtype in case of emergancy
+	defaultOcctype := m["RES1-1SNB"]
+	nsi.GetByBboxStream(bbox, func(f nsi.NsiFeature) {
+		//convert nsifeature to structure
+		str := NsiFeaturetoStructure(f, m, defaultOcctype)
+		fmt.Println(str.OccType.Name)
+	})
+}
 func TestComputeEAD(t *testing.T) {
 	d := []float64{1, 2, 3, 4}
 	f := []float64{.75, .5, .25, 0}
