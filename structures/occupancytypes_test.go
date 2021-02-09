@@ -8,30 +8,39 @@ import (
 )
 
 func TestDamageFunctionFamily(t *testing.T) {
+	//a map of hazard to damage function
 	m := make(map[hazards.Parameter]paireddata.ValueSampler)
-
+	//a set of different hazard types.
 	cep := hazards.Depth | hazards.Salinity | hazards.WaveHeight
 	dep := hazards.Depth
 	ce2p := hazards.Depth | hazards.WaveHeight
 
+	//a fake deterministic damage function for coastal event with salinity
 	cexs := []float64{1, 2, 3}
 	ceys := []float64{1, 2, 3}
 	var cedf = paireddata.PairedData{Xvals: cexs, Yvals: ceys}
 	m[cep] = cedf
 
+	//a fake deterministic damage function for a depth only event
 	dexs := []float64{1, 2, 3}
 	deys := []float64{2, 4, 6}
 	var dedf = paireddata.PairedData{Xvals: dexs, Yvals: deys}
 	m[dep] = dedf
 
+	//a fake deterministic damage function for an event with depth and wave, but no salinity...
 	ce2xs := []float64{1, 2, 3}
 	ce2ys := []float64{3, 6, 9}
 	var ce2df = paireddata.PairedData{Xvals: ce2xs, Yvals: ce2ys}
 	m[ce2p] = ce2df
+
+	//assign the fake damage function map as a family of damage functions.
 	var df = DamageFunctionFamily{DamageFunctions: m}
+
+	//fake instances of hazards (to match the hazard types.)
 	ce := hazards.CoastalEvent{Depth: 2, Salinity: true, WaveHeight: 3.4}
 	de := hazards.DepthEvent{Depth: 2}
 	ce2 := hazards.CoastalEvent{Depth: 2, Salinity: false, WaveHeight: 3.4}
+	//confirm that for each hazard the correct damage function is pulled when requested and the proper damage value is computed.
 	cv := df.DamageFunctions[ce.Parameters()].SampleValue(ce.Depth)
 	if cv != 2 {
 		t.Errorf("Expected 2")

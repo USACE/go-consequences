@@ -67,7 +67,6 @@ func TestNsi_FL_FoundationTypes(t *testing.T) {
 			} else {
 				foundationTypes[str.Properties.FoundType] = 1
 			}
-
 		})
 	}
 	fmt.Println(foundationTypes)
