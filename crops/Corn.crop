@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<crop>
+    <id>1</id>
+    <name>Corn</name>
+    <FirstPlantDate>19Apr</FirstPlantDate>
+    <LastPlantDate>26May</LastPlantDate>
+    <MonthlyFixedCost>30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94</MonthlyFixedCost>
+    <MonthlyFirstPlantCost>1.0,1.0,1.0,56.04,56.04,56.04,56.04,56.04,56.04,56.04,1.0,1.0</MonthlyFirstPlantCost>
+    <MonthlyLastPlantCost>1.0,1.0,1.0,56.04,56.04,56.04,56.04,56.04,56.04,56.04,1.0,1.0</MonthlyLastPlantCost>
+    <SubstituteCrop></SubstituteCrop>
+    <HarvestDate>21Nov</HarvestDate>
+    <HarvestCost>85.51</HarvestCost> <!--harvest cost is per acres -->
+    <Yield>178.0</Yield>
+    <Unit>BU</Unit>
+    <UnitPrice>5.27</UnitPrice> <!--this includes the harvest cost per acre-->
+    <PctLossLastPlant>10.0</PctLossLastPlant> <!-- This can be prorated if somewhere between early and late plant date -->
+    <DryoutPeriod>0</DryoutPeriod>
+    <Durations> <!--1, 3, 14 day duration floods and percent loss for each month  -->
+        <Duration>1,0.0,0.0,0.0,0.0,0.0,22.8,73.5,75.0,75.0,75.0,75.0,0.0</Duration>
+        <Duration>3,0.0,0.0,0.0,3.0,53.2,98.7,100.0,100.0,100.0,100.0,100.0,0.0</Duration>
+        <Duration>14,0.0,0.0,9.7,38.2,74.3,99.3,100.0,100.0,100.0,100.0,100.0,0.0</Duration>
+    </Durations>
+</crop>
