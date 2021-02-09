@@ -55,6 +55,23 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 		fmt.Println("Completed 109,406,858 structures")
 	}
 }
+func TestNsi_FL_FoundationTypes(t *testing.T) {
+	f := []string{"12"}
+	foundationTypes := make(map[string]int64)
+	for _, ss := range f {
+		GetByFipsStream(ss, func(str NsiFeature) {
+			val, ok := foundationTypes[str.Properties.FoundType]
+			if ok {
+				v2 := val + 1
+				foundationTypes[str.Properties.FoundType] = v2
+			} else {
+				foundationTypes[str.Properties.FoundType] = 1
+			}
+
+		})
+	}
+	fmt.Println(foundationTypes)
+}
 func TestNsiByBbox(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	structures := GetByBbox(bbox)

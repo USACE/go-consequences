@@ -16,6 +16,7 @@ type NsiProperties struct {
 	Y         float64 `json:"y"`
 	Occtype   string  `json:"occtype"`
 	FoundHt   float64 `json:"found_ht"`
+	FoundType string  `json:"found_type"`
 	DamCat    string  `json:"st_damcat"`
 	StructVal float64 `json:"val_struct"`
 	ContVal   float64 `json:"val_cont"`
