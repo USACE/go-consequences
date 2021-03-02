@@ -6,7 +6,32 @@ import (
 
 //DepthEvent describes a Hazard with Depth Only
 type DepthEvent struct {
-	Depth float64
+	depth float64
+}
+
+func (h DepthEvent) Depth() float64 {
+	return h.depth
+}
+func (h DepthEvent) SetDepth(d float64) {
+	h.depth = d
+}
+func (h DepthEvent) Velocity() float64 {
+	return -901.0
+}
+func (h DepthEvent) ArrivalTime() time.Time {
+	return time.Time{}
+}
+func (h DepthEvent) ArrivalTime2ft() time.Time {
+	return time.Time{}
+}
+func (h DepthEvent) Duration() float64 {
+	return -901.0
+}
+func (h DepthEvent) WaveHeight() float64 {
+	return -901.0
+}
+func (h DepthEvent) Salinity() bool {
+	return false
 }
 
 //Parameters implements the HazardEvent interface
@@ -24,8 +49,36 @@ func (h DepthEvent) Has(p Parameter) bool {
 
 //ArrivalandDurationEvent describes an event with an arrival time and a duration in days
 type ArrivalandDurationEvent struct {
-	ArrivalTime    time.Time
-	DurationInDays float64
+	arrivalTime    time.Time
+	durationInDays float64
+}
+
+func (h ArrivalandDurationEvent) Depth() float64 {
+	return -901.0
+}
+func (h ArrivalandDurationEvent) Velocity() float64 {
+	return -901.0
+}
+func (h ArrivalandDurationEvent) SetArrivalTime(t time.Time) {
+	h.arrivalTime = t
+}
+func (h ArrivalandDurationEvent) ArrivalTime() time.Time {
+	return h.arrivalTime
+}
+func (h ArrivalandDurationEvent) ArrivalTime2ft() time.Time {
+	return time.Time{}
+}
+func (h ArrivalandDurationEvent) Duration() float64 {
+	return h.durationInDays
+}
+func (h ArrivalandDurationEvent) SetDuration(d float64) {
+	h.durationInDays = d
+}
+func (h ArrivalandDurationEvent) WaveHeight() float64 {
+	return -901.0
+}
+func (h ArrivalandDurationEvent) Salinity() bool {
+	return false
 }
 
 //Parameters implements the HazardEvent interface

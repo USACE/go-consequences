@@ -67,47 +67,26 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Results
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Results { //what if we invert this general model to hazard.damage(consequence receptor)
-	header := []string{"structure damage", "content damage"}
-	results := []interface{}{0.0, 0.0}
-	var ret = consequences.Result{Headers: header, Result: results}
-	de, ok := d.(hazards.DepthEvent)
-	if ok {
-		//depth := de.Depth
-		return computeFloodConsequences(de, s)
-	}
-	ce, okc := d.(hazards.CoastalEvent)
-	if okc {
-		return computeCoastalConsequences(ce, s)
-	}
-	r := consequences.Results{IsTable: false, Result: ret}
-	return r
+	return computeConsequences(d, s)
 }
 
 //the following two methods are legitimately the same - it seems i need an interface rather than a struct for a depthevent
 //this area seems still in need of some refactoring for simplification.
 
-func computeFloodConsequences(e hazards.DepthEvent, s StructureDeterministic) consequences.Results {
+func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) consequences.Results {
 	header := []string{"structure damage", "content damage"}
 	results := []interface{}{0.0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
-	depthAboveFFE := e.Depth - s.FoundHt
-	damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-	cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
-	ret.Result[0] = damagePercent * s.StructVal
-	ret.Result[1] = cdamagePercent * s.ContVal
-	r := consequences.Results{IsTable: false, Result: ret}
-	return r
-}
-
-func computeCoastalConsequences(e hazards.CoastalEvent, s StructureDeterministic) consequences.Results {
-	header := []string{"structure damage", "content damage"}
-	results := []interface{}{0.0, 0.0}
-	var ret = consequences.Result{Headers: header, Result: results}
-	depthAboveFFE := e.Depth - s.FoundHt
-	damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-	cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
-	ret.Result[0] = damagePercent * s.StructVal
-	ret.Result[1] = cdamagePercent * s.ContVal
+	if e.Has(hazards.Depth) {
+		depthAboveFFE := e.Depth() - s.FoundHt
+		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
+		ret.Result[0] = damagePercent * s.StructVal
+		ret.Result[1] = cdamagePercent * s.ContVal
+	} else {
+		ret.Result[0] = 0.0
+		ret.Result[1] = 0.0
+	}
 	r := consequences.Results{IsTable: false, Result: ret}
 	return r
 }

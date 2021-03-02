@@ -37,9 +37,16 @@ func TestDamageFunctionFamily(t *testing.T) {
 	var df = DamageFunctionFamily{DamageFunctions: m}
 
 	//fake instances of hazards (to match the hazard types.)
-	ce := hazards.CoastalEvent{Depth: 2, Salinity: true, WaveHeight: 3.4}
-	de := hazards.DepthEvent{Depth: 2}
-	ce2 := hazards.CoastalEvent{Depth: 2, Salinity: false, WaveHeight: 3.4}
+	ce := hazards.CoastalEvent{}
+	ce.SetDepth(2)
+	ce.SetSalinity(true)
+	ce.SetWaveHeight(3.4)
+	de := hazards.DepthEvent{}
+	de.SetDepth(2)
+	ce2 := hazards.CoastalEvent{}
+	ce2.SetDepth(2)
+	ce2.SetSalinity(false)
+	ce2.SetWaveHeight(3.4)
 	//confirm that for each hazard the correct damage function is pulled when requested and the proper damage value is computed.
 	cv := df.DamageFunctions[ce.Parameters()].SampleValue(ce.Depth)
 	if cv != 2 {

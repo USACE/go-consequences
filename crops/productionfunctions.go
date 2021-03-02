@@ -20,7 +20,7 @@ func (p productionFunction) GetCumulativeMonthlyFixedCostsOnly() []float64 {
 }
 
 func (p productionFunction) GetExposedValue(e hazards.ArrivalandDurationEvent) float64 {
-	hazardMonth := e.ArrivalTime.Month() //iota "enum"
+	hazardMonth := e.ArrivalTime().Month() //iota "enum"
 	hazardMonthIndex := int(hazardMonth) - 1
 	// We need to prorate monthly costs later
 	// This assumes planting on time. Cannot deal with case where you are delayed THEN impacted.

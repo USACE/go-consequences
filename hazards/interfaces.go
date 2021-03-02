@@ -1,8 +1,17 @@
 package hazards
 
+import "time"
+
 //HazardEvent is an interface I am trying to make to describe all Hazard Events
 type HazardEvent interface {
 	//parameters?
+	Depth() float64
+	Velocity() float64
+	ArrivalTime() time.Time
+	ArrivalTime2ft() time.Time
+	Duration() float64
+	WaveHeight() float64
+	Salinity() bool
 	//values?
 	//hazardType?
 	Parameters() Parameter

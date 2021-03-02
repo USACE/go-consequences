@@ -23,8 +23,9 @@ func TestDamageFunctionCompute_one(t *testing.T) {
 	df := DamageFunction{DurationDamageCurves: m}
 
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 1.5}
-
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(1.5)
 	got := df.ComputeDamagePercent(h)
 	expected := 1.15
 	if got != expected {
@@ -47,8 +48,9 @@ func TestDamageFunctionCompute_two(t *testing.T) {
 	df := DamageFunction{DurationDamageCurves: m}
 
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: .5}
-
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(.5)
 	got := df.ComputeDamagePercent(h)
 	expected := .55
 	if got != expected {
@@ -71,8 +73,9 @@ func TestDamageFunctionCompute_three(t *testing.T) {
 	df := DamageFunction{DurationDamageCurves: m}
 
 	at := time.Date(1984, time.Month(2), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 2.5}
-
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(2.5)
 	got := df.ComputeDamagePercent(h)
 	expected := 2.25
 	if got != expected {

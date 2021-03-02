@@ -16,9 +16,9 @@ type CropSchedule struct {
 //ComputeCropDamageCase evaluates a crop schedule against a hazard arrival and duration to determine impact on the crop season.
 func (cs CropSchedule) ComputeCropDamageCase(h hazards.ArrivalandDurationEvent) CropDamageCase {
 	//determine day of year of the hazard.
-	hazardStartDoy := h.ArrivalTime.YearDay()
+	hazardStartDoy := h.ArrivalTime().YearDay()
 	//determine duration of the hazard
-	hazardDurationDays := int(h.DurationInDays)
+	hazardDurationDays := int(h.Duration())
 	if hazardStartDoy <= cs.StartPlantingDate.YearDay() {
 		//flood before start of planting.
 		//determine if the crop start planting date is effected by the hazard

@@ -11,7 +11,9 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	//setup
 	//hazard definition
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(10)
 	//construct a TestCrop
 	c := createTestCrop()
 
@@ -34,7 +36,9 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 	//setup
 	//hazard definition
 	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(10)
 	//construct a TestCrop
 	c := createTestCrop()
 
@@ -59,7 +63,9 @@ func TestCropDamage(t *testing.T) {
 	c := ReadFromXML(path)
 	// construct hazard
 	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 10}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(10)
 	//compute
 	cd := c.Compute(h)
 	//expected results
@@ -83,7 +89,9 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 	c := ReadFromXML(path)
 	// construct hazard
 	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 15}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(15)
 	//compute
 	cd := c.Compute(h)
 	//expected results

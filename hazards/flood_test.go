@@ -7,7 +7,7 @@ import (
 )
 
 func TestDepthEventParameters(t *testing.T) {
-	d := DepthEvent{Depth: 2.5}
+	d := DepthEvent{depth: 2.5}
 	if d.Has(Depth) {
 		fmt.Println("Depth")
 	}
@@ -26,7 +26,7 @@ func TestDepthEventParameters(t *testing.T) {
 }
 func TestArrivalandDurationEventParameters(t *testing.T) {
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	d := ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 180}
+	d := ArrivalandDurationEvent{arrivalTime: at, durationInDays: 180}
 	if d.Has(Depth) {
 		fmt.Println("Depth")
 	}

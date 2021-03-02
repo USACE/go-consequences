@@ -18,7 +18,7 @@ func (df DamageFunction) ComputeDamagePercent(h hazards.ArrivalandDurationEvent)
 	previousValue := make([]float64, 12)
 	firstIteration := true
 	//find the month of the event
-	hazardMonth := h.ArrivalTime.Month() //iota "enum"
+	hazardMonth := h.ArrivalTime().Month() //iota "enum"
 	hazardMonthIndex := int(hazardMonth) - 1
 	keys := make([]float64, 0)
 	for k := range df.DurationDamageCurves {
@@ -27,14 +27,14 @@ func (df DamageFunction) ComputeDamagePercent(h hazards.ArrivalandDurationEvent)
 	sort.Float64s(keys)
 	for _, k := range keys {
 		v := df.DurationDamageCurves[k]
-		if k > h.DurationInDays {
+		if k > h.Duration() {
 			if firstIteration {
 				//linearly interpolate to zero?
-				factor := h.DurationInDays / k
+				factor := h.Duration() / k
 				return v[hazardMonthIndex] * factor //return the damage percentage.
 			}
 			//interpolate
-			factor := (k - h.DurationInDays) / (k - previousKey)
+			factor := (k - h.Duration()) / (k - previousKey)
 			return previousValue[hazardMonthIndex] + factor*(v[hazardMonthIndex]-previousValue[hazardMonthIndex]) //return the damage percentage.
 		}
 		previousKey = k

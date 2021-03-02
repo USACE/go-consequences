@@ -12,7 +12,8 @@ import (
 )
 
 func TestSampleSimulation(t *testing.T) {
-	var hazard = hazards.DepthEvent{Depth: 12.34}
+	var hazard = hazards.DepthEvent{}
+	hazard.SetDepth(12.34)
 	var args = compute.FipsCodeCompute{ID: "123", FIPS: "11", HazardArgs: hazard}
 	var rargs = compute.RequestArgs{Args: args, Concurrent: true}
 	HandleRequestArgs(rargs)
@@ -43,7 +44,8 @@ func TestNationalSimulationConcurrent(t *testing.T) {
 //TestNationalSimulationConccurentByStateOnly
 func TestNationalSimulationConcurrentByStateOnly(t *testing.T) {
 	f := census.StateToCountyFipsMap()
-	var hazard = hazards.DepthEvent{Depth: 12.34}
+	var hazard = hazards.DepthEvent{}
+	hazard.SetDepth(12.34)
 	start := time.Now()
 	var wg sync.WaitGroup
 	wg.Add(len(f))
@@ -64,7 +66,8 @@ func TestNationalSimulationConcurrentByStateOnly(t *testing.T) {
 //TestNationalSimulation - runs sequential by state, concurrent by county within a state
 func TestNationalSimulation(t *testing.T) {
 	f := census.StateToCountyFipsMap()
-	var hazard = hazards.DepthEvent{Depth: 12.34}
+	var hazard = hazards.DepthEvent{}
+	hazard.SetDepth(12.34)
 	start := time.Now()
 	for key := range f {
 		var args = compute.FipsCodeCompute{ID: "123", FIPS: key, HazardArgs: hazard}

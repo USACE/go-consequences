@@ -183,9 +183,11 @@ func main() {
 					} else {
 						//cast to args
 						depth, err := strconv.ParseFloat(depthParam[0], 64)
-						var hazard = hazards.DepthEvent{Depth: 12.34}
+						var hazard = hazards.DepthEvent{}
+						hazard.SetDepth(12.34)
 						if err == nil {
-							hazard = hazards.DepthEvent{Depth: depth}
+							hazard = hazards.DepthEvent{}
+							hazard.SetDepth(depth)
 						}
 						var args = compute.FipsCodeCompute{ID: "123", FIPS: fipsid[0], HazardArgs: hazard}
 						var rargs = compute.RequestArgs{Args: args, Concurrent: true}

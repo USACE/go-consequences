@@ -9,7 +9,9 @@ import (
 
 func TestComputeCropDamageCase_FloodedBeforePlanting(t *testing.T) {
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 180}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(180)
 	st := time.Date(1984, time.Month(7), 22, 0, 0, 0, 0, time.UTC)
 	et := time.Date(1984, time.Month(7), 28, 0, 0, 0, 0, time.UTC)
 
@@ -22,7 +24,9 @@ func TestComputeCropDamageCase_FloodedBeforePlanting(t *testing.T) {
 }
 func TestComputeCropDamageCase_FloodPostponedPlanting(t *testing.T) {
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 7}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(7)
 	st := time.Date(1984, time.Month(1), 25, 0, 0, 0, 0, time.UTC)
 	et := time.Date(1984, time.Month(1), 31, 0, 0, 0, 0, time.UTC)
 
@@ -35,7 +39,9 @@ func TestComputeCropDamageCase_FloodPostponedPlanting(t *testing.T) {
 }
 func TestComputeCropDamageCase_FloodNoPlant(t *testing.T) {
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 12}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(12)
 	st := time.Date(1984, time.Month(1), 25, 0, 0, 0, 0, time.UTC)
 	et := time.Date(1984, time.Month(1), 31, 0, 0, 0, 0, time.UTC)
 
@@ -48,7 +54,9 @@ func TestComputeCropDamageCase_FloodNoPlant(t *testing.T) {
 }
 func TestComputeCropDamageCase_FloodAfterPlanting(t *testing.T) {
 	at := time.Date(1984, time.Month(2), 1, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 12}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(12)
 	st := time.Date(1984, time.Month(1), 25, 0, 0, 0, 0, time.UTC)
 	et := time.Date(1984, time.Month(1), 31, 0, 0, 0, 0, time.UTC)
 
@@ -63,7 +71,9 @@ func TestComputeCropDamageCase_FloodAfterPlanting(t *testing.T) {
 //need a winter crop example.
 func TestComputeCropDamageCase_FloodAfterPlanting_WinterCrop(t *testing.T) {
 	at := time.Date(1984, time.Month(2), 1, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{ArrivalTime: at, DurationInDays: 12}
+	h := hazards.ArrivalandDurationEvent{}
+	h.SetArrivalTime(at)
+	h.SetDuration(12)
 	st := time.Date(1983, time.Month(12), 25, 0, 0, 0, 0, time.UTC)
 	et := time.Date(1983, time.Month(12), 31, 0, 0, 0, 0, time.UTC)
 

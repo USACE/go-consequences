@@ -93,7 +93,8 @@ func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochast
 
 //Compute computes a simulation on the NSI for a depth provided by request args.
 func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
-	var depthevent = hazards.DepthEvent{Depth: 5.32}
+	var depthevent = hazards.DepthEvent{}
+	depthevent.SetDepth(5.32)
 	okd := false
 	fips, okfips := args.Args.(FipsCodeCompute)
 	startnsi := time.Now()
@@ -117,7 +118,8 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 	//s.Status = "Computing Depths"
 	//depths
 	fmt.Println("Computing depths for" + fips.FIPS)
-	var d = hazards.DepthEvent{Depth: 5.32}
+	var d = hazards.DepthEvent{}
+	d.SetDepth(5.32)
 	if okd {
 		d = depthevent
 	}
@@ -162,7 +164,8 @@ func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
 
 //ComputeStream computes a simulation with the NSI using the streaming api, it fulfils the Computable interface on NSIStructureSimulation.
 func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummary {
-	var depthevent = hazards.DepthEvent{Depth: 5.32}
+	var depthevent = hazards.DepthEvent{}
+	depthevent.SetDepth(5.32)
 	okd := false
 	fips, okfips := args.Args.(FipsCodeCompute)
 	startnsi := time.Now()
@@ -171,7 +174,8 @@ func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummar
 		fmt.Println("Downloading NSI by fips " + fips.FIPS)
 		depthevent, okd = fips.HazardArgs.(hazards.DepthEvent)
 		if !okd {
-			depthevent = hazards.DepthEvent{Depth: 5.32}
+			depthevent = hazards.DepthEvent{}
+			depthevent.SetDepth(5.32)
 		}
 		fmt.Println("Computing depths for" + fips.FIPS)
 		m := structures.OccupancyTypeMap()

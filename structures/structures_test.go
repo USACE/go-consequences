@@ -26,11 +26,11 @@ func TestComputeConsequences(t *testing.T) {
 	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
-	var d = hazards.DepthEvent{Depth: 0.0}
+	var d = hazards.DepthEvent{}
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5}
 	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0}
 	for idx := range depths {
-		d.Depth = depths[idx]
+		d.SetDepth(depths[idx])
 		got := s.Compute(d).Result.Result[0].(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
@@ -70,11 +70,11 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	var s = StructureStochastic{OccType: o, StructVal: spv, ContVal: cpv, FoundHt: fhpv, BaseStructure: BaseStructure{DamCat: "category"}}
 	s.UseUncertainty = true
 	//test depth values
-	var d = hazards.DepthEvent{Depth: 0.0}
+	var d = hazards.DepthEvent{}
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5}
 	expectedResults := []float64{0.0, 0.0, -.052138, -0.030335, -0.122390, -0.088922, -0.146414, 0.205319, 0.108698, -0.625010}
 	for idx := range depths {
-		d.Depth = depths[idx]
+		d.SetDepth(depths[idx])
 		got := s.Compute(d).Result.Result[0].(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .000001 {

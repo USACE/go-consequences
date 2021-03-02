@@ -75,10 +75,12 @@ func (c Crop) GetX() float64 {
 func (c Crop) GetY() float64 {
 	return c.y
 }
+
 //GetTotalMarketValue returns crop.totalMarketValue
 func (c Crop) GetTotalMarketValue() float64 {
 	return c.totalMarketValue
 }
+
 //Compute implements concequence.Receptor on crop
 func (c Crop) Compute(event hazards.HazardEvent) consequences.Results {
 	//Check event to determine if it is an arrival time and duration event
@@ -136,7 +138,7 @@ func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Not using interpolated % loss for late plant
 	plantingWindow := (c.cropSchedule.LastPlantingDate.Sub(c.cropSchedule.StartPlantingDate).Hours() / 24)
 	fmt.Println(plantingWindow)
-	actualPlant := (e.ArrivalTime.AddDate(0, 0, int(e.DurationInDays)))
+	actualPlant := (e.ArrivalTime().AddDate(0, 0, int(e.Duration())))
 	fmt.Println(actualPlant)
 	daysLate := (actualPlant.Sub(c.cropSchedule.StartPlantingDate.AddDate(actualPlant.Year(), 0, 0))).Hours() / 24
 	fmt.Println(daysLate)
