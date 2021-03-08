@@ -3,12 +3,14 @@ package hazardproviders
 import (
 	"fmt"
 
+	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
 
 //HazardProvider provides hazards as a return for an argument input
 type HazardProvider interface {
-	ProvideHazard(args interface{}) (hazards.HazardEvent, error)
+	ProvideHazard(location geography.Location) (hazards.HazardEvent, error)
+	ProvideHazardBoundary() (geography.BBox, error)
 }
 
 //NoHazardFoundError is an error for a situation where no hazard could be computed for the given args

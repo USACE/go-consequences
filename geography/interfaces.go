@@ -9,14 +9,14 @@ type Location struct {
 }
 
 type BBox struct {
-	bbox []float64
+	Bbox []float64
 }
 
 func (bb BBox) ToString() string {
 	return fmt.Sprintf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
-		bb.bbox[0], bb.bbox[1],
-		bb.bbox[2], bb.bbox[1],
-		bb.bbox[2], bb.bbox[3],
-		bb.bbox[0], bb.bbox[3],
-		bb.bbox[0], bb.bbox[1])
+		bb.Bbox[0], bb.Bbox[1],
+		bb.Bbox[2], bb.Bbox[1],
+		bb.Bbox[2], bb.Bbox[3],
+		bb.Bbox[0], bb.Bbox[3],
+		bb.Bbox[0], bb.Bbox[1])
 }
