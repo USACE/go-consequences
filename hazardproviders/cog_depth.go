@@ -1,6 +1,5 @@
 package hazardproviders
 
-/*
 import (
 	"github.com/dewberry/gdal"
 )
@@ -18,4 +17,3 @@ func getDepth(lon float64, lat float64, depthGrid string) (float32, error) {
 	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
 	return buffer[0], nil
 }
-*/
