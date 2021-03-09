@@ -12,7 +12,7 @@ type CoastalEvent struct {
 func (h CoastalEvent) Depth() float64 {
 	return h.depth
 }
-func (h CoastalEvent) SetDepth(d float64) {
+func (h *CoastalEvent) SetDepth(d float64) {
 	h.depth = d
 }
 func (h CoastalEvent) ArrivalTime() time.Time {
@@ -27,13 +27,13 @@ func (h CoastalEvent) Duration() float64 {
 func (h CoastalEvent) WaveHeight() float64 {
 	return h.waveHeight
 }
-func (h CoastalEvent) SetWaveHeight(d float64) {
+func (h *CoastalEvent) SetWaveHeight(d float64) {
 	h.waveHeight = d
 }
 func (h CoastalEvent) Salinity() bool {
 	return h.salinity
 }
-func (h CoastalEvent) SetSalinity(d bool) {
+func (h *CoastalEvent) SetSalinity(d bool) {
 	h.salinity = d
 }
 

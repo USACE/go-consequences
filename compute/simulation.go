@@ -256,13 +256,17 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
-func compute(filepath string) {
+func computeFromFile(filepath string) {
 	//open a tif reader
 	tiffReader := hazardproviders.Init(filepath)
 	defer tiffReader.Close()
+	compute(&tiffReader)
+
+}
+func compute(hp hazardproviders.HazardProvider) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
-	bbox, err := tiffReader.ProvideHazardBoundary()
+	bbox, err := hp.ProvideHazardBoundary()
 	if err != nil {
 		log.Panicf("Unable to get the raster bounding box: %s", err)
 	}
@@ -281,7 +285,7 @@ func compute(filepath string) {
 		//convert nsifeature to structure
 		str := NsiFeaturetoStructure(f, m, defaultOcctype)
 		//query input tiff for xy location
-		d, _ := tiffReader.ProvideHazard(geography.Location{X: str.X, Y: str.Y})
+		d, _ := hp.ProvideHazard(geography.Location{X: str.X, Y: str.Y})
 		//compute damages based on provided depths
 		if d.Has(hazards.Depth) {
 			//fmt.Println(fmt.Sprintf("Depth was %f at structure %s", d.Depth(), f.Properties.Name))

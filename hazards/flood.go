@@ -60,7 +60,7 @@ func (h ArrivalandDurationEvent) Depth() float64 {
 func (h ArrivalandDurationEvent) Velocity() float64 {
 	return -901.0
 }
-func (h ArrivalandDurationEvent) SetArrivalTime(t time.Time) {
+func (h *ArrivalandDurationEvent) SetArrivalTime(t time.Time) {
 	h.arrivalTime = t
 }
 func (h ArrivalandDurationEvent) ArrivalTime() time.Time {
@@ -72,7 +72,7 @@ func (h ArrivalandDurationEvent) ArrivalTime2ft() time.Time {
 func (h ArrivalandDurationEvent) Duration() float64 {
 	return h.durationInDays
 }
-func (h ArrivalandDurationEvent) SetDuration(d float64) {
+func (h *ArrivalandDurationEvent) SetDuration(d float64) {
 	h.durationInDays = d
 }
 func (h ArrivalandDurationEvent) WaveHeight() float64 {
