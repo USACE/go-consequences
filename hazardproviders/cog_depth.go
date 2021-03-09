@@ -23,7 +23,9 @@ func Init(fp string) cogHazardProvider {
 	}
 	return cogHazardProvider{fp, &ds}
 }
-
+func (chp *cogHazardProvider) Close() {
+	chp.ds.Close()
+}
 func (chp *cogHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
 	rb := chp.ds.RasterBand(1)
 	igt := chp.ds.InvGeoTransform()
@@ -32,8 +34,10 @@ func (chp *cogHazardProvider) ProvideHazard(l geography.Location) (hazards.Hazar
 	buffer := make([]float32, 1*1)
 	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
 	depth := buffer[0]
+	//fmt.Println(depth)
 	h := hazards.DepthEvent{}
 	h.SetDepth(float64(depth))
+	//fmt.Println(h.Depth())
 	return h, nil
 }
 func (chp *cogHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {

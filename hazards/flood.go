@@ -12,7 +12,8 @@ type DepthEvent struct {
 func (h DepthEvent) Depth() float64 {
 	return h.depth
 }
-func (h DepthEvent) SetDepth(d float64) {
+func (h *DepthEvent) SetDepth(d float64) {
+	//fmt.Println(d)
 	h.depth = d
 }
 func (h DepthEvent) Velocity() float64 {

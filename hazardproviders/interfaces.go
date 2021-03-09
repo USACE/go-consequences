@@ -11,6 +11,7 @@ import (
 type HazardProvider interface {
 	ProvideHazard(location geography.Location) (hazards.HazardEvent, error)
 	ProvideHazardBoundary() (geography.BBox, error)
+	Close()
 }
 
 //NoHazardFoundError is an error for a situation where no hazard could be computed for the given args

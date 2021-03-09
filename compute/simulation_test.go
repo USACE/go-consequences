@@ -8,6 +8,10 @@ import (
 	"github.com/USACE/go-consequences/structures"
 )
 
+func Test_Compute_NSI(t *testing.T) {
+	t.Log("Starting Test")
+	compute("/workspaces/Go_Consequences/data/3782_COG.tif")
+}
 func TestConvertNSIFeatureToStructure(t *testing.T) {
 	bbox := "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	//get a map of all occupancy types
