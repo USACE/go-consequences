@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -35,8 +34,9 @@ func main() {
 					//should have better error checking...
 					http.Error(w, "Invalid FilePath argument", http.StatusNotFound)
 				} else {
-					s, _ := compute.FromFile(fp[0])
-					fmt.Fprintf(w, s)
+					//s, _ := compute.FromFile(fp[0])
+					//fmt.Fprintf(w, s)
+					compute.StreamFromFile(fp[0], w)
 				}
 			}
 		})

@@ -19,7 +19,7 @@ func Init(fp string) cogHazardProvider {
 	//make sure it is a tif
 	ds, err := gdal.Open(fp, gdal.ReadOnly)
 	if err != nil {
-		log.Fatalln("Cannot connect to raster.  Killing everything!")
+		log.Fatalln("Cannot connect to raster.  Killing everything! " + err.Error())
 	}
 	return cogHazardProvider{fp, &ds}
 }

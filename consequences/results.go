@@ -49,6 +49,17 @@ func (c Results) MarshalJSON() ([]byte, error) {
 	s += "]}"
 	return []byte(s), nil
 }
+func (c Result) MarshalJSON() ([]byte, error) {
+	s := "{\"consequence\":{\""
+	result := c.Result
+	for i, val := range c.Headers {
+		value, _ := json.Marshal(result[i])
+		s += val + "\":" + string(value) + ",\""
+	}
+	s = strings.TrimRight(s, ",\"")
+	s += "}},"
+	return []byte(s), nil
+}
 
 /*
 //String converts a ConsequenceDamageResult to a string
