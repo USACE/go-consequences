@@ -227,7 +227,7 @@ func computeStream(hp hazardproviders.HazardProvider, w http.ResponseWriter) {
 				row := []interface{}{str.Name, str.X, str.Y, r.Result.Result[0], r.Result.Result[1]}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				b, _ := structureResult.MarshalJSON()
-				s := string(b)
+				s := string(b) + "\n"
 				fmt.Fprintf(w, s)
 			}
 		}

@@ -57,7 +57,7 @@ func (c Result) MarshalJSON() ([]byte, error) {
 		s += val + "\":" + string(value) + ",\""
 	}
 	s = strings.TrimRight(s, ",\"")
-	s += "}},"
+	s += "}}"
 	return []byte(s), nil
 }
 
