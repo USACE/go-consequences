@@ -94,122 +94,6 @@ func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochast
 	return structures
 }
 
-//Compute computes a simulation on the NSI for a depth provided by request args.
-func (s NSIStructureSimulation) Compute(args RequestArgs) SimulationSummary {
-	var depthevent = hazards.DepthEvent{}
-	depthevent.SetDepth(5.32)
-	okd := false
-	fips, okfips := args.Args.(FipsCodeCompute)
-	startnsi := time.Now()
-	var structures []structures.StructureStochastic
-	if okfips {
-		//s.Status = "Downloading NSI by fips " + fips.FIPS
-		fmt.Println("Downloading NSI by fips " + fips.FIPS)
-		structures = nsiInventorytoStructures(nsi.GetByFips(fips.FIPS))
-		depthevent, okd = fips.HazardArgs.(hazards.DepthEvent)
-	} else {
-		bbox, okbbox := args.Args.(BboxCompute)
-		if okbbox {
-			//s.Status = "Downloading NSI by bbox " + bbox.BBOX
-			fmt.Println("Downloading NSI by bbox " + bbox.BBOX)
-			structures = nsiInventorytoStructures(nsi.GetByBbox(bbox.BBOX))
-			depthevent, okd = bbox.HazardArgs.(hazards.DepthEvent)
-		}
-	}
-	elapsedNsi := time.Since(startnsi)
-	fmt.Println(fmt.Sprintf("FIPS %s retrieved %d structures from the NSI in %d", fips.FIPS, len(structures), elapsedNsi))
-	//s.Status = "Computing Depths"
-	//depths
-	fmt.Println("Computing depths for" + fips.FIPS)
-	var d = hazards.DepthEvent{}
-	d.SetDepth(5.32)
-	if okd {
-		d = depthevent
-	}
-	startcompute := time.Now()
-	//ideally get from some sort of source.
-	rmap := make(map[string]SimulationSummaryRow)
-	//s.Status = fmt.Sprintf("Computing Damages %d of %d", 0, len(s.Structures))
-	for _, str := range structures {
-		r := str.Compute(d)
-		if val, ok := rmap[str.DamCat]; ok {
-			//fmt.Println(fmt.Sprintf("FIPS %s Computing Damages %d of %d", fips.FIPS, idx, len(s.Structures)))
-			val.StructureCount++
-			val.StructureDamage += r.Result.Result[0].(float64) //based on convention - super risky
-			val.ContentDamage += r.Result.Result[1].(float64)   //based on convention - super risky
-			rmap[str.DamCat] = val
-		} else {
-			rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Result.Result[0].(float64), ContentDamage: r.Result.Result[1].(float64)}
-		}
-		//s.Status = fmt.Sprintf("Computing Damages %d of %d", i, len(s.Structures))
-	}
-	header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
-	rows := make([]SimulationSummaryRow, len(rmap))
-	idx := 0
-	for _, val := range rmap {
-		//fmt.Println(fmt.Sprintf("for %s, there were %d structures with %f structure damages %f content damages for damage category %s", fips.FIPS, val.StructureCount, val.StructureDamage, val.ContentDamage, val.RowHeader))
-		rows[idx] = val
-		idx++
-	}
-	elapsed := time.Since(startcompute)
-	var ret = SimulationSummary{ColumnNames: header, Rows: rows, NSITime: elapsedNsi, Computetime: elapsed}
-	//s.Status = "Complete"
-	fmt.Println("Complete for" + fips.FIPS)
-	//s.Result = ret
-	return ret
-}
-
-/*
- more memory efficient version of compute
- each point is processed as it is received
- from the server
-*/
-
-//ComputeStream computes a simulation with the NSI using the streaming api, it fulfils the Computable interface on NSIStructureSimulation.
-func (s NSIStructureSimulation) ComputeStream(args RequestArgs) SimulationSummary {
-	var depthevent = hazards.DepthEvent{}
-	depthevent.SetDepth(5.32)
-	okd := false
-	fips, okfips := args.Args.(FipsCodeCompute)
-	startnsi := time.Now()
-	rmap := make(map[string]SimulationSummaryRow)
-	if okfips {
-		fmt.Println("Downloading NSI by fips " + fips.FIPS)
-		depthevent, okd = fips.HazardArgs.(hazards.DepthEvent)
-		if !okd {
-			depthevent = hazards.DepthEvent{}
-			depthevent.SetDepth(5.32)
-		}
-		fmt.Println("Computing depths for" + fips.FIPS)
-		m := structures.OccupancyTypeMap()
-		defaultOcctype := m["RES1-1SNB"]
-		nsi.GetByFipsStream(fips.FIPS, func(f nsi.NsiFeature) {
-			str := NsiFeaturetoStructure(f, m, defaultOcctype)
-			r := str.Compute(depthevent)
-			if val, ok := rmap[str.DamCat]; ok {
-				val.StructureCount++
-				val.StructureDamage += r.Result.Result[0].(float64) //based on convention - super risky
-				val.ContentDamage += r.Result.Result[1].(float64)   //based on convention - super risky
-				rmap[str.DamCat] = val
-			} else {
-				rmap[str.DamCat] = SimulationSummaryRow{RowHeader: str.DamCat, StructureCount: 1, StructureDamage: r.Result.Result[0].(float64), ContentDamage: r.Result.Result[1].(float64)}
-			}
-		})
-	}
-	elapsedNsi := time.Since(startnsi)
-	header := []string{"Damage Category", "Structure Count", "Total Structure Damage", "Total Content Damage"}
-	rows := make([]SimulationSummaryRow, len(rmap))
-	idx := 0
-	for _, val := range rmap {
-		rows[idx] = val
-		idx++
-	}
-	elapsed := time.Since(startnsi)
-	var ret = SimulationSummary{ColumnNames: header, Rows: rows, NSITime: elapsedNsi, Computetime: elapsed}
-	fmt.Println("Complete for" + fips.FIPS)
-	return ret
-}
-
 //ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
 func ComputeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
@@ -256,14 +140,14 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
-func computeFromFile(filepath string) {
+func FromFile(filepath string) (string, error) {
 	//open a tif reader
 	tiffReader := hazardproviders.Init(filepath)
 	defer tiffReader.Close()
-	compute(&tiffReader)
+	return compute(&tiffReader)
 
 }
-func compute(hp hazardproviders.HazardProvider) {
+func compute(hp hazardproviders.HazardProvider) (string, error) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.ProvideHazardBoundary()
@@ -299,6 +183,7 @@ func compute(hp hazardproviders.HazardProvider) {
 		}
 	})
 	b, _ := result.MarshalJSON() //json.Marshal(result)
-	fmt.Println(string(b))
+	return string(b), nil
+	//fmt.Println(string(b))
 	//fmt.Println(result)
 }

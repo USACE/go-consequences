@@ -10,7 +10,8 @@ import (
 
 func Test_Compute_NSI(t *testing.T) {
 	t.Log("Starting Test")
-	computeFromFile("/workspaces/Go_Consequences/data/3782_COG.tif")
+	s, _ := FromFile("/workspaces/Go_Consequences/data/3782_COG.tif")
+	fmt.Println(s)
 }
 func TestConvertNSIFeatureToStructure(t *testing.T) {
 	bbox := "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
