@@ -32,7 +32,8 @@ func TestNassCDLFile(t *testing.T) {
 }
 func TestNassCDLFileSampleValue(t *testing.T) {
 	ncp := Init("/workspaces/Go_Consequences/data/CDL_2018_19015.tif")
-	fmt.Println(ncp.getCropValue(1551565.363, 1909363.537))
+	fmt.Println(ncp.ProvideHazardBoundary())
+	fmt.Println(ncp.getCropValue(1556859, 2119154)) //should be 5, Soybeans
 }
 func TestNassCDLFileFiltered(t *testing.T) {
 	//requires write access to C:\\Temp\\agtesting

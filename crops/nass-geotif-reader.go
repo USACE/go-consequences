@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/USACE/go-consequences/geography"
 	"github.com/dewberry/gdal"
 )
 
@@ -22,6 +23,10 @@ func Init(fp string) nassCropProvider {
 		log.Fatalln("Cannot connect to NASS GeoTiff.  Killing everything! " + err.Error())
 	}
 	m := NASSCropMap()
+	spatialRef := gdal.CreateSpatialReference("")
+	spatialRef.FromEPSG(5070)
+	srString, err := spatialRef.ToWKT()
+	ds.SetProjection(srString)
 	return nassCropProvider{fp, &ds, m}
 }
 func (ncp *nassCropProvider) getCropValue(y float64, x float64) (Crop, error) {
@@ -38,6 +43,17 @@ func (ncp *nassCropProvider) getCropValue(y float64, x float64) (Crop, error) {
 		return Crop{}, NoCropFoundError{fmt.Sprintf("requested %f, %f, %s and no crop was found.", y, x, ncp.FilePath)}
 	}
 
+}
+func (ncp *nassCropProvider) ProvideHazardBoundary() (geography.BBox, error) {
+	bbox := make([]float64, 4)
+	gt := ncp.ds.GeoTransform()
+	dx := ncp.ds.RasterXSize()
+	dy := ncp.ds.RasterYSize()
+	bbox[0] = gt[0]                     //upper left x
+	bbox[1] = gt[3]                     //upper left y
+	bbox[2] = gt[0] + gt[1]*float64(dx) //lower right x
+	bbox[3] = gt[3] + gt[5]*float64(dy) //lower right y
+	return geography.BBox{Bbox: bbox}, nil
 }
 
 type NoCropFoundError struct {
