@@ -161,7 +161,7 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	//create a results store
-	header := []string{"fd_id", "x", "y", "structure damage", "content damage"}
+	header := []string{"fd_id", "x", "y", "structure damage", "content damage", "par"}
 	var rows []interface{}
 	result := consequences.Results{IsTable: true}
 	result.Result.Headers = header
@@ -177,7 +177,7 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 			if d.Depth() > 0.0 {
 				r := str.Compute(d)
 				//keep a summmary of damages that adds the structure name
-				row := []interface{}{str.Name, str.X, str.Y, r.Result.Result[0], r.Result.Result[1]}
+				row := []interface{}{str.Name, str.X, str.Y, r.Result.Result[0], r.Result.Result[1], f.Properties.Pop2amo65 + f.Properties.Pop2amu65}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				result.AddResult(structureResult)
 			}
@@ -208,7 +208,7 @@ func computeStream(hp hazardproviders.HazardProvider, w http.ResponseWriter) {
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	//create a results store
-	header := []string{"fd_id", "x", "y", "structure damage", "content damage"}
+	header := []string{"fd_id", "x", "y", "depth", "structure damage", "content damage", "Pop_2amo65", "Pop_2amu65", "Pop_2pmo65", "Pop_2pmu65"}
 	var rows []interface{}
 	result := consequences.Results{IsTable: true}
 	result.Result.Headers = header
@@ -224,7 +224,7 @@ func computeStream(hp hazardproviders.HazardProvider, w http.ResponseWriter) {
 			if d.Depth() > 0.0 {
 				r := str.Compute(d)
 				//keep a summmary of damages that adds the structure name
-				row := []interface{}{str.Name, str.X, str.Y, r.Result.Result[0], r.Result.Result[1]}
+				row := []interface{}{str.Name, str.X, str.Y, d.Depth(), r.Result.Result[0], r.Result.Result[1], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				b, _ := structureResult.MarshalJSON()
 				s := string(b) + "\n"
