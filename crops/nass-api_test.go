@@ -30,6 +30,9 @@ func TestNassCDLFile(t *testing.T) {
 	}
 	//fmt.Println(result)
 }
+func TestNassCDLFileSampleValue(t *testing.T) {
+	fmt.Println(getCropValue(1551565.363, 1909363.537, "/workspaces/Go_Consequences/data/CDL_2018_19015.tif"))
+}
 func TestNassCDLFileFiltered(t *testing.T) {
 	//requires write access to C:\\Temp\\agtesting
 	result := GetCDLFileByFIPSFiltered("2018", "19015", "1,5")
