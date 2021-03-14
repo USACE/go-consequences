@@ -2,8 +2,8 @@ package compute
 
 import (
 	"fmt"
+	"io"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -188,14 +188,14 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 	//fmt.Println(string(b))
 	//fmt.Println(result)
 }
-func StreamFromFile(filepath string, w http.ResponseWriter) {
+func StreamFromFile(filepath string, w io.Writer) { //enc json.Encoder) { //w http.ResponseWriter) {
 	//open a tif reader
 	tiffReader := hazardproviders.Init(filepath)
 	defer tiffReader.Close()
 	computeStream(&tiffReader, w)
 
 }
-func computeStream(hp hazardproviders.HazardProvider, w http.ResponseWriter) {
+func computeStream(hp hazardproviders.HazardProvider, w io.Writer) { //enc json.Encoder){//w http.ResponseWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.ProvideHazardBoundary()
