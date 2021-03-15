@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
 )
 
@@ -33,18 +34,11 @@ type SimpleStructure struct {
 	Pop2pmu65   int16
 }
 
-//NsiStreamProcessor is a function used to process an in memory NsiFeature through the NsiStreaming service endpoints
-type StreamProcessor func(str consequences.Receptor)
-
-/*
-memory effecient structure compute methods
-*/
-
 //StreamByFips a streaming service for structure stochastic based on a bounding box
-func (gpk gpkDataSet) StreamByFips(fipscode string, sp StreamProcessor) error {
-	return gpk.processStream(fipscode, sp)
+func (gpk gpkDataSet) ByFips(fipscode string, sp StreamProcessor) error {
+	return gpk.processFipsStream(fipscode, sp)
 }
-func (gpk gpkDataSet) processStream(fipscode string, sp StreamProcessor) error {
+func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) error {
 	//the query below is FIPS based - it defines the schema of the geopackage as well.
 	rows, err := gpk.db.Query("SELECT fd_id, x, y, occtype, found_ht, found_type, st_damcat, val_struct, val_cont, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65 FROM nsi WHERE cbfips LIKE '" + fipscode + "%'")
 	m := structures.OccupancyTypeMap()
@@ -63,6 +57,31 @@ func (gpk gpkDataSet) processStream(fipscode string, sp StreamProcessor) error {
 		}
 		sp(toStructure(s, m, defaultOcctype))
 	}
+	return nil
+
+}
+func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp StreamProcessor) error {
+	return gpk.processBboxStream(bbox, sp)
+}
+func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp StreamProcessor) error {
+	/*//the query below is FIPS based - it defines the schema of the geopackage as well.
+	rows, err := gpk.db.Query("SELECT fd_id, x, y, occtype, found_ht, found_type, st_damcat, val_struct, val_cont, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65 FROM nsi WHERE cbfips LIKE '" + fipscode + "%'")
+	m := structures.OccupancyTypeMap()
+	//define a default occtype in case of emergancy
+	defaultOcctype := m["RES1-1SNB"]
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() { // Iterate and fetch the records from result cursor
+		s := SimpleStructure{}
+		err := rows.Scan(&s.Name, &s.X, &s.Y, &s.OcctypeName, &s.Found_ht, &s.Found_type, &s.DamCat, &s.Val_struct, &s.Val_cont, &s.Pop2amu65, &s.Pop2amo65, &s.Pop2pmu65, &s.Pop2pmo65)
+		if err != nil {
+			return err
+		}
+		sp(toStructure(s, m, defaultOcctype))
+	}*/
 	return nil
 
 }

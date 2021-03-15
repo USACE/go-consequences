@@ -11,6 +11,7 @@ import (
 	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/nsi"
+	"github.com/USACE/go-consequences/structureprovider"
 	"github.com/USACE/go-consequences/structures"
 )
 
@@ -161,7 +162,7 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	//create a results store
-	header := []string{"fd_id", "x", "y", "structure damage", "content damage", "par"}
+	header := []string{"fd_id", "x", "y", "depth", "structure damage", "content damage", "Pop_2amo65", "Pop_2amu65", "Pop_2pmo65", "Pop_2pmu65"}
 	var rows []interface{}
 	result := consequences.Results{IsTable: true}
 	result.Result.Headers = header
@@ -177,7 +178,7 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 			if d.Depth() > 0.0 {
 				r := str.Compute(d)
 				//keep a summmary of damages that adds the structure name
-				row := []interface{}{str.Name, str.X, str.Y, r.Result.Result[0], r.Result.Result[1], f.Properties.Pop2amo65 + f.Properties.Pop2amu65}
+				row := []interface{}{r.Result.Result[0], r.Result.Result[1], r.Result.Result[2], r.Result.Result[3], r.Result.Result[4], r.Result.Result[5], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				result.AddResult(structureResult)
 			}
@@ -224,9 +225,32 @@ func computeStream(hp hazardproviders.HazardProvider, w io.Writer) { //enc json.
 			if d.Depth() > 0.0 {
 				r := str.Compute(d)
 				//keep a summmary of damages that adds the structure name
-				row := []interface{}{str.Name, str.X, str.Y, d.Depth(), r.Result.Result[0], r.Result.Result[1], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
+				row := []interface{}{r.Result.Result[0], r.Result.Result[1], r.Result.Result[2], r.Result.Result[3], r.Result.Result[4], r.Result.Result[5], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				b, _ := structureResult.MarshalJSON()
+				s := string(b) + "\n"
+				fmt.Fprintf(w, s)
+			}
+		}
+	})
+}
+
+func computeStreamNonNSI(hp hazardproviders.HazardProvider, sp structureprovider.StreamProvider, w io.Writer) { //enc json.Encoder){//w http.ResponseWriter) {
+	//get boundingbox
+	fmt.Println("Getting bbox")
+	bbox, err := hp.ProvideHazardBoundary()
+	if err != nil {
+		log.Panicf("Unable to get the raster bounding box: %s", err)
+	}
+	fmt.Println(bbox.ToString())
+	sp.ByBbox(bbox, func(f structures.StructureStochastic) {
+		//ProvideHazard works off of a geography.Location
+		d, _ := hp.ProvideHazard(geography.Location{X: f.X, Y: f.Y})
+		//compute damages based on hazard being able to provide depth
+		if d.Has(hazards.Depth) {
+			if d.Depth() > 0.0 {
+				r := f.Compute(d)
+				b, _ := r.MarshalJSON()
 				s := string(b) + "\n"
 				fmt.Fprintf(w, s)
 			}
