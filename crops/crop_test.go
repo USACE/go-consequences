@@ -24,11 +24,11 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	expecteddamage := 0.0
 
 	//test
-	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	if cd.Result[1] != expectedcase {
+		t.Errorf("Compute() = %v; expected %v", cd.Result[1], expectedcase)
 	}
-	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	if cd.Result[2] != expecteddamage {
+		t.Errorf("Compute() = %v; expected %v", cd.Result[2], expecteddamage)
 	}
 }
 
@@ -49,11 +49,11 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 	expecteddamage := 10.0 //temporary value for testing
 
 	//test
-	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	if cd.Result[1] != expectedcase {
+		t.Errorf("Compute() = %v; expected %v", cd.Result[1], expectedcase)
 	}
-	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	if cd.Result[2] != expecteddamage {
+		t.Errorf("Compute() = %v; expected %v", cd.Result[2], expecteddamage)
 	}
 }
 func TestCropDamage(t *testing.T) {
@@ -73,11 +73,11 @@ func TestCropDamage(t *testing.T) {
 	expecteddamage := 1285.98 //Based on corn
 
 	//test
-	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	if cd.Result[1] != expectedcase {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[1], expectedcase)
 	}
-	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	if cd.Result[2] != expecteddamage {
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[2], expecteddamage)
 	}
 
 }
@@ -99,11 +99,11 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 	expecteddamage := 0.0 //Based on corn
 
 	//test
-	if cd.Result.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[1], expectedcase)
+	if cd.Result[1] != expectedcase {
+		t.Errorf("Compute() = %v; expected %v", cd.Result[1], expectedcase)
 	}
-	if cd.Result.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result.Result[2], expecteddamage)
+	if cd.Result[2] != expecteddamage {
+		t.Errorf("Compute() = %v; expected %v", cd.Result[2], expecteddamage)
 	}
 
 }

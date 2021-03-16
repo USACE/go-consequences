@@ -10,7 +10,6 @@ import (
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/nsi"
 	"github.com/USACE/go-consequences/structureprovider"
 	"github.com/USACE/go-consequences/structures"
 )
@@ -63,35 +62,12 @@ type SimulationSummary struct {
 	Computetime time.Duration
 }
 
-//NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
-func NsiFeaturetoStructure(f nsi.NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
-	var occtype = defaultOcctype
-	if ot, ok := m[f.Properties.Occtype]; ok {
-		occtype = ot
-	} else {
-		occtype = defaultOcctype
-		msg := "Using default " + f.Properties.Occtype + " not found"
-		panic(msg)
-	}
-	return structures.StructureStochastic{
-		OccType:   occtype,
-		StructVal: consequences.ParameterValue{Value: f.Properties.StructVal},
-		ContVal:   consequences.ParameterValue{Value: f.Properties.ContVal},
-		FoundHt:   consequences.ParameterValue{Value: f.Properties.FoundHt},
-		BaseStructure: structures.BaseStructure{
-			Name:   f.Properties.Name,
-			DamCat: f.Properties.DamCat,
-			X:      f.Properties.X,
-			Y:      f.Properties.Y,
-		},
-	}
-}
-func nsiInventorytoStructures(i nsi.NsiInventory) []structures.StructureStochastic {
+func nsiInventorytoStructures(i structureprovider.NsiInventory) []structures.StructureStochastic {
 	m := structures.OccupancyTypeMap()
 	defaultOcctype := m["RES1-1SNB"]
 	structures := make([]structures.StructureStochastic, len(i.Features))
 	for idx, feature := range i.Features {
-		structures[idx] = NsiFeaturetoStructure(feature, m, defaultOcctype)
+		structures[idx] = structureprovider.NsiFeaturetoStructure(feature, m, defaultOcctype)
 	}
 	return structures
 }
@@ -167,9 +143,9 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 	result := consequences.Results{IsTable: true}
 	result.Result.Headers = header
 	result.Result.Result = rows
-	nsi.GetByBboxStream(bbox.ToString(), func(f nsi.NsiFeature) {
+	structureprovider.GetByBboxStream(bbox.ToString(), func(f structureprovider.NsiFeature) {
 		//convert nsifeature to structure
-		str := NsiFeaturetoStructure(f, m, defaultOcctype)
+		str := structureprovider.NsiFeaturetoStructure(f, m, defaultOcctype)
 		//query input tiff for xy location
 		d, _ := hp.ProvideHazard(geography.Location{X: str.X, Y: str.Y})
 		//compute damages based on provided depths
@@ -178,7 +154,7 @@ func compute(hp hazardproviders.HazardProvider) (string, error) {
 			if d.Depth() > 0.0 {
 				r := str.Compute(d)
 				//keep a summmary of damages that adds the structure name
-				row := []interface{}{r.Result.Result[0], r.Result.Result[1], r.Result.Result[2], r.Result.Result[3], r.Result.Result[4], r.Result.Result[5], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
+				row := []interface{}{r.Result[0], r.Result[1], r.Result[2], r.Result[3], r.Result[4], r.Result[5], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				result.AddResult(structureResult)
 			}
@@ -214,9 +190,9 @@ func computeStream(hp hazardproviders.HazardProvider, w io.Writer) { //enc json.
 	result := consequences.Results{IsTable: true}
 	result.Result.Headers = header
 	result.Result.Result = rows
-	nsi.GetByBboxStream(bbox.ToString(), func(f nsi.NsiFeature) {
+	structureprovider.GetByBboxStream(bbox.ToString(), func(f structureprovider.NsiFeature) {
 		//convert nsifeature to structure
-		str := NsiFeaturetoStructure(f, m, defaultOcctype)
+		str := structureprovider.NsiFeaturetoStructure(f, m, defaultOcctype)
 		//query input tiff for xy location
 		d, _ := hp.ProvideHazard(geography.Location{X: str.X, Y: str.Y})
 		//compute damages based on provided depths
@@ -225,7 +201,7 @@ func computeStream(hp hazardproviders.HazardProvider, w io.Writer) { //enc json.
 			if d.Depth() > 0.0 {
 				r := str.Compute(d)
 				//keep a summmary of damages that adds the structure name
-				row := []interface{}{r.Result.Result[0], r.Result.Result[1], r.Result.Result[2], r.Result.Result[3], r.Result.Result[4], r.Result.Result[5], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
+				row := []interface{}{r.Result[0], r.Result[1], r.Result[2], r.Result[3], r.Result[4], r.Result[5], f.Properties.Pop2amo65, f.Properties.Pop2amu65, f.Properties.Pop2pmo65, f.Properties.Pop2pmu65}
 				structureResult := consequences.Result{Headers: header, Result: row}
 				b, _ := structureResult.MarshalJSON()
 				s := string(b) + "\n"
@@ -234,8 +210,14 @@ func computeStream(hp hazardproviders.HazardProvider, w io.Writer) { //enc json.
 		}
 	})
 }
+func StreamFromFileAbstract(filepath string, sp structureprovider.StreamProvider, w io.Writer) { //enc json.Encoder) { //w http.ResponseWriter) {
+	//open a tif reader
+	tiffReader := hazardproviders.Init(filepath)
+	defer tiffReader.Close()
+	computeStreamAbstract(&tiffReader, sp, w)
 
-func computeStreamNonNSI(hp hazardproviders.HazardProvider, sp structureprovider.StreamProvider, w io.Writer) { //enc json.Encoder){//w http.ResponseWriter) {
+}
+func computeStreamAbstract(hp hazardproviders.HazardProvider, sp structureprovider.StreamProvider, w io.Writer) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.ProvideHazardBoundary()

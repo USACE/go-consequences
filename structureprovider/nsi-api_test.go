@@ -1,12 +1,13 @@
-package nsi
+package structureprovider
 
 import (
 	"fmt"
-	"math"
 	"sync"
 	"testing"
 
 	"github.com/USACE/go-consequences/census"
+	"github.com/USACE/go-consequences/geography"
+	"github.com/USACE/go-consequences/structures"
 )
 
 func TestNsiByFips(t *testing.T) {
@@ -14,14 +15,6 @@ func TestNsiByFips(t *testing.T) {
 	structures := GetByFips(fips)
 	if len(structures.Features) != 101 {
 		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, len(structures.Features))
-	}
-}
-func TestNsiStatsByFips(t *testing.T) {
-	var fips string = "15005" //Kalawao county (smallest county in the us by population)stats?bbox=-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165
-	stats := GetStatsByFips(fips)
-	fmt.Println(stats)
-	if stats.SumStructVal != 101.111 {
-		t.Errorf("GetByFips(%s) yeilded %f structures; expected 101", fips, stats.SumStructVal)
 	}
 }
 func TestNsiByFipsStream(t *testing.T) {
@@ -78,14 +71,6 @@ func TestNsiByBbox(t *testing.T) {
 		t.Errorf("GetByBox(%s) yeilded %d structures; expected 1959", bbox, len(structures.Features))
 	}
 }
-func TestNsiStatsByBbox(t *testing.T) {
-	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
-	stats := GetStatsByBbox(bbox)
-	diff := stats.SumStructVal - 953459824.285892
-	if math.Abs(diff) > 0.0000009 {
-		t.Errorf("GetByBox(%s) yeilded structure value of %f; expected 953459824.285892", bbox, stats.SumStructVal)
-	}
-}
 func TestNsiByBboxStream(t *testing.T) {
 	var bbox string = "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
 	index := 0
@@ -120,4 +105,16 @@ func TestNSI_FIPS_CA_ERRORS(t *testing.T) {
 		}
 		t.Errorf("There were %d failures of %d total counties, failed counties were: %s", len(fails), len(counties), s)
 	}
+}
+func Test_StructureProvider_NSI_BBOX(t *testing.T) {
+	bbox := make([]float64, 4) //i might have these values inverted
+	bbox[0] = -81.58418        //upper left x
+	bbox[1] = 30.25165         //upper left y
+	bbox[2] = -81.58161        //lower right x
+	bbox[3] = 30.26939         //lower right y
+	gbbx := geography.BBox{Bbox: bbox}
+	nsp := InitNSISP()
+	nsp.ByBbox(gbbx, func(s structures.StructureStochastic) {
+		fmt.Println(s.Name)
+	})
 }

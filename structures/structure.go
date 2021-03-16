@@ -57,35 +57,39 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		fh = s.FoundHt.CentralTendency()
 	}
 
-	return StructureDeterministic{OccType: ot, StructVal: sv, ContVal: cv, FoundHt: fh, BaseStructure: BaseStructure{DamCat: s.DamCat}}
+	return StructureDeterministic{OccType: ot, StructVal: sv, ContVal: cv, FoundHt: fh, BaseStructure: BaseStructure{Name: s.Name, X: s.X, Y: s.Y, DamCat: s.DamCat}}
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreStochastic
-func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Results {
+func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Result {
 	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Results { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Result { //what if we invert this general model to hazard.damage(consequence receptor)
 	return computeConsequences(d, s)
 }
 
 //the following two methods are legitimately the same - it seems i need an interface rather than a struct for a depthevent
 //this area seems still in need of some refactoring for simplification.
 
-func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) consequences.Results {
+func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) consequences.Result {
 	//header := []string{"structure damage", "content damage"}
-	header := []string{"fd_id", "x", "y", "depth", "structure damage", "content damage"}
-	results := []interface{}{s.Name, s.X, s.Y, 0.0, 0.0, 0.0}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	if e.Has(hazards.Depth) {
 		depthAboveFFE := e.Depth() - s.FoundHt
 		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
-		ret.Result[3] = e.Depth()
-		ret.Result[4] = damagePercent * s.StructVal
-		ret.Result[5] = cdamagePercent * s.ContVal
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = e
+		ret.Result[4] = s.BaseStructure.DamCat
+		ret.Result[5] = s.OccType.Name
+		ret.Result[6] = damagePercent * s.StructVal
+		ret.Result[7] = cdamagePercent * s.ContVal
 	}
-	r := consequences.Results{IsTable: false, Result: ret}
-	return r
+	return ret
 }

@@ -31,7 +31,7 @@ func TestComputeConsequences(t *testing.T) {
 	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0}
 	for idx := range depths {
 		d.SetDepth(depths[idx])
-		got := s.Compute(d).Result.Result[0].(float64)
+		got := s.Compute(d).Result[0].(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
@@ -39,7 +39,7 @@ func TestComputeConsequences(t *testing.T) {
 	}
 	//test interpolation due to foundation height putting depth back in range
 	s.FoundHt = 1.1
-	got := s.Compute(d).Result.Result[0].(float64)
+	got := s.Compute(d).Result[0].(float64)
 	if got != 39.0 {
 		t.Errorf("Compute(%f) = %f; expected %f", 39.0, got, 39.0)
 	}
@@ -75,7 +75,7 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	expectedResults := []float64{0.0, 0.0, -.052138, -0.030335, -0.122390, -0.088922, -0.146414, 0.205319, 0.108698, -0.625010}
 	for idx := range depths {
 		d.SetDepth(depths[idx])
-		got := s.Compute(d).Result.Result[0].(float64)
+		got := s.Compute(d).Result[0].(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .000001 {
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])

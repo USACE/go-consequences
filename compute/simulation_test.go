@@ -2,9 +2,10 @@ package compute
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
-	"github.com/USACE/go-consequences/nsi"
+	"github.com/USACE/go-consequences/structureprovider"
 	"github.com/USACE/go-consequences/structures"
 )
 
@@ -19,9 +20,9 @@ func TestConvertNSIFeatureToStructure(t *testing.T) {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
-	nsi.GetByBboxStream(bbox, func(f nsi.NsiFeature) {
+	structureprovider.GetByBboxStream(bbox, func(f structureprovider.NsiFeature) {
 		//convert nsifeature to structure
-		str := NsiFeaturetoStructure(f, m, defaultOcctype)
+		str := structureprovider.NsiFeaturetoStructure(f, m, defaultOcctype)
 		fmt.Println(str.OccType.Name)
 	})
 }
@@ -49,4 +50,15 @@ func TestComputeSpecialEAD(t *testing.T) {
 	if val != 1.875 {
 		t.Errorf("computeEAD() yeilded %f; expected %f", val, 1.875)
 	}
+}
+func Test_StreamFromFileAbstract(t *testing.T) {
+	nsp := structureprovider.InitNSISP()
+	root := "/workspaces/Go_Consequences/data/3782_COG"
+	filepath := root + ".tif"
+	w, err := os.OpenFile(root+"_consequences.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer w.Close()
+	StreamFromFileAbstract(filepath, nsp, w)
 }
