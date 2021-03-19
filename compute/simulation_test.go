@@ -53,7 +53,7 @@ func TestComputeSpecialEAD(t *testing.T) {
 }
 func Test_StreamFromFileAbstract(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
-	root := "/workspaces/Go_Consequences/data/CERA_Adv29_maxwaterelev_4326_90m"
+	root := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326"
 	filepath := root + ".tif"
 	w, err := os.OpenFile(root+"_consequences.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {

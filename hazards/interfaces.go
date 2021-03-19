@@ -1,6 +1,8 @@
 package hazards
 
-import "time"
+import (
+	"time"
+)
 
 //HazardEvent is an interface I am trying to make to describe all Hazard Events
 type HazardEvent interface {

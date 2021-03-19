@@ -1,6 +1,7 @@
 package hazards
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -61,4 +62,10 @@ func TestArrivalandDurationEventParameters(t *testing.T) {
 	if d.Has(Velocity) {
 		fmt.Println("Velocity")
 	}
+}
+func TestMarshalJSON(t *testing.T) {
+	d := DepthEvent{}
+	d.SetDepth(2.5)
+	b, _ := json.Marshal(d)
+	fmt.Println(string(b))
 }

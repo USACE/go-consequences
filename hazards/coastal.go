@@ -1,6 +1,9 @@
 package hazards
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 //CoastalEvent describes a coastal event
 type CoastalEvent struct {
@@ -9,6 +12,10 @@ type CoastalEvent struct {
 	salinity   bool    //default is false
 }
 
+func (d CoastalEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"coastalevent\":{\"depth\":%f, \"waveheight\":%f,\"salinity\":%t}}", d.Depth(), d.WaveHeight(), d.Salinity())
+	return []byte(s), nil
+}
 func (h CoastalEvent) Depth() float64 {
 	return h.depth
 }

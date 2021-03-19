@@ -1,6 +1,7 @@
 package hazards
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -47,6 +48,10 @@ func (h DepthEvent) Has(p Parameter) bool {
 	dp := h.Parameters()
 	return dp&p != 0
 }
+func (d DepthEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"depthevent\":{\"depth\":%f}}", d.Depth())
+	return []byte(s), nil
+}
 
 //ArrivalandDurationEvent describes an event with an arrival time and a duration in days
 type ArrivalandDurationEvent struct {
@@ -54,6 +59,10 @@ type ArrivalandDurationEvent struct {
 	durationInDays float64
 }
 
+func (d ArrivalandDurationEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"arrivalanddurationevent\":{\"arrivaltime\":%s,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Duration())
+	return []byte(s), nil
+}
 func (h ArrivalandDurationEvent) Depth() float64 {
 	return -901.0
 }
