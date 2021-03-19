@@ -21,6 +21,7 @@ func Init(fp string) cogHazardProvider {
 	if err != nil {
 		log.Fatalln("Cannot connect to raster.  Killing everything! " + err.Error())
 	}
+	//fmt.Println(ds.Projection())
 	return cogHazardProvider{fp, &ds}
 }
 func (chp *cogHazardProvider) Close() {

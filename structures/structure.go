@@ -75,7 +75,7 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Resu
 
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) consequences.Result {
 	//header := []string{"structure damage", "content damage"}
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage"}
+	header := []string{"fd_id", "x", "y", "depth", "damage category", "occupancy type", "structure damage", "content damage"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	if e.Has(hazards.Depth) {
@@ -85,7 +85,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) conseq
 		ret.Result[0] = s.BaseStructure.Name
 		ret.Result[1] = s.BaseStructure.X
 		ret.Result[2] = s.BaseStructure.Y
-		ret.Result[3] = e
+		ret.Result[3] = e.Depth()
 		ret.Result[4] = s.BaseStructure.DamCat
 		ret.Result[5] = s.OccType.Name
 		ret.Result[6] = damagePercent * s.StructVal
