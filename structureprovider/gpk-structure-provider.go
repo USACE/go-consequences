@@ -1,21 +1,34 @@
 package structureprovider
 
 import (
-	"database/sql"
+	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
+	"github.com/dewberry/gdal"
 )
 
 type gpkDataSet struct {
-	db *sql.DB
+	FilePath string
+	ds       *gdal.DataSource
 }
 
-func Init(filepath string) gpkDataSet {
-	db, _ := sql.Open("sqlite3", filepath)
-	db.SetMaxOpenConns(1)
-	return gpkDataSet{db: db}
+func InitGPK(filepath string) gpkDataSet {
+	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+	fmt.Println(ds.Driver().Name())
+	for i := 0; i < ds.LayerCount(); i++ {
+		fmt.Println(ds.LayerByIndex(i).Name())
+		layer := ds.LayerByIndex(i)
+		fieldDef := layer.Definition()
+
+		for j := 0; j < fieldDef.FieldCount(); j++ {
+			fieldName := fieldDef.FieldDefinition(j).Name()
+			fieldType := fieldDef.FieldDefinition(j).Type().Name()
+			fmt.Println(fmt.Sprintf("%s, %s", fieldName, fieldType))
+		}
+	}
+	return gpkDataSet{FilePath: filepath, ds: &ds}
 }
 
 type SimpleStructure struct {
@@ -39,22 +52,18 @@ func (gpk gpkDataSet) ByFips(fipscode string, sp StreamProcessor) error {
 	return gpk.processFipsStream(fipscode, sp)
 }
 func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) error {
-	//the query below is FIPS based - it defines the schema of the geopackage as well.
-	rows, err := gpk.db.Query("SELECT fd_id, x, y, occtype, found_ht, found_type, st_damcat, val_struct, val_cont, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65 FROM nsi WHERE cbfips LIKE '" + fipscode + "%'")
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
 
-	for rows.Next() { // Iterate and fetch the records from result cursor
+	idx := 0
+	fc, _ := gpk.ds.LayerByName("nsi").FeatureCount(true)
+	for idx < fc { // Iterate and fetch the records from result cursor
 		s := SimpleStructure{}
-		err := rows.Scan(&s.Name, &s.X, &s.Y, &s.OcctypeName, &s.Found_ht, &s.Found_type, &s.DamCat, &s.Val_struct, &s.Val_cont, &s.Pop2amu65, &s.Pop2amo65, &s.Pop2pmu65, &s.Pop2pmo65)
-		if err != nil {
-			return err
-		}
+		f := gpk.ds.LayerByName("nsi").NextFeature()
+		s.Name = fmt.Sprintf("%v", f.FieldAsInteger(0))
+		s.OcctypeName = f.FieldAsString(4)
+		//check if CBID matches?
 		sp(toStructure(s, m, defaultOcctype))
 	}
 	return nil
