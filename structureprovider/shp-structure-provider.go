@@ -2,7 +2,6 @@ package structureprovider
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/USACE/go-consequences/geography"
 	"github.com/dewberry/gdal"
@@ -10,15 +9,23 @@ import (
 
 type shpDataSet struct {
 	FilePath string
-	ds       *gdal.Dataset
+	ds       *gdal.DataSource
 }
 
 func InitSHP(filepath string) shpDataSet {
-	ds, err := gdal.Open(filepath, gdal.ReadOnly)
-	if err != nil {
-		log.Fatalln("Cannot connect to shapefile.  Killing everything! " + err.Error())
+	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+	fmt.Println(ds.Driver().Name())
+	for i := 0; i < ds.LayerCount(); i++ {
+		fmt.Println(ds.LayerByIndex(i).Name())
+		layer := ds.LayerByIndex(i)
+		fieldDef := layer.Definition()
+
+		for j := 0; j < fieldDef.FieldCount(); j++ {
+			fieldName := fieldDef.FieldDefinition(j).Name()
+			fieldType := fieldDef.FieldDefinition(j).Type().Name()
+			fmt.Println(fmt.Sprintf("%s, %s", fieldName, fieldType))
+		}
 	}
-	fmt.Println(ds.Driver().ShortName())
 	return shpDataSet{filepath, &ds}
 }
 
