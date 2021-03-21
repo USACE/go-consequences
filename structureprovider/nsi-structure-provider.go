@@ -97,6 +97,10 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		StructVal: consequences.ParameterValue{Value: f.Properties.StructVal},
 		ContVal:   consequences.ParameterValue{Value: f.Properties.ContVal},
 		FoundHt:   consequences.ParameterValue{Value: f.Properties.FoundHt},
+		Pop2pmo65: f.Properties.Pop2pmo65,
+		Pop2pmu65: f.Properties.Pop2pmu65,
+		Pop2amo65: f.Properties.Pop2amo65,
+		Pop2amu65: f.Properties.Pop2amu65,
 		BaseStructure: structures.BaseStructure{
 			Name:   f.Properties.Name,
 			DamCat: f.Properties.DamCat,
