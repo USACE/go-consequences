@@ -12,7 +12,7 @@ import (
 
 func TestGPKByFips(t *testing.T) {
 	filepath := "/workspaces/Go_Consequences/data/nsiv2_11.gpkg"
-	nsp := InitGPK(filepath)
+	nsp := InitGPK(filepath, "nsi")
 	fmt.Println(nsp.FilePath)
 	d := hazards.DepthEvent{}
 	d.SetDepth(2.4)
@@ -24,7 +24,7 @@ func TestGPKByFips(t *testing.T) {
 }
 func TestGPKByBBox(t *testing.T) {
 	filepath := "/workspaces/Go_Consequences/data/nsiv2_11.gpkg"
-	nsp := InitGPK(filepath)
+	nsp := InitGPK(filepath, "nsi")
 	fmt.Println(nsp.FilePath)
 	d := hazards.DepthEvent{}
 	d.SetDepth(2.4)
