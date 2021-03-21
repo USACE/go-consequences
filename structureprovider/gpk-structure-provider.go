@@ -2,6 +2,8 @@ package structureprovider
 
 import (
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -16,35 +18,18 @@ type gpkDataSet struct {
 
 func InitGPK(filepath string) gpkDataSet {
 	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
-	fmt.Println(ds.Driver().Name())
+	//validation?
+	hasNSITable := false
 	for i := 0; i < ds.LayerCount(); i++ {
-		fmt.Println(ds.LayerByIndex(i).Name())
-		layer := ds.LayerByIndex(i)
-		fieldDef := layer.Definition()
-
-		for j := 0; j < fieldDef.FieldCount(); j++ {
-			fieldName := fieldDef.FieldDefinition(j).Name()
-			fieldType := fieldDef.FieldDefinition(j).Type().Name()
-			fmt.Println(fmt.Sprintf("%s, %s", fieldName, fieldType))
+		if "nsi" == ds.LayerByIndex(i).Name() {
+			hasNSITable = true
 		}
 	}
-	return gpkDataSet{FilePath: filepath, ds: &ds}
-}
-
-type SimpleStructure struct {
-	Name        string
-	X           float64
-	Y           float64
-	DamCat      string
-	OcctypeName string
-	Found_ht    float64
-	Found_type  string
-	Val_struct  float64
-	Val_cont    float64
-	Pop2amo65   int16
-	Pop2amu65   int16
-	Pop2pmo65   int16
-	Pop2pmu65   int16
+	if hasNSITable {
+		return gpkDataSet{FilePath: filepath, ds: &ds}
+	}
+	log.Fatalln("GeoPpackage does not have a layer titled nsi.  Killing everything! ")
+	return gpkDataSet{FilePath: filepath}
 }
 
 //StreamByFips a streaming service for structure stochastic based on a bounding box
@@ -55,16 +40,16 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) err
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
-
 	idx := 0
-	fc, _ := gpk.ds.LayerByName("nsi").FeatureCount(true)
+	l := gpk.ds.LayerByName("nsi")
+	fc, _ := l.FeatureCount(true)
 	for idx < fc { // Iterate and fetch the records from result cursor
-		s := SimpleStructure{}
-		f := gpk.ds.LayerByName("nsi").NextFeature()
-		s.Name = fmt.Sprintf("%v", f.FieldAsInteger(0))
-		s.OcctypeName = f.FieldAsString(4)
+		f := l.NextFeature()
+		cbfips := f.FieldAsString(3)
 		//check if CBID matches?
-		sp(toStructure(s, m, defaultOcctype))
+		if strings.Contains(cbfips, fipscode) {
+			sp(featuretoStructure(f, m, defaultOcctype))
+		}
 	}
 	return nil
 
@@ -94,25 +79,24 @@ func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp StreamProcessor)
 	return nil
 
 }
-func toStructure(s SimpleStructure, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
+func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
+	s := structures.StructureStochastic{}
+	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(0))
+	OccTypeName := f.FieldAsString(4)
 	var occtype = defaultOcctype
-	if ot, ok := m[s.OcctypeName]; ok {
+	if ot, ok := m[OccTypeName]; ok {
 		occtype = ot
 	} else {
 		occtype = defaultOcctype
-		msg := "Using default " + s.OcctypeName + " not found"
+		msg := "Using default " + OccTypeName + " not found"
 		panic(msg)
 	}
-	return structures.StructureStochastic{
-		OccType:   occtype,
-		StructVal: consequences.ParameterValue{Value: s.Val_struct},
-		ContVal:   consequences.ParameterValue{Value: s.Val_cont},
-		FoundHt:   consequences.ParameterValue{Value: s.Found_ht},
-		BaseStructure: structures.BaseStructure{
-			Name:   s.Name,
-			DamCat: s.DamCat,
-			X:      s.X,
-			Y:      s.Y,
-		},
-	}
+	s.OccType = occtype
+	s.X = f.FieldAsFloat64(1)
+	s.Y = f.FieldAsFloat64(2)
+	s.DamCat = f.FieldAsString(18)
+	s.StructVal = consequences.ParameterValue{Value: f.FieldAsFloat64(23)}
+	s.ContVal = consequences.ParameterValue{Value: f.FieldAsFloat64(24)}
+	s.FoundHt = consequences.ParameterValue{Value: f.FieldAsFloat64(21)}
+	return s
 }
