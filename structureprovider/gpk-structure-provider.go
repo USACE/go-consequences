@@ -47,6 +47,7 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) err
 		f := l.NextFeature()
 		cbfips := f.FieldAsString(3)
 		//check if CBID matches?
+
 		if strings.Contains(cbfips, fipscode) {
 			sp(featuretoStructure(f, m, defaultOcctype))
 		}
@@ -58,24 +59,18 @@ func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp StreamProcessor) error {
 	return gpk.processBboxStream(bbox, sp)
 }
 func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp StreamProcessor) error {
-	/*//the query below is FIPS based - it defines the schema of the geopackage as well.
-	rows, err := gpk.db.Query("SELECT fd_id, x, y, occtype, found_ht, found_type, st_damcat, val_struct, val_cont, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65 FROM nsi WHERE cbfips LIKE '" + fipscode + "%'")
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
-	if err != nil {
-		return err
+	idx := 0
+	l := gpk.ds.LayerByName("nsi")
+	l.SetSpatialFilterRect(bbox.Bbox[0], bbox.Bbox[3], bbox.Bbox[2], bbox.Bbox[1])
+	fc, _ := l.FeatureCount(true)
+	for idx < fc { // Iterate and fetch the records from result cursor
+		f := l.NextFeature()
+		sp(featuretoStructure(f, m, defaultOcctype))
 	}
-	defer rows.Close()
-
-	for rows.Next() { // Iterate and fetch the records from result cursor
-		s := SimpleStructure{}
-		err := rows.Scan(&s.Name, &s.X, &s.Y, &s.OcctypeName, &s.Found_ht, &s.Found_type, &s.DamCat, &s.Val_struct, &s.Val_cont, &s.Pop2amu65, &s.Pop2amo65, &s.Pop2pmu65, &s.Pop2pmo65)
-		if err != nil {
-			return err
-		}
-		sp(toStructure(s, m, defaultOcctype))
-	}*/
+	return nil
 	return nil
 
 }
