@@ -47,15 +47,15 @@ type nsiStreamProvider struct {
 func InitNSISP() nsiStreamProvider {
 	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures"}
 }
-func (nsp nsiStreamProvider) ByFips(fipscode string, sp StreamProcessor) {
+func (nsp nsiStreamProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	url := fmt.Sprintf("%s?fips=%s&fmt=fs", nsp.ApiURL, fipscode)
 	nsiStructureStream(url, sp)
 }
-func (nsp nsiStreamProvider) ByBbox(bbox geography.BBox, sp StreamProcessor) {
+func (nsp nsiStreamProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
 	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", nsp.ApiURL, bbox.ToString())
 	nsiStructureStream(url, sp)
 }
-func nsiStructureStream(url string, sp StreamProcessor) {
+func nsiStructureStream(url string, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]

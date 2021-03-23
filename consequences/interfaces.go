@@ -16,6 +16,11 @@ type Receptor interface {
 type Inventory struct {
 	Inventory []Receptor
 }
+type StreamProvider interface {
+	ByFips(fipscode string, sp StreamProcessor)
+	ByBbox(bbox geography.BBox, sp StreamProcessor)
+}
+type StreamProcessor func(str Receptor)
 
 //ParameterValue is a way to allow parameters to be either a scalar or a distribution.
 type ParameterValue struct {

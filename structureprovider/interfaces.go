@@ -4,16 +4,9 @@ import (
 	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
-	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
 	"github.com/dewberry/gdal"
 )
-
-type StreamProvider interface {
-	ByFips(fipscode string, sp StreamProcessor)
-	ByBbox(bbox geography.BBox, sp StreamProcessor)
-}
-type StreamProcessor func(str consequences.Receptor)
 
 func StructureSchema() []string {
 	s := make([]string, 9)

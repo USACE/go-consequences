@@ -3,6 +3,7 @@ package structureprovider
 import (
 	"log"
 
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
 	"github.com/dewberry/gdal"
@@ -42,10 +43,10 @@ func InitGPK(filepath string, layername string) gpkDataSet {
 }
 
 //StreamByFips a streaming service for structure stochastic based on a bounding box
-func (gpk gpkDataSet) ByFips(fipscode string, sp StreamProcessor) error {
+func (gpk gpkDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) error {
 	return gpk.processFipsStream(fipscode, sp)
 }
-func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) error {
+func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) error {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
@@ -68,10 +69,10 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) err
 	}
 	return nil
 }
-func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp StreamProcessor) error {
+func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) error {
 	return gpk.processBboxStream(bbox, sp)
 }
-func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp StreamProcessor) error {
+func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) error {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]

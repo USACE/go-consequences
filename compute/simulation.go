@@ -210,14 +210,14 @@ func computeStream(hp hazardproviders.HazardProvider, w io.Writer) { //enc json.
 		}
 	})
 }
-func StreamFromFileAbstract(filepath string, sp structureprovider.StreamProvider, w io.Writer) { //enc json.Encoder) { //w http.ResponseWriter) {
+func StreamFromFileAbstract(filepath string, sp consequences.StreamProvider, w io.Writer) { //enc json.Encoder) { //w http.ResponseWriter) {
 	//open a tif reader
 	tiffReader := hazardproviders.Init(filepath)
 	defer tiffReader.Close()
 	computeStreamAbstract(&tiffReader, sp, w)
 
 }
-func computeStreamAbstract(hp hazardproviders.HazardProvider, sp structureprovider.StreamProvider, w io.Writer) {
+func computeStreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w io.Writer) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.ProvideHazardBoundary()

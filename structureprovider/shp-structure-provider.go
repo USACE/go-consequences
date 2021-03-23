@@ -3,6 +3,7 @@ package structureprovider
 import (
 	"log"
 
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
 	"github.com/dewberry/gdal"
@@ -35,10 +36,10 @@ func InitSHP(filepath string) shpDataSet {
 }
 
 //ByFips a streaming service for structure stochastic based on a bounding box
-func (shp shpDataSet) ByFips(fipscode string, sp StreamProcessor) error {
+func (shp shpDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) error {
 	return shp.processFipsStream(fipscode, sp)
 }
-func (shp shpDataSet) processFipsStream(fipscode string, sp StreamProcessor) error {
+func (shp shpDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) error {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
@@ -63,10 +64,10 @@ func (shp shpDataSet) processFipsStream(fipscode string, sp StreamProcessor) err
 }
 
 //ByBbox allows a shapefile to be streamed by bounding box
-func (shp shpDataSet) ByBbox(bbox geography.BBox, sp StreamProcessor) error {
+func (shp shpDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) error {
 	return shp.processBboxStream(bbox, sp)
 }
-func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp StreamProcessor) error {
+func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) error {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
