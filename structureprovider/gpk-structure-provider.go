@@ -2,7 +2,6 @@ package structureprovider
 
 import (
 	"log"
-	"strings"
 
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
@@ -58,14 +57,16 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp StreamProcessor) err
 		idx++
 		if f != nil {
 			cbfips := f.FieldAsString(gpk.schemaIDX[1])
-			//check if CBID matches?
-			if strings.Contains(cbfips, fipscode) {
-				sp(featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX))
-			}
+			//check if CBID matches from the start of the string
+			if len(fipscode) <= len(cbfips) {
+				comp := cbfips[0:len(fipscode)]
+				if comp == fipscode {
+					sp(featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX))
+				} //else no match, do not send structure.
+			} //else error?
 		}
 	}
 	return nil
-
 }
 func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp StreamProcessor) error {
 	return gpk.processBboxStream(bbox, sp)
