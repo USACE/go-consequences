@@ -13,7 +13,7 @@ type StreamProvider interface {
 	ByFips(fipscode string, sp StreamProcessor)
 	ByBbox(bbox geography.BBox, sp StreamProcessor)
 }
-type StreamProcessor func(str structures.StructureStochastic) //consequences.Receptor)
+type StreamProcessor func(str consequences.Receptor)
 
 func StructureSchema() []string {
 	s := make([]string, 9)

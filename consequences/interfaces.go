@@ -2,50 +2,19 @@ package consequences
 
 import (
 	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
 
 //Receptor is an interface for all things that can have consequences from a hazard event
 type Receptor interface {
 	Compute(event hazards.HazardEvent) Result
+	Location() geography.Location
 }
-
-//
-// work in progress
-//
 
 //Inventory provides a struct to allow for a slice of ConcequenceReceptor
 type Inventory struct {
 	Inventory []Receptor
-}
-
-//Provider defines an interface to provide a consequences Inventory
-type Provider interface {
-	GetInventoryBoundingBox(bb BoundingBox) (Inventory, error)
-	GetInventoryFIPS(fc FIPS) (Inventory, error)
-	GetInventoryFile(filePath string) (Inventory, error)
-	//ProvideStructure(location Locatable) ConsequencesReceptor
-	//ProvideStructure(fdId string) ConsequencesReceptor
-}
-
-//
-// End work in progress
-//
-
-//Locatable is an interface that defines that a thing can have an x and y location
-type Locatable interface {
-	GetX() float64
-	GetY() float64
-}
-
-//BoundingBox represents a rectangular area by extents.
-type BoundingBox struct {
-	//need to support multiple needs here everyone treats this different...
-}
-
-//FIPS is the Federal Information Processing Standard
-type FIPS struct {
-	Code string
 }
 
 //ParameterValue is a way to allow parameters to be either a scalar or a distribution.

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/structures"
 )
 
 func TestGPKByFips(t *testing.T) {
@@ -16,7 +16,7 @@ func TestGPKByFips(t *testing.T) {
 	fmt.Println(nsp.FilePath)
 	d := hazards.DepthEvent{}
 	d.SetDepth(2.4)
-	nsp.ByFips("11", func(s structures.StructureStochastic) {
+	nsp.ByFips("11", func(s consequences.Receptor) {
 		r := s.Compute(d)
 		b, _ := json.Marshal(r)
 		fmt.Println(string(b))
@@ -34,7 +34,7 @@ func TestGPKByBBox(t *testing.T) {
 	bbox[2] = -76.00 //lower right x
 	bbox[3] = 38.00  //lower right y
 	gbbx := geography.BBox{Bbox: bbox}
-	nsp.ByBbox(gbbx, func(s structures.StructureStochastic) {
+	nsp.ByBbox(gbbx, func(s consequences.Receptor) {
 		r := s.Compute(d)
 		b, _ := json.Marshal(r)
 		fmt.Println(string(b))

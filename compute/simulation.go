@@ -225,9 +225,9 @@ func computeStreamAbstract(hp hazardproviders.HazardProvider, sp structureprovid
 		log.Panicf("Unable to get the raster bounding box: %s", err)
 	}
 	fmt.Println(bbox.ToString())
-	sp.ByBbox(bbox, func(f structures.StructureStochastic) {
+	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
-		d, _ := hp.ProvideHazard(geography.Location{X: f.X, Y: f.Y})
+		d, _ := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if d.Has(hazards.Depth) {
 			if d.Depth() > 0.0 {

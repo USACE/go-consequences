@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
 
@@ -32,13 +33,8 @@ type StructureDeterministic struct {
 }
 
 //GetX implements consequences.Locatable
-func (s BaseStructure) GetX() float64 {
-	return s.X
-}
-
-//GetY implements consequences.Locatable
-func (s BaseStructure) GetY() float64 {
-	return s.Y
+func (s BaseStructure) Location() geography.Location {
+	return geography.Location{X: s.X, Y: s.Y}
 }
 
 //SampleStructure converts a structureStochastic into a structure deterministic based on an input seed

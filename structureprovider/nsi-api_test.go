@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/USACE/go-consequences/census"
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
 )
@@ -114,7 +115,8 @@ func Test_StructureProvider_NSI_BBOX(t *testing.T) {
 	bbox[3] = 30.26939         //lower right y
 	gbbx := geography.BBox{Bbox: bbox}
 	nsp := InitNSISP()
-	nsp.ByBbox(gbbx, func(s structures.StructureStochastic) {
+	nsp.ByBbox(gbbx, func(c consequences.Receptor) {
+		s, _ := c.(structures.StructureStochastic)
 		fmt.Println(s.Name)
 	})
 }
