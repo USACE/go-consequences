@@ -3,6 +3,7 @@ package crops
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/USACE/go-consequences/geography"
 	"github.com/dewberry/gdal"
@@ -36,7 +37,9 @@ func (ncp *nassCropProvider) getCropValue(y float64, x float64) (Crop, error) {
 	py := int(igt[3] + y*igt[4] + x*igt[5])
 	buffer := make([]uint8, 1*1)
 	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
-	c, ok := ncp.converter[string(buffer[0])]
+	s := strconv.Itoa(int(buffer[0]))
+	c, ok := ncp.converter[s]
+
 	if ok {
 		return c, nil
 	} else {
