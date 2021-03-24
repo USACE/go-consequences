@@ -19,7 +19,6 @@ func sampleResult() {
 	var ret = Result{Headers: header, Result: results}
 	b, _ := json.Marshal(ret)
 	fmt.Println(string(b))
-	//fmt.Println(ret)
 }
 
 //sampleResults is similar to SampleResult but it stores and writes multiple consequence results in a single consequences struct
@@ -36,5 +35,4 @@ func sampleResults() {
 	}
 	b, _ := json.Marshal(result)
 	fmt.Println(string(b))
-	//fmt.Println(result)
 }

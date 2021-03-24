@@ -73,15 +73,11 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Result 
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Result { //what if we invert this general model to hazard.damage(consequence receptor)
+func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Result {
 	return computeConsequences(d, s)
 }
 
-//the following two methods are legitimately the same - it seems i need an interface rather than a struct for a depthevent
-//this area seems still in need of some refactoring for simplification.
-
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) consequences.Result {
-	//header := []string{"structure damage", "content damage"}
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
@@ -101,6 +97,6 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) conseq
 		ret.Result[9] = s.Pop2amo65
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
-	}
+	} //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
 	return ret
 }

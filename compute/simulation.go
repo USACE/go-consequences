@@ -9,19 +9,7 @@ import (
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/structureprovider"
-	"github.com/USACE/go-consequences/structures"
 )
-
-func nsiInventorytoStructures(i structureprovider.NsiInventory) []structures.StructureStochastic {
-	m := structures.OccupancyTypeMap()
-	defaultOcctype := m["RES1-1SNB"]
-	structures := make([]structures.StructureStochastic, len(i.Features))
-	for idx, feature := range i.Features {
-		structures[idx] = structureprovider.NsiFeaturetoStructure(feature, m, defaultOcctype)
-	}
-	return structures
-}
 
 //ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
 func ComputeEAD(damages []float64, freq []float64) float64 {

@@ -60,25 +60,3 @@ func (c Result) MarshalJSON() ([]byte, error) {
 	s += "}}"
 	return []byte(s), nil
 }
-
-/*
-//String converts a ConsequenceDamageResult to a string
-func (c ConsequenceDamageResult) String() string {
-	if len(c.Headers) != len(c.Results) {
-		return "mismatched lengths"
-	}
-	var ret string = "the consequences were:"
-	for i, h := range c.Headers {
-		ret += " " + h + " = " + fmt.Sprintf("%f", c.Results[i].(float64)) + ","
-	}
-	return strings.Trim(ret, ",")
-}
-*/
-//func (c Result) String() string
-//String converts consequences to string
-func (c Results) String() string {
-	if c.IsTable {
-		return "Im a table!" //todo implement me
-	}
-	return "I should be a single result"
-}
