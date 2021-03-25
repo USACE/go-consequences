@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -15,7 +16,7 @@ import (
 
 //NsiProperties is a reflection of the JSON feature property attributes from the NSI-API
 type NsiProperties struct {
-	Name      string  `json:"fd_id"`
+	Name      int     `json:"fd_id"`
 	X         float64 `json:"x"`
 	Y         float64 `json:"y"`
 	Occtype   string  `json:"occtype"`
@@ -102,7 +103,7 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		Pop2amo65: f.Properties.Pop2amo65,
 		Pop2amu65: f.Properties.Pop2amu65,
 		BaseStructure: structures.BaseStructure{
-			Name:   f.Properties.Name,
+			Name:   strconv.Itoa(f.Properties.Name),
 			DamCat: f.Properties.DamCat,
 			X:      f.Properties.X,
 			Y:      f.Properties.Y,
