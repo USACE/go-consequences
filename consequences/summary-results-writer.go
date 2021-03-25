@@ -22,7 +22,7 @@ func InitSummaryResultsWriterFromFile(filepath string) summaryResultsWriter {
 	}
 	//make the maps
 	t := make(map[string]float64, 1)
-	m := make(map[string]data.InlineStats, 1)
+	m := make(map[string]*data.InlineHistogram, 1)
 	return summaryResultsWriter{filepath: filepath, w: w, totals: t, m: m}
 }
 func InitSummaryResultsWriter(w io.Writer) summaryResultsWriter {
