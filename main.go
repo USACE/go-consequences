@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/USACE/go-consequences/compute"
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/structureprovider"
 )
 
@@ -38,7 +39,8 @@ func main() {
 					//s, _ := compute.FromFile(fp[0])
 					//fmt.Fprintf(w, s)
 					nsp := structureprovider.InitNSISP()
-					compute.StreamFromFileAbstract(fp[0], nsp, w)
+					w2 := consequences.InitStreamingResultsWriter(w)
+					compute.StreamFromFileAbstract(fp[0], nsp, w2)
 				}
 			}
 		})
