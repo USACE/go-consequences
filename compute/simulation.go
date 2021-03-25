@@ -60,10 +60,10 @@ func StreamFromFileAbstract(filepath string, sp consequences.StreamProvider, w c
 	//open a tif reader
 	tiffReader := hazardproviders.Init(filepath)
 	defer tiffReader.Close()
-	computeStreamAbstract(&tiffReader, sp, w)
+	StreamAbstract(&tiffReader, sp, w)
 	w.Close()
 }
-func computeStreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.ProvideHazardBoundary()
