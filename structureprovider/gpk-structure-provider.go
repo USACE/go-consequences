@@ -62,7 +62,10 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 			if len(fipscode) <= len(cbfips) {
 				comp := cbfips[0:len(fipscode)]
 				if comp == fipscode {
-					sp(featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX))
+					s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+					if err == nil {
+						sp(s)
+					}
 				} //else no match, do not send structure.
 			} //else error?
 		}
@@ -84,7 +87,10 @@ func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			sp(featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX))
+			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+			if err == nil {
+				sp(s)
+			}
 		}
 	}
 	return nil

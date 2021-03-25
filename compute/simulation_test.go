@@ -2,9 +2,9 @@ package compute
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/structureprovider"
 	"github.com/USACE/go-consequences/structures"
 )
@@ -47,13 +47,10 @@ func TestComputeSpecialEAD(t *testing.T) {
 	}
 }
 func Test_StreamFromFileAbstract(t *testing.T) {
-	nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/harvey/ORNLcentroids_LBattributes.shp")
 	root := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326"
 	filepath := root + ".tif"
-	w, err := os.OpenFile(root+"_consequences.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		panic(err)
-	}
+	w := consequences.InitStreamingResultsWriterFromFile(root + "_consequences.json")
 	defer w.Close()
 	StreamFromFileAbstract(filepath, nsp, w)
 }

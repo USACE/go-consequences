@@ -36,10 +36,10 @@ func InitSHP(filepath string) shpDataSet {
 }
 
 //ByFips a streaming service for structure stochastic based on a bounding box
-func (shp shpDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) error {
-	return shp.processFipsStream(fipscode, sp)
+func (shp shpDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
+	shp.processFipsStream(fipscode, sp)
 }
-func (shp shpDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) error {
+func (shp shpDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
@@ -55,19 +55,22 @@ func (shp shpDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 			if len(fipscode) <= len(cbfips) {
 				comp := cbfips[0:len(fipscode)]
 				if comp == fipscode {
-					sp(featuretoStructure(f, m, defaultOcctype, shp.schemaIDX))
+					s, err := featuretoStructure(f, m, defaultOcctype, shp.schemaIDX)
+					if err == nil {
+						sp(s)
+					}
+
 				} //else no match, do not send structure.
 			} //else error?
 		}
 	}
-	return nil
 }
 
 //ByBbox allows a shapefile to be streamed by bounding box
-func (shp shpDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) error {
-	return shp.processBboxStream(bbox, sp)
+func (shp shpDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
+	shp.processBboxStream(bbox, sp)
 }
-func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) error {
+func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
@@ -79,8 +82,10 @@ func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			sp(featuretoStructure(f, m, defaultOcctype, shp.schemaIDX))
+			s, err := featuretoStructure(f, m, defaultOcctype, shp.schemaIDX)
+			if err == nil {
+				sp(s)
+			}
 		}
 	}
-	return nil
 }

@@ -1,6 +1,7 @@
 package structureprovider
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -21,7 +22,7 @@ func StructureSchema() []string {
 	s[8] = "found_ht"
 	return s
 }
-func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, idxs []int) structures.StructureStochastic {
+func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, idxs []int) (structures.StructureStochastic, error) {
 	s := structures.StructureStochastic{}
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
@@ -31,7 +32,7 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	} else {
 		occtype = defaultOcctype
 		msg := "Using default " + OccTypeName + " not found"
-		panic(msg)
+		return s, errors.New(msg)
 	}
 	s.OccType = occtype
 	s.X = f.FieldAsFloat64(idxs[2])
@@ -40,5 +41,5 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	s.StructVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[6])}
 	s.ContVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[7])}
 	s.FoundHt = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[8])}
-	return s
+	return s, nil
 }

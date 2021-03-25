@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"io"
 	"log"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -57,14 +56,14 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
-func StreamFromFileAbstract(filepath string, sp consequences.StreamProvider, w io.Writer) { //enc json.Encoder) { //w http.ResponseWriter) {
+func StreamFromFileAbstract(filepath string, sp consequences.StreamProvider, w consequences.ResultsWriter) { //enc json.Encoder) { //w http.ResponseWriter) {
 	//open a tif reader
 	tiffReader := hazardproviders.Init(filepath)
 	defer tiffReader.Close()
 	computeStreamAbstract(&tiffReader, sp, w)
-
+	w.Close()
 }
-func computeStreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w io.Writer) {
+func computeStreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.ProvideHazardBoundary()
@@ -78,10 +77,7 @@ func computeStreamAbstract(hp hazardproviders.HazardProvider, sp consequences.St
 		//compute damages based on hazard being able to provide depth
 		if d.Has(hazards.Depth) {
 			if d.Depth() > 0.0 {
-				r := f.Compute(d)
-				b, _ := r.MarshalJSON()
-				s := string(b) + "\n"
-				fmt.Fprintf(w, s)
+				w.Write(f.Compute(d))
 			}
 		}
 	})

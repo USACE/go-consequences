@@ -21,6 +21,10 @@ type StreamProvider interface {
 	ByBbox(bbox geography.BBox, sp StreamProcessor)
 }
 type StreamProcessor func(str Receptor)
+type ResultsWriter interface {
+	Write(Result)
+	Close()
+}
 
 //ParameterValue is a way to allow parameters to be either a scalar or a distribution.
 type ParameterValue struct {
