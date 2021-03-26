@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -37,10 +36,6 @@ type NsiFeature struct {
 	Properties NsiProperties `json:"properties"`
 }
 
-//NsiInventory is a slice of NsiFeature that describes a complete json feature array return or feature collection return
-type NsiInventory struct {
-	Features []NsiFeature
-}
 type nsiStreamProvider struct {
 	ApiURL string
 }
@@ -78,6 +73,9 @@ func nsiStructureStream(url string, sp consequences.StreamProcessor) {
 			break
 		} else if err != nil {
 			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
+			if err == io.ErrUnexpectedEOF {
+				break
+			}
 		}
 		sp(NsiFeaturetoStructure(n, m, defaultOcctype))
 	}
@@ -111,91 +109,5 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 	}
 }
 
-//GetByFips returns an NsiInventory for a FIPS code
-func GetByFips(fips string) NsiInventory {
-	n := InitNSISP()
-	url := fmt.Sprintf("%s?fips=%s&fmt=fa", n.ApiURL, fips)
-	return nsiAPI(url)
-}
-
-//GetByBbox returns an NsiInventory for a Bounding Box
-func GetByBbox(bbox string) NsiInventory {
-	n := InitNSISP()
-	url := fmt.Sprintf("%s?bbox=%s&fmt=fa", n.ApiURL, bbox)
-	return nsiAPI(url)
-}
-func nsiAPI(url string) NsiInventory {
-	inventory := NsiInventory{}
-	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
-	}
-	client := &http.Client{Transport: transCfg}
-
-	response, err := client.Get(url)
-
-	if err != nil {
-		fmt.Println(err)
-		return inventory
-	}
-	defer response.Body.Close()
-	jsonData, err := ioutil.ReadAll(response.Body)
-	features := make([]NsiFeature, 0)
-	if err := json.Unmarshal(jsonData, &features); err != nil {
-		fmt.Println("error unmarshalling NSI json " + err.Error() + " URL: " + url)
-		s := string(jsonData)
-		fmt.Println("first 1000 chars of jsonbody was: " + s[0:1000]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
-		return inventory
-	}
-	inventory.Features = features
-	return inventory
-}
-
 //NsiStreamProcessor is a function used to process an in memory NsiFeature through the NsiStreaming service endpoints
 type NsiStreamProcessor func(str NsiFeature)
-
-/*
-memory effecient structure compute methods
-*/
-
-//GetByFipsStream a streaming service for NsiFeature based on a FIPs code
-func GetByFipsStream(fips string, nsp NsiStreamProcessor) error {
-	n := InitNSISP()
-	url := fmt.Sprintf("%s?fips=%s&fmt=fs", n.ApiURL, fips)
-	return nsiAPIStream(url, nsp)
-}
-
-//GetByBboxStream a streaming service for NsiFeature based on a bounding box
-func GetByBboxStream(bbox string, nsp NsiStreamProcessor) error {
-	n := InitNSISP()
-	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", n.ApiURL, bbox)
-	return nsiAPIStream(url, nsp)
-}
-func nsiAPIStream(url string, nsp NsiStreamProcessor) error {
-	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
-	}
-	client := &http.Client{Transport: transCfg}
-
-	response, err := client.Get(url)
-
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	defer response.Body.Close()
-	dec := json.NewDecoder(response.Body)
-	//resp, _ := ioutil.ReadAll(response.Body)
-	//s := string(resp)
-	//fmt.Println(s)
-	for {
-		var n NsiFeature
-		if err := dec.Decode(&n); err == io.EOF {
-			break
-		} else if err != nil {
-			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
-			return err
-		}
-		nsp(n)
-	}
-	return nil
-}

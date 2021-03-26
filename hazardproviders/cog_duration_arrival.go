@@ -16,12 +16,12 @@ type cogDurationAndArrivalHazardProvider struct {
 
 //Init creates and produces an unexported cogHazardProvider
 func InitDaAHP(durationfp string, arrivalfp string, startTime time.Time) cogDurationAndArrivalHazardProvider {
-	return cogDurationAndArrivalHazardProvider{durationCR: InitCR(durationfp)}
+	return cogDurationAndArrivalHazardProvider{durationCR: initCR(durationfp)}
 }
-func (chp *cogDurationAndArrivalHazardProvider) Close() {
+func (chp cogDurationAndArrivalHazardProvider) Close() {
 	chp.durationCR.Close()
 }
-func (chp *cogDurationAndArrivalHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
+func (chp cogDurationAndArrivalHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
 	h := hazards.ArrivalandDurationEvent{}
 	d, err := chp.durationCR.ProvideValue(l)
 	if err != nil {
@@ -38,6 +38,6 @@ func (chp *cogDurationAndArrivalHazardProvider) ProvideHazard(l geography.Locati
 	h.SetArrivalTime(t)
 	return h, nil
 }
-func (chp *cogDurationAndArrivalHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {
+func (chp cogDurationAndArrivalHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {
 	return chp.durationCR.GetBoundingBox() //what if the two grids are not the same extent?
 }

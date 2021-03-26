@@ -11,12 +11,12 @@ type cogHazardProvider struct {
 
 //Init creates and produces an unexported cogHazardProvider
 func Init(fp string) cogHazardProvider {
-	return cogHazardProvider{depthcr: InitCR(fp)}
+	return cogHazardProvider{depthcr: initCR(fp)}
 }
-func (chp *cogHazardProvider) Close() {
+func (chp cogHazardProvider) Close() {
 	chp.depthcr.Close()
 }
-func (chp *cogHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
+func (chp cogHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
 	h := hazards.DepthEvent{}
 	d, err := chp.depthcr.ProvideValue(l)
 	if err != nil {
@@ -25,6 +25,6 @@ func (chp *cogHazardProvider) ProvideHazard(l geography.Location) (hazards.Hazar
 	h.SetDepth(d)
 	return h, nil
 }
-func (chp *cogHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {
+func (chp cogHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {
 	return chp.depthcr.GetBoundingBox()
 }

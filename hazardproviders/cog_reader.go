@@ -12,8 +12,8 @@ type cogReader struct {
 	ds       *gdal.Dataset
 }
 
-//Init creates and produces an unexported cogHazardProvider
-func InitCR(fp string) cogReader {
+//init creates and produces an unexported cogReader
+func initCR(fp string) cogReader {
 	//read the file path
 	//make sure it is a tif
 	ds, err := gdal.Open(fp, gdal.ReadOnly)

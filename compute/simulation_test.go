@@ -1,26 +1,13 @@
 package compute
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/structureprovider"
-	"github.com/USACE/go-consequences/structures"
 )
 
-func TestConvertNSIFeatureToStructure(t *testing.T) {
-	bbox := "-81.58418,30.25165,-81.58161,30.26939,-81.55898,30.26939,-81.55281,30.24998,-81.58418,30.25165"
-	//get a map of all occupancy types
-	m := structures.OccupancyTypeMap()
-	//define a default occtype in case of emergancy
-	defaultOcctype := m["RES1-1SNB"]
-	structureprovider.GetByBboxStream(bbox, func(f structureprovider.NsiFeature) {
-		//convert nsifeature to structure
-		str := structureprovider.NsiFeaturetoStructure(f, m, defaultOcctype)
-		fmt.Println(str.OccType.Name)
-	})
-}
 func TestComputeEAD(t *testing.T) {
 	d := []float64{1, 2, 3, 4}
 	f := []float64{.75, .5, .25, 0}
@@ -46,11 +33,12 @@ func TestComputeSpecialEAD(t *testing.T) {
 		t.Errorf("computeEAD() yeilded %f; expected %f", val, 1.875)
 	}
 }
-func Test_StreamFromFileAbstract(t *testing.T) {
+func Test_StreamAbstract(t *testing.T) {
 	nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/harvey/ORNLcentroids_LBattributes.shp")
 	root := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326"
 	filepath := root + ".tif"
 	w := consequences.InitStreamingResultsWriterFromFile(root + "_consequences.json")
 	defer w.Close()
-	StreamFromFileAbstract(filepath, nsp, w)
+	dfr := hazardproviders.Init(filepath)
+	StreamAbstract(dfr, nsp, w)
 }
