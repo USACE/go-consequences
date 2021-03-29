@@ -34,10 +34,10 @@ func TestComputeSpecialEAD(t *testing.T) {
 	}
 }
 func Test_StreamAbstract(t *testing.T) {
-	nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/harvey/ORNLcentroids_LBattributes.shp")
-	root := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326"
+	nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/hurricane-laura/ORNLcentroids_LBattributes.shp")
+	root := "/workspaces/Go_Consequences/data/CERA_Adv29_maxwaterelev_4326_90m"
 	filepath := root + ".tif"
-	w := consequences.InitStreamingResultsWriterFromFile(root + "_consequences.json")
+	w := consequences.InitJsonResultsWriterFromFile(root + "_consequences.json")
 	defer w.Close()
 	dfr := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)

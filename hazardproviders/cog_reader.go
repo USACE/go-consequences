@@ -1,6 +1,7 @@
 package hazardproviders
 
 import (
+	"errors"
 	"log"
 
 	"github.com/USACE/go-consequences/geography"
@@ -10,6 +11,7 @@ import (
 type cogReader struct {
 	FilePath string
 	ds       *gdal.Dataset
+	nodata   float64
 }
 
 //init creates and produces an unexported cogReader
@@ -21,7 +23,12 @@ func initCR(fp string) cogReader {
 		log.Fatalln("Cannot connect to raster.  Killing everything! " + err.Error())
 	}
 	//fmt.Println(ds.Projection())
-	return cogReader{fp, &ds}
+	v, valid := ds.RasterBand(1).NoDataValue()
+	cr := cogReader{FilePath: fp, ds: &ds}
+	if valid {
+		cr.nodata = v
+	}
+	return cr
 }
 func (cr *cogReader) Close() {
 	cr.ds.Close()
@@ -34,7 +41,11 @@ func (cr *cogReader) ProvideValue(l geography.Location) (float64, error) {
 	buffer := make([]float32, 1*1)
 	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
 	depth := buffer[0]
-	return float64(depth), nil
+	d := float64(depth)
+	if d == cr.nodata {
+		return -.01, errors.New("cog reader had the no data value observed, setting to -.01")
+	}
+	return d, nil
 }
 func (cr *cogReader) GetBoundingBox() (geography.BBox, error) {
 	bbox := make([]float64, 4)
