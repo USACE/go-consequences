@@ -82,3 +82,16 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 		}
 	})
 }
+func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	fmt.Println("FIPS Code is " + FIPSCODE)
+	sp.ByFips(FIPSCODE, func(f consequences.Receptor) {
+		//ProvideHazard works off of a geography.Location
+		d, _ := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		//compute damages based on hazard being able to provide depth
+		if d.Has(hazards.Depth) {
+			if d.Depth() > 0.0 && d.Depth() < 9999.0 {
+				w.Write(f.Compute(d))
+			}
+		}
+	})
+}
