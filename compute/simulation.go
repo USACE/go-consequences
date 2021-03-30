@@ -76,7 +76,7 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 		d, _ := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if d.Has(hazards.Depth) {
-			if d.Depth() > 0.0 {
+			if d.Depth() > 0.0 && d.Depth() < 9999.0 {
 				w.Write(f.Compute(d))
 			}
 		}
