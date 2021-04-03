@@ -1,6 +1,8 @@
 package hazardproviders
 
 import (
+	"fmt"
+
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
@@ -20,7 +22,7 @@ func (chp cogHazardProvider) ProvideHazard(l geography.Location) (hazards.Hazard
 	h := hazards.DepthEvent{}
 	d, err := chp.depthcr.ProvideValue(l)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	h.SetDepth(d)
 	return h, nil
