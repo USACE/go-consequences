@@ -73,11 +73,13 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 	fmt.Println(bbox.ToString())
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
-		d, _ := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		d, err2 := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
-		if d.Has(hazards.Depth) {
-			if d.Depth() > 0.0 && d.Depth() < 9999.0 {
-				w.Write(f.Compute(d))
+		if err2 == nil {
+			if d.Has(hazards.Depth) {
+				if d.Depth() > 0.0 && d.Depth() < 9999.0 {
+					w.Write(f.Compute(d))
+				}
 			}
 		}
 	})
@@ -86,11 +88,13 @@ func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp
 	fmt.Println("FIPS Code is " + FIPSCODE)
 	sp.ByFips(FIPSCODE, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
-		d, _ := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
-		if d.Has(hazards.Depth) {
-			if d.Depth() > 0.0 && d.Depth() < 9999.0 {
-				w.Write(f.Compute(d))
+		if err == nil {
+			if d.Has(hazards.Depth) {
+				if d.Depth() > 0.0 && d.Depth() < 9999.0 {
+					w.Write(f.Compute(d))
+				}
 			}
 		}
 	})

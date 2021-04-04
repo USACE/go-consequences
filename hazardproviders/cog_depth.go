@@ -1,8 +1,6 @@
 package hazardproviders
 
 import (
-	"fmt"
-
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
@@ -21,11 +19,11 @@ func (chp cogHazardProvider) Close() {
 func (chp cogHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
 	h := hazards.DepthEvent{}
 	d, err := chp.depthcr.ProvideValue(l)
-	if err != nil {
+	/*if err != nil {
 		fmt.Println(err)
-	}
+	}*/
 	h.SetDepth(d)
-	return h, nil
+	return h, err
 }
 func (chp cogHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {
 	return chp.depthcr.GetBoundingBox()
