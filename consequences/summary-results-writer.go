@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/HenryGeorgist/go-statistics/data"
+	"github.com/HydrologicEngineeringCenter/go-statistics/data"
 	"github.com/leekchan/accounting"
 )
 

@@ -3,7 +3,7 @@ package structures
 import (
 	"math/rand"
 
-	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
 )

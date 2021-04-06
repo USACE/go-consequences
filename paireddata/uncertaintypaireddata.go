@@ -1,7 +1,7 @@
 package paireddata
 
 import (
-	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
 
 // UncertaintyPairedData is paired data where Y is a distribution

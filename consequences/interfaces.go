@@ -1,7 +1,7 @@
 package consequences
 
 import (
-	"github.com/HenryGeorgist/go-statistics/statistics"
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
