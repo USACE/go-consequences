@@ -27,6 +27,7 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
 	var occtype = defaultOcctype
+	//dont have access to foundation type in the structure schema yet.
 	if ot, ok := m[OccTypeName]; ok {
 		occtype = ot
 	} else {

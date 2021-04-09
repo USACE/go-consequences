@@ -84,12 +84,16 @@ func nsiStructureStream(url string, sp consequences.StreamProcessor) {
 //NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
 func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
 	var occtype = defaultOcctype
-	if ot, ok := m[f.Properties.Occtype]; ok {
-		occtype = ot
+	if otf, okf := m[f.Properties.Occtype+"-"+f.Properties.FoundType]; okf {
+		occtype = otf
 	} else {
-		occtype = defaultOcctype
-		msg := "Using default " + f.Properties.Occtype + " not found"
-		panic(msg)
+		if ot, ok := m[f.Properties.Occtype]; ok {
+			occtype = ot
+		} else {
+			occtype = defaultOcctype
+			msg := "Using default " + f.Properties.Occtype + " not found"
+			fmt.Printf(msg) //panic(msg)
+		}
 	}
 	return structures.StructureStochastic{
 		OccType:   occtype,
