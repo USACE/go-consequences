@@ -51,6 +51,30 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 		fmt.Println("Completed 109,406,858 structures")
 	}
 }
+func TestNsiByFipsStream_MultiState_Sequential(t *testing.T) {
+	f := census.StateToCountyFipsMap()
+	n := InitNSISP()
+	index := 0
+	for ss := range f {
+		func(sfips string) {
+			index := 0
+			n.ByFips(sfips, func(s consequences.Receptor) {
+				index++
+			})
+			fmt.Println(fmt.Sprintf("Completed %s with %v structures", sfips, index))
+			if countByState(sfips) == index {
+				fmt.Println(fmt.Sprintf("For state %s the count matched", sfips))
+			} else {
+				fmt.Println(fmt.Sprintf("For state %s the count did NOT match!", sfips))
+			}
+		}(ss)
+	}
+	if index != 109406858 {
+		t.Errorf("ByFips(%s) yeilded %d structures; expected 109,406,858", "all states", index)
+	} else {
+		fmt.Println("Completed 109,406,858 structures")
+	}
+}
 func TestNsiByBboxStream(t *testing.T) {
 	bbox := make([]float64, 4) //i might have these values inverted
 	bbox[0] = -81.58418        //upper left x

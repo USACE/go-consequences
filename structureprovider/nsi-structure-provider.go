@@ -67,6 +67,7 @@ func nsiStructureStream(url string, sp consequences.StreamProcessor) {
 	}
 	defer response.Body.Close()
 	dec := json.NewDecoder(response.Body)
+
 	for {
 		var n NsiFeature
 		if err := dec.Decode(&n); err == io.EOF {
