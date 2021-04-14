@@ -34,11 +34,12 @@ func TestComputeSpecialEAD(t *testing.T) {
 	}
 }
 func Test_StreamAbstract(t *testing.T) {
-	//nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/hurricane-laura/ORNLcentroids_LBattributes.shp")
-	nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/hurricane-laura/ORNLcentroids_LBattributes.shp")
+	//nsp := structureprovider.InitNSISP()
 	root := "/workspaces/Go_Consequences/data/CERA_Adv29_maxwaterelev_4326_90m"
 	filepath := root + ".tif"
-	w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY_NSI.json")
+	w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	defer w.Close()
 	dfr := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)

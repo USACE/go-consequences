@@ -1,7 +1,6 @@
 package structureprovider
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -29,15 +28,18 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	OccTypeName := f.FieldAsString(idxs[5])
 	var occtype = defaultOcctype
 	//dont have access to foundation type in the structure schema yet.
-	if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
-		occtype = otf
+	if idxs[9] > 0 {
+		if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
+			occtype = otf
+		}
 	} else {
 		if ot, ok := m[OccTypeName]; ok {
 			occtype = ot
 		} else {
 			occtype = defaultOcctype
 			msg := "Using default " + OccTypeName + " not found"
-			return s, errors.New(msg)
+			fmt.Println(msg)
+			//return s, errors.New(msg)
 		}
 	}
 

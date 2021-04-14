@@ -1,6 +1,7 @@
 package structureprovider
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -28,7 +29,7 @@ func InitSHP(filepath string) shpDataSet {
 	for i, f := range s {
 		idx := def.FieldIndex(f)
 		if idx < 0 {
-			log.Fatalln("Expected field named " + f + " none was found.  Killing everything! ")
+			fmt.Println("Expected field named " + f + " none was found.  Killing everything! ")
 		}
 		sIDX[i] = idx
 	}
