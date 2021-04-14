@@ -12,8 +12,8 @@ func InitVirtualResultsWriter() *VirtualResultsWriter {
 	var b strings.Builder
 	return &VirtualResultsWriter{data: b}
 }
-func (srw *VirtualResultsWriter) Write(b []byte) {
-	srw.data.Write(b)
+func (srw *VirtualResultsWriter) Write(b []byte) (int, error) {
+	return srw.data.Write(b)
 }
 func (srw *VirtualResultsWriter) Close() {
 	//do nothing
