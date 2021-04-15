@@ -38,8 +38,9 @@ func Test_StreamAbstract(t *testing.T) {
 	//nsp := structureprovider.InitNSISP()
 	root := "/workspaces/Go_Consequences/data/CERA_Adv29_maxwaterelev_4326_90m"
 	filepath := root + ".tif"
-	w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	w := consequences.InitShpResultsWriter("/workspaces/Go_Consequences/data/", "CERA_Adv29_maxwaterelev_4326_90m_consequences")
 	defer w.Close()
 	dfr := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)

@@ -13,6 +13,7 @@ type geoJsonResultsWriter struct {
 	w                    io.Writer
 	S                    string
 	HeaderHasBeenWritten bool
+	HasClosed            bool
 }
 
 func InitGeoJsonResultsWriterFromFile(filepath string) *geoJsonResultsWriter {
@@ -62,11 +63,14 @@ func (srw *geoJsonResultsWriter) Write(r Result) {
 
 	srw.S = s
 }
+
 func (srw *geoJsonResultsWriter) Close() {
 	if srw.S != "" {
 		srw.S = strings.TrimRight(srw.S, ",\n")
 		fmt.Fprintf(srw.w, srw.S)
 		fmt.Fprintf(srw.w, "\n]}")
+		srw.S = ""
+		srw.HasClosed = true
 	}
 	w2, ok := srw.w.(io.WriteCloser)
 	if ok {
