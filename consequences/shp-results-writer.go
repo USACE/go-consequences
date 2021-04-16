@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/dewberry/gdal"
 )
 
@@ -44,17 +45,23 @@ func (srw *shpResultsWriter) Write(r Result) {
 		for i, val := range r.Headers {
 			//need to identify value type
 			func() {
-				atype := reflect.TypeOf(result[i]) //.Elem()
-				gotype := atype.Kind()
-				fieldName := val
-				if len(val) > 10 {
-					fieldName = val[0:10]
-					fieldName = strings.TrimSpace(fieldName)
+				if val == "hazard" { //not a huge fan of this, because it is specific to that kind of hazard.
+					fieldDef := gdal.CreateFieldDefinition("depth", gdal.FT_Real)
+					defer fieldDef.Destroy()
+					srw.Layer.CreateField(fieldDef, true) //approxOk.
+				} else {
+					atype := reflect.TypeOf(result[i]) //.Elem()
+					gotype := atype.Kind()
+					fieldName := val
+					if len(val) > 10 {
+						fieldName = val[0:10]
+						fieldName = strings.TrimSpace(fieldName)
+					}
+					gdaltype := gdalTypes[gotype]
+					fieldDef := gdal.CreateFieldDefinition(fieldName, gdaltype)
+					defer fieldDef.Destroy()
+					srw.Layer.CreateField(fieldDef, true) //approxOk.
 				}
-				gdaltype := gdalTypes[gotype]
-				fieldDef := gdal.CreateFieldDefinition(fieldName, gdaltype)
-				defer fieldDef.Destroy()
-				srw.Layer.CreateField(fieldDef, true) //approxOk.
 			}()
 		}
 		srw.FieldsCreated = true
@@ -83,10 +90,15 @@ func (srw *shpResultsWriter) Write(r Result) {
 			fieldName = val[0:10]
 			fieldName = strings.TrimSpace(fieldName)
 		}
-		idx := layerDef.FieldIndex(fieldName)
 		value := result[i]
 		att := reflect.TypeOf(result[i])
 		valType := att.Kind()
+		if val == "hazard" { //not a big fan of this, hazard specific.
+			fieldName = "depth"
+			valType = reflect.Float64
+			value = value.(hazards.DepthEvent).Depth()
+		}
+		idx := layerDef.FieldIndex(fieldName)
 		switch valType {
 		case reflect.String:
 			feature.SetFieldString(idx, value.(string))
