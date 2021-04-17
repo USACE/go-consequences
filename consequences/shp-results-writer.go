@@ -131,5 +131,6 @@ func (srw *shpResultsWriter) Write(r Result) {
 }
 func (srw *shpResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
+	fmt.Println(fmt.Sprintf("Closing, wrote %v features", srw.index))
 	srw.ds.Destroy()
 }
