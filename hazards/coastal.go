@@ -22,6 +22,9 @@ func (h CoastalEvent) Depth() float64 {
 func (h *CoastalEvent) SetDepth(d float64) {
 	h.depth = d
 }
+func (h CoastalEvent) Velocity() float64 {
+	return -901.0
+}
 func (h CoastalEvent) ArrivalTime() time.Time {
 	return time.Time{}
 }
