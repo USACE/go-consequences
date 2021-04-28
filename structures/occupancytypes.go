@@ -145,8 +145,10 @@ func OccupancyTypeMap() map[string]OccupancyTypeStochastic {
 	m["IND6"] = ind6()
 	m["REL1"] = rel1()
 	m["RES1-1SNB"] = res11snb()
+	m["RES1-1SNB-PIER"] = res11snbPier()
 	m["RES1-1SWB"] = res11swb()
 	m["RES1-2SNB"] = res12snb()
+	m["RES1-2SNB-PIER"] = res12snbPier()
 	m["RES1-2SWB"] = res12swb()
 	m["RES1-3SNB"] = res13snb()
 	m["RES1-3SWB"] = res13swb()
@@ -233,6 +235,23 @@ func res11snb() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
+
+func res11snbPier() OccupancyTypeStochastic {
+	//what to do about content?
+	structurexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structureys := []float64{0,0,0,0,11,29,38,44,51,56,63,66,71,75,77,79,81,84,86,88,89}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+
+	//Salinity hazard
+	sdf.DamageFunctions[hazards.Depth | hazards.Salinity] = structuredamagefunction	
+	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: }//content?
+}
+
 func res11swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	structureydists := make([]statistics.ContinuousDistribution, 25)
@@ -816,6 +835,27 @@ func res12snb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = salinity
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res12snbPier() OccupancyTypeStochastic {
+	structurexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structureys := []float64{0,0,0,0,8,22,29,33,38,42,47,50,53,56,58,60,61,63,65,66,67}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
+	//var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	//cm := make(map[hazards.Parameter]interface{})
+	//var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	//cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth Hazard
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuredamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: }//content?
+
+
 }
 func res12swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
