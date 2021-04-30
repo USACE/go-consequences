@@ -225,31 +225,46 @@ func res11snb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
 	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
 
-	//build the curve for your specific hazard type...
-	salinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	salinityys := []float64{0, 0, 0, 0, 11, 29, 38, 44, 51, 56, 63, 66, 71, 75, 77, 79, 81, 84, 86, 88, 89}
-	var salinity = paireddata.PairedData{Xvals: salinityxs, Yvals: salinityys}
+	structuresalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structuresalinityys := []float64{0, 0, 0, 0, 11, 29, 38, 44, 51, 56, 63, 66, 71, 75, 77, 79, 81, 84, 86, 88, 89}
+	var structuresalinity = paireddata.PairedData{Xvals: structuresalinityxs, Yvals: structuresalinityys}
+
+	contentsalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentsalinityys := []float64{0, 0, 0, 0, 11, 29, 38, 44, 51, 56, 63, 66, 71, 75, 77, 79, 81, 84, 86, 88, 89}
+	var contentsalinity = paireddata.PairedData{Xvals: contentsalinityxs, Yvals: contentsalinityys}
+
 	//Depth,Salinity
-	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = salinity
-	//content function?
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinity
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinity
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res11snbPier() OccupancyTypeStochastic {
-	//what to do about content?
+
 	structurexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structureys := []float64{0,0,0,0,11,29,38,44,51,56,63,66,71,75,77,79,81,84,86,88,89}
+	structureys := []float64{0, 0, 0, 0, 11, 29, 38, 44, 51, 56, 63, 66, 71, 75, 77, 79, 81, 84, 86, 88, 89}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
+
+	contentxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentys := []float64{0, 0, 0, 0, 11, 29, 38, 44, 51, 56, 63, 66, 71, 75, 77, 79, 81, 84, 86, 88, 89}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
+
 	sm := make(map[hazards.Parameter]interface{})
 	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
 
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+
 	//Default hazard.
 	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
 
-	//Salinity hazard
-	sdf.DamageFunctions[hazards.Depth | hazards.Salinity] = structuredamagefunction	
-	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: }//content?
+	//Depth, salinity hazard.
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res11swb() OccupancyTypeStochastic {
@@ -321,33 +336,57 @@ func res11swb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
 	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
 
-	salinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	salinityydists := make([]statistics.ContinuousDistribution, 21)
-	salinityydists[0], _ = statistics.InitDeterministic(0.0)
-	salinityydists[1], _ = statistics.InitDeterministic(0.0)
-	salinityydists[2], _ = statistics.Init([]float64{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, []int64{903, 3461, 3229, 5151, 4727, 4549, 4207, 3841, 3594, 3278, 2979, 2666, 2387})
-	salinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, []int64{85, 2106, 1985, 1765, 2983, 2852, 2680, 2501, 2299, 2160, 1957, 1829, 1684, 1502})
-	salinityydists[4], _ = statistics.Init([]float64{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, []int64{83, 602, 607, 526, 482, 447, 379, 851, 822, 849, 758, 688, 701, 582, 583, 582, 512})
-	salinityydists[5], _ = statistics.Init([]float64{23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43}, []int64{98, 93, 84, 74, 92, 61, 69, 44, 51, 55, 43, 152, 143, 137, 129, 137, 114, 100, 101, 116, 107})
-	salinityydists[6], _ = statistics.Init([]float64{29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52}, []int64{6, 87, 88, 80, 65, 73, 73, 66, 50, 33, 56, 45, 42, 42, 141, 144, 118, 141, 118, 115, 97, 99, 114, 107})
-	salinityydists[7], _ = statistics.Init([]float64{34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58}, []int64{30, 84, 77, 74, 64, 69, 72, 61, 51, 34, 44, 47, 39, 39, 42, 134, 137, 116, 145, 114, 114, 95, 99, 112, 107})
-	salinityydists[8], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65}, []int64{56, 79, 75, 69, 59, 66, 67, 57, 52, 34, 35, 50, 38, 35, 38, 30, 144, 124, 125, 130, 114, 113, 92, 99, 112, 107})
-	salinityydists[9], _ = statistics.Init([]float64{44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}, []int64{49, 79, 68, 72, 57, 63, 72, 43, 60, 39, 31, 44, 42, 34, 32, 42, 24, 140, 121, 127, 127, 116, 109, 91, 99, 112, 107})
-	salinityydists[10], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}, []int64{66, 80, 65, 64, 54, 59, 69, 45, 56, 34, 29, 44, 42, 33, 35, 32, 32, 30, 131, 119, 132, 119, 117, 107, 88, 101, 110, 107})
-	salinityydists[11], _ = statistics.Init([]float64{52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80}, []int64{34, 73, 71, 64, 57, 54, 68, 51, 50, 49, 39, 28, 40, 38, 34, 32, 37, 25, 33, 125, 123, 127, 120, 116, 106, 88, 101, 110, 107})
-	salinityydists[12], _ = statistics.Init([]float64{56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85}, []int64{28, 65, 76, 66, 47, 55, 59, 64, 42, 56, 32, 31, 31, 46, 35, 31, 25, 38, 25, 31, 123, 129, 120, 120, 116, 105, 86, 101, 111, 106})
-	salinityydists[13], _ = statistics.Init([]float64{60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89}, []int64{66, 71, 62, 62, 55, 54, 63, 48, 50, 40, 38, 24, 43, 33, 32, 33, 32, 27, 30, 24, 121, 128, 119, 120, 117, 104, 86, 101, 111, 106})
-	salinityydists[14], _ = statistics.Init([]float64{61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}, []int64{28, 65, 72, 58, 54, 50, 60, 60, 43, 49, 43, 31, 27, 39, 37, 29, 36, 28, 27, 29, 22, 122, 131, 116, 121, 116, 104, 85, 101, 111, 106})
-	salinityydists[15], _ = statistics.Init([]float64{63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{40, 76, 62, 62, 54, 48, 55, 63, 42, 51, 34, 28, 33, 36, 38, 31, 29, 36, 22, 28, 21, 120, 134, 113, 121, 116, 105, 84, 101, 111, 106})
-	salinityydists[16], _ = statistics.Init([]float64{65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95}, []int64{63, 70, 60, 64, 47, 51, 62, 50, 43, 49, 33, 29, 31, 38, 39, 29, 27, 36, 21, 32, 17, 120, 136, 110, 124, 112, 105, 84, 101, 111, 106})
-	salinityydists[17], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98}, []int64{32, 66, 70, 55, 52, 50, 54, 62, 43, 48, 39, 37, 16, 42, 35, 35, 28, 25, 38, 21, 30, 16, 121, 136, 109, 123, 113, 103, 83, 102, 110, 106})
-	salinityydists[18], _ = statistics.Init([]float64{70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{66, 71, 62, 62, 55, 54, 63, 48, 50, 40, 38, 24, 43, 33, 32, 33, 32, 27, 30, 24, 14, 145, 138, 114, 141, 118, 92, 113, 124, 114})
-	salinityydists[19], _ = statistics.Init([]float64{73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{35, 81, 73, 71, 59, 61, 73, 49, 56, 37, 28, 53, 38, 37, 34, 41, 23, 34, 17, 29, 175, 159, 170, 143, 126, 145, 153})
-	salinityydists[20], _ = statistics.Init([]float64{75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{36, 92, 75, 74, 63, 71, 68, 60, 47, 35, 46, 44, 42, 32, 42, 32, 30, 19, 35, 193, 181, 189, 147, 172, 175})
-	var salinityStochastic = paireddata.UncertaintyPairedData{Xvals: salinityxs, Yvals: salinityydists}
+	structuresalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structuresalinityydists := make([]statistics.ContinuousDistribution, 21)
+	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	structuresalinityydists[2], _ = statistics.Init([]float64{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, []int64{903, 3461, 3229, 5151, 4727, 4549, 4207, 3841, 3594, 3278, 2979, 2666, 2387})
+	structuresalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, []int64{85, 2106, 1985, 1765, 2983, 2852, 2680, 2501, 2299, 2160, 1957, 1829, 1684, 1502})
+	structuresalinityydists[4], _ = statistics.Init([]float64{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, []int64{83, 602, 607, 526, 482, 447, 379, 851, 822, 849, 758, 688, 701, 582, 583, 582, 512})
+	structuresalinityydists[5], _ = statistics.Init([]float64{23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43}, []int64{98, 93, 84, 74, 92, 61, 69, 44, 51, 55, 43, 152, 143, 137, 129, 137, 114, 100, 101, 116, 107})
+	structuresalinityydists[6], _ = statistics.Init([]float64{29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52}, []int64{6, 87, 88, 80, 65, 73, 73, 66, 50, 33, 56, 45, 42, 42, 141, 144, 118, 141, 118, 115, 97, 99, 114, 107})
+	structuresalinityydists[7], _ = statistics.Init([]float64{34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58}, []int64{30, 84, 77, 74, 64, 69, 72, 61, 51, 34, 44, 47, 39, 39, 42, 134, 137, 116, 145, 114, 114, 95, 99, 112, 107})
+	structuresalinityydists[8], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65}, []int64{56, 79, 75, 69, 59, 66, 67, 57, 52, 34, 35, 50, 38, 35, 38, 30, 144, 124, 125, 130, 114, 113, 92, 99, 112, 107})
+	structuresalinityydists[9], _ = statistics.Init([]float64{44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}, []int64{49, 79, 68, 72, 57, 63, 72, 43, 60, 39, 31, 44, 42, 34, 32, 42, 24, 140, 121, 127, 127, 116, 109, 91, 99, 112, 107})
+	structuresalinityydists[10], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}, []int64{66, 80, 65, 64, 54, 59, 69, 45, 56, 34, 29, 44, 42, 33, 35, 32, 32, 30, 131, 119, 132, 119, 117, 107, 88, 101, 110, 107})
+	structuresalinityydists[11], _ = statistics.Init([]float64{52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80}, []int64{34, 73, 71, 64, 57, 54, 68, 51, 50, 49, 39, 28, 40, 38, 34, 32, 37, 25, 33, 125, 123, 127, 120, 116, 106, 88, 101, 110, 107})
+	structuresalinityydists[12], _ = statistics.Init([]float64{56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85}, []int64{28, 65, 76, 66, 47, 55, 59, 64, 42, 56, 32, 31, 31, 46, 35, 31, 25, 38, 25, 31, 123, 129, 120, 120, 116, 105, 86, 101, 111, 106})
+	structuresalinityydists[13], _ = statistics.Init([]float64{60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89}, []int64{66, 71, 62, 62, 55, 54, 63, 48, 50, 40, 38, 24, 43, 33, 32, 33, 32, 27, 30, 24, 121, 128, 119, 120, 117, 104, 86, 101, 111, 106})
+	structuresalinityydists[14], _ = statistics.Init([]float64{61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}, []int64{28, 65, 72, 58, 54, 50, 60, 60, 43, 49, 43, 31, 27, 39, 37, 29, 36, 28, 27, 29, 22, 122, 131, 116, 121, 116, 104, 85, 101, 111, 106})
+	structuresalinityydists[15], _ = statistics.Init([]float64{63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{40, 76, 62, 62, 54, 48, 55, 63, 42, 51, 34, 28, 33, 36, 38, 31, 29, 36, 22, 28, 21, 120, 134, 113, 121, 116, 105, 84, 101, 111, 106})
+	structuresalinityydists[16], _ = statistics.Init([]float64{65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95}, []int64{63, 70, 60, 64, 47, 51, 62, 50, 43, 49, 33, 29, 31, 38, 39, 29, 27, 36, 21, 32, 17, 120, 136, 110, 124, 112, 105, 84, 101, 111, 106})
+	structuresalinityydists[17], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98}, []int64{32, 66, 70, 55, 52, 50, 54, 62, 43, 48, 39, 37, 16, 42, 35, 35, 28, 25, 38, 21, 30, 16, 121, 136, 109, 123, 113, 103, 83, 102, 110, 106})
+	structuresalinityydists[18], _ = statistics.Init([]float64{70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{66, 71, 62, 62, 55, 54, 63, 48, 50, 40, 38, 24, 43, 33, 32, 33, 32, 27, 30, 24, 14, 145, 138, 114, 141, 118, 92, 113, 124, 114})
+	structuresalinityydists[19], _ = statistics.Init([]float64{73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{35, 81, 73, 71, 59, 61, 73, 49, 56, 37, 28, 53, 38, 37, 34, 41, 23, 34, 17, 29, 175, 159, 170, 143, 126, 145, 153})
+	structuresalinityydists[20], _ = statistics.Init([]float64{75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{36, 92, 75, 74, 63, 71, 68, 60, 47, 35, 46, 44, 42, 32, 42, 32, 30, 19, 35, 193, 181, 189, 147, 172, 175})
+	var structuresalinityStochastic = paireddata.UncertaintyPairedData{Xvals: structuresalinityxs, Yvals: structuresalinityydists}
+	contentsalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentsalinityydists := make([]statistics.ContinuousDistribution, 21)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[2], _ = statistics.Init([]float64{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, []int64{903, 3461, 3229, 5151, 4727, 4549, 4207, 3841, 3594, 3278, 2979, 2666, 2387})
+	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, []int64{85, 2106, 1985, 1765, 2983, 2852, 2680, 2501, 2299, 2160, 1957, 1829, 1684, 1502})
+	contentsalinityydists[4], _ = statistics.Init([]float64{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, []int64{83, 602, 607, 526, 482, 447, 379, 851, 822, 849, 758, 688, 701, 582, 583, 582, 512})
+	contentsalinityydists[5], _ = statistics.Init([]float64{23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43}, []int64{98, 93, 84, 74, 92, 61, 69, 44, 51, 55, 43, 152, 143, 137, 129, 137, 114, 100, 101, 116, 107})
+	contentsalinityydists[6], _ = statistics.Init([]float64{29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52}, []int64{6, 87, 88, 80, 65, 73, 73, 66, 50, 33, 56, 45, 42, 42, 141, 144, 118, 141, 118, 115, 97, 99, 114, 107})
+	contentsalinityydists[7], _ = statistics.Init([]float64{34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58}, []int64{30, 84, 77, 74, 64, 69, 72, 61, 51, 34, 44, 47, 39, 39, 42, 134, 137, 116, 145, 114, 114, 95, 99, 112, 107})
+	contentsalinityydists[8], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65}, []int64{56, 79, 75, 69, 59, 66, 67, 57, 52, 34, 35, 50, 38, 35, 38, 30, 144, 124, 125, 130, 114, 113, 92, 99, 112, 107})
+	contentsalinityydists[9], _ = statistics.Init([]float64{44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}, []int64{49, 79, 68, 72, 57, 63, 72, 43, 60, 39, 31, 44, 42, 34, 32, 42, 24, 140, 121, 127, 127, 116, 109, 91, 99, 112, 107})
+	contentsalinityydists[10], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}, []int64{66, 80, 65, 64, 54, 59, 69, 45, 56, 34, 29, 44, 42, 33, 35, 32, 32, 30, 131, 119, 132, 119, 117, 107, 88, 101, 110, 107})
+	contentsalinityydists[11], _ = statistics.Init([]float64{52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80}, []int64{34, 73, 71, 64, 57, 54, 68, 51, 50, 49, 39, 28, 40, 38, 34, 32, 37, 25, 33, 125, 123, 127, 120, 116, 106, 88, 101, 110, 107})
+	contentsalinityydists[12], _ = statistics.Init([]float64{56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85}, []int64{28, 65, 76, 66, 47, 55, 59, 64, 42, 56, 32, 31, 31, 46, 35, 31, 25, 38, 25, 31, 123, 129, 120, 120, 116, 105, 86, 101, 111, 106})
+	contentsalinityydists[13], _ = statistics.Init([]float64{60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89}, []int64{66, 71, 62, 62, 55, 54, 63, 48, 50, 40, 38, 24, 43, 33, 32, 33, 32, 27, 30, 24, 121, 128, 119, 120, 117, 104, 86, 101, 111, 106})
+	contentsalinityydists[14], _ = statistics.Init([]float64{61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}, []int64{28, 65, 72, 58, 54, 50, 60, 60, 43, 49, 43, 31, 27, 39, 37, 29, 36, 28, 27, 29, 22, 122, 131, 116, 121, 116, 104, 85, 101, 111, 106})
+	contentsalinityydists[15], _ = statistics.Init([]float64{63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{40, 76, 62, 62, 54, 48, 55, 63, 42, 51, 34, 28, 33, 36, 38, 31, 29, 36, 22, 28, 21, 120, 134, 113, 121, 116, 105, 84, 101, 111, 106})
+	contentsalinityydists[16], _ = statistics.Init([]float64{65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95}, []int64{63, 70, 60, 64, 47, 51, 62, 50, 43, 49, 33, 29, 31, 38, 39, 29, 27, 36, 21, 32, 17, 120, 136, 110, 124, 112, 105, 84, 101, 111, 106})
+	contentsalinityydists[17], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98}, []int64{32, 66, 70, 55, 52, 50, 54, 62, 43, 48, 39, 37, 16, 42, 35, 35, 28, 25, 38, 21, 30, 16, 121, 136, 109, 123, 113, 103, 83, 102, 110, 106})
+	contentsalinityydists[18], _ = statistics.Init([]float64{70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{66, 71, 62, 62, 55, 54, 63, 48, 50, 40, 38, 24, 43, 33, 32, 33, 32, 27, 30, 24, 14, 145, 138, 114, 141, 118, 92, 113, 124, 114})
+	contentsalinityydists[19], _ = statistics.Init([]float64{73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{35, 81, 73, 71, 59, 61, 73, 49, 56, 37, 28, 53, 38, 37, 34, 41, 23, 34, 17, 29, 175, 159, 170, 143, 126, 145, 153})
+	contentsalinityydists[20], _ = statistics.Init([]float64{75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{36, 92, 75, 74, 63, 71, 68, 60, 47, 35, 46, 44, 42, 32, 42, 32, 30, 19, 35, 193, 181, 189, 147, 172, 175})
+	var contentsalinityStochastic = paireddata.UncertaintyPairedData{Xvals: contentsalinityxs, Yvals: contentsalinityydists}
 	//Depth,Salinity
-	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = salinityStochastic
-	//content function...defaults to default?
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
 
 	return OccupancyTypeStochastic{Name: "RES1-1SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -829,32 +868,41 @@ func res12snb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
 	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
 
-	salinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	salinityys := []float64{0, 0, 0, 0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67}
-	var salinity = paireddata.PairedData{Xvals: salinityxs, Yvals: salinityys}
-	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = salinity
+	structuresalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structuresalinityys := []float64{0, 0, 0, 0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67}
+	var structuresalinity = paireddata.PairedData{Xvals: structuresalinityxs, Yvals: structuresalinityys}
+	contentsalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentsalinityys := []float64{0, 0, 0, 0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67}
+	var contentsalinity = paireddata.PairedData{Xvals: contentsalinityxs, Yvals: contentsalinityys}
+	//Depth, salinity hazard
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinity
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinity
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res12snbPier() OccupancyTypeStochastic {
 	structurexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structureys := []float64{0,0,0,0,8,22,29,33,38,42,47,50,53,56,58,60,61,63,65,66,67}
+	structureys := []float64{0, 0, 0, 0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67}
 	var structuredamagefunction = paireddata.PairedData{Xvals: structurexs, Yvals: structureys}
-	//var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
+	contentxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentys := []float64{0, 0, 0, 0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentxs, Yvals: contentys}
+
 	sm := make(map[hazards.Parameter]interface{})
 	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
 
-	//cm := make(map[hazards.Parameter]interface{})
-	//var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+
 	//Default hazard.
 	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
-	//cdf.DamageFunctions[hazards.Default] = contentdamagefunction
-	//Depth Hazard
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Depth, salinity Hazard
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentdamagefunction
 
-	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: }//content?
-
+	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
 
 }
 func res12swb() OccupancyTypeStochastic {
@@ -926,34 +974,60 @@ func res12swb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = structuredamagefunctionStochastic
 	cdf.DamageFunctions[hazards.Depth] = contentdamagefunctionStochastic
 
-	salinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	salinityydists := make([]statistics.ContinuousDistribution, 21)
-	salinityydists[0], _ = statistics.InitDeterministic(0.0)
-	salinityydists[1], _ = statistics.InitDeterministic(0.0)
-	salinityydists[2], _ = statistics.Init([]float64{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, []int64{903, 3461, 3229, 5151, 4727, 4549, 4207, 3841, 3594, 3278, 2979, 2666, 2387})
-	salinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, []int64{85, 2106, 1985, 1765, 2983, 2852, 2680, 2501, 2299, 2160, 1957, 1829, 1684, 1502})
-	salinityydists[4], _ = statistics.Init([]float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, []int64{568, 1057, 1030, 903, 798, 1558, 1468, 1478, 1299, 1211, 1180, 1064, 1018, 917, 851})
-	salinityydists[5], _ = statistics.Init([]float64{16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{250, 314, 278, 258, 264, 222, 209, 165, 190, 491, 449, 441, 415, 388, 389, 320, 346, 345, 316})
-	salinityydists[6], _ = statistics.Init([]float64{21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41}, []int64{48, 108, 86, 78, 81, 81, 74, 53, 40, 58, 46, 152, 146, 141, 127, 140, 111, 105, 102, 116, 107})
-	salinityydists[7], _ = statistics.Init([]float64{24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45}, []int64{37, 102, 96, 69, 78, 80, 70, 54, 36, 58, 51, 44, 152, 136, 135, 135, 129, 115, 99, 102, 115, 107})
-	salinityydists[8], _ = statistics.Init([]float64{28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, []int64{56, 92, 87, 66, 76, 80, 57, 63, 38, 46, 50, 44, 34, 152, 145, 121, 138, 122, 115, 96, 101, 114, 107})
-	salinityydists[9], _ = statistics.Init([]float64{31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54}, []int64{35, 93, 82, 72, 67, 84, 59, 66, 42, 38, 46, 49, 39, 42, 139, 141, 116, 146, 114, 115, 95, 100, 113, 107})
-	salinityydists[10], _ = statistics.Init([]float64{35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}, []int64{36, 92, 75, 74, 63, 71, 68, 60, 47, 35, 46, 44, 42, 32, 42, 139, 134, 117, 143, 114, 113, 95, 99, 112, 107})
-	salinityydists[11], _ = statistics.Init([]float64{37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62}, []int64{17, 76, 81, 73, 62, 68, 74, 51, 58, 43, 35, 44, 43, 39, 35, 35, 141, 129, 121, 138, 112, 114, 93, 99, 112, 107})
-	salinityydists[12], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65}, []int64{56, 79, 75, 69, 59, 66, 67, 57, 52, 34, 35, 50, 38, 35, 38, 30, 144, 124, 125, 130, 114, 113, 92, 99, 112, 107})
-	salinityydists[13], _ = statistics.Init([]float64{42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68}, []int64{27, 76, 75, 69, 59, 64, 72, 55, 56, 39, 29, 48, 41, 35, 37, 41, 25, 142, 120, 124, 130, 118, 108, 92, 99, 112, 107})
-	salinityydists[14], _ = statistics.Init([]float64{44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}, []int64{49, 79, 68, 72, 57, 63, 72, 43, 60, 39, 31, 44, 42, 34, 32, 42, 24, 140, 121, 127, 127, 116, 109, 91, 99, 112, 107})
-	salinityydists[15], _ = statistics.Init([]float64{45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72}, []int64{4, 75, 79, 70, 56, 59, 63, 64, 51, 51, 41, 29, 41, 41, 37, 28, 40, 26, 139, 119, 132, 123, 116, 108, 90, 100, 111, 107})
-	salinityydists[16], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73}, []int64{25, 68, 76, 69, 59, 55, 72, 54, 54, 48, 33, 32, 43, 42, 34, 28, 38, 29, 135, 119, 132, 123, 116, 108, 90, 100, 111, 107})
-	salinityydists[17], _ = statistics.Init([]float64{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75}, []int64{37, 84, 69, 68, 57, 58, 68, 49, 56, 40, 31, 35, 48, 36, 30, 37, 30, 31, 132, 119, 134, 120, 118, 107, 88, 101, 110, 107})
-	salinityydists[18], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}, []int64{66, 80, 65, 64, 54, 59, 69, 45, 56, 34, 29, 44, 42, 33, 35, 32, 32, 30, 131, 119, 132, 119, 117, 107, 88, 101, 110, 107})
-	salinityydists[19], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, []int64{16, 66, 76, 66, 57, 56, 60, 65, 45, 55, 37, 24, 49, 37, 33, 37, 34, 27, 33, 127, 119, 132, 120, 117, 106, 88, 101, 110, 107})
-	salinityydists[20], _ = statistics.Init([]float64{51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79}, []int64{27, 68, 74, 68, 57, 50, 62, 61, 49, 50, 41, 26, 44, 37, 30, 37, 37, 22, 36, 125, 120, 130, 120, 117, 106, 88, 101, 110, 107})
+	structuresalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structuresalinityydists := make([]statistics.ContinuousDistribution, 21)
+	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	structuresalinityydists[2], _ = statistics.Init([]float64{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, []int64{903, 3461, 3229, 5151, 4727, 4549, 4207, 3841, 3594, 3278, 2979, 2666, 2387})
+	structuresalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, []int64{85, 2106, 1985, 1765, 2983, 2852, 2680, 2501, 2299, 2160, 1957, 1829, 1684, 1502})
+	structuresalinityydists[4], _ = statistics.Init([]float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, []int64{568, 1057, 1030, 903, 798, 1558, 1468, 1478, 1299, 1211, 1180, 1064, 1018, 917, 851})
+	structuresalinityydists[5], _ = statistics.Init([]float64{16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{250, 314, 278, 258, 264, 222, 209, 165, 190, 491, 449, 441, 415, 388, 389, 320, 346, 345, 316})
+	structuresalinityydists[6], _ = statistics.Init([]float64{21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41}, []int64{48, 108, 86, 78, 81, 81, 74, 53, 40, 58, 46, 152, 146, 141, 127, 140, 111, 105, 102, 116, 107})
+	structuresalinityydists[7], _ = statistics.Init([]float64{24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45}, []int64{37, 102, 96, 69, 78, 80, 70, 54, 36, 58, 51, 44, 152, 136, 135, 135, 129, 115, 99, 102, 115, 107})
+	structuresalinityydists[8], _ = statistics.Init([]float64{28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, []int64{56, 92, 87, 66, 76, 80, 57, 63, 38, 46, 50, 44, 34, 152, 145, 121, 138, 122, 115, 96, 101, 114, 107})
+	structuresalinityydists[9], _ = statistics.Init([]float64{31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54}, []int64{35, 93, 82, 72, 67, 84, 59, 66, 42, 38, 46, 49, 39, 42, 139, 141, 116, 146, 114, 115, 95, 100, 113, 107})
+	structuresalinityydists[10], _ = statistics.Init([]float64{35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}, []int64{36, 92, 75, 74, 63, 71, 68, 60, 47, 35, 46, 44, 42, 32, 42, 139, 134, 117, 143, 114, 113, 95, 99, 112, 107})
+	structuresalinityydists[11], _ = statistics.Init([]float64{37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62}, []int64{17, 76, 81, 73, 62, 68, 74, 51, 58, 43, 35, 44, 43, 39, 35, 35, 141, 129, 121, 138, 112, 114, 93, 99, 112, 107})
+	structuresalinityydists[12], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65}, []int64{56, 79, 75, 69, 59, 66, 67, 57, 52, 34, 35, 50, 38, 35, 38, 30, 144, 124, 125, 130, 114, 113, 92, 99, 112, 107})
+	structuresalinityydists[13], _ = statistics.Init([]float64{42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68}, []int64{27, 76, 75, 69, 59, 64, 72, 55, 56, 39, 29, 48, 41, 35, 37, 41, 25, 142, 120, 124, 130, 118, 108, 92, 99, 112, 107})
+	structuresalinityydists[14], _ = statistics.Init([]float64{44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}, []int64{49, 79, 68, 72, 57, 63, 72, 43, 60, 39, 31, 44, 42, 34, 32, 42, 24, 140, 121, 127, 127, 116, 109, 91, 99, 112, 107})
+	structuresalinityydists[15], _ = statistics.Init([]float64{45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72}, []int64{4, 75, 79, 70, 56, 59, 63, 64, 51, 51, 41, 29, 41, 41, 37, 28, 40, 26, 139, 119, 132, 123, 116, 108, 90, 100, 111, 107})
+	structuresalinityydists[16], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73}, []int64{25, 68, 76, 69, 59, 55, 72, 54, 54, 48, 33, 32, 43, 42, 34, 28, 38, 29, 135, 119, 132, 123, 116, 108, 90, 100, 111, 107})
+	structuresalinityydists[17], _ = statistics.Init([]float64{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75}, []int64{37, 84, 69, 68, 57, 58, 68, 49, 56, 40, 31, 35, 48, 36, 30, 37, 30, 31, 132, 119, 134, 120, 118, 107, 88, 101, 110, 107})
+	structuresalinityydists[18], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}, []int64{66, 80, 65, 64, 54, 59, 69, 45, 56, 34, 29, 44, 42, 33, 35, 32, 32, 30, 131, 119, 132, 119, 117, 107, 88, 101, 110, 107})
+	structuresalinityydists[19], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, []int64{16, 66, 76, 66, 57, 56, 60, 65, 45, 55, 37, 24, 49, 37, 33, 37, 34, 27, 33, 127, 119, 132, 120, 117, 106, 88, 101, 110, 107})
+	structuresalinityydists[20], _ = statistics.Init([]float64{51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79}, []int64{27, 68, 74, 68, 57, 50, 62, 61, 49, 50, 41, 26, 44, 37, 30, 37, 37, 22, 36, 125, 120, 130, 120, 117, 106, 88, 101, 110, 107})
 
-	var salinityStochastic = paireddata.UncertaintyPairedData{Xvals: salinityxs, Yvals: salinityydists}
+	var structuresalinityStochastic = paireddata.UncertaintyPairedData{Xvals: structuresalinityxs, Yvals: structuresalinityydists}
+
+	contentsalinityxs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentsalinityydists := make([]statistics.ContinuousDistribution, 21)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[2], _ = statistics.Init([]float64{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, []int64{903, 3461, 3229, 5151, 4727, 4549, 4207, 3841, 3594, 3278, 2979, 2666, 2387})
+	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, []int64{85, 2106, 1985, 1765, 2983, 2852, 2680, 2501, 2299, 2160, 1957, 1829, 1684, 1502})
+	contentsalinityydists[4], _ = statistics.Init([]float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, []int64{568, 1057, 1030, 903, 798, 1558, 1468, 1478, 1299, 1211, 1180, 1064, 1018, 917, 851})
+	contentsalinityydists[5], _ = statistics.Init([]float64{16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{250, 314, 278, 258, 264, 222, 209, 165, 190, 491, 449, 441, 415, 388, 389, 320, 346, 345, 316})
+	contentsalinityydists[6], _ = statistics.Init([]float64{21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41}, []int64{48, 108, 86, 78, 81, 81, 74, 53, 40, 58, 46, 152, 146, 141, 127, 140, 111, 105, 102, 116, 107})
+	contentsalinityydists[7], _ = statistics.Init([]float64{24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45}, []int64{37, 102, 96, 69, 78, 80, 70, 54, 36, 58, 51, 44, 152, 136, 135, 135, 129, 115, 99, 102, 115, 107})
+	contentsalinityydists[8], _ = statistics.Init([]float64{28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, []int64{56, 92, 87, 66, 76, 80, 57, 63, 38, 46, 50, 44, 34, 152, 145, 121, 138, 122, 115, 96, 101, 114, 107})
+	contentsalinityydists[9], _ = statistics.Init([]float64{31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54}, []int64{35, 93, 82, 72, 67, 84, 59, 66, 42, 38, 46, 49, 39, 42, 139, 141, 116, 146, 114, 115, 95, 100, 113, 107})
+	contentsalinityydists[10], _ = statistics.Init([]float64{35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}, []int64{36, 92, 75, 74, 63, 71, 68, 60, 47, 35, 46, 44, 42, 32, 42, 139, 134, 117, 143, 114, 113, 95, 99, 112, 107})
+	contentsalinityydists[11], _ = statistics.Init([]float64{37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62}, []int64{17, 76, 81, 73, 62, 68, 74, 51, 58, 43, 35, 44, 43, 39, 35, 35, 141, 129, 121, 138, 112, 114, 93, 99, 112, 107})
+	contentsalinityydists[12], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65}, []int64{56, 79, 75, 69, 59, 66, 67, 57, 52, 34, 35, 50, 38, 35, 38, 30, 144, 124, 125, 130, 114, 113, 92, 99, 112, 107})
+	contentsalinityydists[13], _ = statistics.Init([]float64{42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68}, []int64{27, 76, 75, 69, 59, 64, 72, 55, 56, 39, 29, 48, 41, 35, 37, 41, 25, 142, 120, 124, 130, 118, 108, 92, 99, 112, 107})
+	contentsalinityydists[14], _ = statistics.Init([]float64{44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}, []int64{49, 79, 68, 72, 57, 63, 72, 43, 60, 39, 31, 44, 42, 34, 32, 42, 24, 140, 121, 127, 127, 116, 109, 91, 99, 112, 107})
+	contentsalinityydists[15], _ = statistics.Init([]float64{45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72}, []int64{4, 75, 79, 70, 56, 59, 63, 64, 51, 51, 41, 29, 41, 41, 37, 28, 40, 26, 139, 119, 132, 123, 116, 108, 90, 100, 111, 107})
+	contentsalinityydists[16], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73}, []int64{25, 68, 76, 69, 59, 55, 72, 54, 54, 48, 33, 32, 43, 42, 34, 28, 38, 29, 135, 119, 132, 123, 116, 108, 90, 100, 111, 107})
+	contentsalinityydists[17], _ = statistics.Init([]float64{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75}, []int64{37, 84, 69, 68, 57, 58, 68, 49, 56, 40, 31, 35, 48, 36, 30, 37, 30, 31, 132, 119, 134, 120, 118, 107, 88, 101, 110, 107})
+	contentsalinityydists[18], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}, []int64{66, 80, 65, 64, 54, 59, 69, 45, 56, 34, 29, 44, 42, 33, 35, 32, 32, 30, 131, 119, 132, 119, 117, 107, 88, 101, 110, 107})
+	contentsalinityydists[19], _ = statistics.Init([]float64{50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, []int64{16, 66, 76, 66, 57, 56, 60, 65, 45, 55, 37, 24, 49, 37, 33, 37, 34, 27, 33, 127, 119, 132, 120, 117, 106, 88, 101, 110, 107})
+	contentsalinityydists[20], _ = statistics.Init([]float64{51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79}, []int64{27, 68, 74, 68, 57, 50, 62, 61, 49, 50, 41, 26, 44, 37, 30, 37, 37, 22, 36, 125, 120, 130, 120, 117, 106, 88, 101, 110, 107})
+
+	var contentsalinityStochastic = paireddata.UncertaintyPairedData{Xvals: contentsalinityxs, Yvals: contentsalinityydists}
 	//Depth,Salinity
-	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = salinityStochastic
-	//Content function defaults to default?
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
 
 	return OccupancyTypeStochastic{Name: "RES1-2SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
