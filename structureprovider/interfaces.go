@@ -23,6 +23,7 @@ func StructureSchema() []string {
 	return s
 }
 func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, idxs []int) (structures.StructureStochastic, error) {
+	defer f.Destroy()
 	s := structures.StructureStochastic{}
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
