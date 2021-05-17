@@ -19,6 +19,11 @@ type NoHazardFoundError struct {
 	Input string
 }
 
+//NoDataHazardError is an error for a situation where no hazard could be computed for the given args
+type NoDataHazardError struct {
+	Input string
+}
+
 //NoFrequencyFoundError is an error for a situation where no frequency could be associated for the hazard for the given args
 type NoFrequencyFoundError struct {
 	Input string
@@ -32,6 +37,10 @@ type HazardError struct {
 //Error implements the error interface for NoHazardFoundError
 func (h NoHazardFoundError) Error() string {
 	return fmt.Sprintf("No hazard Found for %s", h.Input)
+}
+//Error implements the error interface for NoDataHazardError
+func (h NoDataHazardError) Error() string {
+	return fmt.Sprintf("Location yeilded No Data for a hazard. %s", h.Input)
 }
 
 //Error implements the error interface for NoFrequencyFoundError

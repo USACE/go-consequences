@@ -44,7 +44,7 @@ func (cr *cogReader) ProvideValue(l geography.Location) (float64, error) {
 	depth := buffer[0]
 	d := float64(depth)
 	if d == cr.nodata {
-		return cr.nodata, errors.New(fmt.Sprintf("cog reader had the no data value observed, setting to %v", cr.nodata))
+		return cr.nodata, hazard.NoDataHazardError{Input: Sprintf("COG reader had the no data value observed, setting to %v", cr.nodata)}
 	}
 	return d, nil
 }
