@@ -93,3 +93,32 @@ func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 		}
 	}
 }
+func (gpk gpkDataSet) ByPolygon(poly []float64, sp consequences.StreamProcessor) {
+	gpk.processPolyStream(poly, sp)
+}
+func (gpk gpkDataSet) processPolyStream(poly []float64, sp consequences.StreamProcessor) {
+	m := structures.OccupancyTypeMap()
+	//define a default occtype in case of emergancy
+	g := gdal.Create(gdal.GT_Polygon)
+	//use anon function to dispose sooner...
+	defer g.Destroy()
+	for i := 0; i < len(poly); i += 2 {
+		g.AddPoint(poly[i], poly[i+1], 0)
+	}
+	g.AddPoint(poly[0], poly[1], 0)
+	defaultOcctype := m["RES1-1SNB"]
+	idx := 0
+	l := gpk.ds.LayerByName(gpk.LayerName)
+	l.SetSpatialFilter(g)
+	fc, _ := l.FeatureCount(true)
+	for idx < fc { // Iterate and fetch the records from result cursor
+		f := l.NextFeature()
+		idx++
+		if f != nil {
+			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+			if err == nil {
+				sp(s)
+			}
+		}
+	}
+}
