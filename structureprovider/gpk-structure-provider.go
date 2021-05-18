@@ -99,17 +99,22 @@ func (gpk gpkDataSet) ByPolygon(poly []float64, sp consequences.StreamProcessor)
 func (gpk gpkDataSet) processPolyStream(poly []float64, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
-	g := gdal.Create(gdal.GT_Polygon)
+	g := gdal.Create(gdal.GT_LinearRing)
 	//use anon function to dispose sooner...
 	defer g.Destroy()
+	index := 0
 	for i := 0; i < len(poly); i += 2 {
 		g.AddPoint(poly[i], poly[i+1], 0)
+		index++
 	}
 	g.AddPoint(poly[0], poly[1], 0)
+	g2 := gdal.Create(gdal.GT_Polygon)
+	defer g2.Destroy()
+	g2.AddGeometry(g)
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
 	l := gpk.ds.LayerByName(gpk.LayerName)
-	l.SetSpatialFilter(g)
+	l.SetSpatialFilter(g2)
 	fc, _ := l.FeatureCount(true)
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
