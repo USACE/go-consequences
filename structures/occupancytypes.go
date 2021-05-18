@@ -40,11 +40,82 @@ type OccupancyTypeDeterministic struct {
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
-	result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
-	if ok {
-		return result
+	if h.HasWaveHeight() { // need HasWaveHeight() function and should include condition for returning wave height less than 1
+		if h.WaveHeight() < 3 {
+			if o.Name == "RES1-1SNB-PIER" {
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{2, 2, 3, 4, 14, 32, 42, 48, 56, 61, 68, 72, 77, 81, 84, 86, 89, 91, 94, 96, 97}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+
+			} else if o.Name == "RES1-2SNB" {
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{0, 1, 1, 6, 16, 30, 41, 50, 59, 65, 69, 72, 76, 80, 82, 85, 87, 89, 91, 92, 94}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-2SNB-PIER" {
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{0, 0, 0, 1, 10, 23, 33, 41, 50, 57, 61, 65, 69, 72, 75, 77, 80, 82, 84, 85, 87}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-1SWB" {
+				//THIS DAMAGE FUNCTION - probably stochastic
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-2SWB" {
+				//THIS DAMAGE FUNCTION - probably stochastic
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else { // RES1-1SNB is default.
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{3, 4, 5, 8, 22, 37, 46, 53, 60, 66, 72, 77, 81, 85, 87, 90, 92, 95, 97, 99, 100}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			}
+		} else {
+			if o.Name == "RES1-1SNB-PIER" {
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{5, 8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-2SNB" {
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-2SNB-PIER" {
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{0, 0, 2, 2, 13, 27, 43, 60, 76, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-1SWB" { // not done and probably stochastic
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else if o.Name == "RES1-2SWB" { //not done and probably stochastic
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			} else { // RES1-1SNB is default.
+				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+				structurewaveys := []float64{8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100, 100}
+				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				return structurewaves
+			}
+		}
+	} else {
+		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.StructureDFF.DamageFunctions[hazards.Default]
 	}
-	return o.StructureDFF.DamageFunctions[hazards.Default]
 }
 
 //GetContentDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
