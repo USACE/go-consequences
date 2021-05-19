@@ -61,13 +61,56 @@ func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazard
 			} else if o.Name == "RES1-1SWB" {
 				//THIS DAMAGE FUNCTION - probably stochastic
 				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-				structurewaveys := []float64{}
-				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+				structurewaveys := make([]statistics.ContinuousDistribution, 21)
+				structurewaveys[0], _ = statistics.InitDeterministic(8.0)
+				structurewaveys[1], _ = statistics.InitDeterministic(9.0)
+				structurewaveys[2], _ = statistics.Init([]float64{8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, []int64{857, 1676, 1408, 1217, 1020, 2555, 2407, 2158, 1938, 1772})
+				structurewaveys[3], _ = statistics.Init([]float64{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, []int64{48, 194, 159, 155, 93, 104, 298, 268, 251, 207, 223})
+				structurewaveys[4], _ = statistics.Init([]float64{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}, []int64{11, 158, 129, 135, 112, 76, 86, 74, 65, 264, 254, 226, 191, 219})
+				structurewaveys[5], _ = statistics.Init([]float64{33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48}, []int64{85, 126, 108, 114, 88, 80, 62, 70, 54, 59, 47, 257, 233, 216, 185, 216})
+				structurewaveys[6], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57}, []int64{8, 119, 113, 92, 108, 78, 74, 55, 67, 56, 57, 49, 26, 255, 232, 211, 184, 216})
+				structurewaveys[7], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}, []int64{8, 113, 111, 85, 90, 93, 73, 48, 62, 59, 47, 51, 47, 32, 243, 231, 207, 184, 216})
+				structurewaveys[8], _ = statistics.Init([]float64{53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71}, []int64{107, 101, 91, 89, 84, 81, 57, 42, 64, 48, 55, 37, 39, 34, 237, 231, 203, 184, 216})
+				structurewaveys[9], _ = statistics.Init([]float64{59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, []int64{93, 98, 89, 79, 97, 62, 68, 38, 62, 53, 46, 47, 44, 25, 41, 227, 229, 202, 185, 215})
+				structurewaveys[10], _ = statistics.Init([]float64{64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84}, []int64{60, 108, 85, 74, 82, 79, 71, 51, 42, 57, 48, 45, 39, 42, 21, 39, 232, 225, 200, 185, 215})
+				structurewaveys[11], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+				structurewaveys[12], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+				structurewaveys[13], _ = statistics.Init([]float64{74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96}, []int64{6, 92, 88, 82, 70, 86, 65, 69, 49, 38, 54, 43, 42, 43, 37, 30, 30, 23, 235, 221, 199, 183, 215})
+				structurewaveys[14], _ = statistics.Init([]float64{75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97}, []int64{24, 83, 86, 82, 69, 89, 65, 61, 51, 37, 53, 43, 42, 44, 36, 30, 29, 24, 234, 221, 199, 183, 215})
+				structurewaveys[15], _ = statistics.Init([]float64{77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{34, 94, 83, 78, 70, 85, 58, 68, 43, 39, 55, 43, 37, 45, 38, 26, 29, 26, 231, 221, 199, 183, 215})
+				structurewaveys[16], _ = statistics.Init([]float64{80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{104, 95, 89, 82, 90, 71, 59, 43, 56, 52, 44, 48, 44, 24, 41, 16, 284, 264, 233, 261})
+				structurewaveys[17], _ = statistics.Init([]float64{82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{35, 129, 97, 92, 107, 79, 69, 51, 64, 56, 51, 50, 25, 41, 27, 357, 326, 344})
+				structurewaveys[18], _ = statistics.Init([]float64{85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{27, 142, 125, 112, 110, 91, 70, 67, 74, 58, 34, 44, 30, 528, 488})
+				structurewaveys[19], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[20], _ = statistics.Init([]float64{90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{199, 171, 161, 102, 108, 92, 68, 57, 32, 1010})
+				// uncertainty paired data var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
 				return structurewaves
 			} else if o.Name == "RES1-2SWB" {
 				//THIS DAMAGE FUNCTION - probably stochastic
 				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-				structurewaveys := []float64{}
+				structurewaveys := make([]statistics.ContinuousDistribution, 21)
+				structurewaveys[0], _ = statistics.InitDeterministic()
+				structurewaveys[1], _ = statistics.InitDeterministic()
+				structurewaveys[2], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[3], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[4], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[5], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[6], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[7], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[8], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[9], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[10], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[11], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[12], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[13], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[14], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[15], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[16], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[17], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[18], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[19], _ = statistics.Init([]float64{}, []int64{})
+				structurewaveys[20], _ = statistics.Init([]float64{}, []int64{})
+
 				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
 				return structurewaves
 			} else { // RES1-1SNB is default.
@@ -94,12 +137,12 @@ func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazard
 				return structurewaves
 			} else if o.Name == "RES1-1SWB" { // not done and probably stochastic
 				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-				structurewaveys := []float64{}
+				structurewaveys := []float64{16, 18, 20, 25, 43, 55, 63, 71, 78, 87, 91, 97, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
 				return structurewaves
 			} else if o.Name == "RES1-2SWB" { //not done and probably stochastic
 				structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-				structurewaveys := []float64{}
+				structurewaveys := []float64{12, 14, 16, 21, 35, 51, 68, 84, 98, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
 				var structurewaves = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
 				return structurewaves
 			} else { // RES1-1SNB is default.
