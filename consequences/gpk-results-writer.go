@@ -65,8 +65,9 @@ func (srw *gpkResultsWriter) Write(r Result) {
 			}()
 		}
 		srw.FieldsCreated = true
+		srw.Layer.StartTransaction()
 	}
-	srw.Layer.StartTransaction()
+
 	//add a feature to a layer?
 	layerDef := srw.Layer.Definition()
 	//if header has been built, add the feature, and the attributes.
@@ -137,16 +138,23 @@ func (srw *gpkResultsWriter) Write(r Result) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	err2 := srw.Layer.CommitTransaction()
-	if err2 != nil {
-		fmt.Println(err2)
+	if srw.index%100000 == 0 {
+		err2 := srw.Layer.CommitTransaction()
+		if err2 != nil {
+			fmt.Println(err2)
+		}
+		srw.Layer.StartTransaction()
 	}
+
 	srw.index++ //incriment.
 	//feature.Destroy() //testing an explicit call.//causes seg fault error, probably not calling causes a memory leak... oy vey.
 }
 func (srw *gpkResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
+	err2 := srw.Layer.CommitTransaction()
+	if err2 != nil {
+		fmt.Println(err2)
+	}
 	fmt.Println(fmt.Sprintf("Closing, wrote %v features", srw.index))
 	srw.ds.Destroy()
 }
