@@ -66,6 +66,7 @@ func (srw *gpkResultsWriter) Write(r Result) {
 		}
 		srw.FieldsCreated = true
 	}
+	srw.Layer.StartTransaction()
 	//add a feature to a layer?
 	layerDef := srw.Layer.Definition()
 	//if header has been built, add the feature, and the attributes.
@@ -136,6 +137,7 @@ func (srw *gpkResultsWriter) Write(r Result) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	err2 := srw.Layer.CommitTransaction()
 	if err2 != nil {
 		fmt.Println(err2)
