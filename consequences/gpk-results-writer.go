@@ -72,7 +72,7 @@ func (srw *gpkResultsWriter) Write(r Result) {
 	//if header has been built, add the feature, and the attributes.
 
 	feature := layerDef.Create()
-	defer feature.Destroy()
+	//defer feature.Destroy()
 	feature.SetFieldInteger(0, srw.index)
 	//create a point geometry - not sure the best way to do that.
 	x := 0.0
@@ -142,7 +142,8 @@ func (srw *gpkResultsWriter) Write(r Result) {
 	if err2 != nil {
 		fmt.Println(err2)
 	}
-	srw.index++ //incriment.
+	srw.index++       //incriment.
+	feature.Destroy() //testing an explicit call.
 }
 func (srw *gpkResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
