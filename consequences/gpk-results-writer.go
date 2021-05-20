@@ -142,8 +142,8 @@ func (srw *gpkResultsWriter) Write(r Result) {
 	if err2 != nil {
 		fmt.Println(err2)
 	}
-	srw.index++       //incriment.
-	feature.Destroy() //testing an explicit call.
+	srw.index++ //incriment.
+	//feature.Destroy() //testing an explicit call.//causes seg fault error, probably not calling causes a memory leak... oy vey.
 }
 func (srw *gpkResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
