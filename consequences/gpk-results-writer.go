@@ -131,7 +131,7 @@ func (srw *gpkResultsWriter) Write(r Result) {
 
 	}
 	g.SetPoint(0, x, y, 0)
-	feature.SetGeometry(g)
+	feature.SetGeometryDirectly(g)
 	err := srw.Layer.Create(feature)
 	if err != nil {
 		fmt.Println(err)
