@@ -10,10 +10,11 @@ import (
 )
 
 type gpkDataSet struct {
-	FilePath  string
-	LayerName string
-	schemaIDX []int
-	ds        *gdal.DataSource
+	FilePath      string
+	LayerName     string
+	schemaIDX     []int
+	ds            *gdal.DataSource
+	deterministic bool
 }
 
 func InitGPK(filepath string, layername string) gpkDataSet {
@@ -41,9 +42,15 @@ func InitGPK(filepath string, layername string) gpkDataSet {
 	}
 	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, ds: &ds}
 }
+func (gpk *gpkDataSet) SetDeterministic(useDeterministic bool) {
+	gpk.deterministic = useDeterministic
+}
 
 //StreamByFips a streaming service for structure stochastic based on a bounding box
 func (gpk gpkDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
+	if gpk.deterministic {
+		gpk.processFipsStreamDeterministic(fipscode, sp)
+	}
 	gpk.processFipsStream(fipscode, sp)
 }
 func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
@@ -71,7 +78,36 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 		}
 	}
 }
+func (gpk gpkDataSet) processFipsStreamDeterministic(fipscode string, sp consequences.StreamProcessor) {
+	m := structures.OccupancyTypeMap()
+	m2 := swapOcctypeMap(m)
+	//define a default occtype in case of emergancy
+	defaultOcctype := m2["RES1-1SNB"]
+	idx := 0
+	l := gpk.ds.LayerByName(gpk.LayerName)
+	fc, _ := l.FeatureCount(true)
+	for idx < fc { // Iterate and fetch the records from result cursor
+		f := l.NextFeature()
+		idx++
+		if f != nil {
+			cbfips := f.FieldAsString(gpk.schemaIDX[1])
+			//check if CBID matches from the start of the string
+			if len(fipscode) <= len(cbfips) {
+				comp := cbfips[0:len(fipscode)]
+				if comp == fipscode {
+					s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX)
+					if err == nil {
+						sp(s)
+					}
+				} //else no match, do not send structure.
+			} //else error?
+		}
+	}
+}
 func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
+	if gpk.deterministic {
+		gpk.processBboxStreamDeterministic(bbox, sp)
+	}
 	gpk.processBboxStream(bbox, sp)
 }
 func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
@@ -93,34 +129,21 @@ func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 		}
 	}
 }
-func (gpk gpkDataSet) ByPolygon(poly []float64, sp consequences.StreamProcessor) {
-	gpk.processPolyStream(poly, sp)
-}
-func (gpk gpkDataSet) processPolyStream(poly []float64, sp consequences.StreamProcessor) {
+
+func (gpk gpkDataSet) processBboxStreamDeterministic(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
+	m2 := swapOcctypeMap(m)
 	//define a default occtype in case of emergancy
-	g := gdal.Create(gdal.GT_LinearRing)
-	//use anon function to dispose sooner...
-	defer g.Destroy()
-	index := 0
-	for i := 0; i < len(poly); i += 2 {
-		g.AddPoint(poly[i], poly[i+1], 0)
-		index++
-	}
-	g.AddPoint(poly[0], poly[1], 0)
-	g2 := gdal.Create(gdal.GT_Polygon)
-	defer g2.Destroy()
-	g2.AddGeometry(g)
-	defaultOcctype := m["RES1-1SNB"]
+	defaultOcctype := m2["RES1-1SNB"]
 	idx := 0
 	l := gpk.ds.LayerByName(gpk.LayerName)
-	l.SetSpatialFilter(g2)
+	l.SetSpatialFilterRect(bbox.Bbox[0], bbox.Bbox[3], bbox.Bbox[2], bbox.Bbox[1])
 	fc, _ := l.FeatureCount(true)
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX)
 			if err == nil {
 				sp(s)
 			}
