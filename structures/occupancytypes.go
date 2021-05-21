@@ -109,11 +109,13 @@ func (o OccupancyTypeStochastic) CentralTendency() OccupancyTypeDeterministic {
 	sm := make(map[hazards.Parameter]paireddata.ValueSampler)
 	var sdf = DamageFunctionFamily{DamageFunctions: sm}
 	for k, v := range o.StructureDFF.DamageFunctions {
+		//fmt.Println("Structure " + hazards.Parameter.String(k))
 		sdf.DamageFunctions[k] = centralTendencyPairedDataValueSampler(v)
 	}
 	cm := make(map[hazards.Parameter]paireddata.ValueSampler)
 	var cdf = DamageFunctionFamily{DamageFunctions: cm}
 	for k, v := range o.ContentDFF.DamageFunctions {
+		//fmt.Println("Content " + hazards.Parameter.String(k))
 		cdf.DamageFunctions[k] = centralTendencyPairedDataValueSampler(v)
 	}
 	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
@@ -446,8 +448,8 @@ func com1() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -499,8 +501,8 @@ func com2() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -551,8 +553,8 @@ func com3() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -603,8 +605,8 @@ func com4() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -655,8 +657,8 @@ func com5() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -707,8 +709,8 @@ func com6() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -759,8 +761,8 @@ func com7() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -811,8 +813,8 @@ func com8() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -863,8 +865,8 @@ func com9() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})
@@ -915,8 +917,8 @@ func com10() OccupancyTypeStochastic {
 
 	contentsalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
 	contentsalinityydists := make([]statistics.ContinuousDistribution, 10)
-	structuresalinityydists[0], _ = statistics.InitDeterministic(0.0)
-	structuresalinityydists[1], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[0], _ = statistics.InitDeterministic(0.0)
+	contentsalinityydists[1], _ = statistics.InitDeterministic(0.0)
 	contentsalinityydists[2], _ = statistics.Init([]float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int64{250846, 523969, 523033, 481164, 496674, 219830, 146134, 71728, 25676, 8546})
 	contentsalinityydists[3], _ = statistics.Init([]float64{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34}, []int64{357, 1271, 2468, 4055, 5381, 6314, 6594, 6934, 7341, 7813, 7939, 8463, 8554, 6043, 3978, 3671, 3388, 2989, 2754, 2386, 2108, 1764, 1437, 1060, 804, 590, 482, 400, 315, 209, 151, 35})
 	contentsalinityydists[4], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}, []int64{187, 579, 919, 1430, 2080, 2293, 2355, 2305, 2454, 2549, 2565, 2762, 2789, 2992, 3052, 3287, 3253, 3443, 3548, 3700, 2270, 1608, 1666, 1725, 1784, 1809, 1822, 1799, 1838, 1707, 1591, 1447, 1339, 1271, 1143, 985, 917, 768, 656, 546, 407, 333, 203, 111, 102, 57, 14})

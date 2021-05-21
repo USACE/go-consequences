@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/USACE/go-consequences/hazards"
@@ -59,5 +60,14 @@ func TestDamageFunctionFamily(t *testing.T) {
 	c2v := df.DamageFunctions[ce2.Parameters()].SampleValue(ce2.Depth)
 	if c2v != 6 {
 		t.Errorf("Expected 6")
+	}
+}
+func Test_occupancyCentralTendency(t *testing.T) {
+	//a map of occupancy types
+	m := OccupancyTypeMap()
+	for name, ot := range m {
+		fmt.Println("reading " + name)
+		m2 := ot.CentralTendency()
+		fmt.Println("computed " + m2.Name)
 	}
 }
