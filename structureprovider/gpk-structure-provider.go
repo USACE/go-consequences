@@ -50,8 +50,10 @@ func (gpk *gpkDataSet) SetDeterministic(useDeterministic bool) {
 func (gpk gpkDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	if gpk.deterministic {
 		gpk.processFipsStreamDeterministic(fipscode, sp)
+	} else {
+		gpk.processFipsStream(fipscode, sp)
 	}
-	gpk.processFipsStream(fipscode, sp)
+
 }
 func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
@@ -107,8 +109,10 @@ func (gpk gpkDataSet) processFipsStreamDeterministic(fipscode string, sp consequ
 func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
 	if gpk.deterministic {
 		gpk.processBboxStreamDeterministic(bbox, sp)
+	} else {
+		gpk.processBboxStream(bbox, sp)
 	}
-	gpk.processBboxStream(bbox, sp)
+
 }
 func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := structures.OccupancyTypeMap()
