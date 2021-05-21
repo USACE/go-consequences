@@ -32,6 +32,15 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	if idxs[9] > 0 {
 		if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
 			occtype = otf
+		} else {
+			if ot, ok := m[OccTypeName]; ok {
+				occtype = ot
+			} else {
+				occtype = defaultOcctype
+				msg := "Using default " + OccTypeName + " not found"
+				fmt.Println(msg)
+				//return s, errors.New(msg)
+			}
 		}
 	} else {
 		if ot, ok := m[OccTypeName]; ok {
