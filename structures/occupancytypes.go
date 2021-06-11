@@ -40,20 +40,104 @@ type OccupancyTypeDeterministic struct {
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
-	result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
-	if ok {
-		return result
+	if h.Has(hazards.WaveHeight) { // include condition for returning function for wave height less than 1 or an exception?
+		if h.WaveHeight() < 3 {
+			return o.GetStructureDamageFunctionForMedWave()
+		} else {
+			return o.GetStructureDamageFunctionForHighWave()
+		}
+	} else {
+		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.StructureDFF.DamageFunctions[hazards.Default]
 	}
-	return o.StructureDFF.DamageFunctions[hazards.Default]
+}
+
+//GetStructureDamageForMedWave gets the medium wave (less than 3ft) structure damage function for a given occupancy type
+func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForMedWave() paireddata.ValueSampler {
+	if o.Name == "RES1-1SNB-PIER" {
+		return res11snbPierMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB" {
+		return res12snbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB-PIER" {
+		return res12snbPierMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-1SWB" {
+		return res11swbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SWB" {
+		return res12swbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else {
+		return res11snbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	}
+}
+
+//GetStructureDamageForHighWave gets the high wave (greater than or equal to 3ft) structure damage function for a given occupancy type
+func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHighWave() paireddata.ValueSampler {
+	if o.Name == "RES1-1SNB-PIER" {
+		return res11snbPierHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB" {
+		return res12snbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB-PIER" {
+		return res12snbPierHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-1SWB" {
+		return res11swbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SWB" {
+		return res12swbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	} else {
+		return res11snbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+	}
 }
 
 //GetContentDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
-	result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
-	if ok {
-		return result
+	if h.Has(hazards.WaveHeight) { // include condition for returning function for wave height less than 1 or an exception?
+		if h.WaveHeight() < 3 {
+			return o.GetContentDamageFunctionForMedWave()
+		} else {
+			return o.GetContentDamageFunctionForHighWave()
+		}
+	} else {
+		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.ContentDFF.DamageFunctions[hazards.Default]
 	}
-	return o.ContentDFF.DamageFunctions[hazards.Default]
+}
+
+//GetContentDamageForMedWave gets the medium wave (less than 3ft) content damage function for a given occupancy type
+func (o OccupancyTypeDeterministic) GetContentDamageFunctionForMedWave() paireddata.ValueSampler {
+	if o.Name == "RES1-1SNB-PIER" {
+		return res11snbPierMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB" {
+		return res12snbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB-PIER" {
+		return res12snbPierMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-1SWB" {
+		return res11swbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SWB" {
+		return res12swbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else {
+		return res11snbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	}
+}
+
+//GetContentDamageForHighWave gets the high wave (greater than or equal to 3ft) content damage function for a given occupancy type
+func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHighWave() paireddata.ValueSampler {
+	if o.Name == "RES1-1SNB-PIER" {
+		return res11snbPierHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB" {
+		return res12snbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SNB-PIER" {
+		return res12snbPierHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-1SWB" {
+		return res11swbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else if o.Name == "RES1-2SWB" {
+		return res12swbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	} else {
+		return res11snbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+	}
 }
 
 //UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
@@ -147,11 +231,23 @@ func OccupancyTypeMap() map[string]OccupancyTypeStochastic {
 	m["IND6"] = ind6()
 	m["REL1"] = rel1()
 	m["RES1-1SNB"] = res11snb()
+	m["RES1-1SNB_MEDWAVE"] = res11snbMedwave()
+	m["RES1-1SNB_HIGHWAVE"] = res11snbHighwave()
 	m["RES1-1SNB-PIER"] = res11snbPier()
+	m["RES1-1SNB-PIER_MEDWAVE"] = res11snbPierMedwave()
+	m["RES1-1SNB-PIER_HIGHWAVE"] = res11snbPierHighwave()
 	m["RES1-1SWB"] = res11swb()
+	m["RES1-1SWB_MEDWAVE"] = res11swbMedwave()
+	m["RES1-1SNB_HIGHWAVE"] = res11swbHighwave()
 	m["RES1-2SNB"] = res12snb()
+	m["RES1-2SNB_MEDWAVE"] = res12snbMedwave()
+	m["RES1-2SNB_HIGHWAVE"] = res12snbHighwave()
 	m["RES1-2SNB-PIER"] = res12snbPier()
+	m["RES1-2SNB-PIER_MEDWAVE"] = res12snbPierMedwave()
+	m["RES1-2SNB-PIER_HIGHWAVE"] = res12snbPierHighwave()
 	m["RES1-2SWB"] = res12swb()
+	m["RES1-2SWB_MEDWAVE"] = res12swbMedwave()
+	m["RES1-2SNB_HIGHWAVE"] = res12swbHighwave()
 	m["RES1-3SNB"] = res13snb()
 	m["RES1-3SWB"] = res13swb()
 	m["RES1-SLNB"] = res1slnb()
@@ -242,6 +338,56 @@ func res11snb() OccupancyTypeStochastic {
 	return OccupancyTypeStochastic{Name: "RES1-1SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
+func res11snbMedwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{3, 4, 5, 8, 22, 37, 46, 53, 60, 66, 72, 77, 81, 85, 87, 90, 92, 95, 97, 99, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{3, 4, 5, 8, 22, 37, 46, 53, 60, 66, 72, 77, 81, 85, 87, 90, 92, 95, 97, 99, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res11snbHighwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
 func res11snbPier() OccupancyTypeStochastic {
 
 	structurexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
@@ -267,6 +413,56 @@ func res11snbPier() OccupancyTypeStochastic {
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentdamagefunction
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res11snbPierMedwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{2, 2, 3, 4, 14, 32, 42, 48, 56, 61, 68, 72, 77, 81, 84, 86, 89, 91, 94, 96, 97}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{2, 2, 3, 4, 14, 32, 42, 48, 56, 61, 68, 72, 77, 81, 84, 86, 89, 91, 94, 96, 97}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res11snbPierHighwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{5, 8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{5, 8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res11swb() OccupancyTypeStochastic {
@@ -392,6 +588,99 @@ func res11swb() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES1-1SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
+
+func res11swbMedwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := make([]statistics.ContinuousDistribution, 21)
+	structurewaveys[0], _ = statistics.InitDeterministic(8.0)
+	structurewaveys[1], _ = statistics.InitDeterministic(9.0)
+	structurewaveys[2], _ = statistics.Init([]float64{8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, []int64{857, 1676, 1408, 1217, 1020, 2555, 2407, 2158, 1938, 1772})
+	structurewaveys[3], _ = statistics.Init([]float64{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, []int64{48, 194, 159, 155, 93, 104, 298, 268, 251, 207, 223})
+	structurewaveys[4], _ = statistics.Init([]float64{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}, []int64{11, 158, 129, 135, 112, 76, 86, 74, 65, 264, 254, 226, 191, 219})
+	structurewaveys[5], _ = statistics.Init([]float64{33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48}, []int64{85, 126, 108, 114, 88, 80, 62, 70, 54, 59, 47, 257, 233, 216, 185, 216})
+	structurewaveys[6], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57}, []int64{8, 119, 113, 92, 108, 78, 74, 55, 67, 56, 57, 49, 26, 255, 232, 211, 184, 216})
+	structurewaveys[7], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}, []int64{8, 113, 111, 85, 90, 93, 73, 48, 62, 59, 47, 51, 47, 32, 243, 231, 207, 184, 216})
+	structurewaveys[8], _ = statistics.Init([]float64{53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71}, []int64{107, 101, 91, 89, 84, 81, 57, 42, 64, 48, 55, 37, 39, 34, 237, 231, 203, 184, 216})
+	structurewaveys[9], _ = statistics.Init([]float64{59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, []int64{93, 98, 89, 79, 97, 62, 68, 38, 62, 53, 46, 47, 44, 25, 41, 227, 229, 202, 185, 215})
+	structurewaveys[10], _ = statistics.Init([]float64{64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84}, []int64{60, 108, 85, 74, 82, 79, 71, 51, 42, 57, 48, 45, 39, 42, 21, 39, 232, 225, 200, 185, 215})
+	structurewaveys[11], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+	structurewaveys[12], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+	structurewaveys[13], _ = statistics.Init([]float64{74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96}, []int64{6, 92, 88, 82, 70, 86, 65, 69, 49, 38, 54, 43, 42, 43, 37, 30, 30, 23, 235, 221, 199, 183, 215})
+	structurewaveys[14], _ = statistics.Init([]float64{75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97}, []int64{24, 83, 86, 82, 69, 89, 65, 61, 51, 37, 53, 43, 42, 44, 36, 30, 29, 24, 234, 221, 199, 183, 215})
+	structurewaveys[15], _ = statistics.Init([]float64{77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{34, 94, 83, 78, 70, 85, 58, 68, 43, 39, 55, 43, 37, 45, 38, 26, 29, 26, 231, 221, 199, 183, 215})
+	structurewaveys[16], _ = statistics.Init([]float64{80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{104, 95, 89, 82, 90, 71, 59, 43, 56, 52, 44, 48, 44, 24, 41, 16, 284, 264, 233, 261})
+	structurewaveys[17], _ = statistics.Init([]float64{82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{35, 129, 97, 92, 107, 79, 69, 51, 64, 56, 51, 50, 25, 41, 27, 357, 326, 344})
+	structurewaveys[18], _ = statistics.Init([]float64{85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{27, 142, 125, 112, 110, 91, 70, 67, 74, 58, 34, 44, 30, 528, 488})
+	structurewaveys[19], _ = statistics.Init([]float64{90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{199, 171, 161, 102, 108, 92, 68, 57, 32, 1010})
+	structurewaveys[20], _ = statistics.InitDeterministic(100.0)
+	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := make([]statistics.ContinuousDistribution, 21)
+	contentwaveys[0], _ = statistics.InitDeterministic(8.0)
+	contentwaveys[1], _ = statistics.InitDeterministic(9.0)
+	contentwaveys[2], _ = statistics.Init([]float64{8, 9, 10, 11, 12, 13, 14, 15, 16, 17}, []int64{857, 1676, 1408, 1217, 1020, 2555, 2407, 2158, 1938, 1772})
+	contentwaveys[3], _ = statistics.Init([]float64{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, []int64{48, 194, 159, 155, 93, 104, 298, 268, 251, 207, 223})
+	contentwaveys[4], _ = statistics.Init([]float64{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}, []int64{11, 158, 129, 135, 112, 76, 86, 74, 65, 264, 254, 226, 191, 219})
+	contentwaveys[5], _ = statistics.Init([]float64{33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48}, []int64{85, 126, 108, 114, 88, 80, 62, 70, 54, 59, 47, 257, 233, 216, 185, 216})
+	contentwaveys[6], _ = statistics.Init([]float64{40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57}, []int64{8, 119, 113, 92, 108, 78, 74, 55, 67, 56, 57, 49, 26, 255, 232, 211, 184, 216})
+	contentwaveys[7], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}, []int64{8, 113, 111, 85, 90, 93, 73, 48, 62, 59, 47, 51, 47, 32, 243, 231, 207, 184, 216})
+	contentwaveys[8], _ = statistics.Init([]float64{53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71}, []int64{107, 101, 91, 89, 84, 81, 57, 42, 64, 48, 55, 37, 39, 34, 237, 231, 203, 184, 216})
+	contentwaveys[9], _ = statistics.Init([]float64{59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78}, []int64{93, 98, 89, 79, 97, 62, 68, 38, 62, 53, 46, 47, 44, 25, 41, 227, 229, 202, 185, 215})
+	contentwaveys[10], _ = statistics.Init([]float64{64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84}, []int64{60, 108, 85, 74, 82, 79, 71, 51, 42, 57, 48, 45, 39, 42, 21, 39, 232, 225, 200, 185, 215})
+	contentwaveys[11], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+	contentwaveys[12], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+	contentwaveys[13], _ = statistics.Init([]float64{74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96}, []int64{6, 92, 88, 82, 70, 86, 65, 69, 49, 38, 54, 43, 42, 43, 37, 30, 30, 23, 235, 221, 199, 183, 215})
+	contentwaveys[14], _ = statistics.Init([]float64{75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97}, []int64{24, 83, 86, 82, 69, 89, 65, 61, 51, 37, 53, 43, 42, 44, 36, 30, 29, 24, 234, 221, 199, 183, 215})
+	contentwaveys[15], _ = statistics.Init([]float64{77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{34, 94, 83, 78, 70, 85, 58, 68, 43, 39, 55, 43, 37, 45, 38, 26, 29, 26, 231, 221, 199, 183, 215})
+	contentwaveys[16], _ = statistics.Init([]float64{80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{104, 95, 89, 82, 90, 71, 59, 43, 56, 52, 44, 48, 44, 24, 41, 16, 284, 264, 233, 261})
+	contentwaveys[17], _ = statistics.Init([]float64{82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{35, 129, 97, 92, 107, 79, 69, 51, 64, 56, 51, 50, 25, 41, 27, 357, 326, 344})
+	contentwaveys[18], _ = statistics.Init([]float64{85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{27, 142, 125, 112, 110, 91, 70, 67, 74, 58, 34, 44, 30, 528, 488})
+	contentwaveys[19], _ = statistics.Init([]float64{90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{199, 171, 161, 102, 108, 92, 68, 57, 32, 1010})
+	contentwaveys[20], _ = statistics.InitDeterministic(100.0)
+	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunctionStochastic
+
+	return OccupancyTypeStochastic{Name: "RES1-1SWB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res11swbHighwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{16, 18, 20, 25, 43, 55, 63, 71, 78, 87, 91, 97, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{16, 18, 20, 25, 43, 55, 63, 71, 78, 87, 91, 97, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-1SWB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
 func agr1() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
 	structureys := []float64{0, 0, 0, 0, 0, 6, 11, 15, 19, 25, 30, 35, 41, 46, 51, 57, 63, 70, 75, 79, 82, 84, 87, 89, 90, 92, 93, 95, 96}
@@ -1236,6 +1525,56 @@ func res12snb() OccupancyTypeStochastic {
 	return OccupancyTypeStochastic{Name: "RES1-2SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
+func res12snbMedwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{0, 1, 1, 6, 16, 30, 41, 50, 59, 65, 69, 72, 76, 80, 82, 85, 87, 89, 91, 92, 94}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{0, 1, 1, 6, 16, 30, 41, 50, 59, 65, 69, 72, 76, 80, 82, 85, 87, 89, 91, 92, 94}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-2SNB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res12snbHighwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-2SNB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
 func res12snbPier() OccupancyTypeStochastic {
 	structurexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structureys := []float64{0, 0, 0, 0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67}
@@ -1260,6 +1599,57 @@ func res12snbPier() OccupancyTypeStochastic {
 	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
 
 }
+
+func res12snbPierMedwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{0, 0, 0, 1, 10, 23, 33, 41, 50, 57, 61, 65, 69, 72, 75, 77, 80, 82, 84, 85, 87}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{0, 0, 0, 1, 10, 23, 33, 41, 50, 57, 61, 65, 69, 72, 75, 77, 80, 82, 84, 85, 87}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res12snbPierHighwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{0, 0, 2, 2, 13, 27, 43, 60, 76, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{0, 0, 2, 2, 13, 27, 43, 60, 76, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
 func res12swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	structureydists := make([]statistics.ContinuousDistribution, 25)
@@ -1386,6 +1776,99 @@ func res12swb() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES1-2SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
+
+func res12swbMedwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := make([]statistics.ContinuousDistribution, 21)
+	structurewaveys[0], _ = statistics.InitDeterministic(6.0)
+	structurewaveys[1], _ = statistics.InitDeterministic(7.0)
+	structurewaveys[2], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15}, []int64{785, 705, 609, 467, 1188, 1104, 996, 834, 828})
+	structurewaveys[3], _ = statistics.Init([]float64{9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, []int64{587, 662, 575, 499, 398, 1129, 1041, 941, 807, 821})
+	structurewaveys[4], _ = statistics.Init([]float64{16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27}, []int64{148, 149, 147, 118, 82, 92, 83, 276, 262, 229, 194, 220})
+	structurewaveys[5], _ = statistics.Init([]float64{28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42}, []int64{93, 142, 102, 123, 98, 63, 77, 66, 63, 56, 252, 240, 221, 187, 217})
+	structurewaveys[6], _ = statistics.Init([]float64{38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54}, []int64{72, 121, 104, 100, 99, 81, 49, 74, 60, 59, 46, 36, 254, 233, 212, 184, 216})
+	structurewaveys[7], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}, []int64{8, 113, 111, 85, 90, 93, 73, 48, 62, 59, 47, 51, 47, 32, 243, 231, 207, 184, 216})
+	structurewaveys[8], _ = statistics.Init([]float64{55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74}, []int64{35, 113, 95, 82, 92, 81, 71, 46, 59, 55, 47, 51, 38, 33, 38, 232, 229, 203, 184, 216})
+	structurewaveys[9], _ = statistics.Init([]float64{61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81}, []int64{30, 98, 98, 78, 84, 82, 71, 55, 46, 58, 46, 43, 49, 42, 22, 40, 229, 228, 201, 185, 215})
+	structurewaveys[10], _ = statistics.Init([]float64{63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83}, []int64{48, 108, 86, 78, 81, 81, 74, 53, 40, 58, 46, 45, 42, 43, 19, 41, 228, 229, 200, 185, 215})
+	structurewaveys[11], _ = statistics.Init([]float64{65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85}, []int64{74, 100, 87, 75, 91, 70, 66, 50, 41, 59, 47, 46, 38, 40, 21, 39, 233, 224, 199, 185, 215})
+	structurewaveys[12], _ = statistics.Init([]float64{66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86}, []int64{84, 99, 85, 74, 91, 69, 67, 44, 50, 53, 45, 45, 40, 39, 20, 41, 231, 224, 199, 185, 215})
+	structurewaveys[13], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+	structurewaveys[14], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+	structurewaveys[15], _ = statistics.Init([]float64{68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89}, []int64{27, 94, 89, 84, 73, 90, 59, 65, 40, 56, 47, 42, 52, 31, 38, 23, 36, 231, 224, 199, 185, 215})
+	structurewaveys[16], _ = statistics.Init([]float64{69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90}, []int64{34, 95, 92, 76, 80, 83, 61, 62, 38, 56, 52, 43, 47, 33, 35, 26, 33, 231, 224, 199, 185, 215})
+	structurewaveys[17], _ = statistics.Init([]float64{70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}, []int64{37, 102, 96, 69, 78, 80, 70, 54, 36, 58, 51, 44, 45, 32, 37, 27, 30, 232, 223, 200, 184, 215})
+	structurewaveys[18], _ = statistics.Init([]float64{71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92}, []int64{56, 98, 85, 76, 73, 80, 69, 53, 36, 57, 51, 43, 48, 29, 36, 27, 29, 232, 224, 200, 183, 215})
+	structurewaveys[19], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+	structurewaveys[20], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := make([]statistics.ContinuousDistribution, 21)
+	contentwaveys[0], _ = statistics.InitDeterministic(6.0)
+	contentwaveys[1], _ = statistics.InitDeterministic(7.0)
+	contentwaveys[2], _ = statistics.Init([]float64{7, 8, 9, 10, 11, 12, 13, 14, 15}, []int64{785, 705, 609, 467, 1188, 1104, 996, 834, 828})
+	contentwaveys[3], _ = statistics.Init([]float64{9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, []int64{587, 662, 575, 499, 398, 1129, 1041, 941, 807, 821})
+	contentwaveys[4], _ = statistics.Init([]float64{16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27}, []int64{148, 149, 147, 118, 82, 92, 83, 276, 262, 229, 194, 220})
+	contentwaveys[5], _ = statistics.Init([]float64{28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42}, []int64{93, 142, 102, 123, 98, 63, 77, 66, 63, 56, 252, 240, 221, 187, 217})
+	contentwaveys[6], _ = statistics.Init([]float64{38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54}, []int64{72, 121, 104, 100, 99, 81, 49, 74, 60, 59, 46, 36, 254, 233, 212, 184, 216})
+	contentwaveys[7], _ = statistics.Init([]float64{46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64}, []int64{8, 113, 111, 85, 90, 93, 73, 48, 62, 59, 47, 51, 47, 32, 243, 231, 207, 184, 216})
+	contentwaveys[8], _ = statistics.Init([]float64{55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74}, []int64{35, 113, 95, 82, 92, 81, 71, 46, 59, 55, 47, 51, 38, 33, 38, 232, 229, 203, 184, 216})
+	contentwaveys[9], _ = statistics.Init([]float64{61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81}, []int64{30, 98, 98, 78, 84, 82, 71, 55, 46, 58, 46, 43, 49, 42, 22, 40, 229, 228, 201, 185, 215})
+	contentwaveys[10], _ = statistics.Init([]float64{63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83}, []int64{48, 108, 86, 78, 81, 81, 74, 53, 40, 58, 46, 45, 42, 43, 19, 41, 228, 229, 200, 185, 215})
+	contentwaveys[11], _ = statistics.Init([]float64{65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85}, []int64{74, 100, 87, 75, 91, 70, 66, 50, 41, 59, 47, 46, 38, 40, 21, 39, 233, 224, 199, 185, 215})
+	contentwaveys[12], _ = statistics.Init([]float64{66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86}, []int64{84, 99, 85, 74, 91, 69, 67, 44, 50, 53, 45, 45, 40, 39, 20, 41, 231, 224, 199, 185, 215})
+	contentwaveys[13], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+	contentwaveys[14], _ = statistics.Init([]float64{67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88}, []int64{17, 92, 87, 85, 77, 89, 60, 70, 40, 55, 50, 42, 50, 35, 38, 21, 38, 231, 224, 199, 185, 215})
+	contentwaveys[15], _ = statistics.Init([]float64{68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89}, []int64{27, 94, 89, 84, 73, 90, 59, 65, 40, 56, 47, 42, 52, 31, 38, 23, 36, 231, 224, 199, 185, 215})
+	contentwaveys[16], _ = statistics.Init([]float64{69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90}, []int64{34, 95, 92, 76, 80, 83, 61, 62, 38, 56, 52, 43, 47, 33, 35, 26, 33, 231, 224, 199, 185, 215})
+	contentwaveys[17], _ = statistics.Init([]float64{70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91}, []int64{37, 102, 96, 69, 78, 80, 70, 54, 36, 58, 51, 44, 45, 32, 37, 27, 30, 232, 223, 200, 184, 215})
+	contentwaveys[18], _ = statistics.Init([]float64{71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92}, []int64{56, 98, 85, 76, 73, 80, 69, 53, 36, 57, 51, 43, 48, 29, 36, 27, 29, 232, 224, 200, 183, 215})
+	contentwaveys[19], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+	contentwaveys[20], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
+	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunctionStochastic
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunctionStochastic
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunctionStochastic
+
+	return OccupancyTypeStochastic{Name: "RES1-2SWB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
+func res12swbHighwave() OccupancyTypeStochastic {
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := []float64{12, 14, 16, 21, 35, 51, 68, 84, 98, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var structuredamagefunction = paireddata.PairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	contentwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	contentwaveys := []float64{12, 14, 16, 21, 35, 51, 68, 84, 98, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}
+	var contentdamagefunction = paireddata.PairedData{Xvals: contentwavexs, Yvals: contentwaveys}
+
+	sm := make(map[hazards.Parameter]interface{})
+	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
+
+	cm := make(map[hazards.Parameter]interface{})
+	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
+	//Default hazard.
+	sdf.DamageFunctions[hazards.Default] = structuredamagefunction
+	cdf.DamageFunctions[hazards.Default] = contentdamagefunction
+	//Waves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight] = structuredamagefunction
+	cdf.DamageFunctions[hazards.WaveHeight] = contentdamagefunction
+
+	return OccupancyTypeStochastic{Name: "RES1-2SWB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+}
+
 func res13snb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	structureydists := make([]statistics.ContinuousDistribution, 19)
