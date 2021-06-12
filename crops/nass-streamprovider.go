@@ -43,6 +43,7 @@ func (n nassTiffReader) iterate(sp consequences.StreamProcessor) {
 				for iX := 0; iX < iXBlock; iX++ {
 					s := strconv.Itoa(int(b[iX+iY*nXBlocksize])) //not sure this is right
 					c, ok := n.converter[s]
+					//need to add location
 					if ok {
 						sp(c)
 					}
