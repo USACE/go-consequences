@@ -145,11 +145,17 @@ func nassCDLValueAPI(url string) Crop {
 }
 
 //GetCDLFileByFIPS stores a NASS CDL Geotif for a given year and county FIPS
-func GetCDLFileByFIPS(year string, fips string) bool {
+func GetCDLFileByFIPS(year string, fips string) (nassTiffReader, error) {
 	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsURL, year, fips)
 	return nassFileAPI(url)
 }
-func nassFileAPI(url string) bool {
+
+//GetCDLFileByBbox stores a NASS CDL Geotif for a given year and bounding box
+func GetCDLFileByBbox(year string, minx string, miny string, maxx string, maxy string) (nassTiffReader, error) {
+	url := fmt.Sprintf("%sGetCDLStat?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsURL, year, minx, miny, maxx, maxy)
+	return nassFileAPI(url)
+}
+func nassFileAPI(url string) (nassTiffReader, error) {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -157,7 +163,7 @@ func nassFileAPI(url string) bool {
 	response, err := client.Get(url)
 	if err != nil {
 		fmt.Println(err)
-		return false
+		return nassTiffReader{}, err
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
@@ -167,25 +173,28 @@ func nassFileAPI(url string) bool {
 		s := string(xmlData)
 		fmt.Println(s)
 		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
-		return false
+		return nassTiffReader{}, err
 	}
 	response2, err2 := client.Get(resultURL.ReturnURL)
 	if err2 != nil {
 		fmt.Println(err2)
-		return false
+		return nassTiffReader{}, err2
 	}
 	defer response2.Body.Close()
+	//vsimem
 	fileparts := strings.Split(resultURL.ReturnURL, "/")
-	outfile := "C:\\Temp\\agtesting\\" + fileparts[len(fileparts)-1]
+	outfile := "/workspaces/Go_Consequences/data/" + fileparts[len(fileparts)-1]
+
 	out, err := os.Create(outfile)
 	if err != nil {
 		fmt.Println(err)
-		return false
+		return nassTiffReader{}, err
 	}
 	defer out.Close()
 	io.Copy(out, response2.Body)
 
-	return true
+	ret := Init(outfile)
+	return ret, nil
 }
 
 //GetCDLFileByFIPSFiltered provides a filtered geotif for a fips code. croptype is the list of values to keep and can be provided as a comma separated array of values to include

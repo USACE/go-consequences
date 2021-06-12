@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
 )
 
@@ -75,6 +76,9 @@ func (c Crop) GetX() float64 {
 func (c Crop) GetY() float64 {
 	return c.y
 }
+func (c Crop) Location() geography.Location {
+	return geography.Location{X: c.x, Y: c.y}
+}
 
 //GetTotalMarketValue returns crop.totalMarketValue
 func (c Crop) GetTotalMarketValue() float64 {
@@ -135,22 +139,28 @@ func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// delayed loss is equivalent to total marketable value less harvest cost, times the percent loss due to late planting
 	// Not using interpolated % loss for late plant
 	plantingWindow := (c.cropSchedule.LastPlantingDate.Sub(c.cropSchedule.StartPlantingDate).Hours() / 24)
-	fmt.Println(plantingWindow)
+	//fmt.Println(plantingWindow)
 	actualPlant := (e.ArrivalTime().AddDate(0, 0, int(e.Duration())))
-	fmt.Println(actualPlant)
+	//fmt.Println(actualPlant)
 	daysLate := (actualPlant.Sub(c.cropSchedule.StartPlantingDate.AddDate(actualPlant.Year(), 0, 0))).Hours() / 24
-	fmt.Println(daysLate)
+	//fmt.Println(daysLate)
 	factor := (daysLate / plantingWindow) * c.productionFunction.lossFromLatePlanting / 100
-	fmt.Println("factor is : ", factor)
+	//fmt.Println("factor is : ", factor)
 	return c.GetTotalMarketValue() * factor
 }
 
 func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Assume Loss is only fixed costs for entire year
-	return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[12]
+	if c.substituteName == "" {
+		return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[12]
+	} else {
+		return c.computeSubstitueCase(e)
+	}
+
 }
 
 func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
 	// TODO
+	fmt.Println("compute substitute, TODO implement me.")
 	return 0.0
 }

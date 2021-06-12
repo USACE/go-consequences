@@ -23,12 +23,12 @@ func TestNassCDLValue(t *testing.T) {
 	//fmt.Println(result)
 }
 func TestNassCDLFile(t *testing.T) {
-	//requires write access to C:\\Temp\\agtesting
-	result := GetCDLFileByFIPS("2018", "19015")
-	if !result {
-		t.Error("GetCDLFile() returned false;")
+	//requires write access to /workspaces/Go_Consequences/data/
+	result, err := GetCDLFileByFIPS("2018", "19017")
+	if err != nil {
+		t.Error(err)
 	}
-	//fmt.Println(result)
+	fmt.Println(result.FilePath)
 }
 func TestNassCDLFileSampleValue(t *testing.T) {
 	ncp := Init("/workspaces/Go_Consequences/data/CDL_2018_19015.tif")
