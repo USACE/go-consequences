@@ -108,7 +108,7 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 
 }
 func TestReadFromXML(t *testing.T) {
-	path := "./" + "Corn" + ".crop"
+	path := "./resources/" + "Corn" + ".crop"
 	c := ReadFromXML(path)
 	if c.GetCropName() != "Corn" {
 		t.Error("Did not parse corn")

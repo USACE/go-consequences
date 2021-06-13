@@ -48,6 +48,7 @@ func ReadFromXML(filePath string) Crop {
 	if errxml := xml.Unmarshal(bytes, &c); err != nil {
 		fmt.Println(errxml)
 	}
+	fmt.Println("Parsing " + c.Name)
 	ret := BuildCrop(c.ID, c.Name)
 	ret = ret.WithOutput(c.Yeild, c.PricePerUnit)
 	//parse the cropschedule
@@ -92,6 +93,8 @@ func xmltoProductionFunction(mcfps string, mclps string, mfcs string, cs CropSch
 		mfc[i] = f3
 	}
 	if (totalFixedCosts + totalVariableCostsFP) > totalValue {
+		minvalue := (totalFixedCosts + totalVariableCostsFP) / yeild
+		fmt.Println(fmt.Sprintf("minimum required value needs to be %v", minvalue))
 		panic("Costs are higher than product value! I DECLARE BANKRUPTCY")
 	}
 	if (totalFixedCosts + totalVariableCostsLP) > totalValue {

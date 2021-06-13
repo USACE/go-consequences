@@ -89,13 +89,13 @@ func (c Crop) GetTotalMarketValue() float64 {
 func (c Crop) Compute(event hazards.HazardEvent) consequences.Result {
 	//Check event to determine if it is an arrival time and duration event
 	header := []string{"Crop", "x", "y", "Damage Outcome", "Damage"}
-	results := []interface{}{c.name, c.Location().X, c.Location().Y, string(Unassigned), 0.0}
+	results := []interface{}{c.name, c.Location().X, c.Location().Y, Unassigned.String(), 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	da, ok := event.(hazards.ArrivalandDurationEvent)
 	if ok {
 		//determine cropdamageoutcome
 		outcome := c.cropSchedule.ComputeCropDamageCase(da)
-		results[3] = string(outcome)
+		results[3] = outcome.String()
 		//switch case on damageoutcome
 		//compute damages
 		damage := 0.0

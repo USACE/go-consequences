@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<crop>
+    <id>24</id>
+    <name>Winter_Wheat</name>
+    <FirstPlantDate>06Sep</FirstPlantDate>
+    <LastPlantDate>30Oct</LastPlantDate>
+    <MonthlyFixedCost>20.7,20.7,20.7,20.7,20.7,20.7,20.7,20.7,20.7,20.7,20.7,20.7</MonthlyFixedCost>
+    <MonthlyFirstPlantCost>14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34</MonthlyFirstPlantCost>
+    <MonthlyLastPlantCost>14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34,14.34</MonthlyLastPlantCost>
+    <SubstituteCrop></SubstituteCrop>
+    <HarvestDate>07Aug</HarvestDate>
+    <HarvestCost>47.63</HarvestCost>
+    <Yield>49.0</Yield>
+    <Unit>BU</Unit>
+    <UnitPrice>8.59</UnitPrice>
+    <PctLossLastPlant>10.0</PctLossLastPlant>
+    <DryoutPeriod>0</DryoutPeriod>
+    <Durations>
+        <Duration>1,5.0,5.0,5.0,10.0,20.0,50.0,100.0,100.0,0.0,5.0,5.0,5.0</Duration>
+        <Duration>3,10.0,10.0,10.0,25.0,40.0,50.0,100.0,100.0,0.0,10.0,10.0,10.0</Duration>
+        <Duration>14,20.0,20.0,20.0,40.0,70.0,80.0,100.0,100.0,0.0,20.0,20.0,20.0</Duration>
+    </Durations>
+</crop>

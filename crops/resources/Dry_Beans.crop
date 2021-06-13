@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<crop>
+    <id>42</id>
+    <name>Dry Beans</name>
+    <FirstPlantDate>14May</FirstPlantDate>
+    <LastPlantDate>13Jun</LastPlantDate>
+    <MonthlyFixedCost>17.1,17.1,17.1,17.1,17.1,17.1,17.1,17.1,17.1,17.1,17.1,17.1</MonthlyFixedCost>
+    <MonthlyFirstPlantCost>1.0,1.0,1.0,1.0,52.46,52.46,52.46,52.46,52.46,1.0,1.0,1.0</MonthlyFirstPlantCost>
+    <MonthlyLastPlantCost>1.0,1.0,1.0,1.0,52.46,52.46,52.46,52.46,52.46,1.0,1.0,1.0</MonthlyLastPlantCost>
+    <SubstituteCrop></SubstituteCrop>
+    <HarvestDate>26Oct</HarvestDate>
+    <HarvestCost>40.01</HarvestCost>
+    <Yield>1430.0</Yield>
+    <Unit>LBS</Unit>
+    <UnitPrice>0.34</UnitPrice>
+    <PctLossLastPlant>10.0</PctLossLastPlant>
+    <DryoutPeriod>0</DryoutPeriod>
+    <Durations>
+        <Duration>1,0.0,0.0,0.0,0.0,0.0,22.8,73.5,75.0,75.0,75.0,75.0,0.0</Duration>
+        <Duration>3,0.0,0.0,0.0,3.0,53.2,98.7,100.0,100.0,100.0,100.0,100.0,0.0</Duration>
+        <Duration>14,0.0,0.0,9.7,38.2,74.3,99.3,100.0,100.0,100.0,100.0,100.0,0.0</Duration>
+    </Durations>
+</crop>
