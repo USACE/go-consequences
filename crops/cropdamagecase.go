@@ -21,6 +21,8 @@ func (cdc CropDamageCase) String() string {
 		return "Impacted"
 	case NotImpactedDuringSeason:
 		return "Not Impacted During Season"
+	case PlantingDelayed:
+		return "Planting Delayed"
 	case NotPlanted:
 		return "Not Planted"
 	case SubstituteCrop:

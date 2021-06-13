@@ -22,7 +22,7 @@ func Init(fp string) nassTiffReader {
 	if err != nil {
 		log.Fatalln("Cannot connect to NASS GeoTiff.  Killing everything! " + err.Error())
 	}
-	m := NASSCropMap()
+	//m := NASSCropMap()
 	spatialRef := gdal.CreateSpatialReference("")
 	spatialRef.FromEPSG(5070)
 	srString, err := spatialRef.ToWKT()
@@ -30,7 +30,7 @@ func Init(fp string) nassTiffReader {
 		panic(err)
 	}
 	ds.SetProjection(srString)
-	return nassTiffReader{fp, &ds, m}
+	return nassTiffReader{fp, &ds, nil}
 }
 func (ncp *nassTiffReader) getCropValue(y float64, x float64) (Crop, error) {
 	rb := ncp.ds.RasterBand(1)
@@ -40,6 +40,9 @@ func (ncp *nassTiffReader) getCropValue(y float64, x float64) (Crop, error) {
 	buffer := make([]uint8, 1*1)
 	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
 	s := strconv.Itoa(int(buffer[0]))
+	if ncp.converter == nil {
+		ncp.converter = NASSCropMap()
+	}
 	c, ok := ncp.converter[s]
 
 	if ok {
