@@ -25,10 +25,10 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 
 	//test
 	if cd.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[1], expectedcase)
+		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
 	if cd.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[2], expecteddamage)
+		t.Errorf("Compute() = %v; expected %v", cd.Result[4], expecteddamage)
 	}
 }
 
@@ -50,10 +50,10 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 
 	//test
 	if cd.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[1], expectedcase)
+		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
 	if cd.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[2], expecteddamage)
+		t.Errorf("Compute() = %v; expected %v", cd.Result[4], expecteddamage)
 	}
 }
 func TestCropDamage(t *testing.T) {
@@ -74,10 +74,10 @@ func TestCropDamage(t *testing.T) {
 
 	//test
 	if cd.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[1], expectedcase)
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[3], expectedcase)
 	}
 	if cd.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[2], expecteddamage)
+		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[4], expecteddamage)
 	}
 
 }
@@ -100,10 +100,10 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 
 	//test
 	if cd.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[1], expectedcase)
+		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
 	if cd.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[2], expecteddamage)
+		t.Errorf("Compute() = %v; expected %v", cd.Result[4], expecteddamage)
 	}
 
 }

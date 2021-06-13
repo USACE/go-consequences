@@ -12,3 +12,20 @@ const (
 	NotPlanted              CropDamageCase = 8
 	SubstituteCrop          CropDamageCase = 16
 )
+
+func (cdc CropDamageCase) String() string {
+	switch cdc {
+	case Unassigned:
+		return "Unassigned"
+	case Impacted:
+		return "Impacted"
+	case NotImpactedDuringSeason:
+		return "Not Impacted During Season"
+	case NotPlanted:
+		return "Not Planted"
+	case SubstituteCrop:
+		return "Substitute Crop"
+	default:
+		return "Unassigned"
+	}
+}

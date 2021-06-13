@@ -88,14 +88,14 @@ func (c Crop) GetTotalMarketValue() float64 {
 //Compute implements concequence.Receptor on crop
 func (c Crop) Compute(event hazards.HazardEvent) consequences.Result {
 	//Check event to determine if it is an arrival time and duration event
-	header := []string{"Crop", "Damage Outcome", "Damage"}
-	results := []interface{}{c.name, Unassigned, 0.0}
+	header := []string{"Crop", "x", "y", "Damage Outcome", "Damage"}
+	results := []interface{}{c.name, c.Location().X, c.Location().Y, string(Unassigned), 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	da, ok := event.(hazards.ArrivalandDurationEvent)
 	if ok {
 		//determine cropdamageoutcome
 		outcome := c.cropSchedule.ComputeCropDamageCase(da)
-		results[1] = outcome
+		results[3] = string(outcome)
 		//switch case on damageoutcome
 		//compute damages
 		damage := 0.0
@@ -118,7 +118,7 @@ func (c Crop) Compute(event hazards.HazardEvent) consequences.Result {
 		default:
 			damage = 0.0
 		}
-		results[2] = damage
+		results[4] = damage
 	}
 	return ret
 }

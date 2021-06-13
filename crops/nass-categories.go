@@ -3,8 +3,9 @@ package crops
 //NASSCropMap is a map of Crops to NASS Crop ID #s
 func NASSCropMap() map[string]Crop {
 	m := make(map[string]Crop)
-
-	m["1"] = BuildCrop(1, "Corn")
+	path := "./" + "Corn" + ".crop"
+	c := ReadFromXML(path)
+	m["1"] = c //BuildCrop(1, "Corn")
 	m["2"] = BuildCrop(2, "Cotton")
 	m["3"] = BuildCrop(3, "Rice")
 	m["4"] = BuildCrop(4, "Sorghum")
