@@ -18,7 +18,7 @@ type gpkResultsWriter struct {
 	index         int
 }
 
-func InitGpkResultsWriter(filepath string, layerName string) *gpkResultsWriter {
+func InitGpkResultsWriter_Projected(filepath string, layerName string, ESPG int) *gpkResultsWriter {
 	driverOut := gdal.OGRDriverByName("GPKG")
 	dsOut, okOut := driverOut.Create(filepath, []string{})
 	if !okOut {
@@ -28,10 +28,13 @@ func InitGpkResultsWriter(filepath string, layerName string) *gpkResultsWriter {
 	//defer dsOut.Destroy() -> probably should destroy on close?
 	//set spatial reference?
 	sr := gdal.CreateSpatialReference("")
-	sr.FromEPSG(4326)
+	sr.FromEPSG(ESPG)
 	newLayer := dsOut.CreateLayer(layerName, sr, gdal.GT_Point, []string{"GEOMETRY_NAME=shape"}) //forcing point data type.  source type (using lyaer.type()) from postgis was a generic geometry
 
 	return &gpkResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}
+}
+func InitGpkResultsWriter(filepath string, layerName string) *gpkResultsWriter {
+	return InitGpkResultsWriter_Projected(filepath, layerName, 4326)
 }
 func (srw *gpkResultsWriter) Write(r Result) {
 	//if header has not been built:

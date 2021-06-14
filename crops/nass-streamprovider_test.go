@@ -24,9 +24,9 @@ func Test_StreamProcessor(t *testing.T) {
 	nassSp := InitNassCropProvider("2018", filter) // choose a year
 	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
 	h := hazards.ArrivalandDurationEvent{}
-	h.SetArrivalTime(at)                                                                                    //fake arrival time
-	h.SetDuration(15)                                                                                       // fake duration
-	rw := consequences.InitGpkResultsWriter("/workspaces/Go_Consequences/data/teststring.gpkg", "agdamage") // testing data output
+	h.SetArrivalTime(at)                                                                                                    //fake arrival time
+	h.SetDuration(15)                                                                                                       // fake duration
+	rw := consequences.InitGpkResultsWriter_Projected("/workspaces/Go_Consequences/data/teststring.gpkg", "agdamage", 5070) // testing data output
 	defer rw.Close()
 	nassSp.ByFips("19017", func(r consequences.Receptor) { //iterate over a county for testing.
 		c, ok := r.(Crop)

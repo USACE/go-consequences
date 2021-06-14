@@ -18,7 +18,7 @@ type shpResultsWriter struct {
 	index         int
 }
 
-func InitShpResultsWriter(filepath string, layerName string) *shpResultsWriter {
+func InitShpResultsWriter_Projected(filepath string, layerName string, ESPG int) *shpResultsWriter {
 	driverOut := gdal.OGRDriverByName("ESRI shapefile")
 	dsOut, okOut := driverOut.Create(filepath, []string{})
 	if !okOut {
@@ -28,10 +28,13 @@ func InitShpResultsWriter(filepath string, layerName string) *shpResultsWriter {
 	//defer dsOut.Destroy() -> probably should destroy on close?
 	//set spatial reference?
 	sr := gdal.CreateSpatialReference("")
-	sr.FromEPSG(4326)
+	sr.FromEPSG(ESPG)
 	newLayer := dsOut.CreateLayer(layerName, sr, gdal.GT_Point, []string{"GEOMETRY_NAME=shape"}) //forcing point data type.  source type (using lyaer.type()) from postgis was a generic geometry
 
 	return &shpResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}
+}
+func InitShpResultsWriter(filepath string, layerName string) *shpResultsWriter {
+	return InitShpResultsWriter_Projected(filepath, layerName, 4326)
 }
 func (srw *shpResultsWriter) Write(r Result) {
 	//if header has not been built:
