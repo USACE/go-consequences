@@ -18,7 +18,7 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	c := createTestCrop()
 
 	//compute
-	cd := c.Compute(h)
+	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := NotImpactedDuringSeason
 	expecteddamage := 0.0
@@ -43,7 +43,7 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 	c := createTestCrop()
 
 	//compute
-	cd := c.Compute(h)
+	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
 	expecteddamage := 10.0 //temporary value for testing
@@ -67,7 +67,7 @@ func TestCropDamage(t *testing.T) {
 	h.SetArrivalTime(at)
 	h.SetDuration(10)
 	//compute
-	cd := c.Compute(h)
+	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
 	expecteddamage := 1285.98 //Based on corn
@@ -93,7 +93,7 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 	h.SetArrivalTime(at)
 	h.SetDuration(15)
 	//compute
-	cd := c.Compute(h)
+	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := PlantingDelayed
 	expecteddamage := 0.0 //Based on corn

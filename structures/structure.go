@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"errors"
 	"math/rand"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -68,20 +69,27 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreStochastic
-func (s StructureStochastic) Compute(d hazards.HazardEvent) consequences.Result {
+func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
 	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) Compute(d hazards.HazardEvent) consequences.Result {
+func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
 	return computeConsequences(d, s)
 }
 
-func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) consequences.Result {
+func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
-	if e.Has(hazards.Depth) {
+	var err error = nil
+	if e.Has(hazards.Depth) { //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
+		if e.Depth() < 0.0 {
+			err = errors.New("depth above ground was less than zero")
+		}
+		if e.Depth() > 9999.0 {
+			err = errors.New("depth above ground was greater than 9999")
+		}
 		depthAboveFFE := e.Depth() - s.FoundHt
 		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
@@ -97,6 +105,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) conseq
 		ret.Result[9] = s.Pop2amo65
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
-	} //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
-	return ret
+	} else {
+		err = errors.New("Hazard did not contain depth")
+	}
+	return ret, err
 }
