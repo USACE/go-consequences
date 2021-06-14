@@ -7,7 +7,6 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
-	"github.com/USACE/go-consequences/hazards"
 )
 
 //ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
@@ -76,10 +75,9 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 		d, err2 := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if err2 == nil {
-			if d.Has(hazards.Depth) {
-				if d.Depth() > 0.0 && d.Depth() < 9999.0 {
-					w.Write(f.Compute(d))
-				}
+			r, err3 := f.Compute(d)
+			if err3 == nil {
+				w.Write(r)
 			}
 		}
 	})
@@ -91,10 +89,9 @@ func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp
 		d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if err == nil {
-			if d.Has(hazards.Depth) {
-				if d.Depth() > 0.0 && d.Depth() < 9999.0 {
-					w.Write(f.Compute(d))
-				}
+			r, err3 := f.Compute(d)
+			if err3 == nil {
+				w.Write(r)
 			}
 		}
 	})

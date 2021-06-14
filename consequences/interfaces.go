@@ -11,7 +11,7 @@ import (
 
 //Receptor is an interface for all things that can have consequences from a hazard event
 type Receptor interface {
-	Compute(event hazards.HazardEvent) Result
+	Compute(event hazards.HazardEvent) (Result, error)
 	Location() geography.Location
 }
 

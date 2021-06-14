@@ -17,7 +17,7 @@ func TestGPKByFips(t *testing.T) {
 	d := hazards.DepthEvent{}
 	d.SetDepth(2.4)
 	nsp.ByFips("11", func(s consequences.Receptor) {
-		r := s.Compute(d)
+		r, _ := s.Compute(d)
 		b, _ := json.Marshal(r)
 		fmt.Println(string(b))
 	})
@@ -35,7 +35,7 @@ func TestGPKByBBox(t *testing.T) {
 	bbox[3] = 38.00  //lower right y
 	gbbx := geography.BBox{Bbox: bbox}
 	nsp.ByBbox(gbbx, func(s consequences.Receptor) {
-		r := s.Compute(d)
+		r, _ := s.Compute(d)
 		b, _ := json.Marshal(r)
 		fmt.Println(string(b))
 	})

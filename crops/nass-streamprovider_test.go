@@ -31,8 +31,10 @@ func Test_StreamProcessor(t *testing.T) {
 	nassSp.ByFips("19017", func(r consequences.Receptor) { //iterate over a county for testing.
 		c, ok := r.(Crop)
 		if ok {
-			r := c.Compute(h)
-			rw.Write(r)
+			r, err := c.Compute(h)
+			if err == nil {
+				rw.Write(r)
+			}
 		}
 	})
 }

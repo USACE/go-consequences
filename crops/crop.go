@@ -1,6 +1,7 @@
 package crops
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -86,11 +87,12 @@ func (c Crop) GetTotalMarketValue() float64 {
 }
 
 //Compute implements concequence.Receptor on crop
-func (c Crop) Compute(event hazards.HazardEvent) consequences.Result {
+func (c Crop) Compute(event hazards.HazardEvent) (consequences.Result, error) {
 	//Check event to determine if it is an arrival time and duration event
 	header := []string{"Crop", "x", "y", "Damage Outcome", "Damage"}
 	results := []interface{}{c.name, c.Location().X, c.Location().Y, Unassigned.String(), 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
+	var err error = nil
 	da, ok := event.(hazards.ArrivalandDurationEvent)
 	if ok {
 		//determine cropdamageoutcome
@@ -103,10 +105,12 @@ func (c Crop) Compute(event hazards.HazardEvent) consequences.Result {
 		case Unassigned:
 			//huh?
 			damage = 0.0
+			err = errors.New("Damage Outcome was Unassigned")
 		case Impacted:
 			damage = c.computeImpactedCase(da)
 		case NotImpactedDuringSeason:
 			damage = 0.0
+			err = errors.New("Damage Outcome was Not Impacted During Season")
 		case PlantingDelayed:
 			damage = c.computeDelayedCase(da)
 		case NotPlanted:
@@ -117,10 +121,11 @@ func (c Crop) Compute(event hazards.HazardEvent) consequences.Result {
 			damage = c.computeSubstitueCase(da)
 		default:
 			damage = 0.0
+			err = errors.New("Damage Outcome resulted in Default case")
 		}
 		results[4] = damage
 	}
-	return ret
+	return ret, err
 }
 func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Determine crop damage percent based on damage dur curve and event dur
