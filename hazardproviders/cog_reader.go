@@ -18,6 +18,7 @@ type cogReader struct {
 func initCR(fp string) cogReader {
 	//read the file path
 	//make sure it is a tif
+	fmt.Println("Connecting to: " + fp)
 	ds, err := gdal.Open(fp, gdal.ReadOnly)
 	if err != nil {
 		log.Fatalln("Cannot connect to raster.  Killing everything! " + err.Error())
