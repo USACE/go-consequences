@@ -13,6 +13,9 @@ type cogHazardProvider struct {
 func Init(fp string) cogHazardProvider {
 	return cogHazardProvider{depthcr: initCR(fp)}
 }
+func Init_Meters(fp string) cogHazardProvider {
+	return cogHazardProvider{depthcr: initCR_Meters(fp)}
+}
 func (chp cogHazardProvider) Close() {
 	chp.depthcr.Close()
 }

@@ -9,9 +9,16 @@ import (
 )
 
 type cogReader struct {
-	FilePath string
-	ds       *gdal.Dataset
-	nodata   float64
+	FilePath         string
+	ds               *gdal.Dataset
+	nodata           float64
+	verticalIsMeters bool //default false
+}
+
+func initCR_Meters(fp string) cogReader {
+	cr := initCR(fp)
+	cr.verticalIsMeters = true
+	return cr
 }
 
 //init creates and produces an unexported cogReader
@@ -23,9 +30,8 @@ func initCR(fp string) cogReader {
 	if err != nil {
 		log.Fatalln("Cannot connect to raster.  Killing everything! " + err.Error())
 	}
-	//fmt.Println(ds.Projection())
 	v, valid := ds.RasterBand(1).NoDataValue()
-	cr := cogReader{FilePath: fp, ds: &ds}
+	cr := cogReader{FilePath: fp, ds: &ds, verticalIsMeters: false}
 	if valid {
 		cr.nodata = v
 	}
@@ -45,6 +51,9 @@ func (cr *cogReader) ProvideValue(l geography.Location) (float64, error) {
 	d := float64(depth)
 	if d == cr.nodata {
 		return cr.nodata, NoDataHazardError{Input: fmt.Sprintf("COG reader had the no data value observed, setting to %v", cr.nodata)}
+	}
+	if cr.verticalIsMeters {
+		d *= 3.28084
 	}
 	return d, nil
 }
