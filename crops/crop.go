@@ -136,7 +136,7 @@ func (c Crop) computeImpactedCase(e hazards.ArrivalandDurationEvent) float64 {
 	totalMarketValue := c.GetTotalMarketValue()
 	totalMarketValueLessHarvestCost := totalMarketValue - c.productionFunction.harvestCost
 	loss := dmgfactor * percentProductionValue * totalMarketValueLessHarvestCost
-	fmt.Println("loss = ", loss)
+	//fmt.Println("loss = ", loss)
 	return loss
 }
 
@@ -157,7 +157,7 @@ func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) float64 {
 	// Assume Loss is only fixed costs for entire year
 	if c.substituteName == "" {
-		return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[12]
+		return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[11]
 	} else {
 		return c.computeSubstitueCase(e)
 	}

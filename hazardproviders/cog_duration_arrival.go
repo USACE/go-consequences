@@ -26,12 +26,12 @@ func (chp cogDurationAndArrivalHazardProvider) ProvideHazard(l geography.Locatio
 	h := hazards.ArrivalandDurationEvent{}
 	d, err := chp.durationCR.ProvideValue(l)
 	if err != nil {
-		panic(err)
+		return h, err
 	}
 	h.SetDuration(d)
 	a, err := chp.arrivalCR.ProvideValue(l)
 	if err != nil {
-		panic(err)
+		return h, err
 	}
 	sat := fmt.Sprintf("%fh", a)
 	duration, _ := time.ParseDuration(sat)

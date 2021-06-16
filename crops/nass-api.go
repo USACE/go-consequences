@@ -152,7 +152,7 @@ func GetCDLFileByFIPS(year string, fips string) (nassTiffReader, error) {
 
 //GetCDLFileByBbox stores a NASS CDL Geotif for a given year and bounding box
 func GetCDLFileByBbox(year string, minx string, miny string, maxx string, maxy string) (nassTiffReader, error) {
-	url := fmt.Sprintf("%sGetCDLStat?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsURL, year, minx, miny, maxx, maxy)
+	url := fmt.Sprintf("%sGetCDLFile?year=%s&bbox=%s,%s,%s,%s", apiStatsURL, year, minx, miny, maxx, maxy)
 	return nassFileAPI(url)
 }
 func nassFileAPI(url string) (nassTiffReader, error) {
