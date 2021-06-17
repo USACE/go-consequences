@@ -7,7 +7,7 @@
     <MonthlyFixedCost>28.46,28.46,28.46,28.46,28.46,28.46,28.46,28.46,28.46,28.46,28.46,28.46</MonthlyFixedCost>
     <MonthlyFirstPlantCost>1.0,1.0,1.0,31.97,31.97,31.97,31.97,31.97,31.97,1.0,1.0,1.0</MonthlyFirstPlantCost>
     <MonthlyLastPlantCost>1.0,1.0,1.0,31.97,31.97,31.97,31.97,31.97,31.97,1.0,1.0,1.0</MonthlyLastPlantCost>
-    <SubstituteCrop></SubstituteCrop>
+    <SubstituteCrop>1</SubstituteCrop>
     <HarvestDate>31Oct</HarvestDate>
     <HarvestCost>36.39</HarvestCost>
     <Yield>51.0</Yield>

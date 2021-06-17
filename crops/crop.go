@@ -2,7 +2,6 @@ package crops
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -14,12 +13,34 @@ type Crop struct {
 	id                 byte
 	name               string
 	substituteName     string
+	SubstituteCrop     Substitute
 	x                  float64
 	y                  float64
 	totalMarketValue   float64 //Marketable value, yeild *pricePerUnit
 	productionFunction productionFunction
 	lossFunction       DamageFunction
 	cropSchedule       CropSchedule
+}
+type Substitute struct {
+	id                 byte
+	name               string
+	totalMarketValue   float64 //Marketable value, yeild *pricePerUnit
+	productionFunction productionFunction
+	lossFunction       DamageFunction
+	cropSchedule       CropSchedule
+}
+
+func (s Substitute) toCrop() Crop {
+	c := BuildCrop(s.id, s.name)
+	c.WithProductionFunction(s.productionFunction)
+	c.WithLossFunction(s.lossFunction)
+	c.WithCropSchedule(s.cropSchedule)
+	c.totalMarketValue = s.totalMarketValue
+	return c
+}
+func (c Crop) toSubstitute() Substitute {
+	s := Substitute{id: c.id, name: c.name, totalMarketValue: c.totalMarketValue, productionFunction: c.productionFunction, lossFunction: c.lossFunction, cropSchedule: c.cropSchedule}
+	return s
 }
 
 //BuildCrop builds a crop since the properties of crop are not exported
@@ -97,7 +118,7 @@ func (c Crop) Compute(event hazards.HazardEvent) (consequences.Result, error) {
 	if ok {
 		//determine cropdamageoutcome
 		outcome := c.cropSchedule.ComputeCropDamageCase(da)
-		results[3] = outcome.String()
+
 		results[5] = da.Duration()
 		results[6] = da.ArrivalTime().Format("Mon Jan 2 15:04:05")
 		//switch case on damageoutcome
@@ -116,7 +137,7 @@ func (c Crop) Compute(event hazards.HazardEvent) (consequences.Result, error) {
 		case PlantingDelayed:
 			damage = c.computeDelayedCase(da)
 		case NotPlanted:
-			damage = c.computeNotPlantedCase(da)
+			damage, outcome = c.computeNotPlantedCase(da)
 		case SubstituteCrop:
 			// case for sbustitute crop not yet implemented
 			//get the substitute, and compute damages on it... hope for no infinate loop.
@@ -125,6 +146,7 @@ func (c Crop) Compute(event hazards.HazardEvent) (consequences.Result, error) {
 			damage = 0.0
 			err = errors.New("Damage Outcome resulted in Default case")
 		}
+		results[3] = outcome.String()
 		results[4] = damage
 	}
 	return ret, err
@@ -156,18 +178,25 @@ func (c Crop) computeDelayedCase(e hazards.ArrivalandDurationEvent) float64 {
 	return c.GetTotalMarketValue() * factor
 }
 
-func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) float64 {
+func (c Crop) computeNotPlantedCase(e hazards.ArrivalandDurationEvent) (float64, CropDamageCase) {
 	// Assume Loss is only fixed costs for entire year
 	if c.substituteName == "" {
-		return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[11]
+		return c.productionFunction.GetCumulativeMonthlyFixedCostsOnly()[11], NotPlanted
 	} else {
-		return c.computeSubstitueCase(e)
+
+		return c.computeSubstitueCase(e), SubstituteCrop
 	}
 
 }
 
 func (c Crop) computeSubstitueCase(e hazards.ArrivalandDurationEvent) float64 {
 	// TODO
-	fmt.Println("compute substitute, TODO implement me.")
+	//fmt.Println("compute substitute, TODO implement me.")
+	ocv := c.totalMarketValue - c.productionFunction.harvestCost
+	sc := c.SubstituteCrop.toCrop()
+	scv := sc.totalMarketValue - sc.productionFunction.harvestCost
+	if scv <= ocv {
+		return ocv - scv
+	}
 	return 0.0
 }

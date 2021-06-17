@@ -1,5 +1,7 @@
 package crops
 
+import "strconv"
+
 //NASSCropMap is a map of Crops to NASS Crop ID #s
 func NASSCropMap() map[string]Crop {
 	m := make(map[string]Crop)
@@ -119,5 +121,21 @@ func NASSCropMap() map[string]Crop {
 	//m["249"] = BuildCrop(249, "Gourds")
 	//m["250"] = BuildCrop(250, "Cranberries")
 	//m["254"] = BuildCrop(254, "Dbl Crop Barley/Soybeans")
+
+	//handle substitutes
+	cropswsubs := make([]Crop, 0)
+	for _, c := range m {
+		if c.substituteName != "" {
+			sc, ok := m[c.substituteName]
+			if ok {
+				s := sc.toSubstitute()
+				c.SubstituteCrop = s
+				cropswsubs = append(cropswsubs, c)
+			}
+		}
+	}
+	for _, c := range cropswsubs {
+		m[strconv.Itoa(int(c.id))] = c
+	}
 	return m
 }

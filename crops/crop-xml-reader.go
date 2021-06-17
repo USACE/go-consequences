@@ -45,6 +45,7 @@ func ReadFromXML(filePath string) Crop {
 	bytes, _ := ioutil.ReadAll(xmlFile)
 
 	var c xmlCrop
+
 	if errxml := xml.Unmarshal(bytes, &c); err != nil {
 		fmt.Println(errxml)
 	}
@@ -67,6 +68,9 @@ func ReadFromXML(filePath string) Crop {
 	//parse the production function
 	pf := xmltoProductionFunction(c.MonthlyFirstPlantCost, c.MonthlyLastPlantCost, c.MonthlyFixedCost, cs, c.HarvestCost, c.PercentLossLastPlant, c.Yeild, c.PricePerUnit)
 	ret.WithProductionFunction(pf)
+	if c.SubstituteCropID != 0 {
+		ret.substituteName = strconv.Itoa(int(c.SubstituteCropID))
+	}
 	return ret
 }
 func xmltoProductionFunction(mcfps string, mclps string, mfcs string, cs CropSchedule, hc float64, lpl float64, yeild float64, price float64) productionFunction {

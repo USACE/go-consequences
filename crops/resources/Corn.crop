@@ -7,7 +7,7 @@
     <MonthlyFixedCost>30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94,30.94</MonthlyFixedCost>
     <MonthlyFirstPlantCost>1.0,1.0,1.0,56.04,56.04,56.04,56.04,56.04,56.04,56.04,1.0,1.0</MonthlyFirstPlantCost>
     <MonthlyLastPlantCost>1.0,1.0,1.0,56.04,56.04,56.04,56.04,56.04,56.04,56.04,1.0,1.0</MonthlyLastPlantCost>
-    <SubstituteCrop></SubstituteCrop>
+    <SubstituteCrop>5</SubstituteCrop>
     <HarvestDate>21Nov</HarvestDate>
     <HarvestCost>85.51</HarvestCost> <!--harvest cost is per acres -->
     <Yield>178.0</Yield>
