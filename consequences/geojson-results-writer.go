@@ -16,12 +16,12 @@ type geoJsonResultsWriter struct {
 	HasClosed            bool
 }
 
-func InitGeoJsonResultsWriterFromFile(filepath string) *geoJsonResultsWriter {
+func InitGeoJsonResultsWriterFromFile(filepath string) (*geoJsonResultsWriter, error) {
 	w, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
-		panic(err)
+		return &geoJsonResultsWriter{}, err
 	}
-	return &geoJsonResultsWriter{filepath: filepath, w: w}
+	return &geoJsonResultsWriter{filepath: filepath, w: w}, nil
 }
 func InitGeoJsonResultsWriter(w io.Writer) *geoJsonResultsWriter {
 	return &geoJsonResultsWriter{filepath: "not applicapble", w: w}

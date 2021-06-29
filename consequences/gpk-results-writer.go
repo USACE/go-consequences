@@ -1,6 +1,7 @@
 package consequences
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -18,12 +19,12 @@ type gpkResultsWriter struct {
 	index         int
 }
 
-func InitGpkResultsWriter_Projected(filepath string, layerName string, ESPG int) *gpkResultsWriter {
+func InitGpkResultsWriter_Projected(filepath string, layerName string, ESPG int) (*gpkResultsWriter, error) {
 	driverOut := gdal.OGRDriverByName("GPKG")
 	dsOut, okOut := driverOut.Create(filepath, []string{})
 	if !okOut {
 		//error out?
-		fmt.Println("geopackage not created")
+		return &gpkResultsWriter{}, errors.New("geopackage at path " + filepath + " not created")
 	}
 	//defer dsOut.Destroy() -> probably should destroy on close?
 	//set spatial reference?
@@ -31,9 +32,9 @@ func InitGpkResultsWriter_Projected(filepath string, layerName string, ESPG int)
 	sr.FromEPSG(ESPG)
 	newLayer := dsOut.CreateLayer(layerName, sr, gdal.GT_Point, []string{"GEOMETRY_NAME=shape"}) //forcing point data type.  source type (using lyaer.type()) from postgis was a generic geometry
 
-	return &gpkResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}
+	return &gpkResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}, nil
 }
-func InitGpkResultsWriter(filepath string, layerName string) *gpkResultsWriter {
+func InitGpkResultsWriter(filepath string, layerName string) (*gpkResultsWriter, error) {
 	return InitGpkResultsWriter_Projected(filepath, layerName, 4326)
 }
 func (srw *gpkResultsWriter) Write(r Result) {
@@ -158,6 +159,6 @@ func (srw *gpkResultsWriter) Close() {
 	if err2 != nil {
 		fmt.Println(err2)
 	}
-	fmt.Println(fmt.Sprintf("Closing, wrote %v features", srw.index))
+	fmt.Printf("Closing, wrote %v features\n", srw.index)
 	srw.ds.Destroy()
 }

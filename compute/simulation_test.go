@@ -41,7 +41,7 @@ func Test_StreamAbstract(t *testing.T) {
 	filepath := root + ".tif"
 	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
-	w := consequences.InitGpkResultsWriter("/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326_consequences_nsi.gpkg", "nsi_result")
+	w, _ := consequences.InitGpkResultsWriter("/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
 	dfr := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)

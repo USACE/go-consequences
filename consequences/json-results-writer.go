@@ -29,7 +29,7 @@ func (srw *jsonResultsWriter) Write(r Result) {
 	}
 	b, _ := r.MarshalJSON()
 	s := string(b) + ","
-	fmt.Fprintf(srw.w, s)
+	fmt.Fprint(srw.w, s)
 }
 func (srw *jsonResultsWriter) Close() {
 	fmt.Fprintf(srw.w, "]}")

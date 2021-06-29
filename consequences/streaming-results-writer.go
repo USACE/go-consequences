@@ -11,12 +11,12 @@ type streamingResultsWriter struct {
 	w        io.Writer
 }
 
-func InitStreamingResultsWriterFromFile(filepath string) streamingResultsWriter {
+func InitStreamingResultsWriterFromFile(filepath string) (streamingResultsWriter, error) {
 	w, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
-		panic(err)
+		return streamingResultsWriter{}, err
 	}
-	return streamingResultsWriter{filepath: filepath, w: w}
+	return streamingResultsWriter{filepath: filepath, w: w}, nil
 }
 func InitStreamingResultsWriter(w io.Writer) streamingResultsWriter {
 	return streamingResultsWriter{filepath: "not applicapble", w: w}
@@ -24,7 +24,7 @@ func InitStreamingResultsWriter(w io.Writer) streamingResultsWriter {
 func (srw streamingResultsWriter) Write(r Result) {
 	b, _ := r.MarshalJSON()
 	s := string(b) + "\n"
-	fmt.Fprintf(srw.w, s)
+	fmt.Fprint(srw.w, s)
 }
 func (srw streamingResultsWriter) Close() {
 	w2, ok := srw.w.(io.WriteCloser)

@@ -1,6 +1,7 @@
 package consequences
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -18,12 +19,12 @@ type shpResultsWriter struct {
 	index         int
 }
 
-func InitShpResultsWriter_Projected(filepath string, layerName string, ESPG int) *shpResultsWriter {
+func InitShpResultsWriter_Projected(filepath string, layerName string, ESPG int) (*shpResultsWriter, error) {
 	driverOut := gdal.OGRDriverByName("ESRI shapefile")
 	dsOut, okOut := driverOut.Create(filepath, []string{})
 	if !okOut {
 		//error out?
-		fmt.Println("shapefile not created")
+		return &shpResultsWriter{}, errors.New("Shapefile not created at path " + filepath)
 	}
 	//defer dsOut.Destroy() -> probably should destroy on close?
 	//set spatial reference?
@@ -31,9 +32,9 @@ func InitShpResultsWriter_Projected(filepath string, layerName string, ESPG int)
 	sr.FromEPSG(ESPG)
 	newLayer := dsOut.CreateLayer(layerName, sr, gdal.GT_Point, []string{"GEOMETRY_NAME=shape"}) //forcing point data type.  source type (using lyaer.type()) from postgis was a generic geometry
 
-	return &shpResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}
+	return &shpResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}, nil
 }
-func InitShpResultsWriter(filepath string, layerName string) *shpResultsWriter {
+func InitShpResultsWriter(filepath string, layerName string) (*shpResultsWriter, error) {
 	return InitShpResultsWriter_Projected(filepath, layerName, 4326)
 }
 func (srw *shpResultsWriter) Write(r Result) {
@@ -134,6 +135,6 @@ func (srw *shpResultsWriter) Write(r Result) {
 }
 func (srw *shpResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
-	fmt.Println(fmt.Sprintf("Closing, wrote %v features", srw.index))
+	fmt.Printf("Closing, wrote %v features\n", srw.index)
 	srw.ds.Destroy()
 }

@@ -17,15 +17,15 @@ type summaryResultsWriter struct {
 	m          map[string]*data.InlineHistogram
 }
 
-func InitSummaryResultsWriterFromFile(filepath string) *summaryResultsWriter {
+func InitSummaryResultsWriterFromFile(filepath string) (*summaryResultsWriter, error) {
 	w, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
-		panic(err)
+		return &summaryResultsWriter{}, err
 	}
 	//make the maps
 	t := make(map[string]float64, 1)
 	m := make(map[string]*data.InlineHistogram, 1)
-	return &summaryResultsWriter{filepath: filepath, w: w, totals: t, m: m}
+	return &summaryResultsWriter{filepath: filepath, w: w, totals: t, m: m}, nil
 }
 func InitSummaryResultsWriter(w io.Writer) *summaryResultsWriter {
 	t := make(map[string]float64, 1)
@@ -72,14 +72,14 @@ func (srw *summaryResultsWriter) Write(r Result) {
 }
 func (srw *summaryResultsWriter) Close() {
 	ac := accounting.Accounting{Symbol: "$", Precision: 2}
-	fmt.Fprintf(srw.w, fmt.Sprintf("Grand Total is %v\n", ac.FormatMoney(srw.grandTotal)))
+	fmt.Fprintf(srw.w, "Grand Total is %v\n", ac.FormatMoney(srw.grandTotal))
 	h := srw.totals
 	for i, v := range h {
-		fmt.Fprintf(srw.w, fmt.Sprintf("Damages for %v were %v\n", i, ac.FormatMoney(v)))
+		fmt.Fprintf(srw.w, "Damages for %v were %v\n", i, ac.FormatMoney(v))
 	}
 	j := srw.m
 	for i, v := range j {
-		fmt.Fprintf(srw.w, fmt.Sprintf("Histogram for %v:\n%v", i, v.StringSparse()))
+		fmt.Fprintf(srw.w, "Histogram for %v:\n%v", i, v.StringSparse())
 	}
 	w2, ok := srw.w.(io.WriteCloser)
 	if ok {
