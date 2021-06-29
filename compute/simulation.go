@@ -55,13 +55,6 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
-func StreamFromFileAbstract(filepath string, sp consequences.StreamProvider, w consequences.ResultsWriter) { //enc json.Encoder) { //w http.ResponseWriter) {
-	//open a tif reader
-	tiffReader := hazardproviders.Init(filepath)
-	defer tiffReader.Close()
-	StreamAbstract(&tiffReader, sp, w)
-	w.Close()
-}
 func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")

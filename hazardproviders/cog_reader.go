@@ -1,8 +1,8 @@
 package hazardproviders
 
 import (
+	"errors"
 	"fmt"
-	"log"
 
 	"github.com/USACE/go-consequences/geography"
 	"github.com/dewberry/gdal"
@@ -15,27 +15,27 @@ type cogReader struct {
 	verticalIsMeters bool //default false
 }
 
-func initCR_Meters(fp string) cogReader {
-	cr := initCR(fp)
+func initCR_Meters(fp string) (cogReader, error) {
+	cr, err := initCR(fp)
 	cr.verticalIsMeters = true
-	return cr
+	return cr, err
 }
 
 //init creates and produces an unexported cogReader
-func initCR(fp string) cogReader {
+func initCR(fp string) (cogReader, error) {
 	//read the file path
 	//make sure it is a tif
 	fmt.Println("Connecting to: " + fp)
 	ds, err := gdal.Open(fp, gdal.ReadOnly)
 	if err != nil {
-		log.Fatalln("Cannot connect to raster.  Killing everything! " + err.Error())
+		return cogReader{}, errors.New("Cannot connect to raster at path " + fp + err.Error())
 	}
 	v, valid := ds.RasterBand(1).NoDataValue()
 	cr := cogReader{FilePath: fp, ds: &ds, verticalIsMeters: false}
 	if valid {
 		cr.nodata = v
 	}
-	return cr
+	return cr, nil
 }
 func (cr *cogReader) Close() {
 	cr.ds.Close()

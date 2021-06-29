@@ -57,7 +57,7 @@ func Test_StreamAbstract(t *testing.T) {
 	rw, _ := consequences.InitGpkResultsWriter_Projected("/workspaces/Go_Consequences/data/abstract.gpkg", "agdamage", 5070) // testing data output
 	defer rw.Close()
 	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
-	hp := hazardproviders.InitDaAHP("/workspaces/Go_Consequences/data/Duration5070.tif", "/workspaces/Go_Consequences/data/Arrival5070.tif", at)
+	hp, _ := hazardproviders.InitDaAHP("/workspaces/Go_Consequences/data/Duration5070.tif", "/workspaces/Go_Consequences/data/Arrival5070.tif", at)
 	defer hp.Close()
 	compute.StreamAbstract(hp, nassSp, rw)
 }

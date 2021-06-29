@@ -1,6 +1,7 @@
 package hazardproviders
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,8 +16,21 @@ type cogDurationAndArrivalHazardProvider struct {
 }
 
 //Init creates and produces an unexported cogHazardProvider
-func InitDaAHP(durationfp string, arrivalfp string, startTime time.Time) cogDurationAndArrivalHazardProvider {
-	return cogDurationAndArrivalHazardProvider{durationCR: initCR(durationfp), arrivalCR: initCR(arrivalfp), startTime: startTime}
+func InitDaAHP(durationfp string, arrivalfp string, startTime time.Time) (cogDurationAndArrivalHazardProvider, error) {
+	d, ed := initCR(durationfp)
+	a, ad := initCR(arrivalfp)
+	var et error
+	et = nil
+	if ed != nil {
+		if ad != nil {
+			et = errors.New(ed.Error() + ad.Error())
+		}
+		et = ed
+	}
+	if ad != nil {
+		et = ad
+	}
+	return cogDurationAndArrivalHazardProvider{durationCR: d, arrivalCR: a, startTime: startTime}, et
 }
 func (chp cogDurationAndArrivalHazardProvider) Close() {
 	chp.durationCR.Close()
