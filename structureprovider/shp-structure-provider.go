@@ -1,8 +1,7 @@
 package structureprovider
 
 import (
-	"fmt"
-	"log"
+	"errors"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -17,10 +16,10 @@ type shpDataSet struct {
 	ds        *gdal.DataSource
 }
 
-func InitSHP(filepath string) shpDataSet {
+func InitSHP(filepath string) (shpDataSet, error) {
 	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
 	if ds.LayerCount() > 1 {
-		log.Fatal("Found more than one layer please specify one layer.")
+		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found more than one layer please specify one layer.")
 	}
 	l := ds.LayerByIndex(0)
 	def := l.Definition()
@@ -29,11 +28,11 @@ func InitSHP(filepath string) shpDataSet {
 	for i, f := range s {
 		idx := def.FieldIndex(f)
 		if idx < 0 {
-			fmt.Println("Expected field named " + f + " none was found.  Killing everything! ")
+			return shpDataSet{}, errors.New("Shapefile at path " + filepath + " Expected field named " + f + " none was found")
 		}
 		sIDX[i] = idx
 	}
-	return shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, ds: &ds}
+	return shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, ds: &ds}, nil
 }
 
 //ByFips a streaming service for structure stochastic based on a bounding box

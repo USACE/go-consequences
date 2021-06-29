@@ -1,7 +1,7 @@
 package structureprovider
 
 import (
-	"log"
+	"errors"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -17,7 +17,7 @@ type gpkDataSet struct {
 	deterministic bool
 }
 
-func InitGPK(filepath string, layername string) gpkDataSet {
+func InitGPK(filepath string, layername string) (gpkDataSet, error) {
 	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
 	//validation?
 	hasNSITable := false
@@ -27,7 +27,7 @@ func InitGPK(filepath string, layername string) gpkDataSet {
 		}
 	}
 	if !hasNSITable {
-		log.Fatalln("GeoPpackage does not have a layer titled nsi.  Killing everything! ")
+		return gpkDataSet{}, errors.New("GeoPpackage at path " + filepath + "does not have a layer titled nsi. ")
 	}
 	l := ds.LayerByName(layername)
 	def := l.Definition()
@@ -36,11 +36,11 @@ func InitGPK(filepath string, layername string) gpkDataSet {
 	for i, f := range s {
 		idx := def.FieldIndex(f)
 		if idx < 0 {
-			log.Fatalln("Expected field named " + f + " none was found.  Killing everything! ")
+			return gpkDataSet{}, errors.New("GeoPpackage at path " + filepath + " Expected field named " + f + " none was found")
 		}
 		sIDX[i] = idx
 	}
-	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, ds: &ds}
+	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, ds: &ds}, nil
 }
 func (gpk *gpkDataSet) SetDeterministic(useDeterministic bool) {
 	gpk.deterministic = useDeterministic

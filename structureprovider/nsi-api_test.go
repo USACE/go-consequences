@@ -36,11 +36,11 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 			n.ByFips(sfips, func(s consequences.Receptor) {
 				index++
 			})
-			fmt.Println(fmt.Sprintf("Completed %s with %v structures", sfips, index))
+			fmt.Printf("Completed %s with %v structures\n", sfips, index)
 			if countByState(sfips) == index {
-				fmt.Println(fmt.Sprintf("For state %s the count matched", sfips))
+				fmt.Printf("For state %s the count matched\n", sfips)
 			} else {
-				fmt.Println(fmt.Sprintf("For state %s the count did NOT match!", sfips))
+				fmt.Printf("For state %s the count did NOT match!\n", sfips)
 			}
 		}(ss)
 	}
@@ -61,11 +61,11 @@ func TestNsiByFipsStream_MultiState_Sequential(t *testing.T) {
 			n.ByFips(sfips, func(s consequences.Receptor) {
 				index++
 			})
-			fmt.Println(fmt.Sprintf("Completed %s with %v structures", sfips, index))
+			fmt.Printf("Completed %s with %v structures\n", sfips, index)
 			if countByState(sfips) == index {
-				fmt.Println(fmt.Sprintf("For state %s the count matched", sfips))
+				fmt.Printf("For state %s the count matched\n", sfips)
 			} else {
-				fmt.Println(fmt.Sprintf("For state %s the count did NOT match!", sfips))
+				fmt.Printf("For state %s the count did NOT match!\n", sfips)
 			}
 		}(ss)
 	}

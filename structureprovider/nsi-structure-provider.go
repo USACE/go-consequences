@@ -93,7 +93,7 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		} else {
 			occtype = defaultOcctype
 			msg := "Using default " + f.Properties.Occtype + " not found"
-			fmt.Printf(msg) //panic(msg)
+			fmt.Print(msg) //panic(msg)
 		}
 	}
 	return structures.StructureStochastic{
