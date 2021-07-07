@@ -5,9 +5,17 @@ import (
 	"testing"
 )
 
-func TestSHPByFips(t *testing.T) {
+func Test_InitSHP(t *testing.T) {
 	root := "/workspaces/Go_Consequences/data/hurricane-laura/ORNLcentroids_LBattributes"
 	filepath := root + ".shp"
 	nsp, _ := InitSHP(filepath) //, "ORNLcentroids_LBattributes")
+	fmt.Println(nsp.FilePath)
+}
+func Test_InitSHP_BadData(t *testing.T) {
+	root := "/workspaces/Go_Consequences/data/CERA_Adv29_maxwaterelev_4326_90m_consequences_SUMMARY_NSI.json"
+	nsp, err := InitSHP(root) //, "ORNLcentroids_LBattributes")
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(nsp.FilePath)
 }

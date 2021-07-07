@@ -21,6 +21,9 @@ func InitSHP(filepath string) (shpDataSet, error) {
 	if ds.LayerCount() > 1 {
 		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found more than one layer please specify one layer.")
 	}
+	if ds.LayerCount() < 1 {
+		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found no layers please specify one layer.")
+	}
 	l := ds.LayerByIndex(0)
 	def := l.Definition()
 	s := StructureSchema()
