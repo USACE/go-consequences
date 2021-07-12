@@ -42,11 +42,21 @@ func (cr *cogReader) Close() {
 }
 func (cr *cogReader) ProvideValue(l geography.Location) (float64, error) {
 	rb := cr.ds.RasterBand(1)
+
 	igt := cr.ds.InvGeoTransform()
 	px := int(igt[0] + l.X*igt[1] + l.Y*igt[2])
 	py := int(igt[3] + l.X*igt[4] + l.Y*igt[5])
 	buffer := make([]float32, 1*1)
-	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
+	if px < 0 || px > rb.XSize() {
+		return cr.nodata, NoDataHazardError{Input: "X is out of range"}
+	}
+	if py < 0 || py > rb.YSize() {
+		return cr.nodata, NoDataHazardError{Input: "Y is out of range"}
+	}
+	err := rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
+	if err != nil {
+		return cr.nodata, NoDataHazardError{Input: err.Error()}
+	}
 	depth := buffer[0]
 	d := float64(depth)
 	if d == cr.nodata {
