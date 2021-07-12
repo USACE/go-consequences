@@ -3,10 +3,13 @@ package compute
 import (
 	"fmt"
 	"log"
+	"math/rand"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/indirecteconomics"
+	"github.com/USACE/go-consequences/structures"
 )
 
 //ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
@@ -88,4 +91,72 @@ func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp
 			}
 		}
 	})
+}
+
+func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	fmt.Println("FIPS Code is " + FIPSCODE)
+	totalCounty := make(map[string]indirecteconomics.CapitalAndLabor)
+	lossCounty := make(map[string]indirecteconomics.CapitalAndLabor)
+	sp.ByFips(FIPSCODE, func(f consequences.Receptor) {
+		//ProvideHazard works off of a geography.Location
+		s, sok := f.(structures.StructureStochastic)
+		if sok {
+			//parse to get county level
+			d := s.SampleStructure(rand.Int63()) //this is not a good idea, it will advance the seed and change results beween ECAM and non ecam computes.
+			cbfips := s.CBFips[0:5]
+			c, cok := totalCounty[cbfips]
+			if cok {
+				c.Capital += d.ContVal + d.StructVal
+				c.Labor += int64(d.Pop2pmu65) //day workers (summing labor - could sum night under as an alternative, this assumes that people cant go to work because work is damaged, if we summed night, we would be saying people cant go to work because they are displaced.)
+				totalCounty[cbfips] = c
+			} else {
+				newc := indirecteconomics.CapitalAndLabor{Capital: d.ContVal + d.StructVal, Labor: int64(d.Pop2pmu65)}
+				totalCounty[cbfips] = newc
+			}
+		}
+		d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		//compute damages based on hazard being able to provide depth
+		if err == nil {
+			r, err3 := f.Compute(d)
+			if err3 == nil {
+				//we know it is a structure, so just jump to the values (unsafe operation, data structure of results subject to change)
+				cbfips := r.Result[12].(string)[0:5]
+				c, cok := lossCounty[cbfips]
+				if cok {
+					c.Capital += r.Result[7].(float64) + r.Result[6].(float64)
+					c.Labor += int64(r.Result[10].(int32)) //day workers (summing labor - could sum night under as an alternative, this assumes that people cant go to work because work is damaged, if we summed night, we would be saying people cant go to work because they are displaced.)
+					lossCounty[cbfips] = c
+				} else {
+					newc := indirecteconomics.CapitalAndLabor{Capital: r.Result[7].(float64) + r.Result[6].(float64), Labor: int64(r.Result[10].(int32))}
+					lossCounty[cbfips] = newc
+				}
+				w.Write(r)
+			}
+		}
+	})
+	//create loss ratios!
+	for k, v := range lossCounty {
+		statefips := k[0:2]
+		countyfips := k[2:5]
+		tc, tcok := totalCounty[k]
+		if tcok {
+
+			llr := float64(float64(v.Labor) / float64(tc.Labor))
+			clr := v.Capital / tc.Capital
+			if llr > 0 {
+				if clr > 0 {
+					er, err := indirecteconomics.ComputeEcam(statefips, countyfips, clr, llr)
+					if err != nil {
+						fmt.Println("Couldnt compute ECAM for " + k)
+					} else {
+						fmt.Println(er) //computed ecam!
+					}
+				} else {
+					fmt.Printf("Couldnt compute ECAM for %v, Capital loss ratio was %f\n", k, clr)
+				}
+			} else {
+				fmt.Printf("Couldnt compute ECAM for %v, labor loss ratio was %f\n", k, llr)
+			}
+		}
+	}
 }

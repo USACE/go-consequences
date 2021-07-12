@@ -13,6 +13,7 @@ import (
 type BaseStructure struct {
 	Name   string
 	DamCat string
+	CBFips string
 	X, Y   float64
 }
 
@@ -65,7 +66,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		Pop2pmu65:     s.Pop2pmu65,
 		Pop2amo65:     s.Pop2amo65,
 		Pop2amu65:     s.Pop2amu65,
-		BaseStructure: BaseStructure{Name: s.Name, X: s.X, Y: s.Y, DamCat: s.DamCat}}
+		BaseStructure: BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat}}
 }
 
 //Compute implements the consequences.Receptor interface on StrucutreStochastic
@@ -79,8 +80,8 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Res
 }
 
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	if e.Has(hazards.Depth) { //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
@@ -105,6 +106,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[9] = s.Pop2amo65
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
+		ret.Result[12] = s.CBFips
 	} else {
 		err = errors.New("Hazard did not contain depth")
 	}

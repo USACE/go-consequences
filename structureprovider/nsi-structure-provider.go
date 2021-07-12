@@ -107,6 +107,7 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		Pop2amu65: f.Properties.Pop2amu65,
 		BaseStructure: structures.BaseStructure{
 			Name:   strconv.Itoa(f.Properties.Name),
+			CBFips: f.Properties.CB,
 			DamCat: f.Properties.DamCat,
 			X:      f.Properties.X,
 			Y:      f.Properties.Y,
