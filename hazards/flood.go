@@ -104,3 +104,60 @@ func (ad ArrivalandDurationEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0
 }
+
+//ArrivalandDurationEvent describes an event with an arrival time and a duration in days
+type ArrivalDepthandDurationEvent struct {
+	arrivalTime    time.Time
+	depth          float64
+	durationInDays float64
+}
+
+func (d ArrivalDepthandDurationEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"arrivaldepthanddurationevent\":{\"arrivaltime\":%s,\"depth\":%f,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Depth(), d.Duration())
+	return []byte(s), nil
+}
+func (h *ArrivalDepthandDurationEvent) SetDepth(d float64) {
+	h.depth = d
+}
+func (h ArrivalDepthandDurationEvent) Depth() float64 {
+	return h.depth
+}
+func (h ArrivalDepthandDurationEvent) Velocity() float64 {
+	return -901.0
+}
+func (h *ArrivalDepthandDurationEvent) SetArrivalTime(t time.Time) {
+	h.arrivalTime = t
+}
+func (h ArrivalDepthandDurationEvent) ArrivalTime() time.Time {
+	return h.arrivalTime
+}
+func (h ArrivalDepthandDurationEvent) ArrivalTime2ft() time.Time {
+	return time.Time{}
+}
+func (h ArrivalDepthandDurationEvent) Duration() float64 {
+	return h.durationInDays
+}
+func (h *ArrivalDepthandDurationEvent) SetDuration(d float64) {
+	h.durationInDays = d
+}
+func (h ArrivalDepthandDurationEvent) WaveHeight() float64 {
+	return -901.0
+}
+func (h ArrivalDepthandDurationEvent) Salinity() bool {
+	return false
+}
+
+//Parameters implements the HazardEvent interface
+func (ad ArrivalDepthandDurationEvent) Parameters() Parameter {
+	adp := Default
+	adp = SetHasDuration(adp)
+	adp = SetHasDepth(adp)
+	adp = SetHasArrivalTime(adp)
+	return adp
+}
+
+//Has implements the HazardEvent Interface
+func (ad ArrivalDepthandDurationEvent) Has(p Parameter) bool {
+	adp := ad.Parameters()
+	return adp&p != 0
+}
