@@ -158,7 +158,7 @@ func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEven
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
-		ret.Result[13] = damagePercent * reconstructiondays
+		ret.Result[13] = (damagePercent * reconstructiondays) + e.Duration()
 	} else {
 		err = errors.New("Hazard did not contain depth")
 	}

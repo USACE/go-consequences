@@ -3,6 +3,7 @@ package structures
 import (
 	"math"
 	"testing"
+	"time"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/consequences"
@@ -111,6 +112,9 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 
 	//test depth values
 	var d = hazards.ArrivalDepthandDurationEvent{}
+	d.SetDuration(2.5)
+	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
+	d.SetArrivalTime(at)
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5}
 	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0}
 	for idx := range depths {
@@ -125,9 +129,9 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 		}
 		got := out.(float64)
 
-		diff := expectedResults[idx]*1.8 - got //180.0/100=1.8
-		if math.Abs(diff) > .0000000000001 {   //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
-			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.800)
+		diff := (expectedResults[idx]*1.8 + d.Duration()) - got //180.0/100=1.8
+		if math.Abs(diff) > .0000000000001 {                    //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
+			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.8+d.Duration())
 		}
 	}
 
