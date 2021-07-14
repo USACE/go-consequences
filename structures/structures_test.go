@@ -133,6 +133,14 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 		if math.Abs(diff) > .0000000000001 {                    //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.8+d.Duration())
 		}
+		out2, err := r.Fetch("rebuilddate")
+		if err != nil {
+			panic(err)
+		}
+		gotdate := out2.(time.Time)
+		if gotdate.Equal(d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration()))) {
+			t.Errorf("Compute(%f) = %s; expected %s", depths[idx], gotdate, d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration())))
+		}
 	}
 
 }

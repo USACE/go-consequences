@@ -3,6 +3,7 @@ package structures
 import (
 	"errors"
 	"math/rand"
+	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -117,8 +118,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	return ret, err
 }
 func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEvent, s StructureDeterministic) (consequences.Result, error) {
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "daystoreconstruction"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0.0}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "daystoreconstruction", "rebuilddate"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0.0, time.Now()}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 
@@ -158,7 +159,9 @@ func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEven
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
-		ret.Result[13] = (damagePercent * reconstructiondays) + e.Duration()
+		rebuilddays := (damagePercent * reconstructiondays) + e.Duration()
+		ret.Result[13] = rebuilddays
+		ret.Result[14] = e.ArrivalTime().AddDate(0, 0, int(rebuilddays)) //rounds to int
 	} else {
 		err = errors.New("Hazard did not contain depth")
 	}
