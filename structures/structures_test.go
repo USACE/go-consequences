@@ -116,10 +116,15 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 	for idx := range depths {
 		d.SetDepth(depths[idx])
 		r, err := s.Compute(d)
-		got := r.Result[13].(float64)
 		if err != nil {
 			panic(err)
 		}
+		out, err := r.Fetch("daystoreconstruction")
+		if err != nil {
+			panic(err)
+		}
+		got := out.(float64)
+
 		diff := expectedResults[idx]*1.8 - got //180.0/100=1.8
 		if math.Abs(diff) > .0000000000001 {   //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.800)
