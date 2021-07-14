@@ -2,6 +2,7 @@ package consequences
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 )
 
@@ -28,6 +29,14 @@ func (c *Results) AddResult(cr Result) {
 	//todo check headers for equivalency...
 	c.Headers = cr.Headers
 	c.Result.Result = append(c.Result.Result, cr.Result)
+}
+func (c Result) Fetch(parameter string) (interface{}, error) {
+	for i, v := range c.Headers {
+		if v == parameter {
+			return c.Result[i], nil
+		}
+	}
+	return nil, errors.New("Parameter " + parameter + " not found")
 }
 
 //MarshalJSON a better printed version of results - this is my preferred way to print, but it is more complex
