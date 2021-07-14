@@ -76,6 +76,10 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
+	add, addok := d.(hazards.ArrivalDepthandDurationEvent)
+	if addok {
+		return computeConsequencesWithReconstruction(add, s)
+	}
 	return computeConsequences(d, s)
 }
 
@@ -107,6 +111,54 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
+	} else {
+		err = errors.New("Hazard did not contain depth")
+	}
+	return ret, err
+}
+func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEvent, s StructureDeterministic) (consequences.Result, error) {
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "daystoreconstruction"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0.0}
+	var ret = consequences.Result{Headers: header, Result: results}
+	var err error = nil
+
+	if e.Has(hazards.Depth) { //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
+		if e.Depth() < 0.0 {
+			err = errors.New("depth above ground was less than zero")
+		}
+		if e.Depth() > 9999.0 {
+			err = errors.New("depth above ground was greater than 9999")
+		}
+		depthAboveFFE := e.Depth() - s.FoundHt
+		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
+		reconstructiondays := 0.0
+		switch s.DamCat {
+		case "RES":
+			reconstructiondays = 30.0
+		case "COM":
+			reconstructiondays = 90.0
+		case "IND":
+			reconstructiondays = 270.0
+		case "PUB":
+			reconstructiondays = 360.0
+		default:
+			reconstructiondays = 180.0
+		}
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = e
+		ret.Result[4] = s.BaseStructure.DamCat
+		ret.Result[5] = s.OccType.Name
+		ret.Result[6] = damagePercent * s.StructVal
+		ret.Result[7] = cdamagePercent * s.ContVal
+		ret.Result[8] = s.Pop2amu65
+		ret.Result[9] = s.Pop2amo65
+		ret.Result[10] = s.Pop2pmu65
+		ret.Result[11] = s.Pop2pmo65
+		ret.Result[12] = s.CBFips
+		ret.Result[13] = damagePercent * reconstructiondays
 	} else {
 		err = errors.New("Hazard did not contain depth")
 	}
