@@ -111,7 +111,7 @@ func (ad ArrivalandDurationEvent) Has(p Parameter) bool {
 	return adp&p != 0
 }
 
-//ArrivalandDurationEvent describes an event with an arrival time and a duration in days
+//ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
 type ArrivalDepthandDurationEvent struct {
 	arrivalTime    time.Time
 	depth          float64
@@ -169,4 +169,54 @@ func (ad ArrivalDepthandDurationEvent) Parameters() Parameter {
 func (ad ArrivalDepthandDurationEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0
+}
+
+//ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
+type QualitativeEvent struct {
+	qualitative string
+}
+
+func (d QualitativeEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"qualitativeevent\":{\"qualitative\":%s}}", d.Qualitative())
+	return []byte(s), nil
+}
+func (h QualitativeEvent) Depth() float64 {
+	return -901.0
+}
+func (h QualitativeEvent) Velocity() float64 {
+	return -901.0
+}
+func (h QualitativeEvent) ArrivalTime() time.Time {
+	return time.Time{}
+}
+func (h QualitativeEvent) ArrivalTime2ft() time.Time {
+	return time.Time{}
+}
+func (h QualitativeEvent) Duration() float64 {
+	return -901.0
+}
+func (h QualitativeEvent) WaveHeight() float64 {
+	return -901.0
+}
+func (h QualitativeEvent) Salinity() bool {
+	return false
+}
+func (h QualitativeEvent) Qualitative() string {
+	return h.qualitative
+}
+func (h *QualitativeEvent) SetQualitative(message string) {
+	h.qualitative = message
+}
+
+//Parameters implements the HazardEvent interface
+func (q QualitativeEvent) Parameters() Parameter {
+	qp := Default
+	qp = SetHasQualitative(qp)
+	return qp
+}
+
+//Has implements the HazardEvent Interface
+func (q QualitativeEvent) Has(p Parameter) bool {
+	qp := q.Parameters()
+	return qp&p != 0
 }

@@ -112,8 +112,23 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
+	} else if e.Has(hazards.Qualitative) {
+		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = e
+		ret.Result[4] = s.BaseStructure.DamCat
+		ret.Result[5] = s.OccType.Name
+		ret.Result[6] = 0.0
+		ret.Result[7] = 0.0
+		ret.Result[8] = s.Pop2amu65
+		ret.Result[9] = s.Pop2amo65
+		ret.Result[10] = s.Pop2pmu65
+		ret.Result[11] = s.Pop2pmo65
+		ret.Result[12] = s.CBFips
 	} else {
-		err = errors.New("Hazard did not contain depth")
+		err = errors.New("Hazard did not contain valid parameters to impact a structure")
 	}
 	return ret, err
 }
