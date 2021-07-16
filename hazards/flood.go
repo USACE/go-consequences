@@ -35,6 +35,9 @@ func (h DepthEvent) WaveHeight() float64 {
 func (h DepthEvent) Salinity() bool {
 	return false
 }
+func (h DepthEvent) Qualitative() string {
+	return ""
+}
 
 //Parameters implements the HazardEvent interface
 func (h DepthEvent) Parameters() Parameter {
@@ -89,6 +92,9 @@ func (h ArrivalandDurationEvent) WaveHeight() float64 {
 }
 func (h ArrivalandDurationEvent) Salinity() bool {
 	return false
+}
+func (h ArrivalandDurationEvent) Qualitative() string {
+	return ""
 }
 
 //Parameters implements the HazardEvent interface
@@ -145,6 +151,9 @@ func (h ArrivalDepthandDurationEvent) WaveHeight() float64 {
 }
 func (h ArrivalDepthandDurationEvent) Salinity() bool {
 	return false
+}
+func (h ArrivalDepthandDurationEvent) Qualitative() string {
+	return ""
 }
 
 //Parameters implements the HazardEvent interface

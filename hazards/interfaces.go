@@ -14,6 +14,7 @@ type HazardEvent interface {
 	Duration() float64
 	WaveHeight() float64
 	Salinity() bool
+	Qualitative() string
 	//values?
 	//hazardType?
 	Parameters() Parameter
@@ -25,15 +26,15 @@ type Parameter byte
 
 //Parameter types describe different parameters for hazards
 const (
-	Default        Parameter = 0  //0
-	Depth          Parameter = 1  //1
-	Velocity       Parameter = 2  //2
-	ArrivalTime    Parameter = 4  //3
-	ArrivalTime2ft Parameter = 8  //4
-	Duration       Parameter = 16 //5
-	WaveHeight     Parameter = 32 //6
-	Salinity       Parameter = 64 //7
-	//next parameter
+	Default        Parameter = 0   //0
+	Depth          Parameter = 1   //1
+	Velocity       Parameter = 2   //2
+	ArrivalTime    Parameter = 4   //3
+	ArrivalTime2ft Parameter = 8   //4
+	Duration       Parameter = 16  //5
+	WaveHeight     Parameter = 32  //6
+	Salinity       Parameter = 64  //7
+	Qualitative    Parameter = 128 //8
 	//fin
 
 )
@@ -71,6 +72,11 @@ func SetHasWaveHeight(h Parameter) Parameter {
 //SetHasSalinity turns on a bitflag for the Parameter Salinity
 func SetHasSalinity(h Parameter) Parameter {
 	return h | Salinity
+}
+
+//SetHasSalinity turns on a bitflag for the Parameter Salinity
+func SetHasQualitative(h Parameter) Parameter {
+	return h | Qualitative
 }
 func (p Parameter) String() string {
 	s := ""
@@ -124,6 +130,14 @@ func (p Parameter) String() string {
 			s += ", "
 		}
 		s += "Salinity"
+
+		count++
+	}
+	if p&Qualitative != 0 {
+		if count > 0 {
+			s += ", "
+		}
+		s += "Qualitative"
 
 		count++
 	}

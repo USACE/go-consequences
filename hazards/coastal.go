@@ -46,6 +46,9 @@ func (h CoastalEvent) Salinity() bool {
 func (h *CoastalEvent) SetSalinity(d bool) {
 	h.salinity = d
 }
+func (h CoastalEvent) Qualitative() string {
+	return ""
+}
 
 //Parameters implements the HazardEvent interface
 func (ad CoastalEvent) Parameters() Parameter {
