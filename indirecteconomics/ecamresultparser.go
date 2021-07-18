@@ -120,7 +120,7 @@ func abreviationToDetailedString(abrv string) (string, error) {
 	case "FSH":
 		return "Fishing", nil
 	case "CRU":
-		return "Oil, gas and coal Extraction", nil
+		return "Oil gas and coal Extraction", nil
 	case "MIN":
 		return "Minerals mining", nil
 	case "PWR":
