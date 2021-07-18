@@ -145,6 +145,8 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 			clr := v.Capital / tc.Capital
 			if llr > 0 {
 				if clr > 0 {
+					fmt.Println(fmt.Sprintf("capital loss ratio %f", clr))
+					fmt.Println(fmt.Sprintf("labor loss ratio %f", llr))
 					er, err := indirecteconomics.ComputeEcam(statefips, countyfips, clr, llr)
 					if err != nil {
 						fmt.Println("Couldnt compute ECAM for " + k)

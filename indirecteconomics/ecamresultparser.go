@@ -3,6 +3,7 @@ package indirecteconomics
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -20,6 +21,20 @@ type EcamSectorResultOutput struct {
 	Change        float64
 }
 
+func (er EcamResult) String() string {
+	report := "Production\n"
+	report += "Sector, Previous Output (millions USD), Post Shock Output (millions USD), Output Change (millions USD)\n"
+	for _, r := range er.ProductionImpacts {
+		report += fmt.Sprintf("%v, %f, %f, %f", r.Sector, r.Benchmark, r.Benchmark+r.Change, r.Change) + "\n" // i am not sure this is right
+	}
+	report += "\n"
+	report += "Labor\n"
+	report += "Sector, Previous Employment, Post Shock Employment, Employment Change\n"
+	for _, r := range er.EmploymentImpacts {
+		report += fmt.Sprintf("%v, %f, %f, %f", r.Sector, r.Benchmark, r.Change, r.PercentChange) + "\n" //i am not sure this is right either.
+	}
+	return report
+}
 func ParseEcamResult(webResponse *http.Response) (EcamResult, error) {
 	//need significant error checking.  ref: hec2.ecam.ComputeECAM.java
 	rc := webResponse.Body
