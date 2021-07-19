@@ -183,7 +183,3 @@ func abreviationToDetailedString(abrv string) (string, error) {
 		return abrv, errors.New("Could not parse " + abrv)
 	}
 }
-
-/*
-
- */

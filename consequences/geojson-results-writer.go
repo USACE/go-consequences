@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"strings"
 )
 
@@ -50,7 +51,13 @@ func (srw *geoJsonResultsWriter) Write(r Result) {
 			y = result[i].(float64)
 		}
 	}
-	sp = strings.TrimRight(sp, ",\"")
+	atype := reflect.TypeOf(result[len(result)-1])
+	if atype.Kind() == reflect.String {
+		sp = strings.TrimRight(sp, ",\"")
+		sp += "\""
+	} else {
+		sp = strings.TrimRight(sp, ",\"")
+	}
 
 	//write out a feature
 	s := "{\"type\": \"Feature\",\n\"geometry\": {\n\"type\": \"Point\",\n\"coordinates\": ["

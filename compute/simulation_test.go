@@ -54,3 +54,12 @@ func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstractByFIPS_WithECAM("48201", dfr, nsp, w)
 }
+func Test_StreamAbstract_smallDataset(t *testing.T) {
+	nsp := structureprovider.InitNSISP()
+	root := "/workspaces/Go_Consequences/data/clipped_sample"
+	filepath := root + ".tif"
+	w, _ := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	defer w.Close()
+	dfr, _ := hazardproviders.Init(filepath)
+	StreamAbstract(dfr, nsp, w)
+}

@@ -66,6 +66,7 @@ func (c Result) MarshalJSON() ([]byte, error) {
 		s += val + "\":" + string(value) + ",\""
 	}
 	s = strings.TrimRight(s, ",\"")
+	//check if the last value is a string, if so, we need to clse
 	s += "}}"
 	return []byte(s), nil
 }
