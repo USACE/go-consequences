@@ -31,7 +31,7 @@ func (er EcamResult) String() string {
 	report += "Labor\n"
 	report += "Sector, Previous Employment, Post Shock Employment, Employment Change\n"
 	for _, r := range er.EmploymentImpacts {
-		report += fmt.Sprintf("%v, %f, %f, %f", r.Sector, r.Benchmark, r.Change, r.PercentChange) + "\n" //i am not sure this is right either.
+		report += fmt.Sprintf("%v, %f, %f, %f", r.Sector, r.Benchmark, r.PercentChange, r.Change) + "\n" //i am not sure this is right either.
 	}
 	return report
 }

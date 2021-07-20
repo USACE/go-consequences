@@ -10,7 +10,7 @@ import (
 
 type CapitalAndLabor struct {
 	Capital float64
-	Labor   int64
+	Labor   float64
 }
 
 func ComputeEcam(stateFips string, countyFips string, capitalLoss float64, laborloss float64) (EcamResult, error) {
