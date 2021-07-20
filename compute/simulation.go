@@ -8,6 +8,7 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/indirecteconomics"
 	"github.com/USACE/go-consequences/structures"
 )
@@ -107,10 +108,10 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 			c, cok := totalCounty[cbfips]
 			if cok {
 				c.Capital += d.ContVal + d.StructVal
-				c.Labor += int64(d.Pop2pmu65) //day workers (summing labor - could sum night under as an alternative, this assumes that people cant go to work because work is damaged, if we summed night, we would be saying people cant go to work because they are displaced.)
+				c.Labor += float64(d.Pop2pmu65) //day workers (summing labor - could sum night under as an alternative, this assumes that people cant go to work because work is damaged, if we summed night, we would be saying people cant go to work because they are displaced.)
 				totalCounty[cbfips] = c
 			} else {
-				newc := indirecteconomics.CapitalAndLabor{Capital: d.ContVal + d.StructVal, Labor: int64(d.Pop2pmu65)}
+				newc := indirecteconomics.CapitalAndLabor{Capital: d.ContVal + d.StructVal, Labor: float64(d.Pop2pmu65)}
 				totalCounty[cbfips] = newc
 			}
 		}
@@ -122,12 +123,16 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 				//we know it is a structure, so just jump to the values (unsafe operation, data structure of results subject to change)
 				cbfips := r.Result[12].(string)[0:5]
 				c, cok := lossCounty[cbfips]
+				duration := .5
+				if d.Has(hazards.Duration) {
+					duration = d.Duration()
+				}
 				if cok {
 					c.Capital += r.Result[7].(float64) + r.Result[6].(float64)
-					c.Labor += int64(r.Result[10].(int32)) //day workers (summing labor - could sum night under as an alternative, this assumes that people cant go to work because work is damaged, if we summed night, we would be saying people cant go to work because they are displaced.)
+					c.Labor += float64(r.Result[10].(int32)) * duration //day workers (summing labor - could sum night under as an alternative, this assumes that people cant go to work because work is damaged, if we summed night, we would be saying people cant go to work because they are displaced.)
 					lossCounty[cbfips] = c
 				} else {
-					newc := indirecteconomics.CapitalAndLabor{Capital: r.Result[7].(float64) + r.Result[6].(float64), Labor: int64(r.Result[10].(int32))}
+					newc := indirecteconomics.CapitalAndLabor{Capital: r.Result[7].(float64) + r.Result[6].(float64), Labor: float64(r.Result[10].(int32)) * duration}
 					lossCounty[cbfips] = newc
 				}
 				w.Write(r)
