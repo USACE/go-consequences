@@ -1,5 +1,7 @@
 github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20210427215836-c320f5ce1b22 h1:AN3jxiduIbZp/Q0LMFUDv4+btCa4ob6WSh6v30z+M7Y=
 github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20210427215836-c320f5ce1b22/go.mod h1:emMoyYiFKgCy3DPFt4uKUdHZ9FwC8k1YArGNifarbmg=
+github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20210721135724-6478074dde32 h1:J8IOgufb4Q/Zp2pnJxIeCxkHH7FhjfOFP9qxCd16NGE=
+github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20210721135724-6478074dde32/go.mod h1:emMoyYiFKgCy3DPFt4uKUdHZ9FwC8k1YArGNifarbmg=
 github.com/cockroachdb/apd v1.1.0 h1:3LFP3629v+1aKXU5Q37mxmRxX/pIu1nijXydLShEq5I=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/dewberry/gdal v0.3.1 h1:scISo4PeC3LxjVnG2E5SYIHwbCI2LzcKvoeqbnoQNVc=

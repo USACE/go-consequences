@@ -90,11 +90,11 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	if e.Has(hazards.Depth) { //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
-		if e.Depth() < 0.0 {
-			err = errors.New("depth above ground was less than zero")
-		}
-		if e.Depth() > 9999.0 {
-			err = errors.New("depth above ground was greater than 9999")
+		//if e.Depth() < 0.0 {
+		//err = errors.New("depth above ground was less than zero")
+		//}
+		if e.Depth() > 9000.0 {
+			err = errors.New("depth above ground was greater than 9000")
 		}
 		depthAboveFFE := e.Depth() - s.FoundHt
 		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in

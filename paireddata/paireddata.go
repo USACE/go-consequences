@@ -4,11 +4,10 @@ import (
 	"sort"
 )
 
-
-// PairedData is paired data x and y values 
+// PairedData is paired data x and y values
 type PairedData struct {
-	Xvals []float64
-	Yvals []float64
+	Xvals []float64 `json:"xvalues"`
+	Yvals []float64 `json:"yvalues"`
 }
 
 //SampleValue implements ValueSampler
@@ -34,3 +33,4 @@ func (p PairedData) SampleValue(inputValue interface{}) float64 {
 	a := p.Yvals[lower]
 	return a + slope*(xval-p.Xvals[lower])
 }
+//func Marshal
