@@ -63,16 +63,12 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 	idx := 0
 	l := gpk.ds.LayerByName(gpk.LayerName)
 	fdef := l.Definition().FieldDefinition(gpk.schemaIDX[1])
-	fc, _ := l.FeatureCount(true)
-	fmt.Println(fc)
 	filterstring := "SUBSTR(" + fdef.Name() + ",1," + fmt.Sprint(len(fipscode)) + ") = '" + fipscode + "'"
-	fmt.Println(filterstring)
 	err := l.SetAttributeFilter(filterstring)
 	if err != nil {
 		panic(err)
 	}
-	fc, _ = l.FeatureCount(true)
-	fmt.Println(fc)
+	fc, _ := l.FeatureCount(true)
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
@@ -92,16 +88,12 @@ func (gpk gpkDataSet) processFipsStreamDeterministic(fipscode string, sp consequ
 	idx := 0
 	l := gpk.ds.LayerByName(gpk.LayerName)
 	fdef := l.Definition().FieldDefinition(gpk.schemaIDX[1])
-	fc, _ := l.FeatureCount(true)
-	fmt.Println(fc)
 	filterstring := "SUBSTR(" + fdef.Name() + ",1," + fmt.Sprint(len(fipscode)) + ") = '" + fipscode + "'"
-	fmt.Println(filterstring)
 	err := l.SetAttributeFilter(filterstring)
 	if err != nil {
 		panic(err)
 	}
-	fc, _ = l.FeatureCount(true)
-	fmt.Println(fc)
+	fc, _ := l.FeatureCount(true)
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
