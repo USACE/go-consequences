@@ -2,6 +2,7 @@ package structureprovider
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -61,22 +62,25 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
 	l := gpk.ds.LayerByName(gpk.LayerName)
+	fdef := l.Definition().FieldDefinition(gpk.schemaIDX[1])
 	fc, _ := l.FeatureCount(true)
+	fmt.Println(fc)
+	filterstring := "SUBSTR(" + fdef.Name() + ",1," + fmt.Sprint(len(fipscode)) + ") = '" + fipscode + "'"
+	fmt.Println(filterstring)
+	err := l.SetAttributeFilter(filterstring)
+	if err != nil {
+		panic(err)
+	}
+	fc, _ = l.FeatureCount(true)
+	fmt.Println(fc)
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			cbfips := f.FieldAsString(gpk.schemaIDX[1])
-			//check if CBID matches from the start of the string
-			if len(fipscode) <= len(cbfips) {
-				comp := cbfips[0:len(fipscode)]
-				if comp == fipscode {
-					s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
-					if err == nil {
-						sp(s)
-					}
-				} //else no match, do not send structure.
-			} //else error?
+			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+			if err == nil {
+				sp(s)
+			}
 		}
 	}
 }
@@ -87,22 +91,25 @@ func (gpk gpkDataSet) processFipsStreamDeterministic(fipscode string, sp consequ
 	defaultOcctype := m2["RES1-1SNB"]
 	idx := 0
 	l := gpk.ds.LayerByName(gpk.LayerName)
+	fdef := l.Definition().FieldDefinition(gpk.schemaIDX[1])
 	fc, _ := l.FeatureCount(true)
+	fmt.Println(fc)
+	filterstring := "SUBSTR(" + fdef.Name() + ",1," + fmt.Sprint(len(fipscode)) + ") = '" + fipscode + "'"
+	fmt.Println(filterstring)
+	err := l.SetAttributeFilter(filterstring)
+	if err != nil {
+		panic(err)
+	}
+	fc, _ = l.FeatureCount(true)
+	fmt.Println(fc)
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			cbfips := f.FieldAsString(gpk.schemaIDX[1])
-			//check if CBID matches from the start of the string
-			if len(fipscode) <= len(cbfips) {
-				comp := cbfips[0:len(fipscode)]
-				if comp == fipscode {
-					s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX)
-					if err == nil {
-						sp(s)
-					}
-				} //else no match, do not send structure.
-			} //else error?
+			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX)
+			if err == nil {
+				sp(s)
+			}
 		}
 	}
 }
