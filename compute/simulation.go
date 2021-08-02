@@ -39,12 +39,15 @@ func ComputeEAD(damages []float64, freq []float64) float64 {
 //ComputeSpecialEAD integrates under the damage frequency curve but does not calculate the first triangle between 1 and the first frequency.
 func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	//this differs from computeEAD in that it specifically does not calculate the first triangle between 1 and the first frequency to interpolate damages to zero.
+	if len(damages) != len(freq) {
+		panic("frequency curve is unbalanced")
+	}
 	triangle := 0.0
 	square := 0.0
 	x1 := freq[0]
 	y1 := damages[0]
 	eadT := 0.0
-	if len(freq) > 1 {
+	if len(damages) > 1 {
 		for i := 1; i < len(freq); i++ {
 			xdelta := x1 - freq[i]
 			square = xdelta * y1

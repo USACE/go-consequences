@@ -34,7 +34,10 @@ func TestComputeSpecialEAD(t *testing.T) {
 	}
 }
 func Test_StreamAbstract(t *testing.T) {
-	//nsp := structureprovider.InitSHP("/workspaces/Go_Consequences/data/harvey/ORNLcentroids_LBattributes.shp")
+	/*nsp, err := structureprovider.InitSHP("/workspaces/Go_Consequences/data/harvey/ORNLcentroids_LBattributes.shp")
+	if err != nil {
+		panic(err)
+	}*/
 	nsp := structureprovider.InitNSISP()
 	//root := "/workspaces/Go_Consequences/data/CERA_Adv29_maxwaterelev_4326_90m"
 	root := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326"

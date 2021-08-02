@@ -6,9 +6,19 @@ import (
 )
 
 func Test_InitSHP(t *testing.T) {
-	root := "/workspaces/Go_Consequences/data/hurricane-laura/ORNLcentroids_LBattributes"
-	filepath := root + ".shp"
-	nsp, _ := InitSHP(filepath) //, "ORNLcentroids_LBattributes")
+	root := "/workspaces/Go_Consequences/data/hurricane-laura/ORNLcentroids_LBattributes_found_type.shp"
+	nsp, err := InitSHP(root) //, "ORNLcentroids_LBattributes")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(nsp.FilePath)
+}
+func Test_InitSHP_missingField(t *testing.T) {
+	root := "/workspaces/Go_Consequences/data/harvey/ORNLcentroids_LBattributes.shp"
+	nsp, err := InitSHP(root) //, "ORNLcentroids_LBattributes")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(nsp.FilePath)
 }
 func Test_InitSHP_BadData(t *testing.T) {
