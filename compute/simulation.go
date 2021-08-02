@@ -44,13 +44,15 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	x1 := freq[0]
 	y1 := damages[0]
 	eadT := 0.0
-	for i := 1; i < len(freq); i++ {
-		xdelta := x1 - freq[i]
-		square = xdelta * y1
-		triangle = ((xdelta) * -(y1 - damages[i])) / 2.0
-		eadT += square + triangle
-		x1 = freq[i]
-		y1 = damages[i]
+	if len(freq) > 1 {
+		for i := 1; i < len(freq); i++ {
+			xdelta := x1 - freq[i]
+			square = xdelta * y1
+			triangle = ((xdelta) * -(y1 - damages[i])) / 2.0
+			eadT += square + triangle
+			x1 = freq[i]
+			y1 = damages[i]
+		}
 	}
 	if x1 != 0.0 {
 		xdelta := x1 - 0.0
