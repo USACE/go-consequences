@@ -23,6 +23,7 @@ type StructureStochastic struct {
 	BaseStructure
 	UseUncertainty                             bool //defaults to false!
 	OccType                                    OccupancyTypeStochastic
+	FoundType                                  string
 	StructVal, ContVal, FoundHt                consequences.ParameterValue
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65 int32
 }
@@ -31,6 +32,7 @@ type StructureStochastic struct {
 type StructureDeterministic struct {
 	BaseStructure
 	OccType                                    OccupancyTypeDeterministic
+	FoundType                                  string
 	StructVal, ContVal, FoundHt                float64
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65 int32
 }
@@ -62,6 +64,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		OccType:       ot,
 		StructVal:     sv,
 		ContVal:       cv,
+		FoundType:     s.FoundType,
 		FoundHt:       fh,
 		Pop2pmo65:     s.Pop2pmo65,
 		Pop2pmu65:     s.Pop2pmu65,

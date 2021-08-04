@@ -58,6 +58,7 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	s.X = f.FieldAsFloat64(idxs[2])
 	s.Y = f.FieldAsFloat64(idxs[3])
 	s.DamCat = f.FieldAsString(idxs[4])
+	s.FoundType = f.FieldAsString(idxs[9])
 	s.StructVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[6])}
 	s.ContVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[7])}
 	s.FoundHt = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[8])}
@@ -110,6 +111,6 @@ func featuretoDeterministicStructure(f *gdal.Feature, m map[string]structures.Oc
 	s.StructVal = f.FieldAsFloat64(idxs[6])
 	s.ContVal = f.FieldAsFloat64(idxs[7])
 	s.FoundHt = f.FieldAsFloat64(idxs[8])
-
+	s.FoundType = f.FieldAsString(idxs[9])
 	return s, nil
 }
