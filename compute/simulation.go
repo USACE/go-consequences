@@ -51,7 +51,11 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 		for i := 1; i < len(freq); i++ {
 			xdelta := x1 - freq[i]
 			square = xdelta * y1
-			triangle = ((xdelta) * -(y1 - damages[i])) / 2.0
+			if square != 0.0 { //we dont know where damage really begins until we see it. we can guess it is inbetween ordinates, but who knows.
+				triangle = ((xdelta) * -(y1 - damages[i])) / 2.0
+			} else {
+				triangle = 0.0
+			}
 			eadT += square + triangle
 			x1 = freq[i]
 			y1 = damages[i]
@@ -60,7 +64,6 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	if x1 != 0.0 {
 		xdelta := x1 - 0.0
 		eadT += xdelta * y1 //no extrapolation, just continue damages out as if it were truth for all remaining probability.
-
 	}
 	return eadT
 }

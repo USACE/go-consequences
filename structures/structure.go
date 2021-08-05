@@ -49,7 +49,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 	cv := 0.0
 	fh := 0.0
 	if s.UseUncertainty {
-		ot = s.OccType.SampleOccupancyType(seed)
+		ot = s.OccType.SampleOccupancyType(seed) //this is super inefficient. At the time this is called we know the hazard.
 		sv = s.StructVal.SampleValue(rand.Float64())
 		cv = s.ContVal.SampleValue(rand.Float64())
 		fh = s.FoundHt.SampleValue(rand.Float64())
