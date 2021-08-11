@@ -17,6 +17,11 @@ func TestNsiByFipsStream(t *testing.T) {
 	counter := 0
 	n.ByFips(fips, func(s consequences.Receptor) {
 		counter++
+		/*str, ok := s.(structures.StructureStochastic)
+		if ok {
+			fmt.Println(fmt.Sprintf("%v", str.NumStories))
+		}*/
+
 	})
 	if counter != 101 {
 		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, counter)

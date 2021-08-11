@@ -10,10 +10,11 @@ import (
 )
 
 type shpDataSet struct {
-	FilePath  string
-	LayerName string
-	schemaIDX []int
-	ds        *gdal.DataSource
+	FilePath          string
+	LayerName         string
+	schemaIDX         []int
+	optionalSchemaIDX []int
+	ds                *gdal.DataSource
 }
 
 func InitSHP(filepath string) (shpDataSet, error) {
@@ -21,6 +22,7 @@ func InitSHP(filepath string) (shpDataSet, error) {
 	if ds.LayerCount() > 1 {
 		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found more than one layer please specify one layer.")
 	}
+
 	/*if ds.LayerCount() < 1 {
 		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found no layers please specify one layer.")
 	}*/
@@ -35,7 +37,13 @@ func InitSHP(filepath string) (shpDataSet, error) {
 		}
 		sIDX[i] = idx
 	}
-	return shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, ds: &ds}, nil
+	o := OptionalSchema()
+	oIDX := make([]int, len(o))
+	for i, f := range o {
+		idx := def.FieldIndex(f)
+		oIDX[i] = idx
+	}
+	return shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}, nil
 }
 
 //ByFips a streaming service for structure stochastic based on a bounding box
@@ -58,7 +66,7 @@ func (shp shpDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 			if len(fipscode) <= len(cbfips) {
 				comp := cbfips[0:len(fipscode)]
 				if comp == fipscode {
-					s, err := featuretoStructure(f, m, defaultOcctype, shp.schemaIDX)
+					s, err := featuretoStructure(f, m, defaultOcctype, shp.schemaIDX, shp.optionalSchemaIDX)
 					if err == nil {
 						sp(s)
 					}
@@ -85,7 +93,7 @@ func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoStructure(f, m, defaultOcctype, shp.schemaIDX)
+			s, err := featuretoStructure(f, m, defaultOcctype, shp.schemaIDX, shp.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}

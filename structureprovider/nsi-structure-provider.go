@@ -15,20 +15,21 @@ import (
 
 //NsiProperties is a reflection of the JSON feature property attributes from the NSI-API
 type NsiProperties struct {
-	Name      int     `json:"fd_id"`
-	X         float64 `json:"x"`
-	Y         float64 `json:"y"`
-	Occtype   string  `json:"occtype"`
-	FoundHt   float64 `json:"found_ht"`
-	FoundType string  `json:"found_type"`
-	DamCat    string  `json:"st_damcat"`
-	StructVal float64 `json:"val_struct"`
-	ContVal   float64 `json:"val_cont"`
-	CB        string  `json:"cbfips"`
-	Pop2amu65 int32   `json:"pop2amu65"`
-	Pop2amo65 int32   `json:"pop2amo65"`
-	Pop2pmu65 int32   `json:"pop2pmu65"`
-	Pop2pmo65 int32   `json:"pop2pmo65"`
+	Name       int     `json:"fd_id"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+	Occtype    string  `json:"occtype"`
+	FoundHt    float64 `json:"found_ht"`
+	FoundType  string  `json:"found_type"`
+	DamCat     string  `json:"st_damcat"`
+	StructVal  float64 `json:"val_struct"`
+	ContVal    float64 `json:"val_cont"`
+	CB         string  `json:"cbfips"`
+	Pop2amu65  int32   `json:"pop2amu65"`
+	Pop2amo65  int32   `json:"pop2amo65"`
+	Pop2pmu65  int32   `json:"pop2pmu65"`
+	Pop2pmo65  int32   `json:"pop2pmo65"`
+	NumStories int32   `json:"num_story"`
 }
 
 //NsiFeature is a feature which contains the properties of a structure from the NSI API
@@ -97,15 +98,16 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		}
 	}
 	return structures.StructureStochastic{
-		OccType:   occtype,
-		StructVal: consequences.ParameterValue{Value: f.Properties.StructVal},
-		ContVal:   consequences.ParameterValue{Value: f.Properties.ContVal},
-		FoundHt:   consequences.ParameterValue{Value: f.Properties.FoundHt},
-		FoundType: f.Properties.FoundType,
-		Pop2pmo65: f.Properties.Pop2pmo65,
-		Pop2pmu65: f.Properties.Pop2pmu65,
-		Pop2amo65: f.Properties.Pop2amo65,
-		Pop2amu65: f.Properties.Pop2amu65,
+		OccType:    occtype,
+		StructVal:  consequences.ParameterValue{Value: f.Properties.StructVal},
+		ContVal:    consequences.ParameterValue{Value: f.Properties.ContVal},
+		FoundHt:    consequences.ParameterValue{Value: f.Properties.FoundHt},
+		FoundType:  f.Properties.FoundType,
+		Pop2pmo65:  f.Properties.Pop2pmo65,
+		Pop2pmu65:  f.Properties.Pop2pmu65,
+		Pop2amo65:  f.Properties.Pop2amo65,
+		Pop2amu65:  f.Properties.Pop2amu65,
+		NumStories: f.Properties.NumStories,
 		BaseStructure: structures.BaseStructure{
 			Name:   strconv.Itoa(f.Properties.Name),
 			CBFips: f.Properties.CB,

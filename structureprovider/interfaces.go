@@ -22,7 +22,16 @@ func StructureSchema() []string {
 	s[9] = "found_type"
 	return s
 }
-func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, idxs []int) (structures.StructureStochastic, error) {
+func OptionalSchema() []string {
+	s := make([]string, 5)
+	s[0] = "num_story"
+	s[1] = "pop2amu65"
+	s[2] = "pop2amo65"
+	s[3] = "pop2pmu65"
+	s[4] = "pop2pmo65"
+	return s
+}
+func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, idxs []int, oidxs []int) (structures.StructureStochastic, error) {
 	defer f.Destroy()
 	s := structures.StructureStochastic{}
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
@@ -62,7 +71,21 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	s.StructVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[6])}
 	s.ContVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[7])}
 	s.FoundHt = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[8])}
-
+	if oidxs[0] != -1 {
+		s.NumStories = int32(f.FieldAsInteger(oidxs[0]))
+	}
+	if oidxs[1] != -1 {
+		s.Pop2amu65 = int32(f.FieldAsInteger(oidxs[1]))
+	}
+	if oidxs[2] != -1 {
+		s.Pop2amo65 = int32(f.FieldAsInteger(oidxs[2]))
+	}
+	if oidxs[3] != -1 {
+		s.Pop2pmu65 = int32(f.FieldAsInteger(oidxs[3]))
+	}
+	if oidxs[4] != -1 {
+		s.Pop2pmo65 = int32(f.FieldAsInteger(oidxs[4]))
+	}
 	return s, nil
 }
 func swapOcctypeMap(m map[string]structures.OccupancyTypeStochastic) map[string]structures.OccupancyTypeDeterministic {
@@ -72,7 +95,7 @@ func swapOcctypeMap(m map[string]structures.OccupancyTypeStochastic) map[string]
 	}
 	return m2
 }
-func featuretoDeterministicStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeDeterministic, defaultOcctype structures.OccupancyTypeDeterministic, idxs []int) (structures.StructureDeterministic, error) {
+func featuretoDeterministicStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeDeterministic, defaultOcctype structures.OccupancyTypeDeterministic, idxs []int, oidxs []int) (structures.StructureDeterministic, error) {
 	defer f.Destroy()
 	s := structures.StructureDeterministic{}
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
@@ -112,5 +135,20 @@ func featuretoDeterministicStructure(f *gdal.Feature, m map[string]structures.Oc
 	s.ContVal = f.FieldAsFloat64(idxs[7])
 	s.FoundHt = f.FieldAsFloat64(idxs[8])
 	s.FoundType = f.FieldAsString(idxs[9])
+	if oidxs[0] != -1 {
+		s.NumStories = int32(f.FieldAsInteger(oidxs[0]))
+	}
+	if oidxs[1] != -1 {
+		s.Pop2amu65 = int32(f.FieldAsInteger(oidxs[1]))
+	}
+	if oidxs[2] != -1 {
+		s.Pop2amo65 = int32(f.FieldAsInteger(oidxs[2]))
+	}
+	if oidxs[3] != -1 {
+		s.Pop2pmu65 = int32(f.FieldAsInteger(oidxs[3]))
+	}
+	if oidxs[4] != -1 {
+		s.Pop2pmo65 = int32(f.FieldAsInteger(oidxs[4]))
+	}
 	return s, nil
 }

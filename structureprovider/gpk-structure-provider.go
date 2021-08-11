@@ -11,11 +11,12 @@ import (
 )
 
 type gpkDataSet struct {
-	FilePath      string
-	LayerName     string
-	schemaIDX     []int
-	ds            *gdal.DataSource
-	deterministic bool
+	FilePath          string
+	LayerName         string
+	schemaIDX         []int
+	optionalSchemaIDX []int
+	ds                *gdal.DataSource
+	deterministic     bool
 }
 
 func InitGPK(filepath string, layername string) (gpkDataSet, error) {
@@ -40,6 +41,12 @@ func InitGPK(filepath string, layername string) (gpkDataSet, error) {
 			return gpkDataSet{}, errors.New("GeoPpackage at path " + filepath + " Expected field named " + f + " none was found")
 		}
 		sIDX[i] = idx
+	}
+	o := OptionalSchema()
+	oIDX := make([]int, len(o))
+	for i, f := range o {
+		idx := def.FieldIndex(f)
+		oIDX[i] = idx
 	}
 	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, ds: &ds}, nil
 }
@@ -73,7 +80,7 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}
@@ -98,7 +105,7 @@ func (gpk gpkDataSet) processFipsStreamDeterministic(fipscode string, sp consequ
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX)
+			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}
@@ -125,7 +132,7 @@ func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX)
+			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}
@@ -146,7 +153,7 @@ func (gpk gpkDataSet) processBboxStreamDeterministic(bbox geography.BBox, sp con
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX)
+			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}
