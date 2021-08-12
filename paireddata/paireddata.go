@@ -33,4 +33,26 @@ func (p PairedData) SampleValue(inputValue interface{}) float64 {
 	a := p.Yvals[lower]
 	return a + slope*(xval-p.Xvals[lower])
 }
-//func Marshal
+func (p PairedData) IsMonotonicallyIncreasing() bool {
+	monotonic := true
+	prevYval := p.Yvals[0]
+	for i := 1; i < len(p.Yvals); i++ {
+		if prevYval > p.Yvals[i] {
+			monotonic = false
+		}
+	}
+	return monotonic
+}
+func (p *PairedData) ForceNonNegativeMonotonic() {
+	prevYval := 0.0
+	update := make([]float64, len(p.Yvals))
+	for idx, y := range p.Yvals {
+		if prevYval > y {
+			update[idx] = prevYval
+		} else {
+			update[idx] = y
+			prevYval = y
+		}
+	}
+	p.Yvals = update
+}

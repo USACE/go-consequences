@@ -11,6 +11,11 @@ func createTestData() PairedData {
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	return PairedData{Xvals: x, Yvals: y}
 }
+func createUnhappyData() PairedData {
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := []float64{-10.0, -20.0, -30.0, -40.0}
+	return PairedData{Xvals: x, Yvals: y}
+}
 func TestSampleValue_belowRange(t *testing.T) {
 	//setup
 	pd := createTestData()
@@ -84,4 +89,20 @@ func Test_Json(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(string(b))
+}
+func Test_ForceNonNegativeMonotonic(t *testing.T) {
+	pd := createUnhappyData()
+	if pd.IsMonotonicallyIncreasing() {
+		t.Error("say wha?")
+	} else {
+		pd.ForceNonNegativeMonotonic()
+		if pd.IsMonotonicallyIncreasing() {
+			for _, y := range pd.Yvals {
+				fmt.Println(y)
+			}
+		} else {
+			t.Error("say wha? take 2")
+		}
+	}
+
 }

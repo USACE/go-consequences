@@ -11,12 +11,13 @@ type UncertaintyPairedData struct {
 }
 
 //SampleValueSampler implements UncertaintyValueSamplerSampler interface on the UncertaintyPairedData struct to produce a deterministic paireddata value for a given random number between 0 and 1
-func (p UncertaintyPairedData) SampleValueSampler(randomValue float64) ValueSampler {
-	yVals := make([]float64, len(p.Yvals))
-	for idx, dist := range p.Yvals {
+func (up UncertaintyPairedData) SampleValueSampler(randomValue float64) ValueSampler {
+	yVals := make([]float64, len(up.Yvals))
+	for idx, dist := range up.Yvals {
 		yVals[idx] = dist.InvCDF(randomValue)
 	}
-	return PairedData{Xvals: p.Xvals, Yvals: yVals}
+
+	return PairedData{Xvals: up.Xvals, Yvals: yVals}
 }
 func (p UncertaintyPairedData) CentralTendency() ValueSampler {
 	yVals := make([]float64, len(p.Yvals))
