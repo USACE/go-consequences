@@ -43,15 +43,20 @@ func (p PairedData) IsMonotonicallyIncreasing() bool {
 	}
 	return monotonic
 }
-func (p *PairedData) ForceNonNegativeMonotonic() {
-	prevYval := 0.0
+func (p *PairedData) ForceMonotonicInRange(min float64, max float64) {
+	prevYval := min
 	update := make([]float64, len(p.Yvals))
 	for idx, y := range p.Yvals {
 		if prevYval > y {
 			update[idx] = prevYval
 		} else {
-			update[idx] = y
-			prevYval = y
+			if y > max {
+				update[idx] = max
+				prevYval = max
+			} else {
+				update[idx] = y
+				prevYval = y
+			}
 		}
 	}
 	p.Yvals = update

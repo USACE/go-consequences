@@ -13,7 +13,7 @@ func createTestData() PairedData {
 }
 func createUnhappyData() PairedData {
 	x := []float64{1.0, 2.0, 3.0, 4.0}
-	y := []float64{-10.0, -20.0, -30.0, -40.0}
+	y := []float64{-10.0, 20.0, -30.0, 400.0}
 	return PairedData{Xvals: x, Yvals: y}
 }
 func TestSampleValue_belowRange(t *testing.T) {
@@ -95,7 +95,7 @@ func Test_ForceNonNegativeMonotonic(t *testing.T) {
 	if pd.IsMonotonicallyIncreasing() {
 		t.Error("say wha?")
 	} else {
-		pd.ForceNonNegativeMonotonic()
+		pd.ForceMonotonicInRange(10.0, 500)
 		if pd.IsMonotonicallyIncreasing() {
 			for _, y := range pd.Yvals {
 				fmt.Println(y)
