@@ -170,7 +170,13 @@ func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.Value
 	//must be uncertain
 	retval2, ok2 := df.(paireddata.UncertaintyValueSamplerSampler)
 	if ok2 {
-		return retval2.SampleValueSampler(r.Float64())
+		pd := retval2.SampleValueSampler(r.Float64())
+		pd2, ok3 := pd.(paireddata.PairedData)
+		if ok3 {
+			pd2.ForceMonotonicInRange(0.0, 100.0)
+			return pd2
+		}
+		return pd
 	}
 	return retval
 }

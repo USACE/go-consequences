@@ -71,3 +71,12 @@ func Test_occupancyCentralTendency(t *testing.T) {
 		fmt.Println("computed " + m2.Name)
 	}
 }
+func Test_occupancySample(t *testing.T) {
+	//a map of occupancy types
+	m := OccupancyTypeMap()
+	for name, ot := range m {
+		fmt.Println("reading " + name)
+		m2 := ot.SampleOccupancyType(1234)
+		fmt.Println("computed " + m2.Name)
+	}
+}
