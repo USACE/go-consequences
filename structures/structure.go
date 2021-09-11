@@ -2,12 +2,14 @@ package structures
 
 import (
 	"errors"
+	"math"
 	"math/rand"
 	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
+	"github.com/USACE/go-consequences/paireddata"
 )
 
 //BaseStructure represents a Structure name xy location and a damage category
@@ -99,17 +101,26 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		//}
 		sval := s.StructVal
 		conval := s.ContVal
-		if s.NumStories > 2 {
+		sDamFun := s.OccType.GetStructureDamageFunctionForHazard(e)
+		cDamFun := s.OccType.GetContentDamageFunctionForHazard(e)
+		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+		sDamFunPd, okpd := sDamFun.(paireddata.PairedData)
+		if okpd {
+			damagefunctionMax = sDamFunPd.Xvals[len(sDamFunPd.Xvals)-1]
+		}
+		representativeStories := math.Ceil(damagefunctionMax / 9.0)
+
+		if s.NumStories > int32(representativeStories) {
 			//there is great potential that the value of the structure is not representative of the damage function range.
-			sval = 2 * (sval / float64(s.NumStories))
-			conval = 2 * (conval / float64(s.NumStories))
+			sval = 2 * (sval / representativeStories)
+			conval = 2 * (conval / representativeStories)
 		}
 		if e.Depth() > 9000.0 {
 			err = errors.New("depth above ground was greater than 9000")
 		}
 		depthAboveFFE := e.Depth() - s.FoundHt
-		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
+		damagePercent := sDamFun.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+		cdamagePercent := cDamFun.SampleValue(depthAboveFFE) / 100
 		ret.Result[0] = s.BaseStructure.Name
 		ret.Result[1] = s.BaseStructure.X
 		ret.Result[2] = s.BaseStructure.Y
