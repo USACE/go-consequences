@@ -97,6 +97,13 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		//if e.Depth() < 0.0 {
 		//err = errors.New("depth above ground was less than zero")
 		//}
+		sval := s.StructVal
+		conval := s.ContVal
+		if s.NumStories > 2 {
+			//there is great potential that the value of the structure is not representative of the damage function range.
+			sval = 2 * (sval / float64(s.NumStories))
+			conval = 2 * (conval / float64(s.NumStories))
+		}
 		if e.Depth() > 9000.0 {
 			err = errors.New("depth above ground was greater than 9000")
 		}
@@ -109,8 +116,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[3] = e
 		ret.Result[4] = s.BaseStructure.DamCat
 		ret.Result[5] = s.OccType.Name
-		ret.Result[6] = damagePercent * s.StructVal
-		ret.Result[7] = cdamagePercent * s.ContVal
+		ret.Result[6] = damagePercent * sval
+		ret.Result[7] = cdamagePercent * conval
 		ret.Result[8] = s.Pop2amu65
 		ret.Result[9] = s.Pop2amo65
 		ret.Result[10] = s.Pop2pmu65
