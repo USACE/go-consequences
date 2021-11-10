@@ -112,9 +112,11 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 
 		if s.NumStories > int32(representativeStories) {
 			//there is great potential that the value of the structure is not representative of the damage function range.
-			sval = 2 * (sval / representativeStories)
-			conval = 2 * (conval / representativeStories)
+			modifier := representativeStories / float64(s.NumStories)
+			sval *= modifier
+			conval *= modifier
 		}
+
 		if e.Depth() > 9000.0 {
 			err = errors.New("depth above ground was greater than 9000")
 		}
