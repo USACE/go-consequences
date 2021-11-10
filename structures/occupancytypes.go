@@ -42,9 +42,9 @@ type OccupancyTypeDeterministic struct {
 func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
 	if h.Has(hazards.WaveHeight) { // include condition for returning function for wave height less than 1 or an exception?
 		if h.WaveHeight() < 3 {
-			return o.GetStructureDamageFunctionForMedWave()
+			return o.GetStructureDamageFunctionForMedWave(h)
 		} else {
-			return o.GetStructureDamageFunctionForHighWave()
+			return o.GetStructureDamageFunctionForHighWave(h)
 		}
 	} else {
 		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
@@ -56,7 +56,7 @@ func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazard
 }
 
 //GetStructureDamageForMedWave gets the medium wave (less than 3ft) structure damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForMedWave() paireddata.ValueSampler {
+func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForMedWave(h hazards.HazardEvent) paireddata.ValueSampler {
 	if o.Name == "RES1-1SNB-PIER" {
 		return res11snbPierMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
 	} else if o.Name == "RES1-2SNB" {
@@ -68,12 +68,16 @@ func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForMedWave() paire
 	} else if o.Name == "RES1-2SWB" {
 		return res12swbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
 	} else {
-		return res11snbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.StructureDFF.DamageFunctions[hazards.Default]
 	}
 }
 
 //GetStructureDamageForHighWave gets the high wave (greater than or equal to 3ft) structure damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHighWave() paireddata.ValueSampler {
+func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHighWave(h hazards.HazardEvent) paireddata.ValueSampler {
 	if o.Name == "RES1-1SNB-PIER" {
 		return res11snbPierHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
 	} else if o.Name == "RES1-2SNB" {
@@ -85,7 +89,11 @@ func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHighWave() pair
 	} else if o.Name == "RES1-2SWB" {
 		return res12swbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
 	} else {
-		return res11snbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
+		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.StructureDFF.DamageFunctions[hazards.Default]
 	}
 }
 
@@ -93,9 +101,9 @@ func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHighWave() pair
 func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.HazardEvent) paireddata.ValueSampler {
 	if h.Has(hazards.WaveHeight) { // include condition for returning function for wave height less than 1 or an exception?
 		if h.WaveHeight() < 3 {
-			return o.GetContentDamageFunctionForMedWave()
+			return o.GetContentDamageFunctionForMedWave(h)
 		} else {
-			return o.GetContentDamageFunctionForHighWave()
+			return o.GetContentDamageFunctionForHighWave(h)
 		}
 	} else {
 		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
@@ -107,7 +115,7 @@ func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.
 }
 
 //GetContentDamageForMedWave gets the medium wave (less than 3ft) content damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetContentDamageFunctionForMedWave() paireddata.ValueSampler {
+func (o OccupancyTypeDeterministic) GetContentDamageFunctionForMedWave(h hazards.HazardEvent) paireddata.ValueSampler {
 	if o.Name == "RES1-1SNB-PIER" {
 		return res11snbPierMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
 	} else if o.Name == "RES1-2SNB" {
@@ -119,12 +127,16 @@ func (o OccupancyTypeDeterministic) GetContentDamageFunctionForMedWave() pairedd
 	} else if o.Name == "RES1-2SWB" {
 		return res12swbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
 	} else {
-		return res11snbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.ContentDFF.DamageFunctions[hazards.Default]
 	}
 }
 
 //GetContentDamageForHighWave gets the high wave (greater than or equal to 3ft) content damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHighWave() paireddata.ValueSampler {
+func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHighWave(h hazards.HazardEvent) paireddata.ValueSampler {
 	if o.Name == "RES1-1SNB-PIER" {
 		return res11snbPierHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
 	} else if o.Name == "RES1-2SNB" {
@@ -136,7 +148,11 @@ func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHighWave() paired
 	} else if o.Name == "RES1-2SWB" {
 		return res12swbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
 	} else {
-		return res11snbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
+		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
+		if ok {
+			return result
+		}
+		return o.ContentDFF.DamageFunctions[hazards.Default]
 	}
 }
 
