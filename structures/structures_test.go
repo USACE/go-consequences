@@ -142,7 +142,7 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 		got := out.(float64)
 
 		diff := (expectedResults[idx]*1.8 + d.Duration()) - got //180.0/100=1.8
-		if math.Abs(diff) > .0000000000001 {                    //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
+		if math.Abs(diff) > .0000000000001 {
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.8+d.Duration())
 		}
 		out2, err := r.Fetch("rebuilddate")
@@ -150,7 +150,7 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 			panic(err)
 		}
 		gotdate := out2.(time.Time)
-		if gotdate.Equal(d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration()))) {
+		if !gotdate.Equal(d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration()))) {
 			t.Errorf("Compute(%f) = %s; expected %s", depths[idx], gotdate, d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration())))
 		}
 	}
