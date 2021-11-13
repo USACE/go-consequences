@@ -1,8 +1,6 @@
 package paireddata
 
 import (
-	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"

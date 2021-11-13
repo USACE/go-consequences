@@ -1,5 +1,6 @@
 package crops
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -44,3 +45,4 @@ func TestNassCDLFileFiltered(t *testing.T) {
 	}
 	//fmt.Println(result)
 }
+*/
