@@ -49,17 +49,17 @@ func TestDamageFunctionFamily(t *testing.T) {
 	ce2.SetSalinity(false)
 	ce2.SetWaveHeight(3.4)
 	//confirm that for each hazard the correct damage function is pulled when requested and the proper damage value is computed.
-	cv := df.DamageFunctions[ce.Parameters()].SampleValue(ce.Depth)
+	cv := df.DamageFunctions[ce.Parameters()].SampleValue(ce.Depth())
 	if cv != 2 {
-		t.Errorf("Expected 2")
+		t.Errorf("Expected 2 got %v", cv)
 	}
-	dv := df.DamageFunctions[de.Parameters()].SampleValue(de.Depth)
+	dv := df.DamageFunctions[de.Parameters()].SampleValue(de.Depth())
 	if dv != 4 {
-		t.Errorf("Expected 4")
+		t.Errorf("Expected 4 %v", dv)
 	}
-	c2v := df.DamageFunctions[ce2.Parameters()].SampleValue(ce2.Depth)
+	c2v := df.DamageFunctions[ce2.Parameters()].SampleValue(ce2.Depth())
 	if c2v != 6 {
-		t.Errorf("Expected 6")
+		t.Errorf("Expected 6 %v", c2v)
 	}
 }
 func Test_occupancyCentralTendency(t *testing.T) {
