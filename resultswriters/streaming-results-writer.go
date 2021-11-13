@@ -1,9 +1,11 @@
-package consequences
+package resultswriters
 
 import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/USACE/go-consequences/consequences"
 )
 
 type streamingResultsWriter struct {
@@ -21,7 +23,7 @@ func InitStreamingResultsWriterFromFile(filepath string) (streamingResultsWriter
 func InitStreamingResultsWriter(w io.Writer) streamingResultsWriter {
 	return streamingResultsWriter{filepath: "not applicapble", w: w}
 }
-func (srw streamingResultsWriter) Write(r Result) {
+func (srw streamingResultsWriter) Write(r consequences.Result) {
 	b, _ := r.MarshalJSON()
 	s := string(b) + "\n"
 	fmt.Fprint(srw.w, s)

@@ -1,12 +1,9 @@
 package consequences
 
 import (
-	"reflect"
-
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/dewberry/gdal"
 )
 
 //Receptor is an interface for all things that can have consequences from a hazard event
@@ -61,11 +58,4 @@ func (p ParameterValue) SampleValue(input interface{}) float64 {
 		}
 	}
 	return 0
-}
-
-var gdalTypes map[reflect.Kind]gdal.FieldType = map[reflect.Kind]gdal.FieldType{
-	reflect.Float32: gdal.FT_Real,
-	reflect.Float64: gdal.FT_Real,
-	reflect.Int32:   gdal.FT_Integer,
-	reflect.String:  gdal.FT_String,
 }

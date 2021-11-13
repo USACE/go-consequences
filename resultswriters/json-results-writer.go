@@ -1,9 +1,11 @@
-package consequences
+package resultswriters
 
 import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/USACE/go-consequences/consequences"
 )
 
 type jsonResultsWriter struct {
@@ -22,7 +24,7 @@ func InitJsonResultsWriterFromFile(filepath string) *jsonResultsWriter {
 func InitJsonResultsWriter(w io.Writer) *jsonResultsWriter {
 	return &jsonResultsWriter{filepath: "not applicapble", w: w}
 }
-func (srw *jsonResultsWriter) Write(r Result) {
+func (srw *jsonResultsWriter) Write(r consequences.Result) {
 	if !srw.headerHasBeenWritten {
 		fmt.Fprintf(srw.w, "{\"consequences\":[")
 		srw.headerHasBeenWritten = true

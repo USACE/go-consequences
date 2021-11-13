@@ -1,4 +1,4 @@
-package consequences
+package resultswriters
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/data"
+	"github.com/USACE/go-consequences/consequences"
 	"github.com/leekchan/accounting"
 )
 
@@ -32,7 +33,7 @@ func InitSummaryResultsWriter(w io.Writer) *summaryResultsWriter {
 	m := make(map[string]*data.InlineHistogram, 1)
 	return &summaryResultsWriter{filepath: "not applicapble", w: w, totals: t, m: m}
 }
-func (srw *summaryResultsWriter) Write(r Result) {
+func (srw *summaryResultsWriter) Write(r consequences.Result) {
 	//hardcoding for structures to experiment and think it through.
 	var cat = "damage category"
 	var structDam = "structure damage"

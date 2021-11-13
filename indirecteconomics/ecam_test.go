@@ -1,5 +1,6 @@
 package indirecteconomics
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -12,3 +13,4 @@ func Test_ComputeECAM(t *testing.T) {
 	}
 	fmt.Printf("%v", r)
 }
+*/

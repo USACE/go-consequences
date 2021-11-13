@@ -1,5 +1,6 @@
 package crops
 
+/*
 import (
 	"testing"
 	"time"
@@ -61,3 +62,4 @@ func Test_StreamAbstract(t *testing.T) {
 	defer hp.Close()
 	compute.StreamAbstract(hp, nassSp, rw)
 }
+*/

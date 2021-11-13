@@ -1,5 +1,6 @@
 package structureprovider
 
+/*
 import (
 	"encoding/json"
 	"fmt"
@@ -55,3 +56,4 @@ func TestGPKByBBox(t *testing.T) {
 		fmt.Println(string(b))
 	})
 }
+*/

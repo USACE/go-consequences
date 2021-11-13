@@ -1,0 +1,28 @@
+name: Go
+
+on:
+  push:
+    branches: [ master, nightly ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Test
+      run: |
+        go test ./paireddata -c
+        ./paireddata.test -test.v
+        go test ./structures -c
+        ./structures.test -test.v
+        go test ./hazards -c
+        ./hazards.test -test.v
