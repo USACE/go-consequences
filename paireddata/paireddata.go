@@ -61,3 +61,13 @@ func (p *PairedData) ForceMonotonicInRange(min float64, max float64) {
 	}
 	p.Yvals = update
 }
+func (f PairedData) Compose(g PairedData) PairedData{
+	//assume that the x value of f is the y value of g
+	newY := make([]float64,0)
+	newX := make([]float64,0)
+	for idx, y := range g.Yvals{
+		newY = append(newY, f.SampleValue(y))
+		newX = append(newX, g.Xvals[idx])
+	}
+	return PairedData{Yvals: newY, Xvals: newX}
+}

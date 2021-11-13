@@ -106,3 +106,11 @@ func Test_ForceNonNegativeMonotonic(t *testing.T) {
 	}
 
 }
+func Test_Compose(t *testing.T){
+	g := createTestData()
+	y := []float64{8.0, 12.0, 16.0, 20.0}
+	x := []float64{10.0, 20.0, 30.0, 40.0}
+	f := PairedData{Yvals: y, Xvals: x}
+	fog := f.Compose(g)
+	fmt.Println(fog)
+}
