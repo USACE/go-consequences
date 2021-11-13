@@ -22,3 +22,7 @@ jobs:
       run: |
         go test ./paireddata -c
         ./paireddata.test -test.v
+        go test ./structures -c
+        ./structures.test -test.v
+        go test ./hazards -c
+        ./hazards.test -test.v
