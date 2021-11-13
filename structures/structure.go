@@ -2,12 +2,14 @@ package structures
 
 import (
 	"errors"
+	"math"
 	"math/rand"
 	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
+	"github.com/USACE/go-consequences/paireddata"
 )
 
 //BaseStructure represents a Structure name xy location and a damage category
@@ -97,6 +99,24 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		//if e.Depth() < 0.0 {
 		//err = errors.New("depth above ground was less than zero")
 		//}
+		sval := s.StructVal
+		conval := s.ContVal
+		sDamFun := s.OccType.GetStructureDamageFunctionForHazard(e)
+		//cDamFun := s.OccType.GetContentDamageFunctionForHazard(e)
+		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+		sDamFunPd, okpd := sDamFun.(paireddata.PairedData)
+		if okpd {
+			damagefunctionMax = sDamFunPd.Xvals[len(sDamFunPd.Xvals)-1]
+		}
+		representativeStories := math.Ceil(damagefunctionMax / 9.0)
+
+		if s.NumStories > int32(representativeStories) {
+			//there is great potential that the value of the structure is not representative of the damage function range.
+			modifier := representativeStories / float64(s.NumStories)
+			sval *= modifier
+			conval *= modifier
+		}
+
 		if e.Depth() > 9000.0 {
 			err = errors.New("depth above ground was greater than 9000")
 		}
