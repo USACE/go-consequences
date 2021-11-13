@@ -27,16 +27,17 @@ func Test_UncertiantyCentralTendency(t *testing.T) {
 	contentsalinityStochastic.CentralTendency()
 
 }
-func Test_UncertaintyJson(t *testing.T) {
-	pd := createSampleData()
-	b, err := json.Marshal(pd)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(b))
-	pd2 := json.Unmarshal(b, &UncertaintyPairedData{})
-	fmt.Println(pd2)
-}
+
+// func Test_UncertaintyJson(t *testing.T) {
+// 	pd := createSampleData()
+// 	b, err := json.Marshal(pd)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Println(string(b))
+// 	pd2 := json.Unmarshal(b, &UncertaintyPairedData{})
+// 	fmt.Println(pd2)
+// }
 func createSampleData() UncertaintyPairedData {
 	structurexs := []float64{-2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structureydists := make([]statistics.ContinuousDistribution, 19)
