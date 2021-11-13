@@ -1,4 +1,4 @@
-package consequences
+package resultswriters
 
 import (
 	"encoding/json"
@@ -7,6 +7,8 @@ import (
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/USACE/go-consequences/consequences"
 )
 
 type geoJsonResultsWriter struct {
@@ -27,7 +29,7 @@ func InitGeoJsonResultsWriterFromFile(filepath string) (*geoJsonResultsWriter, e
 func InitGeoJsonResultsWriter(w io.Writer) *geoJsonResultsWriter {
 	return &geoJsonResultsWriter{filepath: "not applicapble", w: w}
 }
-func (srw *geoJsonResultsWriter) Write(r Result) {
+func (srw *geoJsonResultsWriter) Write(r consequences.Result) {
 	if !srw.HeaderHasBeenWritten {
 		fmt.Fprintf(srw.w, "{\"type\": \"FeatureCollection\",\n\"features\":[")
 		srw.HeaderHasBeenWritten = true

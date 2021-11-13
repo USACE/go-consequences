@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/USACE/go-consequences/compute"
-	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
 
@@ -38,7 +38,7 @@ func main() {
 					http.Error(w, "Invalid FilePath argument", http.StatusNotFound)
 				} else {
 					nsp := structureprovider.InitNSISP()
-					w2 := consequences.InitStreamingResultsWriter(w)
+					w2 := resultswriters.InitStreamingResultsWriter(w)
 					hp, _ := hazardproviders.Init(fp[0])
 					compute.StreamAbstract(hp, nsp, w2)
 				}

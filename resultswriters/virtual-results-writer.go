@@ -1,4 +1,4 @@
-package consequences
+package resultswriters
 
 import (
 	"strings"

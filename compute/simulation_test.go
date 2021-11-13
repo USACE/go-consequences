@@ -3,8 +3,8 @@ package compute
 import (
 	"testing"
 
-	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
 
@@ -39,7 +39,7 @@ func Test_StreamAbstract(t *testing.T) {
 	filepath := root + ".tif"
 	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
-	w, _ := consequences.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
+	w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)
@@ -47,7 +47,7 @@ func Test_StreamAbstract(t *testing.T) {
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	filepath := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326.tif"
-	w, _ := consequences.InitSummaryResultsWriterFromFile("/workspaces/Go_Consequences/data/directLosses.csv")
+	w, _ := resultswriters.InitSummaryResultsWriterFromFile("/workspaces/Go_Consequences/data/directLosses.csv")
 	defer w.Close()
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstractByFIPS_WithECAM("48201", dfr, nsp, w)
@@ -56,7 +56,7 @@ func Test_StreamAbstract_smallDataset(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	root := "/workspaces/Go_Consequences/data/clipped_sample"
 	filepath := root + ".tif"
-	w, _ := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	w, _ := resultswriters.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	defer w.Close()
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)

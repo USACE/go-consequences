@@ -1,5 +1,6 @@
 package structureprovider
 
+/*
 import (
 	"fmt"
 	"sync"
@@ -17,10 +18,6 @@ func TestNsiByFipsStream(t *testing.T) {
 	counter := 0
 	n.ByFips(fips, func(s consequences.Receptor) {
 		counter++
-		/*str, ok := s.(structures.StructureStochastic)
-		if ok {
-			fmt.Println(fmt.Sprintf("%v", str.NumStories))
-		}*/
 
 	})
 	if counter != 101 {
@@ -167,3 +164,4 @@ func countByState(ss string) int {
 
 	return m[ss]
 }
+*/

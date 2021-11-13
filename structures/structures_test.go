@@ -33,10 +33,14 @@ func TestComputeConsequences(t *testing.T) {
 	for idx := range depths {
 		d.SetDepth(depths[idx])
 		r, err := s.Compute(d)
-		got := r.Result[0].(float64)
 		if err != nil {
 			panic(err)
 		}
+		dr, err := r.Fetch("structure damage")
+		if err != nil {
+			panic(err)
+		}
+		got := dr.(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
@@ -45,10 +49,14 @@ func TestComputeConsequences(t *testing.T) {
 	//test interpolation due to foundation height putting depth back in range
 	s.FoundHt = 1.1
 	r, err := s.Compute(d)
-	got := r.Result[0].(float64)
 	if err != nil {
 		panic(err)
 	}
+	dr, err := r.Fetch("structure damage")
+	if err != nil {
+		panic(err)
+	}
+	got := dr.(float64)
 	if got != 39.0 {
 		t.Errorf("Compute(%f) = %f; expected %f", 39.0, got, 39.0)
 	}
@@ -85,10 +93,14 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	for idx := range depths {
 		d.SetDepth(depths[idx])
 		r, err := s.Compute(d)
-		got := r.Result[0].(float64)
 		if err != nil {
 			panic(err)
 		}
+		dr, err := r.Fetch("structure damage")
+		if err != nil {
+			panic(err)
+		}
+		got := dr.(float64)
 		diff := expectedResults[idx] - got
 		if math.Abs(diff) > .000001 {
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
@@ -130,7 +142,7 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 		got := out.(float64)
 
 		diff := (expectedResults[idx]*1.8 + d.Duration()) - got //180.0/100=1.8
-		if math.Abs(diff) > .0000000000001 {                    //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
+		if math.Abs(diff) > .0000000000001 {
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.8+d.Duration())
 		}
 		out2, err := r.Fetch("rebuilddate")
@@ -138,7 +150,7 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 			panic(err)
 		}
 		gotdate := out2.(time.Time)
-		if gotdate.Equal(d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration()))) {
+		if !gotdate.Equal(d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration()))) {
 			t.Errorf("Compute(%f) = %s; expected %s", depths[idx], gotdate, d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration())))
 		}
 	}
