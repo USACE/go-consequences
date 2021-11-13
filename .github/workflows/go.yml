@@ -20,5 +20,5 @@ jobs:
 
     - name: Test
       run: |
-      go test ./paireddata -c
-      ./paireddata.test -test.v
+        go test ./paireddata -c
+        ./paireddata.test -test.v
