@@ -27,7 +27,7 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	expecteddamage := 0.0
 
 	//test
-	if cd.Result[3] != expectedcase {
+	if cd.Result[3] != expectedcase.String() {
 		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
 	if cd.Result[4] != expecteddamage {
@@ -49,10 +49,10 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
-	expecteddamage := 10.0 //temporary value for testing
+	expecteddamage := 9.675500000000001
 
 	//test
-	if cd.Result[3] != expectedcase {
+	if cd.Result[3] != expectedcase.String() {
 		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
 	if cd.Result[4] != expecteddamage {
