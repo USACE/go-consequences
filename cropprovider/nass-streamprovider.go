@@ -1,22 +1,23 @@
-package crops
+package cropprovider
 
 import (
 	"fmt"
 	"strconv"
 
 	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/crops"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/dewberry/gdal"
 )
 
 type NassCropProvider struct {
 	Year       string
-	CropFilter map[string]Crop
+	CropFilter map[string]crops.Crop
 }
 
 func InitNassCropProvider(year string, cropFilter []string) NassCropProvider {
-	cfilter := make(map[string]Crop, len(cropFilter))
-	m := NASSCropMap()
+	cfilter := make(map[string]crops.Crop, len(cropFilter))
+	m := crops.NASSCropMap()
 	for _, f := range cropFilter {
 		c, ok := m[f]
 		if ok {
@@ -40,7 +41,7 @@ func (n NassCropProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProc
 	}
 	result.iterate(sp, n.CropFilter)
 }
-func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[string]Crop) {
+func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[string]crops.Crop) {
 	rb := n.ds.RasterBand(1)
 	nYs := rb.YSize()
 	nXs := rb.XSize()

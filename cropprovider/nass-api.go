@@ -1,4 +1,4 @@
-package crops
+package cropprovider
 
 //Documentation: https://nassgeodata.gmu.edu/CropScape/devhelp/help.html
 
@@ -12,6 +12,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/USACE/go-consequences/crops"
 )
 
 //StatisticsRow describes a row in the statistics result from the NASS stats endpoint
@@ -108,11 +110,11 @@ func nassStatsAPI(url string) StatisticsResult {
 }
 
 //GetCDLValue returns a crop type for a year and x,y coordinates in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
-func GetCDLValue(year string, x string, y string) Crop {
+func GetCDLValue(year string, x string, y string) crops.Crop {
 	url := fmt.Sprintf("%sGetCDLValue?year=%s&x=%s&y=%s", apiStatsURL, year, x, y) //malformed json keys are not quoted.
 	return nassCDLValueAPI(url)
 }
-func nassCDLValueAPI(url string) Crop {
+func nassCDLValueAPI(url string) crops.Crop {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -120,7 +122,7 @@ func nassCDLValueAPI(url string) Crop {
 	response, err := client.Get(url)
 	if err != nil {
 		fmt.Println(err)
-		return Crop{}
+		return crops.Crop{}
 	}
 	defer response.Body.Close()
 	xmlData, err := ioutil.ReadAll(response.Body)
@@ -130,7 +132,7 @@ func nassCDLValueAPI(url string) Crop {
 		s := string(xmlData)
 		fmt.Println(s)
 		fmt.Println("first 100 chars of xmlbody was: " + s[0:100]) //s) //"last 100 chars of jsonbody was: " + s[len(s)-100:])
-		return Crop{}
+		return crops.Crop{}
 	}
 	nobrackets := strings.Trim(result.Result, "{}")
 	kvs := strings.Split(nobrackets, ", ")
@@ -139,7 +141,7 @@ func nassCDLValueAPI(url string) Crop {
 	x, _ := strconv.ParseFloat(strings.Split(kvs[0], ": ")[1], 64)
 	y, _ := strconv.ParseFloat(strings.Split(kvs[1], ": ")[1], 64)
 	v, _ := strconv.Atoi(value)
-	c := BuildCrop(byte(v), category)
+	c := crops.BuildCrop(byte(v), category)
 	c = c.WithLocation(x, y)
 	return c
 }
