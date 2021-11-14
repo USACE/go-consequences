@@ -1,6 +1,9 @@
 package crops
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -61,6 +64,11 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 
  */
 func TestReadFromXML(t *testing.T) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(pwd)
 	path := "./resources/" + "Corn" + ".crop"
 	c := ReadFromXML(path)
 	if c.GetCropName() != "Corn" {
