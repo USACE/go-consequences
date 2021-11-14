@@ -26,3 +26,5 @@ jobs:
         ./structures.test -test.v
         go test ./hazards -c
         ./hazards.test -test.v
+        go test ./crops -c
+        ./crops.test -test.v

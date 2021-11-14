@@ -1,6 +1,9 @@
 package crops
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -24,10 +27,10 @@ func TestComputeCropDamage_FloodedBeforePlanting(t *testing.T) {
 	expecteddamage := 0.0
 
 	//test
-	if cd.Result[1] != expectedcase {
+	if cd.Result[3] != expectedcase.String() {
 		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
-	if cd.Result[2] != expecteddamage {
+	if cd.Result[4] != expecteddamage {
 		t.Errorf("Compute() = %v; expected %v", cd.Result[4], expecteddamage)
 	}
 }
@@ -46,69 +49,27 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := Impacted
-	expecteddamage := 10.0 //temporary value for testing
+	expecteddamage := 9.675500000000001
 
 	//test
-	if cd.Result[1] != expectedcase {
+	if cd.Result[3] != expectedcase.String() {
 		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
 	}
-	if cd.Result[2] != expecteddamage {
+	if cd.Result[4] != expecteddamage {
 		t.Errorf("Compute() = %v; expected %v", cd.Result[4], expecteddamage)
 	}
 }
-func TestCropDamage(t *testing.T) {
-	//get crop
-	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
-	path := "./" + cropFromNass.GetCropName() + ".crop"
-	c := ReadFromXML(path)
-	// construct hazard
-	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{}
-	h.SetArrivalTime(at)
-	h.SetDuration(10)
-	//compute
-	cd, _ := c.Compute(h)
-	//expected results
-	expectedcase := Impacted
-	expecteddamage := 1285.98 //Based on corn
 
-	//test
-	if cd.Result[1] != expectedcase {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[3], expectedcase)
-	}
-	if cd.Result[2] != expecteddamage {
-		t.Errorf("ComputeConsequence() = %v; expected %v", cd.Result[4], expecteddamage)
-	}
+/*
 
-}
-
-func TestCropDamage_DelayedPlant(t *testing.T) {
-	//get crop
-	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
-	path := "./" + cropFromNass.GetCropName() + ".crop"
-	c := ReadFromXML(path)
-	// construct hazard
-	at := time.Date(1984, time.Month(4), 15, 0, 0, 0, 0, time.UTC)
-	h := hazards.ArrivalandDurationEvent{}
-	h.SetArrivalTime(at)
-	h.SetDuration(15)
-	//compute
-	cd, _ := c.Compute(h)
-	//expected results
-	expectedcase := PlantingDelayed
-	expecteddamage := 0.0 //Based on corn
-
-	//test
-	if cd.Result[1] != expectedcase {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[3], expectedcase)
-	}
-	if cd.Result[2] != expecteddamage {
-		t.Errorf("Compute() = %v; expected %v", cd.Result[4], expecteddamage)
-	}
-
-}
+ */
 func TestReadFromXML(t *testing.T) {
-	path := "./resources/" + "Corn" + ".crop"
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(pwd)
+	path := "./crops/resources/" + "Corn" + ".crop" //does not work locally but works in github actions.
 	c := ReadFromXML(path)
 	if c.GetCropName() != "Corn" {
 		t.Error("Did not parse corn")
