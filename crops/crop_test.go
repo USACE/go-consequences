@@ -69,7 +69,7 @@ func TestReadFromXML(t *testing.T) {
 		log.Println(err)
 	}
 	fmt.Println(pwd)
-	path := "./resources/" + "Corn" + ".crop"
+	path := "./crops/resources/" + "Corn" + ".crop" //does not work locally but works in github actions.
 	c := ReadFromXML(path)
 	if c.GetCropName() != "Corn" {
 		t.Error("Did not parse corn")
