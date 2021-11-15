@@ -21,6 +21,26 @@ func Test_Uncertainty_centralTendency(t *testing.T) {
 	}
 
 }
+func Test_Uncertainty_Sample(t *testing.T) {
+	upd := createSampleData()
+	sn := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
+	p := .75
+	v := sn.InvCDF(p)
+
+	vs := upd.SampleValueSampler(p)
+	pd, ok := vs.(PairedData)
+	if ok {
+		for idx, x := range pd.Xvals {
+			if pd.Yvals[idx] != (x + v) {
+				t.Errorf("The value %v does not match %v", pd.Yvals[idx], x*v)
+			}
+		}
+	} else {
+		t.Error("did not yeild paireddata")
+	}
+
+}
+
 func createSampleData() UncertaintyPairedData {
 	structurexs := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structureydists := make([]statistics.ContinuousDistribution, 17)
