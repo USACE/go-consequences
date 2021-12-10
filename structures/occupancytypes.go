@@ -2228,7 +2228,7 @@ func (p Prototype) DamageFunction(component string) (DamageFunction, error) {
 	return df, nil
 }
 
-func (ddfp DepthDFProvider) DamageFunction(occType string, component string) DamageFunction {
+func (ddfp DepthDFProvider) DamageFunction(occType string, component string) (DamageFunction, error) {
 	return ddfp.store.Prototype(occType).DamageFunction(component)
 }
 

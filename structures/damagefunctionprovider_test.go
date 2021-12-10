@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/USACE/go-consequences/utils"
@@ -28,4 +29,14 @@ func Test_InitDDFStore(t *testing.T) {
 	path := "/workspaces/go-consequences/data/DF.json"
 	var p DepthDFProvider
 	p.Init(path)
+}
+
+func Test_GenerateDF(t *testing.T) {
+	path := "/workspaces/go-consequences/data/DF.json"
+	var p DepthDFProvider
+	p.Init(path)
+
+	df, _ := p.DamageFunction("COM1", "structure")
+
+	fmt.Println(df)
 }

@@ -21,7 +21,7 @@ func ReadJson(path string, i interface{}) error {
 	// Wrong type definitions during unmarshaling probably isn't a big deal
 	if err2 != nil && !strings.Contains(
 		err2.Error(),
-		"json: cannot unmarshal string into Go struct field",
+		"json: cannot unmarshal",
 	) {
 		log.Fatal("Unable to marshal json to interface")
 	}
