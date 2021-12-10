@@ -1,11 +1,13 @@
 package structures
 
 import (
+	"log"
 	"math/rand"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
+	"github.com/USACE/go-consequences/utils"
 )
 
 //OccupancyType interface allows for multiple hazards that integrate with structures
@@ -17,6 +19,11 @@ type OccupancyType interface {
 //DamageFunctionFamily is to support a family of damage functions stored by hazard parameter types
 type DamageFunctionFamily struct {
 	DamageFunctions map[hazards.Parameter]paireddata.ValueSampler //parameter is a bitflag
+}
+
+type DamageFunction struct {
+	DamageDriver   hazards.Parameter
+	DamageFunction paireddata.ValueSampler
 }
 
 //DamageFunctionFamilyStochastic is to support a family of damage functions stored by hazard parameter types that can represent uncertain paired data
@@ -2147,3 +2154,37 @@ func res6() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES6", StructureDFF: sdf, ContentDFF: cdf}
 }
+
+// Read in raw data
+func IngestDFStore(path string) (DFStore, error) {
+
+	var r RawDFStruct
+
+	err := utils.ReadJson(path, &r)
+	if err != nil {
+		log.Fatal("Unable to read damage function from json file")
+	}
+
+	w := make(DFStore)
+	for _, val := range r.OccTypes.Prototypes {
+		w[val.Name] = val
+	}
+
+	return w, err
+}
+
+func (r RawDFStruct) Elements(occType string) {
+
+}
+
+// Adapt raw struct to nested families
+// func ParseDFStore(r RawDFStruct) map[string]DamageFunction {
+
+// 	sSlice := r.OccTypes.OccupancyType
+
+// 	var w map[string]DamageFunction
+// 	for idx, val := range sSlice {
+//         w[val.Name] = val
+// 	}
+//     return w
+// }
