@@ -1,96 +1,37 @@
 package structures
 
-type RawDFProvider interface {
-	Elements(occType string) // Get all substructs under specific occType key
+// Common interface for all damage function providers
+type IPrototype interface {
+	DamageFunction(component string) DamageFunction // component = structure, content, vehicle, etc.
 }
 
-type DamageCategory struct {
-	Name        string      `json:"Name"`
-	Description interface{} `json:"Description"`
-	Rebuild     string      `json:"Rebuild"`
-	CostFactor  string      `json:"CostFactor"`
+type IDFProvider interface {
+	DamageFunction(occType string, component string) DamageFunction
 }
 
-type FoundationHeightUncertainty struct {
-	None struct {
-		Value string `json:"_value"`
-	} `json:"None"`
+//////////////////////////////////////
+//  DepthDFProvider
+//////////////////////////////////////
+
+type DepthDFProvider struct {
+	jsonFilePath string
+	store        DFStore
 }
 
-type StructureUncertainty struct {
-	None struct {
-		Value string `json:"_value"`
-	} `json:"None"`
-}
-
-type ContentUncertainty struct {
-	None struct {
-		Value string `json:"_value"`
-	} `json:"None"`
-}
-
-type OtherUncertainty struct {
-	None struct {
-		Value string `json:"_value"`
-	} `json:"None"`
-}
-
-type VehicleUncertainty struct {
-	None struct {
-		Value string `json:"_value"`
-	} `json:"None"`
-}
-
-type StructureDD struct {
-	CalculateDamage       string `json:"CalculateDamage"`
-	MonotonicCurveUSingle struct {
-		UncertaintyType string `json:"UncertaintyType"`
-		Ordinate        []struct {
-			X     string `json:"X"`
-			Value string `json:"_value"`
-		} `json:"Ordinate"`
-	} `json:"MonotonicCurveUSingle"`
-}
-
-type ContentDD struct {
-	CalculateDamage       string `json:"CalculateDamage"`
-	MonotonicCurveUSingle struct {
-		UncertaintyType string `json:"UncertaintyType"`
-		Ordinate        []struct {
-			X     string `json:"X"`
-			Value string `json:"_value"`
-		} `json:"Ordinate"`
-	} `json:"MonotonicCurveUSingle"`
-}
-
-type OtherDD struct {
-	CalculateDamage       string `json:"CalculateDamage"`
-	MonotonicCurveUSingle struct {
-		UncertaintyType string `json:"UncertaintyType"`
-		Ordinate        struct {
-			X     string `json:"X"`
-			Value string `json:"_value"`
-		} `json:"Ordinate"`
-	} `json:"MonotonicCurveUSingle"`
-}
-
-type VehicleDD struct {
-	CalculateDamage string `json:"CalculateDamage"`
-}
-
+// Main container that includes all info associated with a structure prototype
 type Prototype struct {
-	Name                        string                      `json:"Name"`
-	Description                 string                      `json:"Description"`
-	DamageCategory              DamageCategory              `json:"DamageCategory"`
-	FoundationHeightUncertainty FoundationHeightUncertainty `json:"FoundationHeightUncertainty"`
-	StructureUncertainty        StructureUncertainty        `json:"StructureUncertainty"`
-	ContentUncertainty          ContentUncertainty          `json:"ContentUncertainty"`
-	OtherUncertainty            OtherUncertainty            `json:"OtherUncertainty"`
-	VehicleUncertainty          VehicleUncertainty          `json:"VehicleUncertainty"`
-	StructureDD                 StructureDD                 `json:"StructureDD"`
-	ContentDD                   ContentDD                   `json:"ContentDD"`
-	OtherDD                     OtherDD                     `json:"OtherDD"`
-	VehicleDD                   VehicleDD                   `json:"VehicleDD"`
+	Name                        string         `json:"Name"`
+	Description                 string         `json:"Description"`
+	DamageCategory              DamageCategory `json:"DamageCategory"`
+	FoundationHeightUncertainty Uncertainty    `json:"FoundationHeightUncertainty"`
+	StructureUncertainty        Uncertainty    `json:"StructureUncertainty"`
+	ContentUncertainty          Uncertainty    `json:"ContentUncertainty"`
+	OtherUncertainty            Uncertainty    `json:"OtherUncertainty"`
+	VehicleUncertainty          Uncertainty    `json:"VehicleUncertainty"`
+	StructureDD                 FunctionDD     `json:"StructureDD"`
+	ContentDD                   FunctionDD     `json:"ContentDD"`
+	OtherDD                     FunctionDD     `json:"OtherDD"`
+	VehicleDD                   FunctionDD     `json:"VehicleDD"`
 }
 
 type RawDFStruct struct {
@@ -101,3 +42,33 @@ type RawDFStruct struct {
 
 // Map with OccupancyType string as index
 type DFStore map[string]Prototype
+
+type DamageCategory struct {
+	Name        string      `json:"Name"`
+	Description interface{} `json:"Description"`
+	Rebuild     string      `json:"Rebuild"`
+	CostFactor  string      `json:"CostFactor"`
+}
+
+type Uncertainty struct {
+	None struct {
+		Value string `json:"_value"`
+	} `json:"None"`
+}
+
+type Ordinate struct {
+	X     float64 `json:"X"`
+	Value float64 `json:"_value"`
+}
+
+type FunctionDD struct {
+	CalculateDamage       bool `json:"CalculateDamage"`
+	MonotonicCurveUSingle struct {
+		UncertaintyType string     `json:"UncertaintyType"`
+		Ordinates       []Ordinate `json:"Ordinate"`
+	} `json:"MonotonicCurveUSingle"`
+}
+
+//////////////////////////////////////
+//  END DepthDFProvider
+//////////////////////////////////////
