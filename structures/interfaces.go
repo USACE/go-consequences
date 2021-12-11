@@ -57,12 +57,12 @@ type Uncertainty struct {
 }
 
 type Ordinate struct {
-	X     float64 `json:"X"`
-	Value float64 `json:"_value"`
+	X     float64 `json:"X,string"`
+	Value float64 `json:"_value,string"`
 }
 
 type FunctionDD struct {
-	CalculateDamage       bool `json:"CalculateDamage"`
+	CalculateDamage       bool `json:"CalculateDamage,string"`
 	MonotonicCurveUSingle struct {
 		UncertaintyType string     `json:"UncertaintyType"`
 		Ordinates       []Ordinate `json:"Ordinate"`
