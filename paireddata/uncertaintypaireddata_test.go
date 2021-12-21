@@ -1,6 +1,8 @@
 package paireddata
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
@@ -40,7 +42,25 @@ func Test_Uncertainty_Sample(t *testing.T) {
 	}
 
 }
-
+func Test_UncertaintyJson(t *testing.T) {
+	pd := createSampleData()
+	b, err := json.Marshal(pd)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+	pd2 := UncertaintyPairedData{}
+	err = json.Unmarshal(b, &pd2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(pd2.SampleValueSampler(.5).SampleValue(10.0))
+	b2, err := json.Marshal(pd2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b2))
+}
 func createSampleData() UncertaintyPairedData {
 	structurexs := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structureydists := make([]statistics.ContinuousDistribution, 17)

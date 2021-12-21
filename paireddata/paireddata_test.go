@@ -89,6 +89,12 @@ func Test_Json(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(string(b))
+	var pd2 PairedData
+	err = json.Unmarshal(b, &pd2)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(pd2.SampleValue(3.0))
 }
 func Test_ForceNonNegativeMonotonic(t *testing.T) {
 	pd := createUnhappyData()
@@ -106,7 +112,7 @@ func Test_ForceNonNegativeMonotonic(t *testing.T) {
 	}
 
 }
-func Test_Compose(t *testing.T){
+func Test_Compose(t *testing.T) {
 	g := createTestData()
 	y := []float64{8.0, 12.0, 16.0, 20.0}
 	x := []float64{10.0, 20.0, 30.0, 40.0}
