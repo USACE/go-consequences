@@ -24,8 +24,8 @@ type HazardEvent interface {
 	Has(p Parameter) bool
 }
 
-//Parameter is a bitflag enum https://github.com/yourbasic/bit a possible place to expand the set of hazards
-type Parameter byte
+//Parameter is a bitflag enum
+type Parameter uint //switch to uint64 if we hit 32 slots and need another.
 
 //Parameter types describe different parameters for hazards
 const (
@@ -38,6 +38,7 @@ const (
 	WaveHeight  Parameter = 32  //6
 	Salinity    Parameter = 64  //7
 	Qualitative Parameter = 128 //8
+	//ArrivalTime2ft Parameter = 256
 	//fin
 
 )
