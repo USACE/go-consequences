@@ -10,7 +10,7 @@ type HazardEvent interface {
 	Depth() float64
 	Velocity() float64
 	ArrivalTime() time.Time
-	ArrivalTime2ft() time.Time
+	Erosion() float64
 	Duration() float64
 	WaveHeight() float64
 	Salinity() bool
@@ -26,15 +26,15 @@ type Parameter byte
 
 //Parameter types describe different parameters for hazards
 const (
-	Default        Parameter = 0   //0
-	Depth          Parameter = 1   //1
-	Velocity       Parameter = 2   //2
-	ArrivalTime    Parameter = 4   //3
-	ArrivalTime2ft Parameter = 8   //4
-	Duration       Parameter = 16  //5
-	WaveHeight     Parameter = 32  //6
-	Salinity       Parameter = 64  //7
-	Qualitative    Parameter = 128 //8
+	Default     Parameter = 0   //0
+	Depth       Parameter = 1   //1
+	Velocity    Parameter = 2   //2
+	ArrivalTime Parameter = 4   //3
+	Erosion     Parameter = 8   //4
+	Duration    Parameter = 16  //5
+	WaveHeight  Parameter = 32  //6
+	Salinity    Parameter = 64  //7
+	Qualitative Parameter = 128 //8
 	//fin
 
 )
@@ -54,9 +54,9 @@ func SetHasArrivalTime(h Parameter) Parameter {
 	return h | ArrivalTime
 }
 
-//SetHasArrivalTime2ft turns on a bitflag for the Parameter ArrivalTime2ft
-func SetHasArrivalTime2ft(h Parameter) Parameter {
-	return h | ArrivalTime2ft
+//SetHasErosion turns on a bitflag for the Parameter Erosion
+func SetHasErosion(h Parameter) Parameter {
+	return h | Erosion
 }
 
 //SetHasDuration turns on a bitflag for the Parameter Duration
@@ -93,11 +93,11 @@ func (p Parameter) String() string {
 
 		count++
 	}
-	if p&ArrivalTime2ft != 0 {
+	if p&Erosion != 0 {
 		if count > 0 {
 			s += ", "
 		}
-		s += "Arrival Time 2ft"
+		s += "Erosion"
 
 		count++
 	}

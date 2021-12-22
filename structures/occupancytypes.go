@@ -28,14 +28,14 @@ type DamageFunctionFamilyStochastic struct {
 }
 
 type DamageFunction struct {
-	Source         string                  `json:"source"`
-	DamageDriver   hazards.Parameter       `json:"damagedriver"`
-	DamageFunction paireddata.ValueSampler `json:"damagefunction"`
+	Source         string                `json:"source"`
+	DamageDriver   hazards.Parameter     `json:"damagedriver"`
+	DamageFunction paireddata.PairedData `json:"damagefunction"`
 }
 type DamageFunctionStochastic struct {
-	Source         string                                    `json:"source"`
-	DamageDriver   hazards.Parameter                         `json:"damagedriver"`
-	DamageFunction paireddata.UncertaintyValueSamplerSampler `json:"damagefunction"`
+	Source         string                           `json:"source"`
+	DamageDriver   hazards.Parameter                `json:"damagedriver"`
+	DamageFunction paireddata.UncertaintyPairedData `json:"damagefunction"`
 }
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
@@ -200,8 +200,8 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 	}
 	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
 }
-func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.ValueSampler {
-	retval, ok := df.(paireddata.ValueSampler)
+func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.PairedData {
+	retval, ok := df.(paireddata.PairedData)
 	if ok {
 		return retval
 	}
@@ -214,19 +214,24 @@ func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.Value
 			pd2.ForceMonotonicInRange(0.0, 100.0)
 			return pd2
 		}
-		return pd
+		return pd2 //this is actually not ok, but i dont have many options atm.
 	}
 	return retval
 }
-func centralTendencyPairedDataValueSampler(df interface{}) paireddata.ValueSampler {
-	retval, ok := df.(paireddata.ValueSampler)
+func centralTendencyPairedDataValueSampler(df interface{}) paireddata.PairedData {
+	retval, ok := df.(paireddata.PairedData)
 	if ok {
 		return retval
 	}
 	//must be uncertain
 	retval2, ok2 := df.(paireddata.UncertaintyValueSamplerSampler)
 	if ok2 {
-		return retval2.CentralTendency()
+		ret := retval2.CentralTendency()
+		retpd, ok3 := ret.(paireddata.PairedData)
+		if ok3 {
+			return retpd
+		}
+		return paireddata.PairedData{}
 	}
 	return retval
 }

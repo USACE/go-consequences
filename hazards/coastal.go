@@ -28,8 +28,8 @@ func (h CoastalEvent) Velocity() float64 {
 func (h CoastalEvent) ArrivalTime() time.Time {
 	return time.Time{}
 }
-func (h CoastalEvent) ArrivalTime2ft() time.Time {
-	return time.Time{}
+func (h CoastalEvent) Erosion() float64 {
+	return -901.0
 }
 func (h CoastalEvent) Duration() float64 {
 	return -901.0

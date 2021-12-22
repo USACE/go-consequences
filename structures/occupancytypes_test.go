@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
 )
@@ -110,6 +111,12 @@ func Test_DamageFunctionStochastic_Marshal(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(string(b))
+	df2 := DamageFunctionStochastic{}
+	err = json.Unmarshal(b, &df2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(df.Source)
 }
 
 func Test_DamageFunction_Marshal(t *testing.T) {
@@ -121,6 +128,34 @@ func Test_DamageFunction_Marshal(t *testing.T) {
 	df.DamageFunction = dedf
 	df.DamageDriver = hazards.Depth
 	df.Source = "created for testing marshaling"
+	b, err := json.Marshal(df)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+}
+func Test_Erosion_DamageFunctionStochastic_Marshal(t *testing.T) {
+
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0}
+	y := make([]statistics.ContinuousDistribution, 10)
+	y[0] = statistics.TriangularDistribution{Min: 0.0, MostLikely: 0.0, Max: .5}
+	y[1] = statistics.TriangularDistribution{Min: 0.5, MostLikely: 1.0, Max: 2.25}
+	y[2] = statistics.TriangularDistribution{Min: 0.5, MostLikely: 1.75, Max: 4.5}
+	y[3] = statistics.TriangularDistribution{Min: 0.5, MostLikely: 4.7, Max: 5.5}
+	y[4] = statistics.TriangularDistribution{Min: 0.75, MostLikely: 4.8, Max: 6.5}
+	y[5] = statistics.TriangularDistribution{Min: 0.75, MostLikely: 5.0, Max: 8.0}
+	y[6] = statistics.TriangularDistribution{Min: 0.75, MostLikely: 7.25, Max: 9.0}
+	y[7] = statistics.TriangularDistribution{Min: 1.0, MostLikely: 7.85, Max: 10.0}
+	y[8] = statistics.TriangularDistribution{Min: 2.0, MostLikely: 8.0, Max: 11.0}
+	y[9] = statistics.TriangularDistribution{Min: 3.5, MostLikely: 8.0, Max: 11.0}
+	pd := paireddata.UncertaintyPairedData{Xvals: x, Yvals: y}
+
+	df := DamageFunctionStochastic{}
+	df.Source = "bhrercn"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Erosion
+
 	b, err := json.Marshal(df)
 	if err != nil {
 		panic(err)

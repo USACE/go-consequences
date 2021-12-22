@@ -23,8 +23,8 @@ func (h DepthEvent) Velocity() float64 {
 func (h DepthEvent) ArrivalTime() time.Time {
 	return time.Time{}
 }
-func (h DepthEvent) ArrivalTime2ft() time.Time {
-	return time.Time{}
+func (h DepthEvent) Erosion() float64 {
+	return -901.0
 }
 func (h DepthEvent) Duration() float64 {
 	return -901.0
@@ -78,8 +78,8 @@ func (h *ArrivalandDurationEvent) SetArrivalTime(t time.Time) {
 func (h ArrivalandDurationEvent) ArrivalTime() time.Time {
 	return h.arrivalTime
 }
-func (h ArrivalandDurationEvent) ArrivalTime2ft() time.Time {
-	return time.Time{}
+func (h ArrivalandDurationEvent) Erosion() float64 {
+	return -901.0
 }
 func (h ArrivalandDurationEvent) Duration() float64 {
 	return h.durationInDays
@@ -137,8 +137,8 @@ func (h *ArrivalDepthandDurationEvent) SetArrivalTime(t time.Time) {
 func (h ArrivalDepthandDurationEvent) ArrivalTime() time.Time {
 	return h.arrivalTime
 }
-func (h ArrivalDepthandDurationEvent) ArrivalTime2ft() time.Time {
-	return time.Time{}
+func (h ArrivalDepthandDurationEvent) Erosion() float64 {
+	return -901.0
 }
 func (h ArrivalDepthandDurationEvent) Duration() float64 {
 	return h.durationInDays
@@ -189,8 +189,8 @@ func (h QualitativeEvent) Velocity() float64 {
 func (h QualitativeEvent) ArrivalTime() time.Time {
 	return time.Time{}
 }
-func (h QualitativeEvent) ArrivalTime2ft() time.Time {
-	return time.Time{}
+func (h QualitativeEvent) Erosion() float64 {
+	return -901.0
 }
 func (h QualitativeEvent) Duration() float64 {
 	return -901.0
