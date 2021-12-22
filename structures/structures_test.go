@@ -17,12 +17,18 @@ func TestComputeConsequences(t *testing.T) {
 	x := []float64{1.0, 2.0, 3.0, 4.0}
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	pd := paireddata.PairedData{Xvals: x, Yvals: y}
-	sm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	sm := make(map[hazards.Parameter]DamageFunction)
 	var sdf = DamageFunctionFamily{DamageFunctions: sm}
-	sdf.DamageFunctions[hazards.Default] = pd
-	cm := make(map[hazards.Parameter]paireddata.ValueSampler)
+
+	df := DamageFunction{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	sdf.DamageFunctions[hazards.Default] = df
+	cm := make(map[hazards.Parameter]DamageFunction)
 	var cdf = DamageFunctionFamily{DamageFunctions: cm}
-	cdf.DamageFunctions[hazards.Default] = pd
+	cdf.DamageFunctions[hazards.Default] = df
 	var o = OccupancyTypeDeterministic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
 	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
@@ -68,14 +74,20 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 
 	//build a basic structure with a defined depth damage relationship.
 	x := []float64{1.0, 2.0, 3.0, 4.0}
-	y := []float64{10.0, 20.0, 30.0, 40.0}
-	pd := paireddata.PairedData{Xvals: x, Yvals: y}
-	sm := make(map[hazards.Parameter]interface{})
+	y := arrayToDetermnisticDistributions([]float64{10.0, 20.0, 30.0, 40.0})
+	pd := paireddata.UncertaintyPairedData{Xvals: x, Yvals: y}
+	sm := make(map[hazards.Parameter]DamageFunctionStochastic)
 	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
-	sdf.DamageFunctions[hazards.Default] = pd
-	cm := make(map[hazards.Parameter]interface{})
+
+	df := DamageFunctionStochastic{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	sdf.DamageFunctions[hazards.Default] = df
+	cm := make(map[hazards.Parameter]DamageFunctionStochastic)
 	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
-	cdf.DamageFunctions[hazards.Default] = pd
+	cdf.DamageFunctions[hazards.Default] = df
 
 	var o = OccupancyTypeStochastic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
 
@@ -113,12 +125,16 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 	x := []float64{1.0, 2.0, 3.0, 4.0}
 	y := []float64{10.0, 20.0, 30.0, 40.0}
 	pd := paireddata.PairedData{Xvals: x, Yvals: y}
-	sm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	pddf := DamageFunction{}
+	pddf.DamageFunction = pd
+	pddf.DamageDriver = hazards.Depth
+	pddf.Source = "created for this test"
+	sm := make(map[hazards.Parameter]DamageFunction)
 	var sdf = DamageFunctionFamily{DamageFunctions: sm}
-	sdf.DamageFunctions[hazards.Default] = pd
-	cm := make(map[hazards.Parameter]paireddata.ValueSampler)
+	sdf.DamageFunctions[hazards.Default] = pddf
+	cm := make(map[hazards.Parameter]DamageFunction)
 	var cdf = DamageFunctionFamily{DamageFunctions: cm}
-	cdf.DamageFunctions[hazards.Default] = pd
+	cdf.DamageFunctions[hazards.Default] = pddf
 	var o = OccupancyTypeDeterministic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
 	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
