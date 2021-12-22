@@ -28,14 +28,14 @@ type DamageFunctionFamilyStochastic struct {
 }
 
 type DamageFunction struct {
-	Source         string
-	DamageDriver   hazards.Parameter
-	DamageFunction paireddata.ValueSampler
+	Source         string                  `json:"source"`
+	DamageDriver   hazards.Parameter       `json:"damagedriver"`
+	DamageFunction paireddata.ValueSampler `json:"damagefunction"`
 }
 type DamageFunctionStochastic struct {
-	Source         string
-	DamageDriver   hazards.Parameter
-	DamageFunction paireddata.UncertaintyValueSamplerSampler
+	Source         string                                    `json:"source"`
+	DamageDriver   hazards.Parameter                         `json:"damagedriver"`
+	DamageFunction paireddata.UncertaintyValueSamplerSampler `json:"damagefunction"`
 }
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface

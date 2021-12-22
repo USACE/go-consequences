@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -91,4 +92,38 @@ func Test_occupancySample(t *testing.T) {
 		m2 := ot.SampleOccupancyType(1234)
 		fmt.Println("computed " + m2.Name)
 	}
+}
+func Test_DamageFunctionStochastic_Marshal(t *testing.T) {
+
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := arrayToDetermnisticDistributions([]float64{10.0, 20.0, 30.0, 40.0})
+	pd := paireddata.UncertaintyPairedData{Xvals: x, Yvals: y}
+
+	df := DamageFunctionStochastic{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	b, err := json.Marshal(df)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+}
+
+func Test_DamageFunction_Marshal(t *testing.T) {
+	//a fake deterministic damage function for a depth only event
+	dexs := []float64{1, 2, 3}
+	deys := []float64{2, 4, 6}
+	var dedf = paireddata.PairedData{Xvals: dexs, Yvals: deys}
+	df := DamageFunction{}
+	df.DamageFunction = dedf
+	df.DamageDriver = hazards.Depth
+	df.Source = "created for testing marshaling"
+	b, err := json.Marshal(df)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
 }
