@@ -87,3 +87,8 @@ func TestMarshalJSON(t *testing.T) {
 	b, _ := json.Marshal(d)
 	fmt.Println(string(b))
 }
+func TestMarshalParameterJSON(t *testing.T) {
+	d := Default
+	b, _ := json.Marshal(d)
+	fmt.Println(string(b))
+}

@@ -1,9 +1,12 @@
 package structures
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
@@ -22,9 +25,101 @@ type DamageFunctionFamily struct {
 	DamageFunctions map[hazards.Parameter]DamageFunction `json:"damagefunctions"` //parameter is a bitflag
 }
 
+func (dff DamageFunctionFamily) MarshalJSON() ([]byte, error) {
+	s := "{\"damagefunctions\":{"
+	for key, val := range dff.DamageFunctions {
+		pstring, err := json.Marshal(key)
+		if err != nil {
+			return nil, errors.New("structures: could not marshal damage function family parameter key")
+		}
+		s += fmt.Sprintf("%v:", string(pstring))
+		vstring, err := json.Marshal(val)
+		if err != nil {
+			return nil, errors.New("structures: could not marshal damage function family parameter value")
+		}
+		s += fmt.Sprintf("%v,", string(vstring))
+	}
+	s = strings.TrimRight(s, ",")
+	s += "}"
+	return []byte(s), nil
+}
+func (dff *DamageFunctionFamily) UnmarshalJSON(b []byte) error {
+	m := map[string]interface{}{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	valueBytes, err := json.Marshal(m["damagefunctions"])
+	if err != nil {
+		return err
+	}
+	var functions map[string]DamageFunction
+	if err = json.Unmarshal(valueBytes, &functions); err != nil {
+		return err
+	}
+	damgfunctions := make(map[hazards.Parameter]DamageFunction)
+	for key, value := range functions {
+		var p hazards.Parameter
+		key = "\"" + key + "\""
+		b := []byte(key)
+		err := json.Unmarshal(b, &p)
+		if err != nil {
+			return errors.New("structures: could not unmarshal parameter key " + key)
+		}
+		damgfunctions[p] = value
+	}
+	dff.DamageFunctions = damgfunctions
+	return nil
+}
+
 //DamageFunctionFamilyStochastic is to support a family of damage functions stored by hazard parameter types that can represent uncertain paired data
 type DamageFunctionFamilyStochastic struct {
 	DamageFunctions map[hazards.Parameter]DamageFunctionStochastic `json:"damagefunctions"` //parameter is a bitflag
+}
+
+func (dffs DamageFunctionFamilyStochastic) MarshalJSON() ([]byte, error) {
+	s := "{\"damagefunctions\":{"
+	for key, val := range dffs.DamageFunctions {
+		pstring, err := json.Marshal(key)
+		if err != nil {
+			return nil, errors.New("structures: could not marshal damage function family stochastic parameter key")
+		}
+		s += fmt.Sprintf("%v:", string(pstring))
+		vstring, err := json.Marshal(val)
+		if err != nil {
+			return nil, errors.New("structures: could not marshal damage function family stochastic parameter value")
+		}
+		s += fmt.Sprintf("%v,", string(vstring))
+	}
+	s = strings.TrimRight(s, ",")
+	s += "}}"
+	return []byte(s), nil
+}
+func (dffs *DamageFunctionFamilyStochastic) UnmarshalJSON(b []byte) error {
+	m := map[string]interface{}{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	valueBytes, err := json.Marshal(m["damagefunctions"])
+	if err != nil {
+		return err
+	}
+	var functions map[string]DamageFunctionStochastic
+	if err = json.Unmarshal(valueBytes, &functions); err != nil {
+		return err
+	}
+	damgfunctions := make(map[hazards.Parameter]DamageFunctionStochastic)
+	for key, value := range functions {
+		var p hazards.Parameter
+		key = "\"" + key + "\""
+		b := []byte(key)
+		err := json.Unmarshal(b, &p)
+		if err != nil {
+			return errors.New("structures: could not unmarshal parameter key " + key)
+		}
+		damgfunctions[p] = value
+	}
+	dffs.DamageFunctions = damgfunctions
+	return nil
 }
 
 type DamageFunction struct {

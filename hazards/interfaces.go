@@ -1,6 +1,9 @@
 package hazards
 
 import (
+	"bytes"
+	"encoding/json"
+	"strings"
 	"time"
 )
 
@@ -38,6 +41,30 @@ const (
 	//fin
 
 )
+
+var parametersToStrings = map[Parameter]string{
+	Default:     "default",
+	Depth:       "depth",
+	Velocity:    "velocity",
+	ArrivalTime: "arrivaltime",
+	Erosion:     "erosion",
+	Duration:    "duration",
+	WaveHeight:  "waveheight",
+	Salinity:    "salinity",
+	Qualitative: "qualitative",
+}
+
+var stringsToParameters = map[string]Parameter{
+	"default":     Default,
+	"depth":       Depth,
+	"velocity":    Velocity,
+	"arrivaltime": ArrivalTime,
+	"erosion":     Erosion,
+	"duration":    Duration,
+	"waveheight":  WaveHeight,
+	"salinity":    Salinity,
+	"qualitative": Qualitative,
+}
 
 //SetHasDepth turns on a bitflag for the Parameter Depth
 func SetHasDepth(h Parameter) Parameter {
@@ -81,65 +108,48 @@ func SetHasQualitative(h Parameter) Parameter {
 func (p Parameter) String() string {
 	s := ""
 	count := 0
-	if p&Depth != 0 {
-		s += "Depth"
-		count++
+	if p < 1 {
+		return "default"
 	}
-	if p&ArrivalTime != 0 {
-		if count > 0 {
-			s += ", "
+	for key, val := range parametersToStrings {
+		if p&key != 0 {
+			if count > 0 {
+				s += ", "
+			}
+			s += val
+			count++
 		}
-		s += "Arrival Time"
-
-		count++
-	}
-	if p&Erosion != 0 {
-		if count > 0 {
-			s += ", "
-		}
-		s += "Erosion"
-
-		count++
-	}
-	if p&Velocity != 0 {
-		if count > 0 {
-			s += ", "
-		}
-		s += "Velocity"
-
-		count++
-	}
-	if p&Duration != 0 {
-		if count > 0 {
-			s += ", "
-		}
-		s += "Duration"
-
-		count++
-	}
-	if p&WaveHeight != 0 {
-		if count > 0 {
-			s += ", "
-		}
-		s += "WaveHeight"
-
-		count++
-	}
-	if p&Salinity != 0 {
-		if count > 0 {
-			s += ", "
-		}
-		s += "Salinity"
-
-		count++
-	}
-	if p&Qualitative != 0 {
-		if count > 0 {
-			s += ", "
-		}
-		s += "Qualitative"
-
-		count++
 	}
 	return s
+}
+func toParameter(s string) Parameter {
+	parts := strings.Split(s, ",")
+	var p Parameter
+	for _, sp := range parts {
+		pval, found := stringsToParameters[sp]
+		if found {
+			p = p | pval
+		}
+	}
+	return p
+}
+
+// MarshalJSON marshals the enum as a quoted json string
+func (p Parameter) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(p.String())
+	buffer.WriteString(`"`)
+	return buffer.Bytes(), nil
+}
+
+// UnmarshalJSON unmashals a quoted, comma separated string to the parameter value
+func (p *Parameter) UnmarshalJSON(b []byte) error {
+	var s string
+	err := json.Unmarshal(b, &s)
+	if err != nil {
+		return err
+	}
+	// Note that if the string cannot be found then it will be set to the zero value, 'default' in this case.
+	*p = toParameter(s)
+	return nil
 }
