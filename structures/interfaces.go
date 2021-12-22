@@ -1,21 +1,13 @@
 package structures
 
+/*
 // Common interface for all damage function providers
 type IPrototype interface {
 	DamageFunction(component string) DamageFunction // component = structure, content, vehicle, etc.
 }
-
-type IDFProvider interface {
-	DamageFunction(occType string, component string) DamageFunction
-}
-
-//////////////////////////////////////
-//  DepthDFProvider
-//////////////////////////////////////
-
-type DepthDFProvider struct {
-	jsonFilePath string
-	store        DFStore
+*/
+type OccupancyTypeProvider interface {
+	OccupancyTypeMap() map[string]OccupancyTypeStochastic
 }
 
 // Main container that includes all info associated with a structure prototype

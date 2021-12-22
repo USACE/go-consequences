@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/paireddata"
-	"github.com/USACE/go-consequences/utils"
 )
 
 //OccupancyType interface allows for multiple hazards that integrate with structures
@@ -2431,83 +2429,3 @@ func res6() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES6", StructureDFF: sdf, ContentDFF: cdf}
 }
-
-//////////////////////////////////////
-//  DepthDFProvider
-//////////////////////////////////////
-func (ddfp *DepthDFProvider) Init(path string) {
-	ddfp.jsonFilePath = path
-	rawData, err := ingestDDFStore(ddfp.jsonFilePath)
-	if err != nil {
-		log.Fatal("Unable to read damage function from json file")
-	}
-	ddfp.store = rawData.removeOverhead()
-}
-
-// Read in raw data
-func ingestDDFStore(path string) (RawDFStruct, error) {
-	var r RawDFStruct
-	err := utils.ReadJson(path, &r)
-	if err != nil {
-		log.Fatal("Unable to read damage function from json file")
-	}
-	return r, err
-}
-
-func (r RawDFStruct) removeOverhead() DFStore {
-	w := make(DFStore)
-	for _, val := range r.OccTypes.Prototypes {
-		w[val.Name] = val
-	}
-	return w
-}
-
-func (s DFStore) Prototype(occType string) Prototype {
-	return s[occType]
-}
-
-func (f FunctionDD) pairedData() paireddata.PairedData {
-	var xs, ys []float64
-	for _, val := range f.MonotonicCurveUSingle.Ordinates {
-		xs = append(xs, val.X)
-		ys = append(ys, val.Value)
-	}
-	return paireddata.PairedData{Xvals: xs, Yvals: ys}
-}
-
-// Unique adapter
-// Available components:
-//  structure
-//  content
-//  vehicle
-//  other
-func (p Prototype) DamageFunction(component string) (DamageFunction, error) {
-
-	var w FunctionDD
-	switch component {
-	case "structure":
-		w = p.StructureDD
-	case "content":
-		w = p.ContentDD
-	case "vehicle":
-		w = p.VehicleDD
-	case "other":
-		w = p.OtherDD
-	default:
-		return DamageFunction{}, errors.New("Damage function not available for component: " + component)
-	}
-
-	df := DamageFunction{
-		DamageDriver:   hazards.Depth,
-		DamageFunction: w.pairedData(),
-	}
-	return df, nil
-}
-
-func (ddfp DepthDFProvider) DamageFunction(occType string, component string) (DamageFunction, error) {
-	return ddfp.store.Prototype(occType).DamageFunction(component)
-}
-
-//////////////////////////////////////
-//  END DepthDFProvider
-//////////////////////////////////////
