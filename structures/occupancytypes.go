@@ -183,22 +183,20 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 	sm := make(map[hazards.Parameter]DamageFunction)
 	var sdf = DamageFunctionFamily{DamageFunctions: sm}
 	for k, v := range o.StructureDFF.DamageFunctions {
-		df, found := sdf.DamageFunctions[k]
-		if found {
-			df.DamageDriver = v.DamageDriver
-			df.Source = v.Source
-			df.DamageFunction = samplePairedDataValueSampler(r, v)
-		}
+		df := DamageFunction{}
+		df.DamageDriver = v.DamageDriver
+		df.Source = v.Source
+		df.DamageFunction = samplePairedDataValueSampler(r, v.DamageFunction)
+		sdf.DamageFunctions[k] = df
 	}
 	cm := make(map[hazards.Parameter]DamageFunction)
 	var cdf = DamageFunctionFamily{DamageFunctions: cm}
 	for k, v := range o.ContentDFF.DamageFunctions {
-		df, found := cdf.DamageFunctions[k]
-		if found {
-			df.DamageDriver = v.DamageDriver
-			df.Source = v.Source
-			df.DamageFunction = samplePairedDataValueSampler(r, v)
-		}
+		df := DamageFunction{}
+		df.DamageDriver = v.DamageDriver
+		df.Source = v.Source
+		df.DamageFunction = samplePairedDataValueSampler(r, v.DamageFunction)
+		cdf.DamageFunctions[k] = df
 	}
 	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
 }
