@@ -19,12 +19,12 @@ type OccupancyType interface {
 
 //DamageFunctionFamily is to support a family of damage functions stored by hazard parameter types
 type DamageFunctionFamily struct {
-	DamageFunctions map[hazards.Parameter]DamageFunction //parameter is a bitflag
+	DamageFunctions map[hazards.Parameter]DamageFunction `json:"damagefunctions"` //parameter is a bitflag
 }
 
 //DamageFunctionFamilyStochastic is to support a family of damage functions stored by hazard parameter types that can represent uncertain paired data
 type DamageFunctionFamilyStochastic struct {
-	DamageFunctions map[hazards.Parameter]DamageFunctionStochastic //parameter is a bitflag
+	DamageFunctions map[hazards.Parameter]DamageFunctionStochastic `json:"damagefunctions"` //parameter is a bitflag
 }
 
 type DamageFunction struct {
@@ -40,16 +40,16 @@ type DamageFunctionStochastic struct {
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
-	Name         string
-	StructureDFF DamageFunctionFamilyStochastic //probably need one for deep foundation and shallow foundations...
-	ContentDFF   DamageFunctionFamilyStochastic
+	Name         string                         `json:"name"`
+	StructureDFF DamageFunctionFamilyStochastic `json:"structure"` //probably need one for deep foundation and shallow foundations...
+	ContentDFF   DamageFunctionFamilyStochastic `json:"content"`
 }
 
 //OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
 type OccupancyTypeDeterministic struct {
-	Name         string
-	StructureDFF DamageFunctionFamily //probably need one for deep foundation and shallow foundations...
-	ContentDFF   DamageFunctionFamily
+	Name         string               `json:"name"`
+	StructureDFF DamageFunctionFamily `json:"structure"` //probably need one for deep foundation and shallow foundations...
+	ContentDFF   DamageFunctionFamily `json:"content"`
 }
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic

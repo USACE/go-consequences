@@ -161,4 +161,50 @@ func Test_Erosion_DamageFunctionStochastic_Marshal(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(string(b))
+
+}
+
+func Test_DamageFunctionFamilyStochastic_Marshal(t *testing.T) {
+	m := make(map[hazards.Parameter]DamageFunctionStochastic)
+	dffs := DamageFunctionFamilyStochastic{DamageFunctions: m}
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := arrayToDetermnisticDistributions([]float64{10.0, 20.0, 30.0, 40.0})
+	pd := paireddata.UncertaintyPairedData{Xvals: x, Yvals: y}
+
+	df := DamageFunctionStochastic{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	dffs.DamageFunctions[hazards.Default] = df
+	dffs.DamageFunctions[hazards.Depth] = df
+	dffs.DamageFunctions[hazards.Depth|hazards.ArrivalTime] = df
+
+	b, err := json.Marshal(dffs)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+	dffs2 := DamageFunctionFamilyStochastic{}
+	err = json.Unmarshal(b, &dffs2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(dffs2.DamageFunctions[hazards.Default].Source)
+}
+
+func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
+	ot := agr1()
+	b, err := json.Marshal(ot)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+	ot2 := OccupancyTypeStochastic{}
+	err = json.Unmarshal(b, &ot2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(ot2.ContentDFF.DamageFunctions[hazards.Default].Source)
 }
