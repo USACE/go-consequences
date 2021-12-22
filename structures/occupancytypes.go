@@ -847,7 +847,7 @@ func comStructureSalinity() DamageFunctionStochastic {
 	pd := paireddata.UncertaintyPairedData{Xvals: structuresalinityxs, Yvals: structuresalinityydists}
 
 	dfs := DamageFunctionStochastic{}
-	dfs.Source = "NACCS combined curves for commercial structures?" //confirm with richard.
+	dfs.Source = "NACCS combined curves for commercial structures"
 	dfs.DamageFunction = pd
 	dfs.DamageDriver = hazards.Depth
 	return dfs
@@ -867,7 +867,7 @@ func comContentSalinity() DamageFunctionStochastic {
 	contentsalinityydists[9], _ = statistics.Init([]float64{42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{5, 3, 3, 11, 14, 14, 14, 18, 37, 38, 58, 62, 79, 74, 108, 86, 106, 121, 126, 136, 126, 143, 149, 131, 124, 129, 157, 171, 172, 176, 128, 92, 88, 86, 100, 77, 78, 88, 73, 56, 61, 79, 54, 54, 51, 41, 35, 33, 25, 15, 36, 12, 18, 13, 6, 6, 2, 2})
 	pd := paireddata.UncertaintyPairedData{Xvals: contentsalinityxs, Yvals: contentsalinityydists}
 	dfs := DamageFunctionStochastic{}
-	dfs.Source = "NACCS combined curves for commercial structures?" //confirm with richard.
+	dfs.Source = "NACCS combined curves for commercial structures"
 	dfs.DamageFunction = pd
 	dfs.DamageDriver = hazards.Depth
 	return dfs
@@ -1925,12 +1925,12 @@ func res13snb() OccupancyTypeStochastic {
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
 	sdf, cdf := createStructureAndContentDamageFunctionFamily()
 	egmdfs := DamageFunctionStochastic{}
-	egmdfs.Source = "EGM Depth Damage Curve"
+	egmdfs.Source = "HEC-FIA Depth Damage Curve (Based on 2story EGM)"
 	egmdfs.DamageFunction = structuredamagefunctionStochastic
 	egmdfs.DamageDriver = hazards.Depth
 
 	cegmdfs := DamageFunctionStochastic{}
-	cegmdfs.Source = "EGM Depth Damage Curve"
+	cegmdfs.Source = "HEC-FIA Depth Damage Curve (Based on 2story EGM)"
 	cegmdfs.DamageFunction = contentdamagefunctionStochastic
 	cegmdfs.DamageDriver = hazards.Depth
 
@@ -2001,12 +2001,12 @@ func res13swb() OccupancyTypeStochastic {
 	var contentdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: contentxs, Yvals: contentydists}
 	sdf, cdf := createStructureAndContentDamageFunctionFamily()
 	egmdfs := DamageFunctionStochastic{}
-	egmdfs.Source = "EGM Depth Damage Curve"
+	egmdfs.Source = "HEC-FIA Depth Damage Curve (Based on 2story EGM)"
 	egmdfs.DamageFunction = structuredamagefunctionStochastic
 	egmdfs.DamageDriver = hazards.Depth
 
 	cegmdfs := DamageFunctionStochastic{}
-	cegmdfs.Source = "EGM Depth Damage Curve"
+	cegmdfs.Source = "HEC-FIA Depth Damage Curve (Based on 2story EGM)"
 	cegmdfs.DamageFunction = contentdamagefunctionStochastic
 	cegmdfs.DamageDriver = hazards.Depth
 
