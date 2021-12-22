@@ -3,7 +3,6 @@ package structures
 import (
 	"math"
 	"testing"
-	"time"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/consequences"
@@ -119,6 +118,8 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 		}
 	}
 }
+
+/*
 func TestComputeConsequencesWithReconstruction(t *testing.T) {
 
 	//build a basic structure with a defined depth damage relationship.
@@ -172,3 +173,4 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 	}
 
 }
+*/
