@@ -208,3 +208,12 @@ func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
 	}
 	fmt.Println(ot2.ContentDFF.DamageFunctions[hazards.Default].Source)
 }
+func Test_JsonOcctypes(t *testing.T) {
+	//a map of occupancy types
+	m := OccupancyTypeMap()
+	b, err := json.Marshal(m)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+}
