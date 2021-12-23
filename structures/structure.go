@@ -99,7 +99,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	if sderr != nil {
 		return ret, sderr
 	}
-	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("content", e)
+	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("contents", e)
 	if cderr != nil {
 		return ret, cderr
 	}
