@@ -15,9 +15,9 @@ func TestDamageFunctionFamily(t *testing.T) {
 	//a map of hazard to damage function
 	m := make(map[hazards.Parameter]DamageFunction)
 	//a set of different hazard types.
-	cep := hazards.Depth | hazards.Salinity | hazards.WaveHeight
+	cep := hazards.Depth | hazards.Salinity | hazards.WaveHeight | hazards.HighWaveHeight
 	dep := hazards.Depth
-	ce2p := hazards.Depth | hazards.WaveHeight
+	ce2p := hazards.Depth | hazards.WaveHeight | hazards.HighWaveHeight
 
 	//a fake deterministic damage function for coastal event with salinity
 	cexs := []float64{1, 2, 3}
