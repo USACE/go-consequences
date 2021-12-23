@@ -37,7 +37,7 @@ func TestCoastal_With_Wave_With_Salt(t *testing.T) {
 }
 
 func Test_CoastalWithErosion(t *testing.T) {
-	d := CoastalEvent{percentEroded: 20}
+	d := NewCoastalEvent(CoastalEvent{percentEroded: 20})
 
 	if d.Has(WaveHeight) {
 		t.Error("Did not expected Wave.")

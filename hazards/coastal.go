@@ -7,10 +7,25 @@ import (
 
 //CoastalEvent describes a coastal event
 type CoastalEvent struct {
-	depth         float64 //still depth
-	waveHeight    float64 //continuous variable.
+	depth         float64 `default:"-901.0"` //still depth
+	waveHeight    float64 `default:"-901.0"` //continuous variable.
 	salinity      bool    //default is false
 	percentEroded float64
+}
+
+func NewCoastalEvent(c CoastalEvent) *CoastalEvent {
+
+	e := c
+
+	if c.depth == 0.0 {
+		e.depth = -901.0
+	}
+
+	if c.waveHeight == 0.0 {
+		e.waveHeight = -901.0
+	}
+
+	return &e
 }
 
 func (d CoastalEvent) MarshalJSON() ([]byte, error) {
