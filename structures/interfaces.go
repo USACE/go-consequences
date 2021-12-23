@@ -1,13 +1,15 @@
 package structures
 
-/*
 // Common interface for all damage function providers
 type IPrototype interface {
 	DamageFunction(component string) DamageFunction // component = structure, content, vehicle, etc.
 }
-*/
+
 type OccupancyTypeProvider interface {
 	OccupancyTypeMap() map[string]OccupancyTypeStochastic
+	ExtendMap(extension map[string]OccupancyTypeStochastic) error
+	MergeMap(additionalDFs map[string]OccupancyTypeStochastic) error
+	OverrideMap(overrides map[string]OccupancyTypeStochastic) error
 }
 
 // Main container that includes all info associated with a structure prototype
