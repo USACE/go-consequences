@@ -10,6 +10,7 @@ type OccupancyTypeProvider interface {
 	ExtendMap(extension map[string]OccupancyTypeStochastic) error
 	MergeMap(additionalDFs map[string]OccupancyTypeStochastic) error
 	OverrideMap(overrides map[string]OccupancyTypeStochastic) error
+	Write(outputpath string) error
 }
 
 // Main container that includes all info associated with a structure prototype

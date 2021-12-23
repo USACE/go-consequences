@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type JsonOccupancyTypeProvider struct {
@@ -92,6 +93,22 @@ func (jotp *JsonOccupancyTypeProvider) OverrideMap(overrides map[string]Occupanc
 		} else {
 			return errors.New("structures: occupancy type " + key + " doesn't currently exist.")
 		}
+	}
+	return nil
+}
+func (jotp JsonOccupancyTypeProvider) Write(path string) error {
+	w, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	b, err := json.Marshal(jotp.occupancyTypes)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		return err
 	}
 	return nil
 }
