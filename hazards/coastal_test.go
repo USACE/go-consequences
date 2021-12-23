@@ -38,11 +38,24 @@ func TestCoastal_With_Wave_With_Salt(t *testing.T) {
 
 func Test_CoastalWithErosion(t *testing.T) {
 	d := CoastalEvent{percentEroded: 20}
+
+	if d.Has(WaveHeight) {
+		t.Error("Did not expected Wave.")
+	}
+
+	if d.Has(Salinity) {
+		t.Error("Did not expected Salinity.")
+	}
+
+	if d.Has(Depth) {
+		t.Error("Did not expected Depth.")
+	}
+
 	if !d.Has(Erosion) {
 		t.Error("Expected Erosion, but reported none.")
-	} else {
-		if d.Erosion() != 20 {
-			t.Error("Expected PercentEroded of 20, but got something else.")
-		}
+	}
+
+	if d.Erosion() != 20 {
+		t.Error("Expected PercentEroded of 20, but got something else.")
 	}
 }
