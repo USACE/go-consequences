@@ -481,7 +481,7 @@ func res11snb() OccupancyTypeStochastic {
 	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
 
 	//MediumWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs //shouldnt this include salinity?
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 
 	//Depth,Salinity
@@ -530,11 +530,11 @@ func res11snbPier() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	//mediumWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 	//HighWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -685,12 +685,12 @@ func res11swb() OccupancyTypeStochastic {
 	mwcoastaldfs.DamageDriver = hazards.Depth
 
 	//mediumWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 
 	//HighWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
@@ -1497,12 +1497,12 @@ func res12snb() OccupancyTypeStochastic {
 	mwcoastaldfs.DamageDriver = hazards.Depth
 
 	//MediumWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 
 	//HighWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
@@ -1545,11 +1545,11 @@ func res12snbPier() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	//MediumWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
 	//HighWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1699,11 +1699,11 @@ func res12swb() OccupancyTypeStochastic {
 	hwcoastaldfs.DamageDriver = hazards.Depth
 
 	//HighWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 	//MediumWaves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
 	//Salinity Hazard
 	sdf.DamageFunctions[hazards.Salinity|hazards.Depth] = coastaldfs
 	cdf.DamageFunctions[hazards.Salinity|hazards.Depth] = coastaldfs
