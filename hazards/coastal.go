@@ -56,6 +56,11 @@ func (ad CoastalEvent) Parameters() Parameter {
 	adp = SetHasDepth(adp)
 	if ad.WaveHeight() > 0.0 {
 		adp = SetHasWaveHeight(adp)
+		if ad.WaveHeight() < 3.0 {
+			adp = SetHasMediumWaveHeight(adp)
+		} else {
+			adp = SetHasHighWaveHeight(adp)
+		}
 	}
 	if ad.Salinity() {
 		adp = SetHasSalinity(adp)

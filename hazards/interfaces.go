@@ -29,18 +29,18 @@ type Parameter uint //switch to uint64 if we hit 32 slots and need another.
 
 //Parameter types describe different parameters for hazards
 const (
-	Default     Parameter = 0   //0
-	Depth       Parameter = 1   //1
-	Velocity    Parameter = 2   //2
-	ArrivalTime Parameter = 4   //3
-	Erosion     Parameter = 8   //4
-	Duration    Parameter = 16  //5
-	WaveHeight  Parameter = 32  //6
-	Salinity    Parameter = 64  //7
-	Qualitative Parameter = 128 //8
-	//ArrivalTime2ft Parameter = 256
-	//fin
-
+	Default          Parameter = 0    //0
+	Depth            Parameter = 1    //1
+	Velocity         Parameter = 2    //2
+	ArrivalTime      Parameter = 4    //3
+	ArrivalTime2ft   Parameter = 8    //4
+	Erosion          Parameter = 16   //5
+	Duration         Parameter = 32   //6
+	WaveHeight       Parameter = 64   //7
+	MediumWaveHeight Parameter = 128  //8
+	HighWaveHeight   Parameter = 256  //9
+	Salinity         Parameter = 512  //10
+	Qualitative      Parameter = 1024 //11
 )
 
 var parametersToStrings = map[Parameter]string{
@@ -95,6 +95,12 @@ func SetHasDuration(h Parameter) Parameter {
 //SetHasWaveHeight turns on a bitflag for the Parameter WaveHeight
 func SetHasWaveHeight(h Parameter) Parameter {
 	return h | WaveHeight
+}
+func SetHasMediumWaveHeight(h Parameter) Parameter {
+	return h | MediumWaveHeight
+}
+func SetHasHighWaveHeight(h Parameter) Parameter {
+	return h | HighWaveHeight
 }
 
 //SetHasSalinity turns on a bitflag for the Parameter Salinity

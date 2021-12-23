@@ -12,6 +12,10 @@ import (
 	"github.com/USACE/go-consequences/paireddata"
 )
 
+type OccupancyTypesContainer struct {
+	OccupancyTypes map[string]OccupancyTypeStochastic `json:"occupancytypes"`
+}
+
 //DamageFunctionFamily is to support a family of damage functions stored by hazard parameter types
 type DamageFunctionFamily struct {
 	DamageFunctions map[hazards.Parameter]DamageFunction `json:"damagefunctions"` //parameter is a bitflag
@@ -137,6 +141,72 @@ type OccupancyTypeDeterministic struct {
 	Name         string               `json:"name"`
 	StructureDFF DamageFunctionFamily `json:"structure"` //probably need one for deep foundation and shallow foundations...
 	ContentDFF   DamageFunctionFamily `json:"content"`
+}
+
+func (otc *OccupancyTypesContainer) ExtendMap(extension map[string]OccupancyTypeStochastic) error {
+	for key, value := range extension {
+		_, exists := otc.OccupancyTypes[key]
+		if exists {
+			return errors.New("structures: occupancy type " + key + " already exists")
+		} else {
+			otc.OccupancyTypes[key] = value
+		}
+	}
+	return nil
+}
+func (otc *OccupancyTypesContainer) MergeMap(additionalDFs map[string]OccupancyTypeStochastic) error {
+	for key, value := range additionalDFs {
+		curval, exists := otc.OccupancyTypes[key]
+		if exists {
+			for parameterkey, sdf := range value.StructureDFF.DamageFunctions {
+				_, sdfexists := curval.StructureDFF.DamageFunctions[parameterkey]
+				if sdfexists {
+					return errors.New("structures: occupancy type " + key + " already exists with parameter " + parameterkey.String())
+				} else {
+					curval.StructureDFF.DamageFunctions[parameterkey] = sdf
+				}
+			}
+			for parameterkey, cdf := range value.ContentDFF.DamageFunctions {
+				_, cdfexists := curval.ContentDFF.DamageFunctions[parameterkey]
+				if cdfexists {
+					return errors.New("structures: occupancy type " + key + " already exists with parameter " + parameterkey.String())
+				} else {
+					curval.ContentDFF.DamageFunctions[parameterkey] = cdf
+				}
+			}
+			otc.OccupancyTypes[key] = curval
+		} else {
+			otc.OccupancyTypes[key] = value
+		}
+	}
+	return nil
+}
+func (otc *OccupancyTypesContainer) OverrideMap(overrides map[string]OccupancyTypeStochastic) error {
+	for key, value := range overrides {
+		curval, exists := otc.OccupancyTypes[key]
+		if exists {
+			for parameterkey, sdf := range value.StructureDFF.DamageFunctions {
+				_, sdfexists := curval.StructureDFF.DamageFunctions[parameterkey]
+				if sdfexists {
+					curval.StructureDFF.DamageFunctions[parameterkey] = sdf
+				} else {
+					return errors.New("structures: occupancy type " + key + " doesn't currently exist with parameter " + parameterkey.String())
+				}
+			}
+			for parameterkey, cdf := range value.ContentDFF.DamageFunctions {
+				_, cdfexists := curval.ContentDFF.DamageFunctions[parameterkey]
+				if cdfexists {
+					curval.ContentDFF.DamageFunctions[parameterkey] = cdf
+				} else {
+					return errors.New("structures: occupancy type " + key + " doesn't currently exist with parameter " + parameterkey.String())
+				}
+			}
+			otc.OccupancyTypes[key] = curval
+		} else {
+			return errors.New("structures: occupancy type " + key + " doesn't currently exist.")
+		}
+	}
+	return nil
 }
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
@@ -525,8 +595,8 @@ func res11snbMedwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs //shouldnt this include salinity?
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs //shouldnt this include salinity?
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -547,8 +617,8 @@ func res11snbHighwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -593,8 +663,8 @@ func res11snbPierMedwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -615,8 +685,8 @@ func res11snbPierHighwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -770,8 +840,8 @@ func res11swbMedwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SWB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -792,8 +862,8 @@ func res11swbHighwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SWB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1601,8 +1671,8 @@ func res12snbMedwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1623,8 +1693,8 @@ func res12snbHighwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1666,8 +1736,8 @@ func res12snbPierMedwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1688,8 +1758,8 @@ func res12snbPierHighwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1844,8 +1914,8 @@ func res12swbMedwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SWB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
@@ -1866,8 +1936,8 @@ func res12swbHighwave() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
 	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-2SWB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }

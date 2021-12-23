@@ -3,6 +3,7 @@ package structures
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
@@ -208,12 +209,22 @@ func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
 	}
 	fmt.Println(ot2.ContentDFF.DamageFunctions[hazards.Default].Source)
 }
-func Test_JsonOcctypes(t *testing.T) {
-	//a map of occupancy types
-	m := OccupancyTypeMap()
-	b, err := json.Marshal(m)
+func Test_JsonOcctypes_toFile(t *testing.T) {
+	path := "/workspaces/Go_Consequences/data/occtypes.json"
+	w, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(b))
+	defer w.Close()
+	//a map of occupancy types
+	m := OccupancyTypeMap()
+	c := OccupancyTypesContainer{OccupancyTypes: m}
+	b, err := json.Marshal(c)
+	if err != nil {
+		panic(err)
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		panic(err)
+	}
 }
