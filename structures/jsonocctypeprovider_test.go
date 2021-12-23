@@ -8,12 +8,12 @@ import (
 )
 
 // for testing with Github action
-//const path = "./data/occtypes.json"
-//const path2 = "./data/erosion_trial4.json"
+const path = "./data/occtypes.json"
+const path2 = "./data/erosion_trial4.json"
 
 // for testing locally
-const path = "/workspaces/Go_Consequences/data/occtypes.json"
-const path2 = "/workspaces/Go_Consequences/data/erosion_trial5.json"
+//const path = "/workspaces/Go_Consequences/data/occtypes.json"
+//const path2 = "/workspaces/Go_Consequences/data/erosion_trial5.json"
 
 func Test_JsonReading(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
