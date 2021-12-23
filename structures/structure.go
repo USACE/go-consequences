@@ -93,12 +93,16 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
-
 	sval := s.StructVal
 	conval := s.ContVal
-	sDamFun := s.OccType.GetStructureDamageFunctionForHazard(e)
-	cDamFun := s.OccType.GetContentDamageFunctionForHazard(e)
-
+	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", e)
+	if sderr != nil {
+		return ret, sderr
+	}
+	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("content", e)
+	if cderr != nil {
+		return ret, cderr
+	}
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
 		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]

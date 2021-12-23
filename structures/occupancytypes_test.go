@@ -207,7 +207,7 @@ func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(ot2.ContentDFF.DamageFunctions[hazards.Default].Source)
+	fmt.Println(ot2.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Default].Source)
 }
 func Test_JsonOcctypes_toFile(t *testing.T) {
 	path := "/workspaces/Go_Consequences/data/occtypes.json"

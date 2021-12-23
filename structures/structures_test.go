@@ -28,7 +28,10 @@ func TestComputeConsequences(t *testing.T) {
 	cm := make(map[hazards.Parameter]DamageFunction)
 	var cdf = DamageFunctionFamily{DamageFunctions: cm}
 	cdf.DamageFunctions[hazards.Default] = df
-	var o = OccupancyTypeDeterministic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
+	componentmap := make(map[string]DamageFunctionFamily)
+	componentmap["contents"] = cdf
+	componentmap["structure"] = sdf
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: componentmap}
 	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
@@ -87,8 +90,10 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	cm := make(map[hazards.Parameter]DamageFunctionStochastic)
 	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
 	cdf.DamageFunctions[hazards.Default] = df
-
-	var o = OccupancyTypeStochastic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
+	componentmap := make(map[string]DamageFunctionFamilyStochastic)
+	componentmap["contents"] = cdf
+	componentmap["structure"] = sdf
+	var o = OccupancyTypeStochastic{Name: "test", ComponentDamageFunctions: componentmap}
 
 	sv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}
 	cv := statistics.NormalDistribution{Mean: 0, StandardDeviation: 1}

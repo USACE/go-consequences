@@ -131,16 +131,14 @@ type DamageFunctionStochastic struct {
 
 //OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
-	Name         string                         `json:"name"`
-	StructureDFF DamageFunctionFamilyStochastic `json:"structure"` //probably need one for deep foundation and shallow foundations...
-	ContentDFF   DamageFunctionFamilyStochastic `json:"content"`
+	Name                     string                                    `json:"name"`
+	ComponentDamageFunctions map[string]DamageFunctionFamilyStochastic `json:"componentdamagefunctions"`
 }
 
 //OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
 type OccupancyTypeDeterministic struct {
-	Name         string               `json:"name"`
-	StructureDFF DamageFunctionFamily `json:"structure"` //probably need one for deep foundation and shallow foundations...
-	ContentDFF   DamageFunctionFamily `json:"content"`
+	Name                     string                          `json:"name"`
+	ComponentDamageFunctions map[string]DamageFunctionFamily `json:"componentdamagefunctions"`
 }
 
 func (otc *OccupancyTypesContainer) ExtendMap(extension map[string]OccupancyTypeStochastic) error {
@@ -156,22 +154,22 @@ func (otc *OccupancyTypesContainer) ExtendMap(extension map[string]OccupancyType
 }
 func (otc *OccupancyTypesContainer) MergeMap(additionalDFs map[string]OccupancyTypeStochastic) error {
 	for key, value := range additionalDFs {
-		curval, exists := otc.OccupancyTypes[key]
+		curval, exists := otc.OccupancyTypes[key] //occupancy type
 		if exists {
-			for parameterkey, sdf := range value.StructureDFF.DamageFunctions {
-				_, sdfexists := curval.StructureDFF.DamageFunctions[parameterkey]
-				if sdfexists {
-					return errors.New("structures: occupancy type " + key + " already exists with parameter " + parameterkey.String())
+			for componentkey, cdff := range value.ComponentDamageFunctions {
+				curcdff, componentExists := curval.ComponentDamageFunctions[componentkey]
+				if componentExists {
+					for parameterkey, sdf := range cdff.DamageFunctions {
+						_, sdfexists := curcdff.DamageFunctions[parameterkey]
+						if sdfexists {
+							return errors.New("structures: occupancy type " + key + " already exists with parameter " + parameterkey.String() + " on component " + componentkey)
+						} else {
+							curcdff.DamageFunctions[parameterkey] = sdf
+						}
+					}
+					curval.ComponentDamageFunctions[componentkey] = curcdff
 				} else {
-					curval.StructureDFF.DamageFunctions[parameterkey] = sdf
-				}
-			}
-			for parameterkey, cdf := range value.ContentDFF.DamageFunctions {
-				_, cdfexists := curval.ContentDFF.DamageFunctions[parameterkey]
-				if cdfexists {
-					return errors.New("structures: occupancy type " + key + " already exists with parameter " + parameterkey.String())
-				} else {
-					curval.ContentDFF.DamageFunctions[parameterkey] = cdf
+					curval.ComponentDamageFunctions[componentkey] = cdff
 				}
 			}
 			otc.OccupancyTypes[key] = curval
@@ -185,20 +183,20 @@ func (otc *OccupancyTypesContainer) OverrideMap(overrides map[string]OccupancyTy
 	for key, value := range overrides {
 		curval, exists := otc.OccupancyTypes[key]
 		if exists {
-			for parameterkey, sdf := range value.StructureDFF.DamageFunctions {
-				_, sdfexists := curval.StructureDFF.DamageFunctions[parameterkey]
-				if sdfexists {
-					curval.StructureDFF.DamageFunctions[parameterkey] = sdf
+			for componentkey, cdff := range value.ComponentDamageFunctions {
+				curcdff, componentExists := curval.ComponentDamageFunctions[componentkey]
+				if componentExists {
+					for parameterkey, sdf := range cdff.DamageFunctions {
+						_, sdfexists := curcdff.DamageFunctions[parameterkey]
+						if sdfexists {
+							curcdff.DamageFunctions[parameterkey] = sdf
+						} else {
+							return errors.New("structures: occupancy type " + key + " doesn't currently exist with parameter " + parameterkey.String() + " on component " + componentkey)
+						}
+					}
+					curval.ComponentDamageFunctions[componentkey] = curcdff
 				} else {
-					return errors.New("structures: occupancy type " + key + " doesn't currently exist with parameter " + parameterkey.String())
-				}
-			}
-			for parameterkey, cdf := range value.ContentDFF.DamageFunctions {
-				_, cdfexists := curval.ContentDFF.DamageFunctions[parameterkey]
-				if cdfexists {
-					curval.ContentDFF.DamageFunctions[parameterkey] = cdf
-				} else {
-					return errors.New("structures: occupancy type " + key + " doesn't currently exist with parameter " + parameterkey.String())
+					curval.ComponentDamageFunctions[componentkey] = cdff
 				}
 			}
 			otc.OccupancyTypes[key] = curval
@@ -209,22 +207,18 @@ func (otc *OccupancyTypesContainer) OverrideMap(overrides map[string]OccupancyTy
 	return nil
 }
 
-//GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
-func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) DamageFunction {
-	result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
-	if ok {
-		return result
+//GetComponentDamageFunctionForHazard provides a hazard specific damage function for a component (e.g. structure, content, car, or other)
+func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForHazard(component string, h hazards.HazardEvent) (DamageFunction, error) {
+	c, cok := o.ComponentDamageFunctions[component]
+	if cok {
+		r, rok := c.DamageFunctions[h.Parameters()]
+		if rok {
+			return r, nil
+		} else {
+			return c.DamageFunctions[hazards.Default], nil //errors.New("using default damage function")
+		}
 	}
-	return o.StructureDFF.DamageFunctions[hazards.Default]
-}
-
-//GetContentDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
-func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.HazardEvent) DamageFunction {
-	result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
-	if ok {
-		return result
-	}
-	return o.ContentDFF.DamageFunctions[hazards.Default]
+	return DamageFunction{}, errors.New("component does not exist for this occupancy type")
 }
 
 //UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
@@ -237,25 +231,20 @@ type UncertaintyOccupancyTypeSampler interface {
 func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDeterministic {
 	r := rand.New(rand.NewSource(seed))
 	//iterate through damage function family
-	sm := make(map[hazards.Parameter]DamageFunction)
-	var sdf = DamageFunctionFamily{DamageFunctions: sm}
-	for k, v := range o.StructureDFF.DamageFunctions {
-		df := DamageFunction{}
-		df.DamageDriver = v.DamageDriver
-		df.Source = v.Source
-		df.DamageFunction = samplePairedDataValueSampler(r, v.DamageFunction)
-		sdf.DamageFunctions[k] = df
+	cm := make(map[string]DamageFunctionFamily)
+	for ck, cv := range o.ComponentDamageFunctions { //components
+		hm := make(map[hazards.Parameter]DamageFunction)
+		var cdf = DamageFunctionFamily{DamageFunctions: hm}
+		for k, v := range cv.DamageFunctions { //hazards
+			df := DamageFunction{}
+			df.DamageDriver = v.DamageDriver
+			df.Source = v.Source
+			df.DamageFunction = samplePairedDataValueSampler(r, v.DamageFunction)
+			cdf.DamageFunctions[k] = df
+		}
+		cm[ck] = cdf
 	}
-	cm := make(map[hazards.Parameter]DamageFunction)
-	var cdf = DamageFunctionFamily{DamageFunctions: cm}
-	for k, v := range o.ContentDFF.DamageFunctions {
-		df := DamageFunction{}
-		df.DamageDriver = v.DamageDriver
-		df.Source = v.Source
-		df.DamageFunction = samplePairedDataValueSampler(r, v.DamageFunction)
-		cdf.DamageFunctions[k] = df
-	}
-	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeDeterministic{Name: o.Name, ComponentDamageFunctions: cm}
 }
 func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.PairedData {
 	retval, ok := df.(paireddata.PairedData)
@@ -296,27 +285,20 @@ func centralTendencyPairedDataValueSampler(df interface{}) paireddata.PairedData
 //CentralTendency implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
 func (o OccupancyTypeStochastic) CentralTendency() OccupancyTypeDeterministic {
 	//iterate through damage function family
-	sm := make(map[hazards.Parameter]DamageFunction)
-	var sdf = DamageFunctionFamily{DamageFunctions: sm}
-	for k, v := range o.StructureDFF.DamageFunctions {
-		df, found := sdf.DamageFunctions[k]
-		if found {
+	cm := make(map[string]DamageFunctionFamily)
+	for ck, cv := range o.ComponentDamageFunctions { //components
+		hm := make(map[hazards.Parameter]DamageFunction)
+		var cdf = DamageFunctionFamily{DamageFunctions: hm}
+		for k, v := range cv.DamageFunctions { //hazards
+			df := DamageFunction{}
 			df.DamageDriver = v.DamageDriver
 			df.Source = v.Source
-			df.DamageFunction = centralTendencyPairedDataValueSampler(v)
+			df.DamageFunction = centralTendencyPairedDataValueSampler(v.DamageFunction)
+			cdf.DamageFunctions[k] = df
 		}
+		cm[ck] = cdf
 	}
-	cm := make(map[hazards.Parameter]DamageFunction)
-	var cdf = DamageFunctionFamily{DamageFunctions: cm}
-	for k, v := range o.ContentDFF.DamageFunctions {
-		df, found := cdf.DamageFunctions[k]
-		if found {
-			df.DamageDriver = v.DamageDriver
-			df.Source = v.Source
-			df.DamageFunction = centralTendencyPairedDataValueSampler(v)
-		}
-	}
-	return OccupancyTypeDeterministic{Name: o.Name, StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeDeterministic{Name: o.Name, ComponentDamageFunctions: cm}
 }
 func createStructureAndContentDamageFunctionFamily() (DamageFunctionFamilyStochastic, DamageFunctionFamilyStochastic) {
 	sm := make(map[hazards.Parameter]DamageFunctionStochastic)
@@ -325,6 +307,12 @@ func createStructureAndContentDamageFunctionFamily() (DamageFunctionFamilyStocha
 	cm := make(map[hazards.Parameter]DamageFunctionStochastic)
 	var cdf = DamageFunctionFamilyStochastic{DamageFunctions: cm}
 	return sdf, cdf
+}
+func createComponentMap(sdf DamageFunctionFamilyStochastic, cdf DamageFunctionFamilyStochastic) map[string]DamageFunctionFamilyStochastic {
+	compmap := make(map[string]DamageFunctionFamilyStochastic)
+	compmap["structure"] = sdf
+	compmap["contents"] = cdf
+	return compmap
 }
 func arrayToDetermnisticDistributions(vals []float64) []statistics.ContinuousDistribution {
 	dists := make([]statistics.ContinuousDistribution, len(vals))
@@ -488,7 +476,9 @@ func res11snb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastalsdfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastalcdfs
 
-	return OccupancyTypeStochastic{Name: "RES1-1SNB", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB", ComponentDamageFunctions: compmap}
 }
 
 func res11snbPier() OccupancyTypeStochastic {
@@ -536,7 +526,9 @@ func res11snbPier() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 
-	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", ComponentDamageFunctions: compmap}
 }
 
 func res11swb() OccupancyTypeStochastic {
@@ -696,7 +688,8 @@ func res11swb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 
-	return OccupancyTypeStochastic{Name: "RES1-1SWB", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+	return OccupancyTypeStochastic{Name: "RES1-1SWB", ComponentDamageFunctions: compmap}
 }
 
 func agr1() OccupancyTypeStochastic {
@@ -724,7 +717,9 @@ func agr1() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "AGR1", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "AGR1", ComponentDamageFunctions: compmap}
 }
 func comStructureSalinity() DamageFunctionStochastic {
 	structuresalinityxs := []float64{-1, -0.5, 0, 0.5, 1, 2, 3, 5, 7, 10}
@@ -800,7 +795,9 @@ func com1() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
 
-	return OccupancyTypeStochastic{Name: "COM1", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "COM1", ComponentDamageFunctions: compmap}
 }
 func com2() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -833,7 +830,10 @@ func com2() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM2", StructureDFF: sdf, ContentDFF: cdf}
+
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "COM2", ComponentDamageFunctions: compmap}
 }
 func com3() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -867,7 +867,10 @@ func com3() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM3", StructureDFF: sdf, ContentDFF: cdf}
+
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "COM3", ComponentDamageFunctions: compmap}
 }
 func com4() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -901,7 +904,9 @@ func com4() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM4", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+
+	return OccupancyTypeStochastic{Name: "COM4", ComponentDamageFunctions: compmap}
 }
 func com5() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -935,7 +940,8 @@ func com5() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM5", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+	return OccupancyTypeStochastic{Name: "COM5", ComponentDamageFunctions: compmap}
 }
 func com6() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
@@ -969,7 +975,8 @@ func com6() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM6", StructureDFF: sdf, ContentDFF: cdf}
+	compmap := createComponentMap(sdf, cdf)
+	return OccupancyTypeStochastic{Name: "COM6", ComponentDamageFunctions: compmap}
 }
 func com7() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1003,7 +1010,8 @@ func com7() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM7", StructureDFF: sdf, ContentDFF: cdf}
+
+	return OccupancyTypeStochastic{Name: "COM7", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func com8() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1037,7 +1045,7 @@ func com8() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM8", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "COM8", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func com9() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1071,7 +1079,7 @@ func com9() OccupancyTypeStochastic {
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
-	return OccupancyTypeStochastic{Name: "COM9", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "COM9", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func com10() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1106,7 +1114,7 @@ func com10() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = structuresalinityStochastic
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = contentsalinityStochastic
 
-	return OccupancyTypeStochastic{Name: "COM10", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "COM10", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 
 func edu1() OccupancyTypeStochastic {
@@ -1134,7 +1142,7 @@ func edu1() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "EDU1", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "EDU1", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func edu2() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1161,7 +1169,7 @@ func edu2() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "EDU2", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "EDU2", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func gov1() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1188,7 +1196,7 @@ func gov1() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "GOV1", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "GOV1", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func gov2() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1215,7 +1223,7 @@ func gov2() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "GOV2", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "GOV2", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func ind1() OccupancyTypeStochastic {
 	structurexs := []float64{-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
@@ -1242,7 +1250,7 @@ func ind1() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "IND1", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "IND1", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func ind2() OccupancyTypeStochastic {
 	structurexs := []float64{-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1269,7 +1277,7 @@ func ind2() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "IND2", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "IND2", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func ind3() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}
@@ -1296,7 +1304,7 @@ func ind3() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "IND3", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "IND3", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func ind4() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
@@ -1323,7 +1331,7 @@ func ind4() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "IND4", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "IND4", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func ind5() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}
@@ -1350,7 +1358,7 @@ func ind5() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "IND5", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "IND5", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func ind6() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1377,7 +1385,7 @@ func ind6() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "IND6", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "IND6", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func rel1() OccupancyTypeStochastic {
 	structurexs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -1404,7 +1412,7 @@ func rel1() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "REL1", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "REL1", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res12snb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -1508,7 +1516,7 @@ func res12snb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 
-	return OccupancyTypeStochastic{Name: "RES1-2SNB", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-2SNB", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res12snbPier() OccupancyTypeStochastic {
 	structurexs := []float64{-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
@@ -1551,7 +1559,7 @@ func res12snbPier() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight|hazards.Salinity] = hwcoastaldfs
 
-	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 
 func res12swb() OccupancyTypeStochastic {
@@ -1708,7 +1716,7 @@ func res12swb() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Salinity|hazards.Depth] = coastaldfs
 	cdf.DamageFunctions[hazards.Salinity|hazards.Depth] = coastaldfs
 
-	return OccupancyTypeStochastic{Name: "RES1-2SWB", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-2SWB", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 
 func res13snb() OccupancyTypeStochastic {
@@ -1773,7 +1781,7 @@ func res13snb() OccupancyTypeStochastic {
 	//Depth Hazard
 	sdf.DamageFunctions[hazards.Depth] = egmdfs
 	cdf.DamageFunctions[hazards.Depth] = cegmdfs
-	return OccupancyTypeStochastic{Name: "RES1-3SNB", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-3SNB", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res13swb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -1849,7 +1857,7 @@ func res13swb() OccupancyTypeStochastic {
 	//Depth Hazard
 	sdf.DamageFunctions[hazards.Depth] = egmdfs
 	cdf.DamageFunctions[hazards.Depth] = cegmdfs
-	return OccupancyTypeStochastic{Name: "RES1-3SWB", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-3SWB", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res1slnb() OccupancyTypeStochastic {
 	structurexs := []float64{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -1913,7 +1921,7 @@ func res1slnb() OccupancyTypeStochastic {
 	//Depth Hazard
 	sdf.DamageFunctions[hazards.Depth] = egmdfs
 	cdf.DamageFunctions[hazards.Depth] = cegmdfs
-	return OccupancyTypeStochastic{Name: "RES1-SLNB", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-SLNB", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res1slwb() OccupancyTypeStochastic {
 	structurexs := []float64{-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
@@ -1989,7 +1997,7 @@ func res1slwb() OccupancyTypeStochastic {
 	//Depth Hazard
 	sdf.DamageFunctions[hazards.Depth] = egmdfs
 	cdf.DamageFunctions[hazards.Depth] = cegmdfs
-	return OccupancyTypeStochastic{Name: "RES1-SLWB", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-SLWB", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 
 func res2() OccupancyTypeStochastic {
@@ -2017,7 +2025,7 @@ func res2() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES2", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES2", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res3a() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2044,7 +2052,7 @@ func res3a() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES3A", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES3A", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res3b() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2071,7 +2079,7 @@ func res3b() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES3B", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES3B", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res3c() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2098,7 +2106,7 @@ func res3c() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES3C", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES3C", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res3d() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2125,7 +2133,7 @@ func res3d() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES3D", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES3D", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res3e() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2152,7 +2160,7 @@ func res3e() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES3E", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES3E", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res3f() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2179,7 +2187,7 @@ func res3f() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES3F", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES3F", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res4() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2206,7 +2214,7 @@ func res4() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES4", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES4", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res5() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2233,7 +2241,7 @@ func res5() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES5", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES5", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
 func res6() OccupancyTypeStochastic {
 	structurexs := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
@@ -2260,5 +2268,5 @@ func res6() OccupancyTypeStochastic {
 	sdf.DamageFunctions[hazards.Depth] = dfs
 	cdf.DamageFunctions[hazards.Depth] = cdfs
 
-	return OccupancyTypeStochastic{Name: "RES6", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES6", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }

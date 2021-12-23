@@ -9,7 +9,8 @@ import (
 
 // for testing with Github action
 const path = "./data/occtypes.json"
-const path2 = "./data/erosion_trial4.json"
+
+//const path2 = "./data/erosion_trial4.json"
 
 // for testing locally
 //const path = "/workspaces/Go_Consequences/data/occtypes.json"
@@ -17,11 +18,12 @@ const path2 = "./data/erosion_trial4.json"
 
 func Test_JsonReading(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
-	jotp.Init(path2)
+	jotp.Init(path)
 	m := jotp.occupancyTypesContainer.OccupancyTypes
-	fmt.Println(m["COM1"].ContentDFF.DamageFunctions[hazards.Erosion].Source)
+	fmt.Println(m["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Erosion].Source)
 }
 
+/*
 func Test_JsonMerging(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.Init(path)
@@ -32,7 +34,7 @@ func Test_JsonMerging(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(jotp.occupancyTypesContainer.OccupancyTypes["COM1"].ContentDFF.DamageFunctions[hazards.Erosion].Source)
+	fmt.Println(jotp.occupancyTypesContainer.OccupancyTypes["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Erosion].Source)
 }
 
 func Test_JsonWriting(t *testing.T) {
@@ -50,3 +52,4 @@ func Test_JsonWriting(t *testing.T) {
 		panic(err)
 	}
 }
+*/
