@@ -211,120 +211,20 @@ func (otc *OccupancyTypesContainer) OverrideMap(overrides map[string]OccupancyTy
 
 //GetStructureDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHazard(h hazards.HazardEvent) DamageFunction {
-	if h.Has(hazards.WaveHeight) { // include condition for returning function for wave height less than 1 or an exception?
-		if h.WaveHeight() < 3 {
-			return o.GetStructureDamageFunctionForMedWave(h)
-		} else {
-			return o.GetStructureDamageFunctionForHighWave(h)
-		}
-	} else {
-		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
-		if ok {
-			return result
-		}
-		return o.StructureDFF.DamageFunctions[hazards.Default]
+	result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
+	if ok {
+		return result
 	}
-}
-
-//GetStructureDamageForMedWave gets the medium wave (less than 3ft) structure damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForMedWave(h hazards.HazardEvent) DamageFunction {
-	if o.Name == "RES1-1SNB-PIER" {
-		return res11snbPierMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB" {
-		return res12snbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB-PIER" {
-		return res12snbPierMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-1SWB" {
-		return res11swbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SWB" {
-		return res12swbMedwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else {
-		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
-		if ok {
-			return result
-		}
-		return o.StructureDFF.DamageFunctions[hazards.Default]
-	}
-}
-
-//GetStructureDamageForHighWave gets the high wave (greater than or equal to 3ft) structure damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetStructureDamageFunctionForHighWave(h hazards.HazardEvent) DamageFunction {
-	if o.Name == "RES1-1SNB-PIER" {
-		return res11snbPierHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB" {
-		return res12snbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB-PIER" {
-		return res12snbPierHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-1SWB" {
-		return res11swbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SWB" {
-		return res12swbHighwave().CentralTendency().StructureDFF.DamageFunctions[hazards.WaveHeight]
-	} else {
-		result, ok := o.StructureDFF.DamageFunctions[h.Parameters()]
-		if ok {
-			return result
-		}
-		return o.StructureDFF.DamageFunctions[hazards.Default]
-	}
+	return o.StructureDFF.DamageFunctions[hazards.Default]
 }
 
 //GetContentDamageFunctionForHazard implements OccupancyType on OccupancyTypeDeterministic
 func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHazard(h hazards.HazardEvent) DamageFunction {
-	if h.Has(hazards.WaveHeight) { // include condition for returning function for wave height less than 1 or an exception?
-		if h.WaveHeight() < 3 {
-			return o.GetContentDamageFunctionForMedWave(h)
-		} else {
-			return o.GetContentDamageFunctionForHighWave(h)
-		}
-	} else {
-		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
-		if ok {
-			return result
-		}
-		return o.ContentDFF.DamageFunctions[hazards.Default]
+	result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
+	if ok {
+		return result
 	}
-}
-
-//GetContentDamageForMedWave gets the medium wave (less than 3ft) content damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetContentDamageFunctionForMedWave(h hazards.HazardEvent) DamageFunction {
-	if o.Name == "RES1-1SNB-PIER" {
-		return res11snbPierMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB" {
-		return res12snbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB-PIER" {
-		return res12snbPierMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-1SWB" {
-		return res11swbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SWB" {
-		return res12swbMedwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else {
-		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
-		if ok {
-			return result
-		}
-		return o.ContentDFF.DamageFunctions[hazards.Default]
-	}
-}
-
-//GetContentDamageForHighWave gets the high wave (greater than or equal to 3ft) content damage function for a given occupancy type
-func (o OccupancyTypeDeterministic) GetContentDamageFunctionForHighWave(h hazards.HazardEvent) DamageFunction {
-	if o.Name == "RES1-1SNB-PIER" {
-		return res11snbPierHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB" {
-		return res12snbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SNB-PIER" {
-		return res12snbPierHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-1SWB" {
-		return res11swbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else if o.Name == "RES1-2SWB" {
-		return res12swbHighwave().CentralTendency().ContentDFF.DamageFunctions[hazards.WaveHeight]
-	} else {
-		result, ok := o.ContentDFF.DamageFunctions[h.Parameters()]
-		if ok {
-			return result
-		}
-		return o.ContentDFF.DamageFunctions[hazards.Default]
-	}
+	return o.ContentDFF.DamageFunctions[hazards.Default]
 }
 
 //UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
@@ -460,23 +360,11 @@ func OccupancyTypeMap() map[string]OccupancyTypeStochastic {
 	m["IND6"] = ind6()
 	m["REL1"] = rel1()
 	m["RES1-1SNB"] = res11snb()
-	m["RES1-1SNB_MEDWAVE"] = res11snbMedwave()
-	m["RES1-1SNB_HIGHWAVE"] = res11snbHighwave()
 	m["RES1-1SNB-PIER"] = res11snbPier()
-	m["RES1-1SNB-PIER_MEDWAVE"] = res11snbPierMedwave()
-	m["RES1-1SNB-PIER_HIGHWAVE"] = res11snbPierHighwave()
 	m["RES1-1SWB"] = res11swb()
-	m["RES1-1SWB_MEDWAVE"] = res11swbMedwave()
-	m["RES1-1SNB_HIGHWAVE"] = res11snbHighwave()
 	m["RES1-2SNB"] = res12snb()
-	m["RES1-2SNB_MEDWAVE"] = res12snbMedwave()
-	m["RES1-2SNB_HIGHWAVE"] = res12snbHighwave()
 	m["RES1-2SNB-PIER"] = res12snbPier()
-	m["RES1-2SNB-PIER_MEDWAVE"] = res12snbPierMedwave()
-	m["RES1-2SNB-PIER_HIGHWAVE"] = res12snbPierHighwave()
 	m["RES1-2SWB"] = res12swb()
-	m["RES1-2SWB_MEDWAVE"] = res12swbMedwave()
-	m["RES1-2SNB_HIGHWAVE"] = res12snbHighwave()
 	m["RES1-3SNB"] = res13snb()
 	m["RES1-3SWB"] = res13swb()
 	m["RES1-SLNB"] = res1slnb()
@@ -572,55 +460,35 @@ func res11snb() OccupancyTypeStochastic {
 	coastalcdfs.DamageFunction = structuresalinity
 	coastalcdfs.DamageDriver = hazards.Depth
 
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := arrayToDetermnisticDistributions([]float64{3, 4, 5, 8, 22, 37, 46, 53, 60, 66, 72, 77, 81, 85, 87, 90, 92, 95, 97, 99, 100})
+	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	mwcoastaldfs := DamageFunctionStochastic{}
+	mwcoastaldfs.Source = "FEMA coastal PFRA damage functions"
+	mwcoastaldfs.DamageFunction = structuredamagefunction
+	mwcoastaldfs.DamageDriver = hazards.Depth
+	structurehwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurehwaveys := arrayToDetermnisticDistributions([]float64{8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100, 100})
+	var structurehwdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurehwavexs, Yvals: structurehwaveys}
+
+	hwcoastaldfs := DamageFunctionStochastic{}
+	hwcoastaldfs.Source = "FEMA coastal PFRA damage functions"
+	hwcoastaldfs.DamageFunction = structurehwdamagefunction
+	hwcoastaldfs.DamageDriver = hazards.Depth
+	//HighWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+
+	//MediumWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs //shouldnt this include salinity?
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight|hazards.Salinity] = mwcoastaldfs
+
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastalsdfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastalcdfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res11snbMedwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{3, 4, 5, 8, 22, 37, 46, 53, 60, 66, 72, 77, 81, 85, 87, 90, 92, 95, 97, 99, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage functions"
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs //shouldnt this include salinity?
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-1SNB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res11snbHighwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage functions"
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-1SNB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res11snbPier() OccupancyTypeStochastic {
@@ -634,6 +502,24 @@ func res11snbPier() OccupancyTypeStochastic {
 	coastaldfs.DamageFunction = structuredamagefunction
 	coastaldfs.DamageDriver = hazards.Depth
 
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := arrayToDetermnisticDistributions([]float64{2, 2, 3, 4, 14, 32, 42, 48, 56, 61, 68, 72, 77, 81, 84, 86, 89, 91, 94, 96, 97})
+	var structurewavedamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	mwcoastaldfs := DamageFunctionStochastic{}
+	mwcoastaldfs.Source = "FEMA coastal PFRA damage functions"
+	mwcoastaldfs.DamageFunction = structurewavedamagefunction
+	mwcoastaldfs.DamageDriver = hazards.Depth
+
+	structurehwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurehwaveys := arrayToDetermnisticDistributions([]float64{5, 8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100})
+	var structurehwdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurehwavexs, Yvals: structurehwaveys}
+
+	hwcoastaldfs := DamageFunctionStochastic{}
+	hwcoastaldfs.Source = "FEMA coastal PFRA damage functions"
+	hwcoastaldfs.DamageFunction = structurehwdamagefunction
+	hwcoastaldfs.DamageDriver = hazards.Depth
+
 	sdf, cdf := createStructureAndContentDamageFunctionFamily()
 
 	//Default hazard.
@@ -643,52 +529,14 @@ func res11snbPier() OccupancyTypeStochastic {
 	//Depth, salinity hazard.
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
+	//mediumWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	//HighWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
 
 	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res11snbPierMedwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{2, 2, 3, 4, 14, 32, 42, 48, 56, 61, 68, 72, 77, 81, 84, 86, 89, 91, 94, 96, 97})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage functions"
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res11snbPierHighwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{5, 8, 10, 12, 20, 38, 50, 58, 66, 73, 82, 86, 92, 97, 100, 100, 100, 100, 100, 100, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage functions"
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-1SNB-PIER_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res11swb() OccupancyTypeStochastic {
@@ -797,14 +645,14 @@ func res11swb() OccupancyTypeStochastic {
 	coastaldfs.DamageFunction = structuresalinityStochastic
 	coastaldfs.DamageDriver = hazards.Depth
 
-	//Depth,Salinity
-	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
-	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
+	structurehwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurehwaveys := arrayToDetermnisticDistributions([]float64{16, 18, 20, 25, 43, 55, 63, 71, 78, 87, 91, 97, 100, 100, 100, 100, 100, 100, 100, 100, 100})
+	var structurehwdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurehwavexs, Yvals: structurehwaveys}
 
-	return OccupancyTypeStochastic{Name: "RES1-1SWB", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res11swbMedwave() OccupancyTypeStochastic {
+	hwcoastaldfs := DamageFunctionStochastic{}
+	hwcoastaldfs.Source = "FEMA coastal PFRA damage functions"
+	hwcoastaldfs.DamageFunction = structurehwdamagefunction
+	hwcoastaldfs.DamageDriver = hazards.Depth
 
 	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structurewaveys := make([]statistics.ContinuousDistribution, 21)
@@ -829,43 +677,26 @@ func res11swbMedwave() OccupancyTypeStochastic {
 	structurewaveys[18], _ = statistics.Init([]float64{85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{27, 142, 125, 112, 110, 91, 70, 67, 74, 58, 34, 44, 30, 528, 488})
 	structurewaveys[19], _ = statistics.Init([]float64{90, 91, 92, 93, 94, 95, 96, 97, 98, 99}, []int64{199, 171, 161, 102, 108, 92, 68, 57, 32, 1010})
 	structurewaveys[20], _ = statistics.InitDeterministic(100.0)
-	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+	var structuremwdamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
 
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves (combined finished and unfinished basement)" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunctionStochastic
-	coastaldfs.DamageDriver = hazards.Depth
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	mwcoastaldfs := DamageFunctionStochastic{}
+	mwcoastaldfs.Source = "FEMA coastal PFRA damage curves (combined finished and unfinished basement)"
+	mwcoastaldfs.DamageFunction = structuremwdamagefunctionStochastic
+	mwcoastaldfs.DamageDriver = hazards.Depth
 
-	return OccupancyTypeStochastic{Name: "RES1-1SWB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
+	//mediumWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
 
-func res11swbHighwave() OccupancyTypeStochastic {
+	//HighWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
 
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{16, 18, 20, 25, 43, 55, 63, 71, 78, 87, 91, 97, 100, 100, 100, 100, 100, 100, 100, 100, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+	//Depth,Salinity
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
 
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage functions"
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-1SWB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-1SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func agr1() OccupancyTypeStochastic {
@@ -1643,9 +1474,35 @@ func res12snb() OccupancyTypeStochastic {
 	var structuresalinity = paireddata.UncertaintyPairedData{Xvals: structuresalinityxs, Yvals: structuresalinityys}
 
 	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
+	coastaldfs.Source = "FEMA coastal PFRA damage curves"
 	coastaldfs.DamageFunction = structuresalinity
 	coastaldfs.DamageDriver = hazards.Depth
+
+	structurehwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
+	structurehwaveys := arrayToDetermnisticDistributions([]float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100})
+	var structurehwdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurehwavexs, Yvals: structurehwaveys}
+
+	hwcoastaldfs := DamageFunctionStochastic{}
+	hwcoastaldfs.Source = "FEMA coastal PFRA damage curves"
+	hwcoastaldfs.DamageFunction = structurehwdamagefunction
+	hwcoastaldfs.DamageDriver = hazards.Depth
+
+	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+	structurewaveys := arrayToDetermnisticDistributions([]float64{0, 1, 1, 6, 16, 30, 41, 50, 59, 65, 69, 72, 76, 80, 82, 85, 87, 89, 91, 92, 94})
+	var structuremwdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+
+	mwcoastaldfs := DamageFunctionStochastic{}
+	mwcoastaldfs.Source = "FEMA coastal PFRA damage curves"
+	mwcoastaldfs.DamageFunction = structuremwdamagefunction
+	mwcoastaldfs.DamageDriver = hazards.Depth
+
+	//MediumWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+
+	//HighWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
 
 	//Depth,Salinity
 	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
@@ -1653,52 +1510,6 @@ func res12snb() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES1-2SNB", StructureDFF: sdf, ContentDFF: cdf}
 }
-
-func res12snbMedwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{0, 1, 1, 6, 16, 30, 41, 50, 59, 65, 69, 72, 76, 80, 82, 85, 87, 89, 91, 92, 94})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-2SNB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res12snbHighwave() OccupancyTypeStochastic {
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-2SNB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
-
 func res12snbPier() OccupancyTypeStochastic {
 	structurexs := []float64{-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structureys := arrayToDetermnisticDistributions([]float64{0, 8, 22, 29, 33, 38, 42, 47, 50, 53, 56, 58, 60, 61, 63, 65, 66, 67})
@@ -1707,61 +1518,40 @@ func res12snbPier() OccupancyTypeStochastic {
 	sdf, cdf := createStructureAndContentDamageFunctionFamily()
 
 	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
+	coastaldfs.Source = "FEMA coastal PFRA damage curves"
 	coastaldfs.DamageFunction = structuredamagefunction
 	coastaldfs.DamageDriver = hazards.Depth
 
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.Depth] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
-}
-func res12snbPierMedwave() OccupancyTypeStochastic {
 	structurewavexs := []float64{-2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structurewaveys := arrayToDetermnisticDistributions([]float64{0, 1, 10, 23, 33, 41, 50, 57, 61, 65, 69, 72, 75, 77, 80, 82, 84, 85, 87})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+	var structurewdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
 
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
+	mwcoastaldfs := DamageFunctionStochastic{}
+	mwcoastaldfs.Source = "FEMA coastal PFRA damage curves"
+	mwcoastaldfs.DamageFunction = structurewdamagefunction
+	mwcoastaldfs.DamageDriver = hazards.Depth
+	structurehwavexs := []float64{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0}
+	structurehwaveys := arrayToDetermnisticDistributions([]float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100})
+	var structurehwdamagefunction = paireddata.UncertaintyPairedData{Xvals: structurehwavexs, Yvals: structurehwaveys}
 
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-
+	hwcoastaldfs := DamageFunctionStochastic{}
+	hwcoastaldfs.Source = "FEMA coastal PFRA damage curves"
+	hwcoastaldfs.DamageFunction = structurehwdamagefunction
+	hwcoastaldfs.DamageDriver = hazards.Depth
 	//Default hazard.
 	sdf.DamageFunctions[hazards.Default] = coastaldfs
 	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	//Salinity Hazard
+	sdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
+	cdf.DamageFunctions[hazards.Depth|hazards.Salinity] = coastaldfs
+	//MediumWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	//HighWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
 
-	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res12snbPierHighwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{0, 2, 2, 13, 27, 43, 60, 76, 90, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-2SNB-PIER", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res12swb() OccupancyTypeStochastic {
@@ -1866,18 +1656,9 @@ func res12swb() OccupancyTypeStochastic {
 	var structuresalinityStochastic = paireddata.UncertaintyPairedData{Xvals: structuresalinityxs, Yvals: structuresalinityydists}
 
 	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves (combined with and without finished basement)" //confirm with richard
+	coastaldfs.Source = "FEMA coastal PFRA damage curves (combined with and without finished basement)"
 	coastaldfs.DamageFunction = structuresalinityStochastic
 	coastaldfs.DamageDriver = hazards.Depth
-
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-2SWB", StructureDFF: sdf, ContentDFF: cdf}
-}
-
-func res12swbMedwave() OccupancyTypeStochastic {
 
 	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
 	structurewaveys := make([]statistics.ContinuousDistribution, 21)
@@ -1902,44 +1683,32 @@ func res12swbMedwave() OccupancyTypeStochastic {
 	structurewaveys[18], _ = statistics.Init([]float64{71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92}, []int64{56, 98, 85, 76, 73, 80, 69, 53, 36, 57, 51, 43, 48, 29, 36, 27, 29, 232, 224, 200, 183, 215})
 	structurewaveys[19], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
 	structurewaveys[20], _ = statistics.Init([]float64{72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93}, []int64{62, 105, 80, 72, 78, 75, 67, 53, 41, 53, 50, 45, 45, 30, 35, 28, 28, 232, 224, 199, 183, 215})
-	var structuredamagefunctionStochastic = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+	var structuremwStochastic = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
+	mwcoastaldfs := DamageFunctionStochastic{}
+	mwcoastaldfs.Source = "FEMA coastal PFRA damage curves (combined with and without finished basement)"
+	mwcoastaldfs.DamageFunction = structuremwStochastic
+	mwcoastaldfs.DamageDriver = hazards.Depth
 
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
+	structurehwavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
+	structurehwaveys := arrayToDetermnisticDistributions([]float64{12, 14, 16, 21, 35, 51, 68, 84, 98, 100})
+	var structurehwfunction = paireddata.UncertaintyPairedData{Xvals: structurehwavexs, Yvals: structurehwaveys}
 
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves (combined with and without finished basement)" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunctionStochastic
-	coastaldfs.DamageDriver = hazards.Depth
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = coastaldfs
+	hwcoastaldfs := DamageFunctionStochastic{}
+	hwcoastaldfs.Source = "FEMA coastal PFRA damage curves"
+	hwcoastaldfs.DamageFunction = structurehwfunction
+	hwcoastaldfs.DamageDriver = hazards.Depth
 
-	return OccupancyTypeStochastic{Name: "RES1-2SWB_MEDWAVE", StructureDFF: sdf, ContentDFF: cdf}
-}
+	//HighWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = hwcoastaldfs
+	//MediumWaves Hazard
+	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.MediumWaveHeight] = mwcoastaldfs
+	//Salinity Hazard
+	sdf.DamageFunctions[hazards.Salinity|hazards.Depth] = coastaldfs
+	cdf.DamageFunctions[hazards.Salinity|hazards.Depth] = coastaldfs
 
-func res12swbHighwave() OccupancyTypeStochastic {
-
-	structurewavexs := []float64{-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
-	structurewaveys := arrayToDetermnisticDistributions([]float64{12, 14, 16, 21, 35, 51, 68, 84, 98, 100})
-	var structuredamagefunction = paireddata.UncertaintyPairedData{Xvals: structurewavexs, Yvals: structurewaveys}
-
-	sdf, cdf := createStructureAndContentDamageFunctionFamily()
-
-	coastaldfs := DamageFunctionStochastic{}
-	coastaldfs.Source = "FEMA coastal PFRA damage curves" //confirm with richard
-	coastaldfs.DamageFunction = structuredamagefunction
-	coastaldfs.DamageDriver = hazards.Depth
-	//Default hazard.
-	sdf.DamageFunctions[hazards.Default] = coastaldfs
-	cdf.DamageFunctions[hazards.Default] = coastaldfs
-	//Waves Hazard
-	sdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-	cdf.DamageFunctions[hazards.WaveHeight|hazards.Depth|hazards.HighWaveHeight] = coastaldfs
-
-	return OccupancyTypeStochastic{Name: "RES1-2SWB_HIGHWAVE", StructureDFF: sdf, ContentDFF: cdf}
+	return OccupancyTypeStochastic{Name: "RES1-2SWB", StructureDFF: sdf, ContentDFF: cdf}
 }
 
 func res13snb() OccupancyTypeStochastic {
