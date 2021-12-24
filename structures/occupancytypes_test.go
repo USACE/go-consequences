@@ -137,6 +137,17 @@ func Test_DamageFunction_Marshal(t *testing.T) {
 func Test_Erosion_DamageFunctionStochastic_Marshal(t *testing.T) {
 
 	//build a basic structure with a defined depth damage relationship.
+	df := erosionDamageFunction()
+
+	b, err := json.Marshal(df)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+
+}
+
+func erosionDamageFunction() DamageFunctionStochastic {
 	x := []float64{10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0}
 	y := make([]statistics.ContinuousDistribution, 10)
 	y[0] = statistics.TriangularDistribution{Min: 0.0, MostLikely: 0.0, Max: .5}
@@ -155,13 +166,7 @@ func Test_Erosion_DamageFunctionStochastic_Marshal(t *testing.T) {
 	df.Source = "bhrercn"
 	df.DamageFunction = pd
 	df.DamageDriver = hazards.Erosion
-
-	b, err := json.Marshal(df)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(b))
-
+	return df
 }
 
 func Test_DamageFunctionFamilyStochastic_Marshal(t *testing.T) {

@@ -124,38 +124,46 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	}
 }
 
-/*
 func TestComputeConsequences_erosion(t *testing.T) {
-
+	df := erosionDamageFunction()
 	//build a basic structure with a defined depth damage relationship.
-	jotp := JsonOccupancyTypeProvider{}
-	jotp.Init(path2)
-	m := jotp.occupancyTypesContainer.OccupancyTypes
-	o := m["COM1"].CentralTendency()
-	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
+	ot := OccupancyTypeStochastic{}
+	ot.Name = "fake"
+	cm := make(map[string]DamageFunctionFamilyStochastic)
+	dfm := make(map[hazards.Parameter]DamageFunctionStochastic)
+	dfm[hazards.Erosion] = df
+	dffs := DamageFunctionFamilyStochastic{DamageFunctions: dfm}
+	cm["contents"] = dffs
+	cm["structure"] = dffs
+	ot.ComponentDamageFunctions = cm
+	var s = StructureStochastic{OccType: ot, StructVal: consequences.ParameterValue{Value: 100.0}, ContVal: consequences.ParameterValue{Value: 100.0}, FoundHt: consequences.ParameterValue{Value: 0.0}, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
 	e := hazards.NewCoastalEvent(hazards.CoastalEvent{})
 	erosions := []float64{0.0, 5, 10, 10.5, 20, 25, 50, 75, 85, 95}
-	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0} //these need to be updated
+	expectedResults := []float64{0.0, 0.0, 0.00, 0.05, 1, 1.375, 4.8, 7.55, 7.925, 8} //these need to be updated
 	for idx := range erosions {
 		e.SetErosion(erosions[idx])
 		r, err := s.Compute(e)
 		if err != nil {
-			panic(err)
+			if e.Erosion() != 0.0 {
+				t.Errorf("Compute(%f) = %v; expected %v", erosions[idx], err.Error(), "structure: hazard did not contain valid parameters to impact a structure")
+			}
+		} else {
+			dr, err := r.Fetch("structure damage")
+			if err != nil {
+				panic(err)
+			}
+			got := dr.(float64)
+			diff := expectedResults[idx] - got
+			if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
+				t.Errorf("Compute(%f) = %f; expected %f", erosions[idx], got, expectedResults[idx])
+			}
 		}
-		dr, err := r.Fetch("structure damage")
-		if err != nil {
-			panic(err)
-		}
-		got := dr.(float64)
-		diff := expectedResults[idx] - got
-		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
-			t.Errorf("Compute(%f) = %f; expected %f", erosions[idx], got, expectedResults[idx])
-		}
+
 	}
-	//test interpolation due to foundation height putting depth back in range
-	s.FoundHt = 1.1
+	//test confirm foundation height does not impact results.
+	s.FoundHt = consequences.ParameterValue{Value: statistics.DeterministicDistribution{Value: 1.1}}
 	r, err := s.Compute(e)
 	if err != nil {
 		panic(err)
@@ -165,14 +173,10 @@ func TestComputeConsequences_erosion(t *testing.T) {
 		panic(err)
 	}
 	got := dr.(float64)
-	if got != 39.0 {
-		t.Errorf("Compute(%f) = %f; expected %f", e.Erosion(), got, 39.0)
+	if got != expectedResults[len(erosions)-1] {
+		t.Errorf("Compute(%f) = %f; expected %f", e.Erosion(), got, expectedResults[len(erosions)-1])
 	}
-
-	//add a test for content value as well
-	//add a test for different hazard types (float64 and fire?)
 }
-*/
 
 /*
 func TestComputeConsequencesWithReconstruction(t *testing.T) {

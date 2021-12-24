@@ -115,8 +115,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		}
 	} //else dont modify value because damage is not driven by depth
 	if e.Has(sDamFun.DamageDriver) && e.Has(cDamFun.DamageDriver) {
-		//the exist?
-		//this code presumes damage is driven by depth alone.
+		//they exist!
 		sdampercent := 0.0
 		cdampercent := 0.0
 		switch sDamFun.DamageDriver {
@@ -160,7 +159,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
 	} else {
-		err = errors.New("Hazard did not contain valid parameters to impact a structure")
+		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}
 	return ret, err
 }
