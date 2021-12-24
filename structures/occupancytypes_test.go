@@ -208,6 +208,21 @@ func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
 	}
 	fmt.Println(ot2.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Default].Source)
 }
+func Test_OccupancyType_COM1(t *testing.T) {
+	o := com1()
+	fmt.Println(o.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
+	b, err := json.Marshal(o)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
+	var o2 OccupancyTypeStochastic
+	err = json.Unmarshal(b, &o2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(o2.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
+}
 
 /*
 func Test_JsonOcctypes_toFile(t *testing.T) {

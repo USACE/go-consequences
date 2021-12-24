@@ -8,19 +8,20 @@ import (
 )
 
 // for testing with Github action
-const path = "./data/occtypes.json"
+//const path = "./data/occtypes.json"
 
 //const path2 = "./data/erosion_trial4.json"
 
 // for testing locally
-//const path = "/workspaces/Go_Consequences/data/occtypes.json"
-//const path2 = "/workspaces/Go_Consequences/data/erosion_trial5.json"
+const path = "/workspaces/Go_Consequences/data/occtypes.json"
+
+//const path2 = "/workspaces/Go_Consequences/data/erosion_trial6.json"
 
 func Test_JsonReading(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.Init(path)
 	m := jotp.occupancyTypesContainer.OccupancyTypes
-	fmt.Println(m["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Erosion].Source)
+	fmt.Println(m["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
 }
 
 /*

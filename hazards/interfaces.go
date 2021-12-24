@@ -130,7 +130,7 @@ func (p Parameter) String() string {
 	return s
 }
 func toParameter(s string) Parameter {
-	parts := strings.Split(s, ",")
+	parts := strings.Split(s, ", ")
 	var p Parameter
 	for _, sp := range parts {
 		pval, found := stringsToParameters[sp]
