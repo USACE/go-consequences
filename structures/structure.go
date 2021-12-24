@@ -4,12 +4,10 @@ import (
 	"errors"
 	"math"
 	"math/rand"
-	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/paireddata"
 )
 
 //BaseStructure represents a Structure name xy location and a damage category
@@ -83,10 +81,10 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result
 
 //Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
-	add, addok := d.(hazards.ArrivalDepthandDurationEvent)
+	/*add, addok := d.(hazards.ArrivalDepthandDurationEvent)
 	if addok {
 		return computeConsequencesWithReconstruction(add, s)
-	}
+	}*/
 	return computeConsequences(d, s)
 }
 
@@ -95,42 +93,51 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
-	if e.Has(hazards.Depth) { //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
-		//if e.Depth() < 0.0 {
-		//err = errors.New("depth above ground was less than zero")
-		//}
-		sval := s.StructVal
-		conval := s.ContVal
-		sDamFun := s.OccType.GetStructureDamageFunctionForHazard(e)
-		//cDamFun := s.OccType.GetContentDamageFunctionForHazard(e)
+	sval := s.StructVal
+	conval := s.ContVal
+	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", e)
+	if sderr != nil {
+		return ret, sderr
+	}
+	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("contents", e)
+	if cderr != nil {
+		return ret, cderr
+	}
+	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
-		sDamFunPd, okpd := sDamFun.(paireddata.PairedData)
-		if okpd {
-			damagefunctionMax = sDamFunPd.Xvals[len(sDamFunPd.Xvals)-1]
-		}
+		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
 		representativeStories := math.Ceil(damagefunctionMax / 9.0)
-
 		if s.NumStories > int32(representativeStories) {
 			//there is great potential that the value of the structure is not representative of the damage function range.
 			modifier := representativeStories / float64(s.NumStories)
 			sval *= modifier
 			conval *= modifier
 		}
-
-		if e.Depth() > 9000.0 {
-			err = errors.New("depth above ground was greater than 9000")
+	} //else dont modify value because damage is not driven by depth
+	if e.Has(sDamFun.DamageDriver) && e.Has(cDamFun.DamageDriver) {
+		//they exist!
+		sdampercent := 0.0
+		cdampercent := 0.0
+		switch sDamFun.DamageDriver {
+		case hazards.Depth:
+			depthAboveFFE := e.Depth() - s.FoundHt
+			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
+		case hazards.Erosion:
+			sdampercent = sDamFun.DamageFunction.SampleValue(e.Erosion()) / 100 //assumes what type the damage array is in
+			cdampercent = cDamFun.DamageFunction.SampleValue(e.Erosion()) / 100
+		default:
+			return consequences.Result{}, errors.New("structures: could not understand the damage driver")
 		}
-		depthAboveFFE := e.Depth() - s.FoundHt
-		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
+
 		ret.Result[0] = s.BaseStructure.Name
 		ret.Result[1] = s.BaseStructure.X
 		ret.Result[2] = s.BaseStructure.Y
 		ret.Result[3] = e
 		ret.Result[4] = s.BaseStructure.DamCat
 		ret.Result[5] = s.OccType.Name
-		ret.Result[6] = damagePercent * s.StructVal
-		ret.Result[7] = cdamagePercent * s.ContVal
+		ret.Result[6] = sdampercent * sval
+		ret.Result[7] = cdampercent * conval
 		ret.Result[8] = s.Pop2amu65
 		ret.Result[9] = s.Pop2amo65
 		ret.Result[10] = s.Pop2pmu65
@@ -152,10 +159,12 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
 	} else {
-		err = errors.New("Hazard did not contain valid parameters to impact a structure")
+		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}
 	return ret, err
 }
+
+/*
 func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "daystoreconstruction", "rebuilddate"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0.0, time.Now()}
@@ -206,3 +215,4 @@ func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEven
 	}
 	return ret, err
 }
+*/

@@ -52,8 +52,8 @@ func TestDepthEventParameters(t *testing.T) {
 	if d.Has(ArrivalTime) {
 		fmt.Println("Arrival Time")
 	}
-	if d.Has(ArrivalTime2ft) {
-		fmt.Println("Arrival Time 2ft")
+	if d.Has(Erosion) {
+		fmt.Println("Erosion")
 	}
 	if d.Has(Duration) {
 		fmt.Println("Duration")
@@ -71,8 +71,8 @@ func TestArrivalandDurationEventParameters(t *testing.T) {
 	if d.Has(ArrivalTime) {
 		fmt.Println("Arrival Time")
 	}
-	if d.Has(ArrivalTime2ft) {
-		fmt.Println("Arrival Time 2ft")
+	if d.Has(Erosion) {
+		fmt.Println("Erosion")
 	}
 	if d.Has(Duration) {
 		fmt.Println("Duration")
@@ -84,6 +84,11 @@ func TestArrivalandDurationEventParameters(t *testing.T) {
 func TestMarshalJSON(t *testing.T) {
 	d := DepthEvent{}
 	d.SetDepth(2.5)
+	b, _ := json.Marshal(d)
+	fmt.Println(string(b))
+}
+func TestMarshalParameterJSON(t *testing.T) {
+	d := Default
 	b, _ := json.Marshal(d)
 	fmt.Println(string(b))
 }
