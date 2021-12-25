@@ -7,9 +7,6 @@ type IPrototype interface {
 
 type OccupancyTypeProvider interface {
 	OccupancyTypeMap() map[string]OccupancyTypeStochastic
-	ExtendMap(extension map[string]OccupancyTypeStochastic) error
-	MergeMap(additionalDFs map[string]OccupancyTypeStochastic) error
-	OverrideMap(overrides map[string]OccupancyTypeStochastic) error
 	Write(outputpath string) error
 }
 
