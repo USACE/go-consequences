@@ -43,9 +43,9 @@ type nsiStreamProvider struct {
 }
 
 func InitNSISP() nsiStreamProvider {
-	//this will only work locally
+	//this will only work with go1.16+
 	otp := structures.JsonOccupancyTypeProvider{}
-	otp.Init("/workspaces/Go_Consequences/data/occtypes.json")
+	otp.InitDefault()
 
 	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
 }

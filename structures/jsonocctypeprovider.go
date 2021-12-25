@@ -1,6 +1,7 @@
 package structures
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,12 +9,23 @@ import (
 	"os"
 )
 
+//go:embed occtypes.json
+var DefaultOcctypeBytes []byte
+
 type JsonOccupancyTypeProvider struct {
 	path                    string
 	occupancyTypesContainer OccupancyTypesContainer
 }
 
-func (jotp *JsonOccupancyTypeProvider) Init(path string) {
+func (jotp *JsonOccupancyTypeProvider) InitDefault() {
+	c := OccupancyTypesContainer{}
+	err := json.Unmarshal(DefaultOcctypeBytes, &c)
+	if err != nil {
+		log.Fatal("structures: unable to parse json occupancy types from bytes")
+	}
+	jotp.occupancyTypesContainer = c
+}
+func (jotp *JsonOccupancyTypeProvider) InitLocalPath(path string) {
 	jotp.path = path
 	b, err := ioutil.ReadFile(path)
 	if err != nil {

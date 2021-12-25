@@ -19,7 +19,7 @@ const path = "./data/occtypes.json"
 
 func Test_JsonReading(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
-	jotp.Init(path)
+	jotp.InitDefault()
 	m := jotp.occupancyTypesContainer.OccupancyTypes
 	fmt.Println(m["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
 }
