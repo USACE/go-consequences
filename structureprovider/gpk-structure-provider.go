@@ -17,6 +17,7 @@ type gpkDataSet struct {
 	optionalSchemaIDX []int
 	ds                *gdal.DataSource
 	deterministic     bool
+	OccTypeProvider   structures.OccupancyTypeProvider
 }
 
 func InitGPK(filepath string, layername string) (gpkDataSet, error) {
@@ -48,7 +49,10 @@ func InitGPK(filepath string, layername string) (gpkDataSet, error) {
 		idx := def.FieldIndex(f)
 		oIDX[i] = idx
 	}
-	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}, nil
+	//this will only work with go1.16+
+	otp := structures.JsonOccupancyTypeProvider{}
+	otp.InitDefault()
+	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds, OccTypeProvider: otp}, nil
 }
 func (gpk *gpkDataSet) SetDeterministic(useDeterministic bool) {
 	gpk.deterministic = useDeterministic
@@ -64,7 +68,7 @@ func (gpk gpkDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
 
 }
 func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -88,7 +92,7 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 	}
 }
 func (gpk gpkDataSet) processFipsStreamDeterministic(fipscode string, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	m2 := swapOcctypeMap(m)
 	//define a default occtype in case of emergancy
 	defaultOcctype := m2["RES1-1SNB"]
@@ -121,7 +125,7 @@ func (gpk gpkDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcesso
 
 }
 func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -141,7 +145,7 @@ func (gpk gpkDataSet) processBboxStream(bbox geography.BBox, sp consequences.Str
 }
 
 func (gpk gpkDataSet) processBboxStreamDeterministic(bbox geography.BBox, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	m2 := swapOcctypeMap(m)
 	//define a default occtype in case of emergancy
 	defaultOcctype := m2["RES1-1SNB"]

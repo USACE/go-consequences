@@ -78,7 +78,9 @@ func TestDamageFunctionFamily(t *testing.T) {
 }
 func Test_occupancyCentralTendency(t *testing.T) {
 	//a map of occupancy types
-	m := OccupancyTypeMap()
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	m := jotp.occupancyTypesContainer.OccupancyTypes
 	for name, ot := range m {
 		fmt.Println("reading " + name)
 		m2 := ot.CentralTendency()
@@ -87,7 +89,9 @@ func Test_occupancyCentralTendency(t *testing.T) {
 }
 func Test_occupancySample(t *testing.T) {
 	//a map of occupancy types
-	m := OccupancyTypeMap()
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	m := jotp.occupancyTypesContainer.OccupancyTypes
 	for name, ot := range m {
 		fmt.Println("reading " + name)
 		m2 := ot.SampleOccupancyType(1234)
@@ -200,7 +204,10 @@ func Test_DamageFunctionFamilyStochastic_Marshal(t *testing.T) {
 }
 
 func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
-	ot := agr1()
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	m := jotp.occupancyTypesContainer.OccupancyTypes
+	ot := m["AGR1"]
 	b, err := json.Marshal(ot)
 	if err != nil {
 		panic(err)
@@ -214,7 +221,10 @@ func Test_OccupancyTypeStochastic_Marshal(t *testing.T) {
 	fmt.Println(ot2.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Default].Source)
 }
 func Test_OccupancyType_COM1(t *testing.T) {
-	o := com1()
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	m := jotp.occupancyTypesContainer.OccupancyTypes
+	o := m["COM1"]
 	fmt.Println(o.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
 	b, err := json.Marshal(o)
 	if err != nil {
