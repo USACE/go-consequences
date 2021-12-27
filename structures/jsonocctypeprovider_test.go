@@ -44,6 +44,7 @@ func Test_JsonMerging(t *testing.T) {
 	fmt.Println(jotp.occupancyTypesContainer.OccupancyTypes["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Erosion].Source)
 }
 
+/*
 func Test_JsonWriting(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.InitDefault()
@@ -59,3 +60,4 @@ func Test_JsonWriting(t *testing.T) {
 		panic(err)
 	}
 }
+*/
