@@ -38,22 +38,34 @@ type NsiFeature struct {
 }
 
 type nsiStreamProvider struct {
-	ApiURL string
+	ApiURL          string
+	OccTypeProvider structures.OccupancyTypeProvider
 }
 
 func InitNSISP() nsiStreamProvider {
-	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures"}
+	//this will only work with go1.16+
+	otp := structures.JsonOccupancyTypeProvider{}
+	otp.InitDefault()
+
+	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
+}
+func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
+	//this will only work with go1.16+
+	otp := structures.JsonOccupancyTypeProvider{}
+	otp.InitLocalPath(occtypefp)
+
+	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
 }
 func (nsp nsiStreamProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	url := fmt.Sprintf("%s?fips=%s&fmt=fs", nsp.ApiURL, fipscode)
-	nsiStructureStream(url, sp)
+	nsp.nsiStructureStream(url, sp)
 }
 func (nsp nsiStreamProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
 	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", nsp.ApiURL, bbox.ToString())
-	nsiStructureStream(url, sp)
+	nsp.nsiStructureStream(url, sp)
 }
-func nsiStructureStream(url string, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.StreamProcessor) {
+	m := nsp.OccTypeProvider.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	transCfg := &http.Transport{

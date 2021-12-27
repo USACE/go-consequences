@@ -10,7 +10,7 @@ RUN mkdir -p /src/go
 RUN apt update
 RUN apt -y install gdal-bin gdal-data libgdal-dev
 RUN apt -y install wget
-RUN wget https://golang.org/dl/go1.15.2.linux-amd64.tar.gz -P /
-RUN tar -xvzf /go1.15.2.linux-amd64.tar.gz -C /
+RUN wget https://golang.org/dl/go1.16.12.linux-amd64.tar.gz -P /
+RUN tar -xvzf /go1.16.12.linux-amd64.tar.gz -C /
 RUN apt -y install vim
 RUN apt -y install git

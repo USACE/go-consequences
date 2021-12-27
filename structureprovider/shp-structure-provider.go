@@ -15,17 +15,26 @@ type shpDataSet struct {
 	schemaIDX         []int
 	optionalSchemaIDX []int
 	ds                *gdal.DataSource
+	OccTypeProvider   structures.OccupancyTypeProvider
 }
 
 func InitSHP(filepath string) (shpDataSet, error) {
+	shp, err := initialize(filepath)
+	shp.setOcctypeProvider(false, "")
+	return shp, err
+}
+func InitSHPwithOcctypeFile(filepath string, occtypefp string) (shpDataSet, error) {
+	shp, err := initialize(filepath)
+	shp.setOcctypeProvider(true, occtypefp)
+	return shp, err
+}
+
+func initialize(filepath string) (shpDataSet, error) {
 	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
 	if ds.LayerCount() > 1 {
 		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found more than one layer please specify one layer.")
 	}
 
-	/*if ds.LayerCount() < 1 {
-		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found no layers please specify one layer.")
-	}*/
 	l := ds.LayerByIndex(0)
 	def := l.Definition()
 	s := StructureSchema()
@@ -43,7 +52,19 @@ func InitSHP(filepath string) (shpDataSet, error) {
 		idx := def.FieldIndex(f)
 		oIDX[i] = idx
 	}
-	return shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}, nil
+	shp := shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}
+	return shp, nil
+}
+func (shp *shpDataSet) setOcctypeProvider(useFilepath bool, filepath string) {
+	if useFilepath {
+		otp := structures.JsonOccupancyTypeProvider{}
+		otp.InitLocalPath(filepath)
+		shp.OccTypeProvider = otp
+	} else {
+		otp := structures.JsonOccupancyTypeProvider{}
+		otp.InitDefault()
+		shp.OccTypeProvider = otp
+	}
 }
 
 //ByFips a streaming service for structure stochastic based on a bounding box
@@ -51,7 +72,7 @@ func (shp shpDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	shp.processFipsStream(fipscode, sp)
 }
 func (shp shpDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+	m := shp.OccTypeProvider.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -82,7 +103,7 @@ func (shp shpDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcesso
 	shp.processBboxStream(bbox, sp)
 }
 func (shp shpDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
-	m := structures.OccupancyTypeMap()
+	m := shp.OccTypeProvider.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0

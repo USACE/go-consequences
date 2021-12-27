@@ -1,5 +1,15 @@
 package structureprovider
 
+import (
+	"fmt"
+	"testing"
+
+	"github.com/USACE/go-consequences/consequences"
+	"github.com/USACE/go-consequences/geography"
+	"github.com/USACE/go-consequences/hazards"
+	"github.com/USACE/go-consequences/structures"
+)
+
 /*
 import (
 	"fmt"
@@ -11,13 +21,17 @@ import (
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/structures"
 )
-
+*/
 func TestNsiByFipsStream(t *testing.T) {
 	var fips string = "15005" //Kalawao county (smallest county in the us by population)
 	n := InitNSISP()
 	counter := 0
 	n.ByFips(fips, func(s consequences.Receptor) {
 		counter++
+		st, ok := s.(structures.StructureStochastic)
+		if ok {
+			fmt.Println(st.OccType.ComponentDamageFunctions["structure"].DamageFunctions[hazards.Depth].Source)
+		}
 
 	})
 	if counter != 101 {
@@ -25,6 +39,7 @@ func TestNsiByFipsStream(t *testing.T) {
 	}
 }
 
+/*
 func TestNsiByFipsStream_MultiState(t *testing.T) {
 	f := census.StateToCountyFipsMap()
 	var wg sync.WaitGroup
@@ -77,6 +92,7 @@ func TestNsiByFipsStream_MultiState_Sequential(t *testing.T) {
 		fmt.Println("Completed 109,406,858 structures")
 	}
 }
+*/
 func TestNsiByBboxStream(t *testing.T) {
 	bbox := make([]float64, 4) //i might have these values inverted
 	bbox[0] = -81.58418        //upper left x
@@ -88,12 +104,19 @@ func TestNsiByBboxStream(t *testing.T) {
 	counter := 0
 	n.ByBbox(gbbx, func(s consequences.Receptor) {
 		counter++
+		st, ok := s.(structures.StructureStochastic)
+		if ok {
+			fmt.Println(st.OccType.ComponentDamageFunctions["structure"].DamageFunctions[hazards.Depth].Source)
+		}
 	})
-	if counter != 1959 {
-		t.Errorf("ByBox(%s) yeilded %d structures; expected 1959", gbbx.ToString(), counter)
-	}
+	/*
+		if counter != 1959 {
+			t.Errorf("ByBox(%s) yeilded %d structures; expected 1959", gbbx.ToString(), counter)
+		}
+	*/
 }
 
+/*
 func Test_StructureProvider_NSI_BBOX(t *testing.T) {
 	bbox := make([]float64, 4) //i might have these values inverted
 	bbox[0] = -81.58418        //upper left x

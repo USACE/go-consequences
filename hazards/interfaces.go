@@ -44,27 +44,31 @@ const (
 )
 
 var parametersToStrings = map[Parameter]string{
-	Default:     "default",
-	Depth:       "depth",
-	Velocity:    "velocity",
-	ArrivalTime: "arrivaltime",
-	Erosion:     "erosion",
-	Duration:    "duration",
-	WaveHeight:  "waveheight",
-	Salinity:    "salinity",
-	Qualitative: "qualitative",
+	Default:          "default",
+	Depth:            "depth",
+	Velocity:         "velocity",
+	ArrivalTime:      "arrivaltime",
+	Erosion:          "erosion",
+	Duration:         "duration",
+	WaveHeight:       "waveheight",
+	MediumWaveHeight: "mediumwaveheight",
+	HighWaveHeight:   "highwaveheight",
+	Salinity:         "salinity",
+	Qualitative:      "qualitative",
 }
 
 var stringsToParameters = map[string]Parameter{
-	"default":     Default,
-	"depth":       Depth,
-	"velocity":    Velocity,
-	"arrivaltime": ArrivalTime,
-	"erosion":     Erosion,
-	"duration":    Duration,
-	"waveheight":  WaveHeight,
-	"salinity":    Salinity,
-	"qualitative": Qualitative,
+	"default":          Default,
+	"depth":            Depth,
+	"velocity":         Velocity,
+	"arrivaltime":      ArrivalTime,
+	"erosion":          Erosion,
+	"duration":         Duration,
+	"waveheight":       WaveHeight,
+	"highwaveheight":   HighWaveHeight,
+	"mediumwaveheight": MediumWaveHeight,
+	"salinity":         Salinity,
+	"qualitative":      Qualitative,
 }
 
 //SetHasDepth turns on a bitflag for the Parameter Depth

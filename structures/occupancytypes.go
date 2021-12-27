@@ -300,6 +300,14 @@ func (o OccupancyTypeStochastic) CentralTendency() OccupancyTypeDeterministic {
 	}
 	return OccupancyTypeDeterministic{Name: o.Name, ComponentDamageFunctions: cm}
 }
+func arrayToDetermnisticDistributions(vals []float64) []statistics.ContinuousDistribution {
+	dists := make([]statistics.ContinuousDistribution, len(vals))
+	for i, v := range vals {
+		dists[i] = statistics.DeterministicDistribution{Value: v}
+	}
+	return dists
+}
+
 func createStructureAndContentDamageFunctionFamily() (DamageFunctionFamilyStochastic, DamageFunctionFamilyStochastic) {
 	sm := make(map[hazards.Parameter]DamageFunctionStochastic)
 	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
@@ -313,13 +321,6 @@ func createComponentMap(sdf DamageFunctionFamilyStochastic, cdf DamageFunctionFa
 	compmap["structure"] = sdf
 	compmap["contents"] = cdf
 	return compmap
-}
-func arrayToDetermnisticDistributions(vals []float64) []statistics.ContinuousDistribution {
-	dists := make([]statistics.ContinuousDistribution, len(vals))
-	for i, v := range vals {
-		dists[i] = statistics.DeterministicDistribution{Value: v}
-	}
-	return dists
 }
 
 //OccupancyTypeMap produces a map of all occupancy types as OccupancyTypeStochastic so they can be joined to the structure inventory to compute damage
