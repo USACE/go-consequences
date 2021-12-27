@@ -167,7 +167,7 @@ func erosionDamageFunction() DamageFunctionStochastic {
 	pd := paireddata.UncertaintyPairedData{Xvals: x, Yvals: y}
 
 	df := DamageFunctionStochastic{}
-	df.Source = "bhrercn"
+	df.Source = "NACCS Coastal Erosion Contents Curve bhrercn"
 	df.DamageFunction = pd
 	df.DamageDriver = hazards.Erosion
 	return df

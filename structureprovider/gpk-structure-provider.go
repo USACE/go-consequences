@@ -21,8 +21,20 @@ type gpkDataSet struct {
 }
 
 func InitGPK(filepath string, layername string) (gpkDataSet, error) {
-	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
 	//validation?
+	gpk, err := initalize(filepath, layername)
+	gpk.setOcctypeProvider(false, "")
+	return gpk, err
+}
+func InitGPKwithOcctypePath(filepath string, layername string, occtypefp string) (gpkDataSet, error) {
+	//validation?
+	gpk, err := initalize(filepath, layername)
+	gpk.setOcctypeProvider(true, occtypefp)
+	return gpk, err
+}
+func initalize(filepath string, layername string) (gpkDataSet, error) {
+	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+
 	hasNSITable := false
 	for i := 0; i < ds.LayerCount(); i++ {
 		if layername == ds.LayerByIndex(i).Name() {
@@ -49,10 +61,19 @@ func InitGPK(filepath string, layername string) (gpkDataSet, error) {
 		idx := def.FieldIndex(f)
 		oIDX[i] = idx
 	}
-	//this will only work with go1.16+
-	otp := structures.JsonOccupancyTypeProvider{}
-	otp.InitDefault()
-	return gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds, OccTypeProvider: otp}, nil
+	gpk := gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}
+	return gpk, nil
+}
+func (gpk *gpkDataSet) setOcctypeProvider(useFilepath bool, filepath string) {
+	if useFilepath {
+		otp := structures.JsonOccupancyTypeProvider{}
+		otp.InitLocalPath(filepath)
+		gpk.OccTypeProvider = otp
+	} else {
+		otp := structures.JsonOccupancyTypeProvider{}
+		otp.InitDefault()
+		gpk.OccTypeProvider = otp
+	}
 }
 func (gpk *gpkDataSet) SetDeterministic(useDeterministic bool) {
 	gpk.deterministic = useDeterministic
