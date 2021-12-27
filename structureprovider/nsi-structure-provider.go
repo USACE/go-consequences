@@ -49,6 +49,13 @@ func InitNSISP() nsiStreamProvider {
 
 	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
 }
+func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
+	//this will only work with go1.16+
+	otp := structures.JsonOccupancyTypeProvider{}
+	otp.InitLocalPath(occtypefp)
+
+	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
+}
 func (nsp nsiStreamProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	url := fmt.Sprintf("%s?fips=%s&fmt=fs", nsp.ApiURL, fipscode)
 	nsp.nsiStructureStream(url, sp)
