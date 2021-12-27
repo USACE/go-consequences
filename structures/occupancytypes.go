@@ -308,7 +308,6 @@ func arrayToDetermnisticDistributions(vals []float64) []statistics.ContinuousDis
 	return dists
 }
 
-/*
 func createStructureAndContentDamageFunctionFamily() (DamageFunctionFamilyStochastic, DamageFunctionFamilyStochastic) {
 	sm := make(map[hazards.Parameter]DamageFunctionStochastic)
 	var sdf = DamageFunctionFamilyStochastic{DamageFunctions: sm}
@@ -2272,4 +2271,3 @@ func res6() OccupancyTypeStochastic {
 
 	return OccupancyTypeStochastic{Name: "RES6", ComponentDamageFunctions: createComponentMap(sdf, cdf)}
 }
-*/
