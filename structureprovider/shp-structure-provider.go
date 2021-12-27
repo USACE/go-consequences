@@ -19,14 +19,22 @@ type shpDataSet struct {
 }
 
 func InitSHP(filepath string) (shpDataSet, error) {
+	shp, err := initialize(filepath)
+	shp.setOcctypeProvider(false, "")
+	return shp, err
+}
+func InitSHPwithOcctypeFile(filepath string, occtypefp string) (shpDataSet, error) {
+	shp, err := initialize(filepath)
+	shp.setOcctypeProvider(true, occtypefp)
+	return shp, err
+}
+
+func initialize(filepath string) (shpDataSet, error) {
 	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
 	if ds.LayerCount() > 1 {
 		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found more than one layer please specify one layer.")
 	}
 
-	/*if ds.LayerCount() < 1 {
-		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found no layers please specify one layer.")
-	}*/
 	l := ds.LayerByIndex(0)
 	def := l.Definition()
 	s := StructureSchema()
@@ -44,10 +52,19 @@ func InitSHP(filepath string) (shpDataSet, error) {
 		idx := def.FieldIndex(f)
 		oIDX[i] = idx
 	}
-	//this will only work with go1.16+
-	otp := structures.JsonOccupancyTypeProvider{}
-	otp.InitDefault()
-	return shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds, OccTypeProvider: otp}, nil
+	shp := shpDataSet{FilePath: filepath, LayerName: l.Name(), schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}
+	return shp, nil
+}
+func (shp *shpDataSet) setOcctypeProvider(useFilepath bool, filepath string) {
+	if useFilepath {
+		otp := structures.JsonOccupancyTypeProvider{}
+		otp.InitLocalPath(filepath)
+		shp.OccTypeProvider = otp
+	} else {
+		otp := structures.JsonOccupancyTypeProvider{}
+		otp.InitDefault()
+		shp.OccTypeProvider = otp
+	}
 }
 
 //ByFips a streaming service for structure stochastic based on a bounding box
