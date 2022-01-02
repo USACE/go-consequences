@@ -238,6 +238,12 @@ func Test_OccupancyType_COM1(t *testing.T) {
 	}
 	fmt.Println(o2.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
 }
+func Test_OccupancyType_Report(t *testing.T) {
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	b, _ := jotp.occupancyTypesContainer.OcctypeReport()
+	fmt.Println(string(b))
+}
 
 /*
 func Test_JsonOcctypes_toFile(t *testing.T) {

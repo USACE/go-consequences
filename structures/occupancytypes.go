@@ -206,6 +206,20 @@ func (otc *OccupancyTypesContainer) OverrideMap(overrides map[string]OccupancyTy
 	}
 	return nil
 }
+func (otc OccupancyTypesContainer) OcctypeReport() ([]byte, error) {
+	var ret string
+	ret += fmt.Sprintf("|%v| %v| %v| %v| %v|\n", "occtype", "componenttype", "compoundhazard", "damageDriver", "source")
+	ret += fmt.Sprintf("|%v| %v| %v| %v| %v|\n", "-----", "-----", "-----", "-----", "-----")
+	for occtype, occvalue := range otc.OccupancyTypes {
+		for componenttype, componentvalue := range occvalue.ComponentDamageFunctions {
+			for functiontype, functionvalue := range componentvalue.DamageFunctions {
+				row := fmt.Sprintf("|%v| %v| %v| %v| %v|\n", occtype, componenttype, functiontype.String(), functionvalue.DamageDriver.String(), functionvalue.Source)
+				ret += row
+			}
+		}
+	}
+	return []byte(ret), nil
+}
 
 //GetComponentDamageFunctionForHazard provides a hazard specific damage function for a component (e.g. structure, content, car, or other)
 func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForHazard(component string, h hazards.HazardEvent) (DamageFunction, error) {
