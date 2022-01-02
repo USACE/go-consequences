@@ -29,23 +29,47 @@ func Aggregated_StageDamage(hps []hazardproviders.HazardProvider, sp consequence
 			log.Panicf("Unable to get the raster bounding box: %s", err)
 		}
 		fmt.Println(bbox.ToString())
-		sp.ByBbox(bbox, func(f consequences.Receptor) {
-			//ProvideHazard works off of a geography.Location
-			d, err2 := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
-			//compute damages based on hazard being able to provide depth
-			if err2 == nil {
-				//iterate with uncertainty turned on
-				i := 0
-				maxiter := 100
-				for i < maxiter {
+		//loop here so that damages can be simply added across all structures
+		i := 0
+		maxiter := 100
+		for i < maxiter {
+			//modify structure random seed. this is probably an inefficent way to do this, but it should work.
+			cm := make(map[string]float64)
+			sm := make(map[string]float64)
+			sp.ByBbox(bbox, func(f consequences.Receptor) {
+
+				//ProvideHazard works off of a geography.Location
+				d, err2 := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+				//compute damages based on hazard being able to provide depth
+				if err2 == nil {
 					r, err3 := f.Compute(d)
 					if err3 == nil {
-						w.Write(r)
-						i++
+						damcati, err := r.Fetch("damage category")
+						if err != nil {
+							log.Fatal("couldnt find the damage category")
+						}
+						damcat := damcati.(string)
+						cmtd := cm[damcat]
+						smtd := sm[damcat]
+						sd, err := r.Fetch("structure damage")
+						if err != nil {
+							log.Fatal("error fetching structure damage")
+						}
+						smtd += sd.(float64)
+						cm[damcat] = smtd
+						cd, err := r.Fetch("content damage")
+						if err != nil {
+							log.Fatal("error fetching content damage")
+						}
+						cmtd += cd.(float64)
+						cm[damcat] = cmtd
 					}
 				}
-			}
-		})
+			})
+			i++
+			//loop over damcat level dictionaries and write to the writer.
+
+		}
 	}
 	fmt.Println("Getting bbox")
 
