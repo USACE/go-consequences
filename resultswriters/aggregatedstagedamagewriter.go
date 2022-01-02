@@ -37,7 +37,7 @@ func (srw *aggregatedStageDamageWriter) Write(r consequences.Result) {
 	}
 	damcat := damcati.(string)
 
-	//use the damcat to select the rigtht damage function to aggregate, update the correct elevation inline histogram.
+	//use the damcat to select the rigtht damage function to aggregate, update the correct elevation inline histogram with the aggregated damage stored in header "damage".
 	fmt.Println(damcat)
 
 }
