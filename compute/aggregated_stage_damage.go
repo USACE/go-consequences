@@ -12,6 +12,9 @@ import (
 
 func Aggregated_StageDamage(hps []hazardproviders.HazardProvider, sp consequences.StreamProvider, indexlocation geography.Location, terrainelevation float64, coutputfilepath string, soutputfilepath string) {
 
+	//need to allow provision of the user specified occupancy types
+	//need to allow provision of impact area polygons
+
 	cw, err := resultswriters.InitAggregatedStageDamageWriterFromFile(coutputfilepath)
 	if err != nil {
 		log.Panicf("unable to initialize the content output writer: %s", err)
