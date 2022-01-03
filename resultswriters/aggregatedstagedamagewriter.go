@@ -1,19 +1,18 @@
 package resultswriters
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/data"
 	"github.com/USACE/go-consequences/consequences"
-	"github.com/USACE/go-consequences/paireddata"
 )
 
 type aggregatedStageDamageWriter struct {
 	filepath         string
 	w                io.Writer
-	m                map[string]paireddata.UncertaintyPairedData //damage category
+	m                map[string]map[float64]*data.InlineHistogram //damage category
 	currentElevation float64
 }
 
@@ -23,7 +22,7 @@ func InitAggregatedStageDamageWriterFromFile(filepath string) (*aggregatedStageD
 		return &aggregatedStageDamageWriter{}, err
 	}
 	//make the maps
-	m := make(map[string]paireddata.UncertaintyPairedData, 1)
+	m := make(map[string]map[float64]*data.InlineHistogram, 1)
 	return &aggregatedStageDamageWriter{filepath: filepath, w: w, m: m}, nil
 }
 func (srw *aggregatedStageDamageWriter) SetAggregationElevation(ele float64) {
@@ -32,14 +31,36 @@ func (srw *aggregatedStageDamageWriter) SetAggregationElevation(ele float64) {
 func (srw *aggregatedStageDamageWriter) Write(r consequences.Result) {
 	//hardcoding for structures to experiment and think it through.
 	damcati, err := r.Fetch("damage category")
+
 	if err != nil {
 		log.Fatal("couldnt find the damage category")
 	}
 	damcat := damcati.(string)
-
+	aggregateddamage, err := r.Fetch("damage")
+	if err != nil {
+		log.Fatal("couldnt find the damage")
+	}
+	agdam := aggregateddamage.(float64)
 	//use the damcat to select the rigtht damage function to aggregate, update the correct elevation inline histogram with the aggregated damage stored in header "damage".
-	fmt.Println(damcat)
+	elehisto, ok := srw.m[damcat]
+	if ok {
+		histo, hok := elehisto[srw.currentElevation]
+		if hok {
+			histo.AddObservation(agdam)
+		} else {
+			histo = data.Init(1000.0, agdam-500.0, agdam+500.0)
+			histo.AddObservation(agdam)
+		}
+		elehisto[srw.currentElevation] = histo
+		srw.m[damcat] = elehisto
+	} else {
 
+		histo := data.Init(1000.0, agdam-500.0, agdam+500.0)
+		histo.AddObservation(agdam)
+		mi := make(map[float64]*data.InlineHistogram)
+		mi[srw.currentElevation] = histo
+		srw.m[damcat] = mi
+	}
 }
 func (srw *aggregatedStageDamageWriter) Close() {
 	//write out the information in the map.
