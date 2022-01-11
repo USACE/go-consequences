@@ -47,6 +47,7 @@ func InitNSISP() nsiStreamProvider {
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitDefault()
 
+	// TODO probably don't hard code a possibly changing url
 	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
 }
 func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
@@ -54,6 +55,7 @@ func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitLocalPath(occtypefp)
 
+	// TODO probably don't hard code a possibly changing url
 	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
 }
 func (nsp nsiStreamProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
