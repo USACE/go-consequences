@@ -8,6 +8,11 @@ import (
 	"github.com/USACE/go-consequences/geography"
 )
 
+const (
+	Provider_NSI   string = "Provider_NSI"
+	Provider_Local        = "Provider_Local"
+)
+
 // StructureProvider can be a gpkDataSet, nsiStreamProvider, or shpDataSet
 type StructureProvider interface {
 	// TODO regulate more common methods
@@ -16,10 +21,10 @@ type StructureProvider interface {
 }
 
 type StructureProviderInfo struct {
-	StructureProviderType *string // nsi or local
-	StructureFilePath     *string
+	StructureProviderType *string // Provider_NSI or Provider_Local
+	StructureFilePath     *string // Required if StructureProviderType == Provider_Local
 	OccTypeFilePath       *string // optional
-	LayerName             *string // required if specified a
+	LayerName             *string // required if specified a geopackage StructureFilePath
 }
 
 // NewStructureProvider generates a structure provider
@@ -27,7 +32,7 @@ func NewStructureProvider(spi StructureProviderInfo) (StructureProvider, error) 
 	var p StructureProvider
 	var err error
 	switch *spi.StructureProviderType {
-	case "nsi": // nsi
+	case Provider_NSI: // nsi
 
 		if *spi.OccTypeFilePath != "" {
 			p = InitNSISP()
@@ -35,7 +40,7 @@ func NewStructureProvider(spi StructureProviderInfo) (StructureProvider, error) 
 			p = InitNSISPwithOcctypeFilePath(*spi.OccTypeFilePath)
 		}
 
-	case "local":
+	case Provider_Local:
 
 		if strings.Contains(*spi.StructureFilePath, ".shp") { // shapefile
 			if *spi.OccTypeFilePath != "" {
