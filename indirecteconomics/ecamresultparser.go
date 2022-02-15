@@ -47,7 +47,7 @@ func ParseEcamResult(webResponse *http.Response) (EcamResult, error) {
 		}
 	}
 	errorparts := strings.Split(sr.Text(), "|")
-	if len(errorparts) > 2 {
+	if len(errorparts) >= 2 {
 		ErrorCode := errorparts[1]
 		if ErrorCode == "0" {
 			sr.Scan() //Begin_Output_LF
