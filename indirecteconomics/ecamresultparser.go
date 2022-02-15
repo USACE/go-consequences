@@ -46,42 +46,48 @@ func ParseEcamResult(webResponse *http.Response) (EcamResult, error) {
 			break
 		}
 	}
-	ErrorCode := strings.Split(sr.Text(), "|")[1]
-	if ErrorCode == "0" {
-		sr.Scan() //Begin_Output_LF
-		if sr.Text() == "BEGIN_OUTPUT_LF" {
-			for sr.Scan() {
-				if strings.Contains(sr.Text(), "END_OUTPUT_LF") {
-					break
+	errorparts := strings.Split(sr.Text(), "|")
+	if len(errorparts) > 2 {
+		ErrorCode := errorparts[1]
+		if ErrorCode == "0" {
+			sr.Scan() //Begin_Output_LF
+			if sr.Text() == "BEGIN_OUTPUT_LF" {
+				for sr.Scan() {
+					if strings.Contains(sr.Text(), "END_OUTPUT_LF") {
+						break
+					}
+					tmp, err := parseEcamSectorResult(sr.Text())
+					if err != nil {
+						return EcamResult{}, err
+					}
+					outputimpacts = append(outputimpacts, tmp)
 				}
-				tmp, err := parseEcamSectorResult(sr.Text())
-				if err != nil {
-					return EcamResult{}, err
-				}
-				outputimpacts = append(outputimpacts, tmp)
+			} else {
+				return EcamResult{}, errors.New("Expected BEGIN_OUTPUT_LF got " + sr.Text())
 			}
-		} else {
-			return EcamResult{}, errors.New("Expected BEGIN_OUTPUT_LF got " + sr.Text())
-		}
-		sr.Scan() //Begin_Employment_LF
-		if sr.Text() == "BEGIN_EMPLOYMENT_LF" {
-			for sr.Scan() {
-				if strings.Contains(sr.Text(), "END_EMPLOYMENT_LF") {
-					break
+			sr.Scan() //Begin_Employment_LF
+			if sr.Text() == "BEGIN_EMPLOYMENT_LF" {
+				for sr.Scan() {
+					if strings.Contains(sr.Text(), "END_EMPLOYMENT_LF") {
+						break
+					}
+					tmp, err := parseEcamSectorResult(sr.Text())
+					if err != nil {
+						return EcamResult{}, err
+					}
+					laborimpacts = append(laborimpacts, tmp)
 				}
-				tmp, err := parseEcamSectorResult(sr.Text())
-				if err != nil {
-					return EcamResult{}, err
-				}
-				laborimpacts = append(laborimpacts, tmp)
+			} else {
+				return EcamResult{}, errors.New("Expected BEGIN_EMPLOYMENT_LF got " + sr.Text())
 			}
+			return EcamResult{ProductionImpacts: outputimpacts, EmploymentImpacts: laborimpacts}, nil
 		} else {
-			return EcamResult{}, errors.New("Expected BEGIN_EMPLOYMENT_LF got " + sr.Text())
+			return EcamResult{}, errors.New("ECAM server returned Error Code " + ErrorCode)
 		}
-		return EcamResult{ProductionImpacts: outputimpacts, EmploymentImpacts: laborimpacts}, nil
 	} else {
-		return EcamResult{}, errors.New("ECAM server returned Error Code " + ErrorCode)
+		return EcamResult{}, errors.New("ECAM server something we couldnt parse " + sr.Text())
 	}
+
 }
 
 func parseEcamSectorResult(outputstring string) (EcamSectorResultOutput, error) {
