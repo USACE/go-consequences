@@ -22,6 +22,7 @@ func StructureSchema() []string {
 	s[9] = "found_type"
 	return s
 }
+
 func OptionalSchema() []string {
 	s := make([]string, 5)
 	s[0] = "num_story"
@@ -31,7 +32,14 @@ func OptionalSchema() []string {
 	s[4] = "pop2pmo65"
 	return s
 }
-func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, idxs []int, oidxs []int) (structures.StructureStochastic, error) {
+
+func featuretoStructure(
+	f *gdal.Feature,
+	m map[string]structures.OccupancyTypeStochastic,
+	defaultOcctype structures.OccupancyTypeStochastic,
+	idxs []int,
+	oidxs []int,
+) (structures.StructureStochastic, error) {
 	defer f.Destroy()
 	s := structures.StructureStochastic{}
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
@@ -88,14 +96,24 @@ func featuretoStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeSt
 	}
 	return s, nil
 }
-func swapOcctypeMap(m map[string]structures.OccupancyTypeStochastic) map[string]structures.OccupancyTypeDeterministic {
+
+func swapOcctypeMap(
+	m map[string]structures.OccupancyTypeStochastic,
+) map[string]structures.OccupancyTypeDeterministic {
 	m2 := make(map[string]structures.OccupancyTypeDeterministic)
 	for name, ot := range m {
 		m2[name] = ot.CentralTendency()
 	}
 	return m2
 }
-func featuretoDeterministicStructure(f *gdal.Feature, m map[string]structures.OccupancyTypeDeterministic, defaultOcctype structures.OccupancyTypeDeterministic, idxs []int, oidxs []int) (structures.StructureDeterministic, error) {
+
+func featuretoDeterministicStructure(
+	f *gdal.Feature,
+	m map[string]structures.OccupancyTypeDeterministic,
+	defaultOcctype structures.OccupancyTypeDeterministic,
+	idxs []int,
+	oidxs []int,
+) (structures.StructureDeterministic, error) {
 	defer f.Destroy()
 	s := structures.StructureDeterministic{}
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
