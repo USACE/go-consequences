@@ -33,7 +33,10 @@ func InitGPKwithOcctypePath(filepath string, layername string, occtypefp string)
 	return gpk, err
 }
 func initalize(filepath string, layername string) (gpkDataSet, error) {
-	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+	ds,ok := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+	if !ok{
+		return gpkDataSet{},errors.New("Unable to create new datasource")
+	}
 
 	hasNSITable := false
 	for i := 0; i < ds.LayerCount(); i++ {

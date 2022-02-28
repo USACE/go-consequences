@@ -8,6 +8,18 @@ import (
 	"github.com/dewberry/gdal"
 )
 
+type CogReader cogReader
+
+func InitCr(fp string) (CogReader, error) {
+	cr, err := initCR(fp)
+	return CogReader(cr), err
+}
+
+func (cr *CogReader) GetBbox() (geography.BBox, error) {
+	cgr := cogReader(*cr)
+	return (&cgr).GetBoundingBox()
+}
+
 type cogReader struct {
 	FilePath         string
 	ds               *gdal.Dataset

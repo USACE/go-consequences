@@ -3,6 +3,7 @@ package resultswriters
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 
@@ -77,7 +78,10 @@ func (srw *gpkResultsWriter) Write(r consequences.Result) {
 	layerDef := srw.Layer.Definition()
 	//if header has been built, add the feature, and the attributes.
 
-	feature := layerDef.Create()
+	feature,ok := layerDef.Create()
+	if !ok{
+		log.Println("error creating feature, but looks like we are going to try and continue!")
+	}
 	//defer feature.Destroy()
 	feature.SetFieldInteger(0, srw.index)
 	//create a point geometry - not sure the best way to do that.
