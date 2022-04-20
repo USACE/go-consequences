@@ -7,9 +7,9 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/paireddata"
 )
 
 type OccupancyTypesContainer struct {

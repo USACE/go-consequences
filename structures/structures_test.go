@@ -4,10 +4,10 @@ import (
 	"math"
 	"testing"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
-	"github.com/USACE/go-consequences/paireddata"
 )
 
 func TestComputeConsequences(t *testing.T) {
