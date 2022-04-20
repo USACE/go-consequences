@@ -89,8 +89,8 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Res
 }
 
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	sval := s.StructVal
@@ -143,6 +143,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
+		ret.Result[13] = sdampercent
+		ret.Result[14] = cdampercent
 	} else if e.Has(hazards.Qualitative) {
 		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
 		ret.Result[0] = s.BaseStructure.Name
@@ -158,6 +160,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[10] = s.Pop2pmu65
 		ret.Result[11] = s.Pop2pmo65
 		ret.Result[12] = s.CBFips
+		ret.Result[13] = 0.0
+		ret.Result[14] = 0.0
 	} else {
 		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}
