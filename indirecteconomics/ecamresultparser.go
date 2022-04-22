@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -85,7 +86,11 @@ func ParseEcamResult(webResponse *http.Response) (EcamResult, error) {
 			return EcamResult{}, errors.New("ECAM server returned Error Code " + ErrorCode)
 		}
 	} else {
-		return EcamResult{}, errors.New("ECAM server something we couldnt parse " + sr.Text())
+		b, err := ioutil.ReadAll(rc)
+		if err != nil {
+			return EcamResult{}, errors.New("ECAM server something we couldnt parse " + sr.Text() + " and we got this error when trying to read the response body " + err.Error())
+		}
+		return EcamResult{}, errors.New("ECAM server something we couldnt parse " + sr.Text() + " with body " + string(b))
 	}
 
 }
