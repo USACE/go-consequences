@@ -1,4 +1,4 @@
-/*package indirecteconomics
+package indirecteconomics
 
 import (
 	"fmt"
@@ -47,4 +47,3 @@ func Test_National_ECAM_Compute(t *testing.T) {
 	fmt.Println("successes:", sucsesses, "fails:", fails, "total:", total)
 	fmt.Fprintln(w, "successes:", sucsesses, "fails:", fails, "total:", total)
 }
-*/

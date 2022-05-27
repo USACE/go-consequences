@@ -1,6 +1,7 @@
 package structureprovider
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -66,6 +67,11 @@ func (nsp nsiStreamProvider) ByBbox(bbox geography.BBox, sp consequences.StreamP
 	url := fmt.Sprintf("%s?bbox=%s&fmt=fs", nsp.ApiURL, bbox.ToString())
 	nsp.nsiStructureStream(url, sp)
 }
+func (nsp nsiStreamProvider) ByJsonPost(jsonbody string, sp consequences.StreamProcessor) {
+	body := []byte(jsonbody)
+	url := fmt.Sprintf("%s?fmt=fs", nsp.ApiURL)
+	nsp.nsiPostStructureStream(url, bytes.NewBuffer(body), sp)
+}
 func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.StreamProcessor) {
 	m := nsp.OccTypeProvider.OccupancyTypeMap()
 	//define a default occtype in case of emergancy
@@ -83,6 +89,37 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 	defer response.Body.Close()
 	dec := json.NewDecoder(response.Body)
 
+	for {
+		var n NsiFeature
+		if err := dec.Decode(&n); err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
+			if err == io.ErrUnexpectedEOF {
+				break
+			}
+		}
+		sp(NsiFeaturetoStructure(n, m, defaultOcctype))
+	}
+}
+func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, sp consequences.StreamProcessor) {
+	m := nsp.OccTypeProvider.OccupancyTypeMap()
+	//define a default occtype in case of emergancy
+	defaultOcctype := m["RES1-1SNB"]
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
+	}
+	client := &http.Client{Transport: transCfg}
+
+	response, err := client.Post(url, "application/json", body)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
+	dec := json.NewDecoder(response.Body)
+	//b, err := ioutil.ReadAll(response.Body)
+	//fmt.Println(string(b))
 	for {
 		var n NsiFeature
 		if err := dec.Decode(&n); err == io.EOF {

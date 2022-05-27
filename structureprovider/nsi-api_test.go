@@ -38,6 +38,17 @@ func TestNsiByFipsStream(t *testing.T) {
 		t.Errorf("GetByFips(%s) yeilded %d structures; expected 101", fips, counter)
 	}
 }
+func TestNsiByJsonPostStream(t *testing.T) {
+	var json string = "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-121.504025,38.588017],[-121.507201,38.596202],[-121.503081,38.599623],[-121.494153,38.601568],[-121.484624,38.600428],[-121.478701,38.597342],[-121.473292,38.590835],[-121.504025,38.588017]]]},\"properties\":{}}]}"
+	n := InitNSISP()
+	counter := 0
+	n.ByJsonPost(json, func(s consequences.Receptor) {
+		counter++
+	})
+	if counter != 446 {
+		t.Errorf("GetByFips(%s) yeilded %d structures; expected 446", json, counter)
+	}
+}
 
 /*
 func TestNsiByFipsStream_MultiState(t *testing.T) {
