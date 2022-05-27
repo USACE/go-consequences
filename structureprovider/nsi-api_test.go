@@ -46,7 +46,7 @@ func TestNsiByJsonPostStream(t *testing.T) {
 		counter++
 	})
 	if counter != 446 {
-		t.Errorf("GetByFips(%s) yeilded %d structures; expected 446", json, counter)
+		t.Errorf("GetByJsonPost(%s) yeilded %d structures; expected 446", json, counter)
 	}
 }
 
