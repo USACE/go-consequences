@@ -2,6 +2,7 @@ package structureprovider
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -39,6 +40,22 @@ func TestNsiByFipsStream(t *testing.T) {
 	}
 }
 func TestNsiByJsonPostStream(t *testing.T) {
+	nsiByJsonPostStream(t)
+}
+func TestNsiByJsonPostStreamStressTest(t *testing.T) {
+	trials := 1000
+	var wg sync.WaitGroup
+	wg.Add(trials)
+	for i := 1; i < trials; i++ {
+		go func(index int, test *testing.T) {
+			defer wg.Done()
+			nsiByJsonPostStream(test)
+			fmt.Println(index)
+		}(i, t)
+	}
+	wg.Wait()
+}
+func nsiByJsonPostStream(t *testing.T) {
 	var json string = "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-121.504025,38.588017],[-121.507201,38.596202],[-121.503081,38.599623],[-121.494153,38.601568],[-121.484624,38.600428],[-121.478701,38.597342],[-121.473292,38.590835],[-121.504025,38.588017]]]},\"properties\":{}}]}"
 	n := InitNSISP()
 	counter := 0
