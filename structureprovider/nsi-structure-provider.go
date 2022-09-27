@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -47,17 +48,38 @@ func InitNSISP() nsiStreamProvider {
 	//this will only work with go1.16+
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitDefault()
-
+	//url := urlFinder()
+	url := "https://ml-dev.sec.usace.army.mil/nsi-ml/nsiapi2/structures"
 	// TODO probably don't hard code a possibly changing url
-	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
+	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp}
 }
 func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
 	//this will only work with go1.16+
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitLocalPath(occtypefp)
-
+	//url := urlFinder()
+	url := "https://ml-dev.sec.usace.army.mil/nsi-ml/nsiapi2/structures"
 	// TODO probably don't hard code a possibly changing url
-	return nsiStreamProvider{ApiURL: "https://nsi-dev.sec.usace.army.mil/nsiapi/structures", OccTypeProvider: otp}
+	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp}
+}
+func urlFinder() string {
+	url := "https://www.hec.usace.army.mil/fwlink/?linkid=1&type=string"
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
+	}
+	client := &http.Client{Transport: transCfg}
+
+	response, err := client.Get(url)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
+	rootBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return string(rootBytes)
 }
 func (nsp nsiStreamProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	url := fmt.Sprintf("%s?fips=%s&fmt=fs", nsp.ApiURL, fipscode)
@@ -88,7 +110,8 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 	}
 	defer response.Body.Close()
 	dec := json.NewDecoder(response.Body)
-
+	//b, err := ioutil.ReadAll(response.Body)
+	//fmt.Println(string(b))
 	for {
 		var n NsiFeature
 		if err := dec.Decode(&n); err == io.EOF {

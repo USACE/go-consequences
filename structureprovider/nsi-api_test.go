@@ -42,6 +42,9 @@ func TestNsiByFipsStream(t *testing.T) {
 func TestNsiByJsonPostStream(t *testing.T) {
 	nsiByJsonPostStream(t)
 }
+func TestUrlFinder(t *testing.T) {
+	fmt.Println(urlFinder())
+}
 func TestNsiByJsonPostStreamStressTest(t *testing.T) {
 	trials := 1000
 	var wg sync.WaitGroup
@@ -137,11 +140,11 @@ func TestNsiByBboxStream(t *testing.T) {
 			fmt.Println(st.OccType.ComponentDamageFunctions["structure"].DamageFunctions[hazards.Depth].Source)
 		}
 	})
-	/*
-		if counter != 1959 {
-			t.Errorf("ByBox(%s) yeilded %d structures; expected 1959", gbbx.ToString(), counter)
-		}
-	*/
+
+	if counter != 161 {
+		t.Errorf("ByBox(%s) yeilded %d structures; expected 161", gbbx.ToString(), counter)
+	}
+
 }
 
 /*
