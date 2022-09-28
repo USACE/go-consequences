@@ -49,7 +49,7 @@ func InitNSISP() nsiStreamProvider {
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitDefault()
 	//url := urlFinder()
-	url := "https://ml-dev.sec.usace.army.mil/nsi-ml/nsiapi2/structures"
+	url := "https://nsi.sec.usace.army.mil/nsiapi/structures"
 	// TODO probably don't hard code a possibly changing url
 	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp}
 }
@@ -58,7 +58,7 @@ func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitLocalPath(occtypefp)
 	//url := urlFinder()
-	url := "https://ml-dev.sec.usace.army.mil/nsi-ml/nsiapi2/structures"
+	url := "https://nsi.sec.usace.army.mil/nsiapi/structures"
 	// TODO probably don't hard code a possibly changing url
 	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp}
 }
@@ -96,6 +96,7 @@ func (nsp nsiStreamProvider) ByJsonPost(jsonbody string, sp consequences.StreamP
 }
 func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.StreamProcessor) {
 	m := nsp.OccTypeProvider.OccupancyTypeMap()
+	fmt.Println(url)
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	transCfg := &http.Transport{
