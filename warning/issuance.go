@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-type lindellDist struct {
+type LindellDist struct {
 	a float64
 	b float64
 }
@@ -18,20 +18,20 @@ type lindellDist struct {
        Return Nothing
    End Function
 */
-func (dist lindellDist) CDF(value float64) float64 {
+func (dist LindellDist) CDF(value float64) float64 {
 	if value <= 0 {
 		return 0.0
 	}
-	if value >= 360 {
+	if value > 360 {
 		return 1.0
 	} //seems dangerous.
-	return 1 - (math.Exp(math.Pow(-dist.a*(value/60), dist.b)))
+	return 1 - (math.Exp(-dist.a * math.Pow((value/60), dist.b)))
 }
-func (dist lindellDist) Sample(probability float64) float64 {
+func (dist LindellDist) Sample(probability float64) float64 {
 	if probability <= 0 {
 		return 0.0
 	}
-	if probability >= 1 {
+	if probability > 1 {
 		return 360.0
 	} //fix this.
 	return math.Min(-60*math.Pow(math.Log(1-probability)/dist.a, 1/dist.b), 360) //test. //360 seems arbitrary, but it is what we have in our notes

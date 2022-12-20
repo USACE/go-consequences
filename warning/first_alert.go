@@ -46,15 +46,15 @@ func (wss warning_system_set) GenerateCurve(t time.Time) paireddata.PairedData {
 	CNight := 1 - cNight
 
 	//generate day curve
-	daycurve := computeCurve(BDay, CDay)
+	daycurve := ComputeCurve(BDay, CDay)
 	//generate night curve
-	nightcurve := computeCurve(BNight, CNight)
+	nightcurve := ComputeCurve(BNight, CNight)
 	//interpolate
 	return interpolateCurves(daycurve, nightcurve, t)
 }
 
 ////from PAI2022 Curve Gen -- 2022_09_06.xlsm
-func computeCurve(B float64, C float64) paireddata.PairedData {
+func ComputeCurve(B float64, C float64) paireddata.PairedData {
 	cumulative := 0.0
 	timeStep := 0.0
 	times := make([]float64, 0)
