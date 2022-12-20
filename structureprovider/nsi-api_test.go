@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/USACE/go-consequences/census"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
@@ -70,7 +71,6 @@ func nsiByJsonPostStream(t *testing.T) {
 	}
 }
 
-/*
 func TestNsiByFipsStream_MultiState(t *testing.T) {
 	f := census.StateToCountyFipsMap()
 	var wg sync.WaitGroup
@@ -103,27 +103,41 @@ func TestNsiByFipsStream_MultiState_Sequential(t *testing.T) {
 	f := census.StateToCountyFipsMap()
 	n := InitNSISP()
 	index := 0
+	firmMap := make(map[string]int)
 	for ss := range f {
 		func(sfips string) {
 			index := 0
 			n.ByFips(sfips, func(s consequences.Receptor) {
 				index++
+				ss, ok := s.(structures.StructureStochastic)
+				if ok {
+					val, has := firmMap[ss.FirmZone]
+					if has {
+						firmMap[ss.FirmZone] = val + 1
+					} else {
+						firmMap[ss.FirmZone] = 1
+					}
+				}
 			})
 			fmt.Printf("Completed %s with %v structures\n", sfips, index)
-			if countByState(sfips) == index {
-				fmt.Printf("For state %s the count matched\n", sfips)
-			} else {
-				fmt.Printf("For state %s the count did NOT match!\n", sfips)
-			}
+			//if countByState(sfips) == index {
+			//	fmt.Printf("For state %s the count matched\n", sfips)
+			//} else {
+			//	fmt.Printf("For state %s the count did NOT match!\n", sfips)
+			//}
 		}(ss)
 	}
-	if index != 109406858 {
-		t.Errorf("ByFips(%s) yeilded %d structures; expected 109,406,858", "all states", index)
-	} else {
-		fmt.Println("Completed 109,406,858 structures")
+	//if index != 109406858 {
+	//	t.Errorf("ByFips(%s) yeilded %d structures; expected 109,406,858", "all states", index)
+	//} else {
+	//	fmt.Println("Completed 109,406,858 structures")
+	//}
+	fmt.Printf("completed %v structures\n", index)
+	for z, v := range firmMap {
+		fmt.Printf("zone %v, count %v\n", z, v)
 	}
 }
-*/
+
 func TestNsiByBboxStream(t *testing.T) {
 	bbox := make([]float64, 4) //i might have these values inverted
 	bbox[0] = -81.58418        //upper left x
@@ -147,7 +161,6 @@ func TestNsiByBboxStream(t *testing.T) {
 
 }
 
-/*
 func Test_StructureProvider_NSI_BBOX(t *testing.T) {
 	bbox := make([]float64, 4) //i might have these values inverted
 	bbox[0] = -81.58418        //upper left x
@@ -218,4 +231,3 @@ func countByState(ss string) int {
 
 	return m[ss]
 }
-*/

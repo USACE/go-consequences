@@ -32,6 +32,7 @@ type NsiProperties struct {
 	Pop2pmu65  int32   `json:"pop2pmu65"`
 	Pop2pmo65  int32   `json:"pop2pmo65"`
 	NumStories int32   `json:"num_story"`
+	FirmZone   string  `json:"firmzone"`
 }
 
 //NsiFeature is a feature which contains the properties of a structure from the NSI API
@@ -128,6 +129,7 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 }
 func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, sp consequences.StreamProcessor) {
 	m := nsp.OccTypeProvider.OccupancyTypeMap()
+	fmt.Println(url)
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	transCfg := &http.Transport{

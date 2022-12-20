@@ -46,8 +46,8 @@ func Test_StreamAbstract(t *testing.T) {
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
-	filepath := "/workspaces/Go_Consequences/data/HarrisCounty_RiverineDG_08282017_4326.tif"
-	w, _ := resultswriters.InitSummaryResultsWriterFromFile("/workspaces/Go_Consequences/data/directLosses.csv")
+	filepath := "/workspaces/Go_Consequences/data/Base.tif"
+	w, _ := resultswriters.InitSummaryResultsWriterFromFile("/workspaces/Go_Consequences/data/base_directLosses.csv")
 	defer w.Close()
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstractByFIPS_WithECAM("48201", dfr, nsp, w)

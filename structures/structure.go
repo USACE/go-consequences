@@ -23,7 +23,7 @@ type StructureStochastic struct {
 	BaseStructure
 	UseUncertainty                                         bool //defaults to false!
 	OccType                                                OccupancyTypeStochastic
-	FoundType                                              string
+	FoundType, FirmZone                                    string
 	StructVal, ContVal, FoundHt                            consequences.ParameterValue
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
 }
