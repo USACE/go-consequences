@@ -59,8 +59,6 @@ func ComputeCurve(B float64, C float64) paireddata.PairedData {
 	timeStep := 0.0
 	times := make([]float64, 0)
 	percentWarned := make([]float64, 0)
-	//times = append(times, timeStep)
-	//percentWarned = append(percentWarned, cumulative)
 	for cumulative < .99999 { //check this for better epsilons
 		PUt := 1 - cumulative // percent unwarned
 		cumulative += rayleighPDF(B, timeStep)*PUt + (PUt * cumulative * C)
@@ -71,5 +69,48 @@ func ComputeCurve(B float64, C float64) paireddata.PairedData {
 	return paireddata.PairedData{Xvals: times, Yvals: percentWarned}
 }
 func interpolateCurves(day paireddata.PairedData, night paireddata.PairedData, time time.Time) paireddata.PairedData {
-	return paireddata.PairedData{}
+	dayLength := day.Xvals[len(day.Xvals)-1]
+	nightLength := night.Xvals[len(night.Xvals)-1]
+	maxDuration := math.Max(dayLength, nightLength)
+	xvals := make([]float64, int(maxDuration))
+	yvals := make([]float64, int(maxDuration))
+	minOfDay := (time.Hour() * 60.0) + time.Minute() //+1?
+	//since people are not on the same consistent schedule there is some time in the morning (dawn) and evening (dusk)
+	//that a mixture of people are in "night" mode and a mixture of people are in "day" mode in terms of their ability
+	//to be alerted to some disaster. In those time zones we interpolate between the curves.
+	//timeframe of warning diffusion
+	// 12PM - night - 5AM - *dawn* - 8AM - day - 8PM - *dusk* - 11PM - night -  12PM
+	if minOfDay <= 300 && minOfDay > 1380 { //11pm to 5am
+		//night
+		return night
+	} else if minOfDay >= 480 && minOfDay < 1200 { //8am to 8pm
+		//day
+		return day
+	} else {
+		//interpolate
+		if minOfDay < 480 {
+			//dawn
+			slope := float64(minOfDay-300) / (480 - 300)
+			for i := 0; i < int(maxDuration); i++ {
+				floati := float64(i)
+				xvals[i] = floati
+				nighty := night.SampleValue(floati)
+				yval := nighty + slope*(day.SampleValue(floati)-nighty)
+				yvals = append(yvals, yval)
+			}
+			return paireddata.PairedData{Xvals: xvals, Yvals: yvals}
+		} else {
+			//dusk
+			slope := float64(minOfDay-1200) / (1380 - 1200)
+			for i := 0; i < int(maxDuration); i++ {
+				floati := float64(i)
+				xvals[i] = floati
+				dayy := day.SampleValue(floati)
+				yval := dayy + slope*(night.SampleValue(floati)-dayy)
+				yvals = append(yvals, yval)
+			}
+			return paireddata.PairedData{Xvals: xvals, Yvals: yvals}
+		}
+	}
+
 }
