@@ -7,26 +7,28 @@ import (
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 )
 
-type warning_system struct {
-	day   warning_system_parameters
-	night warning_system_parameters
-}
-type warning_system_parameters struct {
-	b float64 //effectiveness of system.
-	c float64 //effectiveness of indirect system.
-}
-type warning_system_set struct {
-	systems []warning_system
-}
-
 //from PAI2022 Curve Gen -- 2022_09_06.xlsm
 func rayleighPDF(sigma float64, t float64) float64 {
 	sigma_squared := math.Pow(sigma, 2.0)
 	return (t / sigma_squared) * math.Exp(-(math.Pow(t, 2.0))/(2.0*sigma_squared))
 }
 
+type WarningSystemParameters struct {
+	B float64 //effectiveness of system.
+	C float64 //effectiveness of indirect system.
+}
+
 //https://www.researchgate.net/publication/356109540_First_Alert_or_Warning_Diffusion_Time_Estimation_for_Dam_Breaches_Controlled_Dam_Releases_and_Levee_Breaches_or_Overtopping
 //section 7.2  - not used by lifesim. it uses a rayleigh distribution instead.
+/*
+type warning_system struct {
+	day   warning_system_parameters
+	night warning_system_parameters
+}
+
+type warning_system_set struct {
+	systems []warning_system
+}
 func (wss warning_system_set) GenerateCurve(t time.Time) paireddata.PairedData {
 	//combine system b parameters
 	//combine system c parameters
@@ -52,16 +54,17 @@ func (wss warning_system_set) GenerateCurve(t time.Time) paireddata.PairedData {
 	//interpolate
 	return interpolateCurves(daycurve, nightcurve, t)
 }
+*/
 
 ////from PAI2022 Curve Gen -- 2022_09_06.xlsm
-func ComputeCurve(B float64, C float64) paireddata.PairedData {
+func ComputeCurve(ws WarningSystemParameters) paireddata.PairedData {
 	cumulative := 0.0
 	timeStep := 0.0
 	times := make([]float64, 0)
 	percentWarned := make([]float64, 0)
 	for cumulative < .99999 { //check this for better epsilons
 		PUt := 1 - cumulative // percent unwarned
-		cumulative += rayleighPDF(B, timeStep)*PUt + (PUt * cumulative * C)
+		cumulative += rayleighPDF(ws.B, timeStep)*PUt + (PUt * cumulative * ws.C)
 		times = append(times, timeStep)
 		percentWarned = append(percentWarned, cumulative)
 		timeStep += 1.0

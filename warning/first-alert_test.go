@@ -6,7 +6,7 @@ import (
 )
 
 func TestComputeWarningDiffusion(t *testing.T) {
-	result := ComputeCurve(95.0, .06)
+	result := ComputeCurve(WarningSystemParameters{B: 95.0, C: .06})
 	for i, xval := range result.Xvals {
 		fmt.Printf("%v,%v\n", xval, result.Yvals[i])
 	}
