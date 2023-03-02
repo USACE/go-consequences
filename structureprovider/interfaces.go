@@ -24,7 +24,7 @@ func StructureSchema() []string {
 }
 
 func OptionalSchema() []string {
-	s := make([]string, 5)
+	s := make([]string, 6)
 	s[0] = "num_story"
 	s[1] = "pop2amu65"
 	s[2] = "pop2amo65"
