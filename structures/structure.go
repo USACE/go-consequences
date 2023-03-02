@@ -10,15 +10,15 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
-//BaseStructure represents a Structure name xy location and a damage category
+// BaseStructure represents a Structure name xy location and a damage category
 type BaseStructure struct {
-	Name   string
-	DamCat string
-	CBFips string
-	X, Y   float64
+	Name                  string
+	DamCat                string
+	CBFips                string
+	X, Y, GroundElevation float64
 }
 
-//StructureStochastic is a base structure with an occupancy type stochastic and parameter values for all parameters
+// StructureStochastic is a base structure with an occupancy type stochastic and parameter values for all parameters
 type StructureStochastic struct {
 	BaseStructure
 	UseUncertainty                                         bool //defaults to false!
@@ -28,7 +28,7 @@ type StructureStochastic struct {
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
 }
 
-//StructureDeterministic is a base strucure with a deterministic occupancy type and deterministic parameters
+// StructureDeterministic is a base strucure with a deterministic occupancy type and deterministic parameters
 type StructureDeterministic struct {
 	BaseStructure
 	OccType                                                OccupancyTypeDeterministic
@@ -37,12 +37,12 @@ type StructureDeterministic struct {
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
 }
 
-//GetX implements consequences.Locatable
+// GetX implements consequences.Locatable
 func (s BaseStructure) Location() geography.Location {
 	return geography.Location{X: s.X, Y: s.Y}
 }
 
-//SampleStructure converts a structureStochastic into a structure deterministic based on an input seed
+// SampleStructure converts a structureStochastic into a structure deterministic based on an input seed
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
 	ot := OccupancyTypeDeterministic{} //Beware null errors!
 	sv := 0.0
@@ -71,15 +71,15 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		Pop2amo65:     s.Pop2amo65,
 		Pop2amu65:     s.Pop2amu65,
 		NumStories:    s.NumStories,
-		BaseStructure: BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat}}
+		BaseStructure: BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
-//Compute implements the consequences.Receptor interface on StrucutreStochastic
+// Compute implements the consequences.Receptor interface on StrucutreStochastic
 func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
 	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
-//Compute implements the consequences.Receptor interface on StrucutreDeterminstic
+// Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
 	/*add, addok := d.(hazards.ArrivalDepthandDurationEvent)
 	if addok {

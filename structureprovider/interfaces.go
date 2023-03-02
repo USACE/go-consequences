@@ -30,6 +30,7 @@ func OptionalSchema() []string {
 	s[2] = "pop2amo65"
 	s[3] = "pop2pmu65"
 	s[4] = "pop2pmo65"
+	s[5] = "ground_elv"
 	return s
 }
 
@@ -93,6 +94,9 @@ func featuretoStructure(
 	}
 	if oidxs[4] != -1 {
 		s.Pop2pmo65 = int32(f.FieldAsInteger(oidxs[4]))
+	}
+	if oidxs[5] != -1 {
+		s.GroundElevation = f.FieldAsFloat64(oidxs[5])
 	}
 	return s, nil
 }
@@ -167,6 +171,9 @@ func featuretoDeterministicStructure(
 	}
 	if oidxs[4] != -1 {
 		s.Pop2pmo65 = int32(f.FieldAsInteger(oidxs[4]))
+	}
+	if oidxs[5] != -1 {
+		s.GroundElevation = f.FieldAsFloat64(oidxs[5])
 	}
 	return s, nil
 }

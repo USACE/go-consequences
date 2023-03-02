@@ -15,27 +15,28 @@ import (
 	"github.com/USACE/go-consequences/structures"
 )
 
-//NsiProperties is a reflection of the JSON feature property attributes from the NSI-API
+// NsiProperties is a reflection of the JSON feature property attributes from the NSI-API
 type NsiProperties struct {
-	Name       int     `json:"fd_id"`
-	X          float64 `json:"x"`
-	Y          float64 `json:"y"`
-	Occtype    string  `json:"occtype"`
-	FoundHt    float64 `json:"found_ht"`
-	FoundType  string  `json:"found_type"`
-	DamCat     string  `json:"st_damcat"`
-	StructVal  float64 `json:"val_struct"`
-	ContVal    float64 `json:"val_cont"`
-	CB         string  `json:"cbfips"`
-	Pop2amu65  int32   `json:"pop2amu65"`
-	Pop2amo65  int32   `json:"pop2amo65"`
-	Pop2pmu65  int32   `json:"pop2pmu65"`
-	Pop2pmo65  int32   `json:"pop2pmo65"`
-	NumStories int32   `json:"num_story"`
-	FirmZone   string  `json:"firmzone"`
+	Name            int     `json:"fd_id"`
+	X               float64 `json:"x"`
+	Y               float64 `json:"y"`
+	Occtype         string  `json:"occtype"`
+	FoundHt         float64 `json:"found_ht"`
+	FoundType       string  `json:"found_type"`
+	DamCat          string  `json:"st_damcat"`
+	StructVal       float64 `json:"val_struct"`
+	ContVal         float64 `json:"val_cont"`
+	CB              string  `json:"cbfips"`
+	Pop2amu65       int32   `json:"pop2amu65"`
+	Pop2amo65       int32   `json:"pop2amo65"`
+	Pop2pmu65       int32   `json:"pop2pmu65"`
+	Pop2pmo65       int32   `json:"pop2pmo65"`
+	NumStories      int32   `json:"num_story"`
+	FirmZone        string  `json:"firmzone"`
+	GroundElevation float64 `json:"ground_elv"`
 }
 
-//NsiFeature is a feature which contains the properties of a structure from the NSI API
+// NsiFeature is a feature which contains the properties of a structure from the NSI API
 type NsiFeature struct {
 	Properties NsiProperties `json:"properties"`
 }
@@ -160,7 +161,7 @@ func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, 
 	}
 }
 
-//NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
+// NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
 func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
 	var occtype = defaultOcctype
 	if otf, okf := m[f.Properties.Occtype+"-"+f.Properties.FoundType]; okf {
@@ -186,14 +187,15 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		Pop2amu65:  f.Properties.Pop2amu65,
 		NumStories: f.Properties.NumStories,
 		BaseStructure: structures.BaseStructure{
-			Name:   strconv.Itoa(f.Properties.Name),
-			CBFips: f.Properties.CB,
-			DamCat: f.Properties.DamCat,
-			X:      f.Properties.X,
-			Y:      f.Properties.Y,
+			Name:            strconv.Itoa(f.Properties.Name),
+			CBFips:          f.Properties.CB,
+			DamCat:          f.Properties.DamCat,
+			X:               f.Properties.X,
+			Y:               f.Properties.Y,
+			GroundElevation: f.Properties.GroundElevation,
 		},
 	}
 }
 
-//NsiStreamProcessor is a function used to process an in memory NsiFeature through the NsiStreaming service endpoints
+// NsiStreamProcessor is a function used to process an in memory NsiFeature through the NsiStreaming service endpoints
 type NsiStreamProcessor func(str NsiFeature)
