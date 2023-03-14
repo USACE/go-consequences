@@ -133,7 +133,7 @@ func (cr *countyRecord) Update(r consequences.Result) {
 func (at *typeRecord) Update(r consequences.Result) {
 	h, hok := r.Fetch("hazard")
 	if hok == nil {
-		he := h.(hazards.DepthEvent)
+		he := h.(hazards.HazardEvent)
 		depth := he.Depth()
 		for idx, v := range at.thresholds {
 			if depth <= v {
