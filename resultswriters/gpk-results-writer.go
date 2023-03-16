@@ -118,6 +118,21 @@ func (srw *gpkResultsWriter) Write(r consequences.Result) {
 			}
 
 		}
+		if val == "hazards" {
+			fieldName = "hazards"
+			de, dok := value.(string)
+			if dok {
+				valType = reflect.String
+				value = de
+			} else {
+				//must be an array - bummer.
+				//get at the elements of the slice, add all depths to the table?
+				fieldName = "multidepths"
+				valType = reflect.Float64
+				value = 123.456
+			}
+
+		}
 		idx := layerDef.FieldIndex(fieldName)
 		switch valType {
 		case reflect.String:
