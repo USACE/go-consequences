@@ -35,7 +35,7 @@ func TestComputeSpecialEAD(t *testing.T) {
 }
 func Test_StreamAbstract(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
-	root := "/workspaces/Go_Consequences/data/3782_COG"
+	root := "/workspaces/Go_Consequences/data/Brays_100"
 	filepath := root + ".tif"
 	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")

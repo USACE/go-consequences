@@ -44,7 +44,7 @@ func NewStructureProvider(spi StructureProviderInfo) (StructureProvider, error) 
 
 		if strings.Contains(*spi.StructureFilePath, ".shp") { // shapefile
 			if *spi.OccTypeFilePath != "" {
-				p, err = InitSHP(*spi.OccTypeFilePath)
+				p, err = InitSHP(*spi.StructureFilePath)
 			} else {
 				p, err = InitSHPwithOcctypeFile(*spi.StructureFilePath, *spi.OccTypeFilePath)
 			}
