@@ -63,7 +63,7 @@ func initalize(filepath string, layername string) (gpkDataSet, error) {
 		idx := def.FieldIndex(f)
 		oIDX[i] = idx
 	}
-	gpk := gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds}
+	gpk := gpkDataSet{FilePath: filepath, LayerName: layername, schemaIDX: sIDX, optionalSchemaIDX: oIDX, ds: &ds, seed: 1234}
 	return gpk, nil
 }
 func (gpk *gpkDataSet) setOcctypeProvider(useFilepath bool, filepath string) {
@@ -112,9 +112,9 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
-			s.SampleStructure(r.Int63())
+			sd := s.SampleStructure(r.Int63())
 			if err == nil {
-				sp(s)
+				sp(sd)
 			}
 		}
 	}
