@@ -44,15 +44,16 @@ func (s BaseStructure) Location() geography.Location {
 
 // SampleStructure converts a structureStochastic into a structure deterministic based on an input seed
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
+	r := rand.New(rand.NewSource(seed))
 	ot := OccupancyTypeDeterministic{} //Beware null errors!
 	sv := 0.0
 	cv := 0.0
 	fh := 0.0
 	if s.UseUncertainty {
-		ot = s.OccType.SampleOccupancyType(seed) //this is super inefficient. At the time this is called we know the hazard.
-		sv = s.StructVal.SampleValue(rand.Float64())
-		cv = s.ContVal.SampleValue(rand.Float64())
-		fh = s.FoundHt.SampleValue(rand.Float64())
+		ot = s.OccType.SampleOccupancyType(r.Int63()) //this is super inefficient. At the time this is called we know the hazard.
+		sv = s.StructVal.SampleValue(r.Float64())
+		cv = s.ContVal.SampleValue(r.Float64())
+		fh = s.FoundHt.SampleValue(r.Float64())
 	} else {
 		ot = s.OccType.CentralTendency()
 		sv = s.StructVal.CentralTendency()

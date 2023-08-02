@@ -3,6 +3,7 @@ package structureprovider
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -17,6 +18,7 @@ type gpkDataSet struct {
 	optionalSchemaIDX []int
 	ds                *gdal.DataSource
 	deterministic     bool
+	seed              int64
 	OccTypeProvider   structures.OccupancyTypeProvider
 }
 
@@ -78,8 +80,11 @@ func (gpk *gpkDataSet) setOcctypeProvider(useFilepath bool, filepath string) {
 func (gpk *gpkDataSet) SetDeterministic(useDeterministic bool) {
 	gpk.deterministic = useDeterministic
 }
+func (gpk *gpkDataSet) SetSeed(seed int64) {
+	gpk.seed = seed
+}
 
-//StreamByFips a streaming service for structure stochastic based on a bounding box
+// StreamByFips a streaming service for structure stochastic based on a bounding box
 func (gpk gpkDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
 	if gpk.deterministic {
 		gpk.processFipsStreamDeterministic(fipscode, sp)
@@ -101,11 +106,13 @@ func (gpk gpkDataSet) processFipsStream(fipscode string, sp consequences.StreamP
 		panic(err)
 	}
 	fc, _ := l.FeatureCount(true)
+	r := rand.New(rand.NewSource(gpk.seed))
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s.SampleStructure(r.Int63())
 			if err == nil {
 				sp(s)
 			}
