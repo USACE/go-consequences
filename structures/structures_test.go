@@ -2,6 +2,7 @@ package structures
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
@@ -105,10 +106,14 @@ func TestComputeConsequencesUncertainty(t *testing.T) {
 	//test depth values
 	var d = hazards.DepthEvent{}
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5}
-	expectedResults := []float64{0.0, 0.0, -.052138, -0.030335, -0.122390, -0.088922, -0.146414, 0.205319, 0.108698, -0.625010}
+	expectedResults := []float64{0.0, 0.0, 0.138100, -0.117163, -0.198414, -0.234834, -0.022169, -0.721810, -0.178571, 0.362431}
+	var seed int64 = 1234
+	r := rand.New(rand.NewSource(seed))
+
 	for idx := range depths {
 		d.SetDepth(depths[idx])
-		r, err := s.Compute(d)
+		sd := s.SampleStructure(r.Int63())
+		r, err := sd.Compute(d)
 		if err != nil {
 			panic(err)
 		}
