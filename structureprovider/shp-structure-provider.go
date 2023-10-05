@@ -30,7 +30,10 @@ func InitSHPwithOcctypeFile(filepath string, occtypefp string) (shpDataSet, erro
 }
 
 func initialize(filepath string) (shpDataSet, error) {
-	ds := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+	ds,ok := gdal.OpenDataSource(filepath, int(gdal.ReadOnly))
+	if !ok{
+		return shpDataSet{}, errors.New("Unable to create shapefile")
+	}
 	if ds.LayerCount() > 1 {
 		return shpDataSet{}, errors.New("Shapefile at path " + filepath + "Found more than one layer please specify one layer.")
 	}

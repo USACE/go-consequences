@@ -2,6 +2,8 @@ module github.com/USACE/go-consequences
 
 go 1.16
 
+replace github.com/dewberry/gdal => /workspaces/gdal
+
 require (
 	github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20220420143356-562ee86d1eb2
 	github.com/dewberry/gdal v0.3.2
