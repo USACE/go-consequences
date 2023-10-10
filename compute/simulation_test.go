@@ -34,14 +34,19 @@ func TestComputeSpecialEAD(t *testing.T) {
 	}
 }
 func Test_StreamAbstract(t *testing.T) {
+	//initialize the NSI API structure provider
 	nsp := structureprovider.InitNSISP()
-	root := "/workspaces/Go_Consequences/data/Brays_100"
+	//identify the depth grid to apply to the structures.
+	root := "/workspaces/Go_Consequences/data/humbolt/S_NWS_STAGE_EFS_33_4326"
 	filepath := root + ".tif"
 	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	//create a result writer based on the name of the depth grid.
 	w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
+	//initialize a hazard provider based on the depth grid.
 	dfr, _ := hazardproviders.Init(filepath)
+	//compute consequences.
 	StreamAbstract(dfr, nsp, w)
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {

@@ -13,7 +13,7 @@ import (
 	"github.com/USACE/go-consequences/structures"
 )
 
-//ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
+// ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
 func ComputeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
 	square := 0.0
@@ -36,7 +36,7 @@ func ComputeEAD(damages []float64, freq []float64) float64 {
 	return eadT
 }
 
-//ComputeSpecialEAD integrates under the damage frequency curve but does not calculate the first triangle between 1 and the first frequency.
+// ComputeSpecialEAD integrates under the damage frequency curve but does not calculate the first triangle between 1 and the first frequency.
 func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	//this differs from computeEAD in that it specifically does not calculate the first triangle between 1 and the first frequency to interpolate damages to zero.
 	if len(damages) != len(freq) {
@@ -86,6 +86,61 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 			}
 		}
 	})
+}
+func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []float32, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	fmt.Printf("Computing %v frequencies\n", len(hps))
+	//ASSUMPTION hazard providers and frequencies are in the same order
+	//ASSUMPTION ordered by most frequent to least frequent event
+	//ASSUMPTION! get bounding box from largest frequency.
+
+	largestHp := hps[len(hps)-1]
+	bbox, err := largestHp.ProvideHazardBoundary()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	//set up output tables for all frequencies.
+
+	for _, frequency := range freqs {
+		// add a column for each user provided frequency
+		fmt.Printf("computing frequency %v\n", frequency)
+	}
+
+	sp.ByBbox(bbox, func(f consequences.Receptor) {
+		sEADs := make([]float32, len(freqs))
+		cEADs := make([]float32, len(freqs))
+		hazards := make([]hazards.HazardEvent, len(freqs))
+		//ProvideHazard works off of a geography.Location
+		for index, hp := range hps {
+			d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+			hazards = append(hazards, d)
+			//compute damages based on hazard being able to provide depth
+			if err == nil {
+				r, err3 := f.Compute(d)
+				if err3 == nil {
+					w.Write(r) //TODO: update logic here to properly attribute one structure result.
+					sdam, err := r.Fetch("structure damage")
+					if err != nil {
+						//panic?
+						sEADs[index] = 0.0
+					} else {
+						damage := sdam.(float32)
+						sEADs[index] = damage
+					}
+					cdam, err := r.Fetch("content damage")
+					if err != nil {
+						//panic?
+						cEADs[index] = 0.0
+					} else {
+						damage := cdam.(float32)
+						cEADs[index] = damage
+					}
+				}
+			}
+		}
+
+	})
+
 }
 func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Println("FIPS Code is " + FIPSCODE)
