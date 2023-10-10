@@ -87,7 +87,7 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 		}
 	})
 }
-func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []float32, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Printf("Computing %v frequencies\n", len(hps))
 	//ASSUMPTION hazard providers and frequencies are in the same order
 	//ASSUMPTION ordered by most frequent to least frequent event
@@ -100,15 +100,23 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		return
 	}
 	//set up output tables for all frequencies.
+	header := []string{"fd_id", "x", "y", "damcat", "occtype", "s EAD", "c EAD", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "found_ht"}
 
-	for _, frequency := range freqs {
-		// add a column for each user provided frequency
-		fmt.Printf("computing frequency %v\n", frequency)
+	for _, f := range freqs {
+		header = append(header, fmt.Sprintf("%2.6fS", f))
+		header = append(header, fmt.Sprintf("%2.6fC", f))
+		header = append(header, fmt.Sprintf("%2.6fH", f))
 	}
 
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
-		sEADs := make([]float32, len(freqs))
-		cEADs := make([]float32, len(freqs))
+		s, sok := f.(structures.StructureDeterministic)
+		if !sok {
+			return
+		}
+		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, s.Pop2amu65, s.Pop2amo65, s.Pop2pmu65, s.Pop2pmo65, s.FoundHt}
+
+		sEADs := make([]float64, len(freqs))
+		cEADs := make([]float64, len(freqs))
 		hazards := make([]hazards.HazardEvent, len(freqs))
 		//ProvideHazard works off of a geography.Location
 		for index, hp := range hps {
@@ -118,13 +126,12 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 			if err == nil {
 				r, err3 := f.Compute(d)
 				if err3 == nil {
-					w.Write(r) //TODO: update logic here to properly attribute one structure result.
 					sdam, err := r.Fetch("structure damage")
 					if err != nil {
 						//panic?
 						sEADs[index] = 0.0
 					} else {
-						damage := sdam.(float32)
+						damage := sdam.(float64)
 						sEADs[index] = damage
 					}
 					cdam, err := r.Fetch("content damage")
@@ -132,13 +139,26 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 						//panic?
 						cEADs[index] = 0.0
 					} else {
-						damage := cdam.(float32)
+						damage := cdam.(float64)
 						cEADs[index] = damage
 					}
 				}
+				results = append(results, sEADs[index])
+				results = append(results, cEADs[index])
+				results = append(results, d)
+			} else {
+				//record zeros?
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+				results = append(results, "no hazard")
 			}
 		}
-
+		sEAD := ComputeSpecialEAD(sEADs, freqs)
+		results[5] = sEAD
+		cEAD := ComputeEAD(cEADs, freqs)
+		results[6] = cEAD
+		var ret = consequences.Result{Headers: header, Result: results}
+		w.Write(ret)
 	})
 
 }
