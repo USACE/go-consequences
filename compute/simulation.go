@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -109,23 +110,31 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 	}
 
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
-		s, sok := f.(structures.StructureDeterministic)
+		s, sok := f.(structures.StructureStochastic)
 		if !sok {
 			return
 		}
-		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, s.Pop2amu65, s.Pop2amo65, s.Pop2pmu65, s.Pop2pmo65, s.FoundHt}
+		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, s.Pop2amu65, s.Pop2amo65, s.Pop2pmu65, s.Pop2pmo65, s.FoundHt.CentralTendency()}
 
 		sEADs := make([]float64, len(freqs))
 		cEADs := make([]float64, len(freqs))
-		hazards := make([]hazards.HazardEvent, len(freqs))
+		hazarddata := make([]hazards.HazardEvent, len(freqs))
 		//ProvideHazard works off of a geography.Location
+		gotWet := false
 		for index, hp := range hps {
 			d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
-			hazards = append(hazards, d)
+			hazarddata = append(hazarddata, d)
 			//compute damages based on hazard being able to provide depth
+
 			if err == nil {
-				r, err3 := f.Compute(d)
+				//TODO:REMOVE BELOW LOGIC WHEN YOU GET DEPTH GRID!!!!
+				depth := d.Depth()
+				depth = depth - (s.GroundElevation * 1) //3.28084) ///meters to feet, need to remove if moving to nsi 2022
+				depthHazard := hazards.DepthEvent{}
+				depthHazard.SetDepth(depth)
+				r, err3 := f.Compute(depthHazard)
 				if err3 == nil {
+					gotWet = true
 					sdam, err := r.Fetch("structure damage")
 					if err != nil {
 						//panic?
@@ -145,7 +154,9 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 				}
 				results = append(results, sEADs[index])
 				results = append(results, cEADs[index])
-				results = append(results, d)
+				b, _ := json.Marshal(depthHazard)
+				shaz := string(b)
+				results = append(results, shaz)
 			} else {
 				//record zeros?
 				results = append(results, 0.0)
@@ -158,7 +169,10 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		cEAD := ComputeEAD(cEADs, freqs)
 		results[6] = cEAD
 		var ret = consequences.Result{Headers: header, Result: results}
-		w.Write(ret)
+		if gotWet {
+			w.Write(ret)
+		}
+
 	})
 
 }
