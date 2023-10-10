@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -13,7 +14,7 @@ import (
 	"github.com/USACE/go-consequences/structures"
 )
 
-//ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
+// ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
 func ComputeEAD(damages []float64, freq []float64) float64 {
 	triangle := 0.0
 	square := 0.0
@@ -36,7 +37,7 @@ func ComputeEAD(damages []float64, freq []float64) float64 {
 	return eadT
 }
 
-//ComputeSpecialEAD integrates under the damage frequency curve but does not calculate the first triangle between 1 and the first frequency.
+// ComputeSpecialEAD integrates under the damage frequency curve but does not calculate the first triangle between 1 and the first frequency.
 func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	//this differs from computeEAD in that it specifically does not calculate the first triangle between 1 and the first frequency to interpolate damages to zero.
 	if len(damages) != len(freq) {
@@ -86,6 +87,94 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 			}
 		}
 	})
+}
+func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	fmt.Printf("Computing %v frequencies\n", len(hps))
+	//ASSUMPTION hazard providers and frequencies are in the same order
+	//ASSUMPTION ordered by most frequent to least frequent event
+	//ASSUMPTION! get bounding box from largest frequency.
+
+	largestHp := hps[len(hps)-1]
+	bbox, err := largestHp.ProvideHazardBoundary()
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	//set up output tables for all frequencies.
+	header := []string{"fd_id", "x", "y", "damcat", "occtype", "s EAD", "c EAD", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "found_ht"}
+
+	for _, f := range freqs {
+		header = append(header, fmt.Sprintf("%2.6fS", f))
+		header = append(header, fmt.Sprintf("%2.6fC", f))
+		header = append(header, fmt.Sprintf("%2.6fH", f))
+	}
+
+	sp.ByBbox(bbox, func(f consequences.Receptor) {
+		s, sok := f.(structures.StructureStochastic)
+		if !sok {
+			return
+		}
+		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, s.Pop2amu65, s.Pop2amo65, s.Pop2pmu65, s.Pop2pmo65, s.FoundHt.CentralTendency()}
+
+		sEADs := make([]float64, len(freqs))
+		cEADs := make([]float64, len(freqs))
+		hazarddata := make([]hazards.HazardEvent, len(freqs))
+		//ProvideHazard works off of a geography.Location
+		gotWet := false
+		for index, hp := range hps {
+			d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+			hazarddata = append(hazarddata, d)
+			//compute damages based on hazard being able to provide depth
+
+			if err == nil {
+				//TODO:REMOVE BELOW LOGIC WHEN YOU GET DEPTH GRID!!!!
+				depth := d.Depth()
+				depth = depth - (s.GroundElevation * 1) //3.28084) ///meters to feet, need to remove if moving to nsi 2022
+				depthHazard := hazards.DepthEvent{}
+				depthHazard.SetDepth(depth)
+				r, err3 := f.Compute(depthHazard)
+				if err3 == nil {
+					gotWet = true
+					sdam, err := r.Fetch("structure damage")
+					if err != nil {
+						//panic?
+						sEADs[index] = 0.0
+					} else {
+						damage := sdam.(float64)
+						sEADs[index] = damage
+					}
+					cdam, err := r.Fetch("content damage")
+					if err != nil {
+						//panic?
+						cEADs[index] = 0.0
+					} else {
+						damage := cdam.(float64)
+						cEADs[index] = damage
+					}
+				}
+				results = append(results, sEADs[index])
+				results = append(results, cEADs[index])
+				b, _ := json.Marshal(depthHazard)
+				shaz := string(b)
+				results = append(results, shaz)
+			} else {
+				//record zeros?
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+				results = append(results, "no hazard")
+			}
+		}
+		sEAD := ComputeSpecialEAD(sEADs, freqs)
+		results[5] = sEAD
+		cEAD := ComputeEAD(cEADs, freqs)
+		results[6] = cEAD
+		var ret = consequences.Result{Headers: header, Result: results}
+		if gotWet {
+			w.Write(ret)
+		}
+
+	})
+
 }
 func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Println("FIPS Code is " + FIPSCODE)

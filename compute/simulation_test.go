@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/USACE/go-consequences/hazardproviders"
@@ -33,15 +34,98 @@ func TestComputeSpecialEAD(t *testing.T) {
 		t.Errorf("computeEAD() yeilded %f; expected %f", val, 1.875)
 	}
 }
-func Test_StreamAbstract(t *testing.T) {
+func Test_StreamAbstract_MultiFrequency(t *testing.T) {
+	//initialize the NSI API structure provider
+	//nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/nsi.gpkg", "nsi")
+	//nsp.SetDeterministic(true)
+
 	nsp := structureprovider.InitNSISP()
-	root := "/workspaces/Go_Consequences/data/Brays_100"
+	//initialize a set of frequencies
+	frequencies := []float64{1, .5, .2, .1, .05, .02, .01, .005, .002, .001}
+	//specify a working directory for data
+	root := "/workspaces/Go_Consequences/data/humbolt/"
+	//identify the depth grids to represent the frequencies.
+	hazardProviders := make([]hazardproviders.HazardProvider, len(frequencies))
+
+	hp1year, err := hazardproviders.Init(fmt.Sprint(root, "1 Year/raster_elev_937_8_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[0] = hp1year
+
+	hp2year, err := hazardproviders.Init(fmt.Sprint(root, "2 Year/raster_elev_947_1_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[1] = hp2year
+
+	hp5year, err := hazardproviders.Init(fmt.Sprint(root, "5 Year/raster_elev_950_1_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[2] = hp5year
+
+	hp10year, err := hazardproviders.Init(fmt.Sprint(root, "10 Year/raster_elev_951_8_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[3] = hp10year
+
+	hp20year, err := hazardproviders.Init(fmt.Sprint(root, "20 Year/raster_elev_953_4_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[4] = hp20year
+
+	hp50year, err := hazardproviders.Init(fmt.Sprint(root, "50 Year/raster_elev_955_6_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[5] = hp50year
+
+	hp100year, err := hazardproviders.Init(fmt.Sprint(root, "100 Year/raster_elev_957_1_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[6] = hp100year
+
+	hp200year, err := hazardproviders.Init(fmt.Sprint(root, "200 Year/raster_elev_958_4_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[7] = hp200year
+
+	hp500year, err := hazardproviders.Init(fmt.Sprint(root, "500 Year/raster_elev_960_0_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[8] = hp500year
+
+	hp1000year, err := hazardproviders.Init(fmt.Sprint(root, "1000 Year/raster_elev_962_2_4326_deflate.tif"))
+	if err != nil {
+		t.Fail()
+	}
+	hazardProviders[9] = hp1000year
+	//create a result writer based on the name of the depth grid.
+	w, _ := resultswriters.InitGpkResultsWriter(root+"consequences_nsi.gpkg", "nsi_result")
+	defer w.Close()
+	//compute consequences.
+	StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)
+}
+func Test_StreamAbstract(t *testing.T) {
+	//initialize the NSI API structure provider
+	nsp := structureprovider.InitNSISP()
+	//identify the depth grid to apply to the structures.
+	root := "/workspaces/Go_Consequences/data/humbolt/S_NWS_STAGE_EFS_33_4326"
 	filepath := root + ".tif"
 	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	//create a result writer based on the name of the depth grid.
 	w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
+	//initialize a hazard provider based on the depth grid.
 	dfr, _ := hazardproviders.Init(filepath)
+	//compute consequences.
 	StreamAbstract(dfr, nsp, w)
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
