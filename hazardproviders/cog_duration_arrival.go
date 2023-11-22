@@ -13,9 +13,10 @@ type cogDurationAndArrivalHazardProvider struct {
 	durationCR cogReader
 	arrivalCR  cogReader //decimal days
 	startTime  time.Time
+	process    HazardFunction
 }
 
-//Init creates and produces an unexported cogHazardProvider
+// Init creates and produces an unexported cogHazardProvider
 func InitDaAHP(durationfp string, arrivalfp string, startTime time.Time) (cogDurationAndArrivalHazardProvider, error) {
 	d, ed := initCR(durationfp)
 	a, ad := initCR(arrivalfp)
@@ -30,19 +31,18 @@ func InitDaAHP(durationfp string, arrivalfp string, startTime time.Time) (cogDur
 	if ad != nil {
 		et = ad
 	}
-	return cogDurationAndArrivalHazardProvider{durationCR: d, arrivalCR: a, startTime: startTime}, et
+	return cogDurationAndArrivalHazardProvider{durationCR: d, arrivalCR: a, startTime: startTime, process: ArrivalAndDurationHazardFunction()}, et
 }
 func (chp cogDurationAndArrivalHazardProvider) Close() {
 	chp.durationCR.Close()
 	chp.arrivalCR.Close()
 }
-func (chp cogDurationAndArrivalHazardProvider) ProvideHazard(l geography.Location) (hazards.HazardEvent, error) {
-	h := hazards.ArrivalandDurationEvent{}
+func (chp cogDurationAndArrivalHazardProvider) Hazard(l geography.Location) (hazards.HazardEvent, error) {
+	var h hazards.HazardEvent
 	d, err := chp.durationCR.ProvideValue(l)
 	if err != nil {
 		return h, err
 	}
-	h.SetDuration(d)
 	a, err := chp.arrivalCR.ProvideValue(l)
 	if err != nil {
 		return h, err
@@ -50,9 +50,19 @@ func (chp cogDurationAndArrivalHazardProvider) ProvideHazard(l geography.Locatio
 	sat := fmt.Sprintf("%fh", a)
 	duration, _ := time.ParseDuration(sat)
 	t := chp.startTime.Add(duration)
-	h.SetArrivalTime(t)
-	return h, nil
+	hd := hazards.HazardData{
+		Depth:       0,
+		Velocity:    0,
+		ArrivalTime: t,
+		Erosion:     0,
+		Duration:    d,
+		WaveHeight:  0,
+		Salinity:    false,
+		Qualitative: "",
+	}
+	return chp.process(hd, h)
 }
-func (chp cogDurationAndArrivalHazardProvider) ProvideHazardBoundary() (geography.BBox, error) {
+
+func (chp cogDurationAndArrivalHazardProvider) HazardBoundary() (geography.BBox, error) {
 	return chp.durationCR.GetBoundingBox() //what if the two grids are not the same extent?
 }

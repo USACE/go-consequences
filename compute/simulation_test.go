@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
@@ -114,17 +115,25 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 }
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISP()
+	//nsp := structureprovider.InitNSISP()
+	nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower")
+	nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	root := "/workspaces/Go_Consequences/data/humbolt/S_NWS_STAGE_EFS_33_4326"
-	filepath := root + ".tif"
+	root := "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid"
+	filepath := root + ".vrt"
 	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
 	//initialize a hazard provider based on the depth grid.
-	dfr, _ := hazardproviders.Init(filepath)
+	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		if valueIn.Depth == 0 {
+			return hazard, hazardproviders.NoHazardFoundError{}
+		}
+		process := hazardproviders.DepthHazardFunction()
+		return process(valueIn, hazard)
+	})
 	//compute consequences.
 	StreamAbstract(dfr, nsp, w)
 }

@@ -25,14 +25,14 @@ func Aggregated_StageDamage(hps []hazardproviders.HazardProvider, sp consequence
 	}
 	for _, hp := range hps {
 		//update the writer to know what the index location elevation is
-		e, err := hp.ProvideHazard(indexlocation)
+		e, err := hp.Hazard(indexlocation)
 		if err != nil {
 			log.Panicf("unable to get the index location elevation: %s", err)
 		}
 		cw.SetAggregationElevation(e.Depth() + terrainelevation)
 		sw.SetAggregationElevation(e.Depth() + terrainelevation)
 		//get boundingbox
-		bbox, err := hp.ProvideHazardBoundary()
+		bbox, err := hp.HazardBoundary()
 		if err != nil {
 			log.Panicf("unable to get the raster bounding box: %s", err)
 		}
@@ -47,7 +47,7 @@ func Aggregated_StageDamage(hps []hazardproviders.HazardProvider, sp consequence
 			sp.ByBbox(bbox, func(f consequences.Receptor) {
 
 				//ProvideHazard works off of a geography.Location
-				d, err2 := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+				d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 				//compute damages based on hazard being able to provide depth
 				if err2 == nil {
 					r, err3 := f.Compute(d)

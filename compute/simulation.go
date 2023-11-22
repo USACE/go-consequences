@@ -71,14 +71,14 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
-	bbox, err := hp.ProvideHazardBoundary()
+	bbox, err := hp.HazardBoundary()
 	if err != nil {
 		log.Panicf("Unable to get the raster bounding box: %s", err)
 	}
 	fmt.Println(bbox.ToString())
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
-		d, err2 := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if err2 == nil {
 			r, err3 := f.Compute(d)
@@ -95,7 +95,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 	//ASSUMPTION! get bounding box from largest frequency.
 
 	largestHp := hps[len(hps)-1]
-	bbox, err := largestHp.ProvideHazardBoundary()
+	bbox, err := largestHp.HazardBoundary()
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -122,7 +122,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		//ProvideHazard works off of a geography.Location
 		gotWet := false
 		for index, hp := range hps {
-			d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+			d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 			hazarddata = append(hazarddata, d)
 			//compute damages based on hazard being able to provide depth
 
@@ -180,7 +180,7 @@ func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp
 	fmt.Println("FIPS Code is " + FIPSCODE)
 	sp.ByFips(FIPSCODE, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
-		d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if err == nil {
 			r, err3 := f.Compute(d)
@@ -212,7 +212,7 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 				totalCounty[cbfips] = newc
 			}
 		}
-		d, err := hp.ProvideHazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if err == nil {
 			r, err3 := f.Compute(d)
