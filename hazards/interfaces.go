@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-//HazardEvent is an interface I am trying to make to describe all Hazard Events
+// HazardEvent is an interface I am trying to make to describe all Hazard Events
 type HazardEvent interface {
 	//parameters?
 	Depth() float64
@@ -23,11 +23,21 @@ type HazardEvent interface {
 	Parameters() Parameter
 	Has(p Parameter) bool
 }
+type HazardData struct {
+	Depth       float64
+	Velocity    float64
+	ArrivalTime time.Time
+	Erosion     float64
+	Duration    float64
+	WaveHeight  float64
+	Salinity    bool
+	Qualitative string
+}
 
-//Parameter is a bitflag enum
+// Parameter is a bitflag enum
 type Parameter uint //switch to uint64 if we hit 32 slots and need another.
 
-//Parameter types describe different parameters for hazards
+// Parameter types describe different parameters for hazards
 const (
 	Default          Parameter = 0    //0
 	Depth            Parameter = 1    //1
@@ -71,32 +81,32 @@ var stringsToParameters = map[string]Parameter{
 	"qualitative":      Qualitative,
 }
 
-//SetHasDepth turns on a bitflag for the Parameter Depth
+// SetHasDepth turns on a bitflag for the Parameter Depth
 func SetHasDepth(h Parameter) Parameter {
 	return h | Depth
 }
 
-//SetHasVelocity turns on a bitflag for the Parameter Velocity
+// SetHasVelocity turns on a bitflag for the Parameter Velocity
 func SetHasVelocity(h Parameter) Parameter {
 	return h | Velocity
 }
 
-//SetHasArrivalTime turns on a bitflag for the Parameter Arrival Time
+// SetHasArrivalTime turns on a bitflag for the Parameter Arrival Time
 func SetHasArrivalTime(h Parameter) Parameter {
 	return h | ArrivalTime
 }
 
-//SetHasErosion turns on a bitflag for the Parameter Erosion
+// SetHasErosion turns on a bitflag for the Parameter Erosion
 func SetHasErosion(h Parameter) Parameter {
 	return h | Erosion
 }
 
-//SetHasDuration turns on a bitflag for the Parameter Duration
+// SetHasDuration turns on a bitflag for the Parameter Duration
 func SetHasDuration(h Parameter) Parameter {
 	return h | Duration
 }
 
-//SetHasWaveHeight turns on a bitflag for the Parameter WaveHeight
+// SetHasWaveHeight turns on a bitflag for the Parameter WaveHeight
 func SetHasWaveHeight(h Parameter) Parameter {
 	return h | WaveHeight
 }
@@ -107,12 +117,12 @@ func SetHasHighWaveHeight(h Parameter) Parameter {
 	return h | HighWaveHeight
 }
 
-//SetHasSalinity turns on a bitflag for the Parameter Salinity
+// SetHasSalinity turns on a bitflag for the Parameter Salinity
 func SetHasSalinity(h Parameter) Parameter {
 	return h | Salinity
 }
 
-//SetHasSalinity turns on a bitflag for the Parameter Salinity
+// SetHasSalinity turns on a bitflag for the Parameter Salinity
 func SetHasQualitative(h Parameter) Parameter {
 	return h | Qualitative
 }
