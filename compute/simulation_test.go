@@ -8,6 +8,7 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
+	"github.com/planetlabs/gpq/cmd/gpq/command"
 )
 
 func TestComputeEAD(t *testing.T) {
@@ -121,10 +122,10 @@ func Test_StreamAbstract(t *testing.T) {
 	//identify the depth grid to apply to the structures.
 	root := "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid"
 	filepath := root + ".vrt"
-	//w := consequences.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	w, _ := resultswriters.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
-	w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
+	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
 	//initialize a hazard provider based on the depth grid.
 	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
@@ -136,6 +137,13 @@ func Test_StreamAbstract(t *testing.T) {
 	})
 	//compute consequences.
 	StreamAbstract(dfr, nsp, w)
+	cmd := &command.ConvertCmd{
+		From:   "geojson",
+		Input:  root + "_consequences.json",
+		To:     "parquet",
+		Output: root + "_consequences.geoparquet",
+	}
+	cmd.Run()
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
