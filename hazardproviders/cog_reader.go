@@ -21,7 +21,7 @@ func initCR_Meters(fp string) (cogReader, error) {
 	return cr, err
 }
 
-//init creates and produces an unexported cogReader
+// init creates and produces an unexported cogReader
 func initCR(fp string) (cogReader, error) {
 	//read the file path
 	//make sure it is a tif
