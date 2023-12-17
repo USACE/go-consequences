@@ -12,3 +12,9 @@ var gdalTypes map[reflect.Kind]gdal.FieldType = map[reflect.Kind]gdal.FieldType{
 	reflect.Int32:   gdal.FT_Integer,
 	reflect.String:  gdal.FT_String,
 }
+
+type ResultsWriterInfo struct {
+	//type
+	//filepath
+
+}

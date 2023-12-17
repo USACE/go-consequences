@@ -7,6 +7,14 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
+type HazardProviderParameterAndPath struct {
+	Hazard   hazards.Parameter `json:"hazard_parameter_type"`
+	FilePath string            `json:"hazard_provider_file_path"` //this should get fixed to be able to represent more complex information. e.g. what parameter?
+}
+type HazardProviderInfo struct {
+	Hazards []HazardProviderParameterAndPath `json:"hazards"`
+}
+
 // HazardProvider provides hazards as a return for an argument input
 type HazardProvider interface {
 	Hazard(location geography.Location) (hazards.HazardEvent, error)
@@ -30,9 +38,6 @@ func ArrivalAndDurationHazardFunction() HazardFunction {
 		d.SetArrivalTime(valueIn.ArrivalTime)
 		return d, nil
 	}
-}
-
-type HazardProviderInput struct {
 }
 
 // NoHazardFoundError is an error for a situation where no hazard could be computed for the given args

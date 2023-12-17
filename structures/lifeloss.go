@@ -1,6 +1,7 @@
 package structures
 
 import (
+	_ "embed"
 	"errors"
 	"log"
 	"math/rand"
@@ -10,6 +11,39 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
+//go:embed lowlethality.json
+var DefaultLowLethalityBytes []byte
+
+//go:embed highlethality.json
+var DefaultHighLethalityBytes []byte
+
+type LethalityZone int
+
+const (
+	LowLethality  LethalityZone = 1
+	HighLethality LethalityZone = 2
+)
+
+type Mobility uint
+
+const (
+	Unknown   Mobility = 0 //0
+	Mobile    Mobility = 1 //1
+	NotMobile Mobility = 2 //2
+)
+
+type LifeLossEngine struct {
+	LethalityCurves   map[LethalityZone]LethalityCurve
+	StabilityCriteria map[string]StabilityCriteria
+	ResultsHeader     []string
+}
+
+func LifeLossHeader() []string {
+	return []string{"ll_u65", "ll_o65", "ll_tot"}
+}
+func LifeLossDefaultResults() []interface{} {
+	return []interface{}{0.0, 0.0, 0.0}
+}
 func computeLifeLoss(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	//reduce population somehow?
 	if e.Has(hazards.Velocity) {
@@ -20,7 +54,7 @@ func computeLifeLoss(e hazards.HazardEvent, s StructureDeterministic) (consequen
 		//apply building stability criteria
 		if evaluateStability(e, sc) {
 			//select high fataility rate
-			lethalityRate := HighLethality.Sample()
+			lethalityRate := 987654321.0 //HighLethality.Sample()
 			//apply same fatality rate to everyone
 			log.Println(lethalityRate)
 			return consequences.Result{}, errors.New("under construction")
@@ -53,13 +87,6 @@ func evaluateMobility(s StructureDeterministic) Mobility {
 	return Mobile
 }
 
-var HighLethality LethalityCurve = LethalityCurve{
-	data: paireddata.PairedData{},
-}
-var LowLethality LethalityCurve = LethalityCurve{
-	data: paireddata.PairedData{},
-}
-
 type LethalityCurve struct {
 	data paireddata.PairedData
 }
@@ -83,9 +110,11 @@ func (sc StabilityCriteria) Evaluate(e hazards.HazardEvent) bool {
 	velocity := 0.0
 	if e.Has(hazards.Depth) {
 		//get depth from the hazard
+		depth = e.Depth()
 	}
 	if e.Has(hazards.Velocity) {
 		//get velocity from the hazard
+		velocity = e.Velocity()
 	}
 
 	/*shortcut if velocity is less than the min value...
@@ -104,11 +133,3 @@ func determineStability(s StructureDeterministic) (StabilityCriteria, error) {
 	//add construction type to optional parameters and provide default criteria
 	return StabilityCriteria{}, errors.New("implement me")
 }
-
-type Mobility uint
-
-const (
-	Unknown   Mobility = 0 //0
-	Mobile    Mobility = 1 //1
-	NotMobile Mobility = 2 //2
-)
