@@ -1,27 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
-	"net/http"
+	"os"
 
 	"github.com/USACE/go-consequences/compute"
-	"github.com/USACE/go-consequences/hazardproviders"
-	"github.com/USACE/go-consequences/resultswriters"
-	"github.com/USACE/go-consequences/structureprovider"
 )
 
+/*
 //Config describes the configuration settings for go-consequences.
-type Config struct {
-	SkipJWT       bool
-	LambdaContext bool
-	DBUser        string
-	DBPass        string
-	DBName        string
-	DBHost        string
-	DBSSLMode     string
+
+	type Config struct {
+		SkipJWT       bool
+		LambdaContext bool
+		DBUser        string
+		DBPass        string
+		DBName        string
+		DBHost        string
+		DBSSLMode     string
+	}
+*/
+func main() {
+	fp := os.Args[1]
+	b, err := os.ReadFile(fp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var config compute.Config
+	json.Unmarshal(b, &config)
+	err = config.Compute()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func main() {
+/*
 	var cfg Config
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")
@@ -49,3 +63,4 @@ func main() {
 		log.Fatal(http.ListenAndServe("localhost:3030", nil))
 	}
 }
+*/

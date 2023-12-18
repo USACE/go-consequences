@@ -15,6 +15,11 @@ type HazardProviderInfo struct {
 	Hazards []HazardProviderParameterAndPath `json:"hazards"`
 }
 
+func (info HazardProviderInfo) CreateHazardProvider() (HazardProvider, error) {
+	//ultimately make this more flexible, but for now...
+	return Init(info.Hazards[0].FilePath)
+}
+
 // HazardProvider provides hazards as a return for an argument input
 type HazardProvider interface {
 	Hazard(location geography.Location) (hazards.HazardEvent, error)

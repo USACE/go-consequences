@@ -1,7 +1,10 @@
 package compute
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/USACE/go-consequences/hazardproviders"
@@ -113,6 +116,41 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	defer w.Close()
 	//compute consequences.
 	StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)
+}
+func Test_Config(t *testing.T) {
+	config := Config{
+		StructureProviderInfo: structureprovider.StructureProviderInfo{
+			StructureProviderType: structureprovider.NSIAPI,
+		},
+		HazardProviderInfo: hazardproviders.HazardProviderInfo{
+			Hazards: []hazardproviders.HazardProviderParameterAndPath{
+				hazardproviders.HazardProviderParameterAndPath{
+					Hazard:   hazards.Depth,
+					FilePath: "/workspaces/Go_Consequences/data/clipped_sample.tif",
+				},
+			},
+		},
+		ResultsWriterInfo: resultswriters.ResultsWriterInfo{
+			Type:     resultswriters.JSON,
+			FilePath: "/workspaces/Go_Consequences/data/clipped_sample.gpkg",
+		},
+	}
+	b, err := json.Marshal(config)
+	if err != nil {
+		t.Fail()
+	}
+	configPath := "/workspaces/Go_Consequences/data/configexample.json"
+	if _, err := os.Stat(configPath); errors.Is(err, os.ErrNotExist) {
+		//does not exist
+	} else {
+		os.Remove(configPath)
+	}
+	os.WriteFile(configPath, b, os.ModeAppend)
+	err = config.Compute()
+	if err != nil {
+		t.Fail()
+	}
+
 }
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider

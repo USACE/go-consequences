@@ -7,13 +7,13 @@ import (
 	"github.com/USACE/go-consequences/geography"
 )
 
-type StructureProviderType int
+type StructureProviderType string
 
 const (
-	Unknown StructureProviderType = 0 //0
-	NSIAPI  StructureProviderType = 1 //1
-	GPKG    StructureProviderType = 2 //2
-	SHP     StructureProviderType = 3
+	Unknown StructureProviderType = "UNKNOWN" //0
+	NSIAPI  StructureProviderType = "NSIAPI"  //1
+	GPKG    StructureProviderType = "GPKG"    //2
+	SHP     StructureProviderType = "SHP"
 )
 
 func (spt StructureProviderType) String() string {
@@ -40,36 +40,36 @@ type StructureProvider interface {
 }
 
 type StructureProviderInfo struct {
-	StructureProviderType StructureProviderType `json:"structure_provider_type"`     // Provider_NSI or Provider_Local
-	StructureFilePath     string                `json:"structure_file_path"`         // Required if StructureProviderType == Provider_Local
-	OccTypeFilePath       string                `json:"occtype_file_path,omitempty"` // optional
-	LayerName             string                `json:"layername,omitempty"`         // required if specified a geopackage StructureFilePath
+	StructureProviderType StructureProviderType `json:"structure_provider_type"`       // Provider_NSI or Provider_Local
+	StructureFilePath     string                `json:"structure_file_path,omitempty"` // Required if StructureProviderType == Provider_Local
+	OccTypeFilePath       string                `json:"occtype_file_path,omitempty"`   // optional
+	LayerName             string                `json:"layername,omitempty"`           // required if specified a geopackage StructureFilePath
 }
 
 // NewStructureProvider generates a structure provider
-func NewStructureProvider(spi StructureProviderInfo) (StructureProvider, error) {
+func (spi StructureProviderInfo) CreateStructureProvider() (StructureProvider, error) {
 	var p StructureProvider
 	var err error
 	switch spi.StructureProviderType {
 	case NSIAPI: // nsi
 
-		if spi.OccTypeFilePath != "" {
+		if len(spi.OccTypeFilePath) == 0 {
 			p = InitNSISP()
 		} else {
 			p = InitNSISPwithOcctypeFilePath(spi.OccTypeFilePath)
 		}
 
 	case SHP:
-		if spi.OccTypeFilePath != "" {
+		if len(spi.OccTypeFilePath) == 0 {
 			p, err = InitSHP(spi.StructureFilePath)
 		} else {
 			p, err = InitSHPwithOcctypeFile(spi.StructureFilePath, spi.OccTypeFilePath)
 		}
 	case GPKG:
-		if spi.LayerName != "" {
+		if spi.LayerName == "" {
 			return nil, errors.New("NewStructureProvider - LayerName must be specified in StructureProviderInfo for geopackage provider")
 		}
-		if spi.OccTypeFilePath != "" {
+		if len(spi.OccTypeFilePath) == 0 {
 			p, err = InitGPK(spi.StructureFilePath, spi.LayerName)
 		} else {
 			p, err = InitGPKwithOcctypePath(spi.StructureFilePath, spi.LayerName, spi.OccTypeFilePath)
