@@ -23,7 +23,7 @@ type StructureStochastic struct {
 	BaseStructure
 	UseUncertainty                                         bool //defaults to false!
 	OccType                                                OccupancyTypeStochastic
-	FoundType, FirmZone                                    string
+	FoundType, FirmZone, ConstructionType                  string
 	StructVal, ContVal, FoundHt                            consequences.ParameterValue
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
 }
@@ -32,7 +32,7 @@ type StructureStochastic struct {
 type StructureDeterministic struct {
 	BaseStructure
 	OccType                                                OccupancyTypeDeterministic
-	FoundType                                              string
+	FoundType, ConstructionType                            string
 	StructVal, ContVal, FoundHt                            float64
 	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
 }
@@ -62,17 +62,18 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 	}
 
 	return StructureDeterministic{
-		OccType:       ot,
-		StructVal:     sv,
-		ContVal:       cv,
-		FoundType:     s.FoundType,
-		FoundHt:       fh,
-		Pop2pmo65:     s.Pop2pmo65,
-		Pop2pmu65:     s.Pop2pmu65,
-		Pop2amo65:     s.Pop2amo65,
-		Pop2amu65:     s.Pop2amu65,
-		NumStories:    s.NumStories,
-		BaseStructure: BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		OccType:          ot,
+		StructVal:        sv,
+		ContVal:          cv,
+		FoundType:        s.FoundType,
+		ConstructionType: s.ConstructionType,
+		FoundHt:          fh,
+		Pop2pmo65:        s.Pop2pmo65,
+		Pop2pmu65:        s.Pop2pmu65,
+		Pop2amo65:        s.Pop2amo65,
+		Pop2amu65:        s.Pop2amu65,
+		NumStories:       s.NumStories,
+		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreStochastic

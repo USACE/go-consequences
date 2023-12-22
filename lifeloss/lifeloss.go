@@ -97,6 +97,11 @@ func (le LifeLossEngine) determineStability(s structures.StructureDeterministic)
 		return le.StabilityCriteria["woodunanchored"], nil
 	}
 	//get construction type.
-
+	if s.ConstructionType == "M" {
+		return le.StabilityCriteria["masonryconcretebrick"], nil
+	}
+	if s.ConstructionType == "S" {
+		return le.StabilityCriteria["masonryconcretebrick"], nil
+	}
 	return le.StabilityCriteria["woodanchored"], nil
 }
