@@ -18,6 +18,7 @@ type HazardEvent interface {
 	WaveHeight() float64
 	Salinity() bool
 	Qualitative() string
+	DV() float64
 	//values?
 	//hazardType?
 	Parameters() Parameter
@@ -32,6 +33,7 @@ type HazardData struct {
 	WaveHeight  float64
 	Salinity    bool
 	Qualitative string
+	DV          float64
 }
 
 // Parameter is a bitflag enum
@@ -51,6 +53,7 @@ const (
 	HighWaveHeight   Parameter = 256  //9
 	Salinity         Parameter = 512  //10
 	Qualitative      Parameter = 1024 //11
+	DV               Parameter = 2048 //12
 )
 
 var parametersToStrings = map[Parameter]string{
@@ -65,20 +68,22 @@ var parametersToStrings = map[Parameter]string{
 	HighWaveHeight:   "highwaveheight",
 	Salinity:         "salinity",
 	Qualitative:      "qualitative",
+	DV:               "depthtimesvelocity",
 }
 
 var stringsToParameters = map[string]Parameter{
-	"default":          Default,
-	"depth":            Depth,
-	"velocity":         Velocity,
-	"arrivaltime":      ArrivalTime,
-	"erosion":          Erosion,
-	"duration":         Duration,
-	"waveheight":       WaveHeight,
-	"highwaveheight":   HighWaveHeight,
-	"mediumwaveheight": MediumWaveHeight,
-	"salinity":         Salinity,
-	"qualitative":      Qualitative,
+	"default":            Default,
+	"depth":              Depth,
+	"velocity":           Velocity,
+	"arrivaltime":        ArrivalTime,
+	"erosion":            Erosion,
+	"duration":           Duration,
+	"waveheight":         WaveHeight,
+	"highwaveheight":     HighWaveHeight,
+	"mediumwaveheight":   MediumWaveHeight,
+	"salinity":           Salinity,
+	"qualitative":        Qualitative,
+	"depthtimesvelocity": DV,
 }
 
 // SetHasDepth turns on a bitflag for the Parameter Depth
@@ -125,6 +130,9 @@ func SetHasSalinity(h Parameter) Parameter {
 // SetHasSalinity turns on a bitflag for the Parameter Salinity
 func SetHasQualitative(h Parameter) Parameter {
 	return h | Qualitative
+}
+func SetHasDV(h Parameter) Parameter {
+	return h | DV
 }
 func (p Parameter) String() string {
 	s := ""

@@ -1,9 +1,11 @@
 package lifeloss
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/structures"
@@ -23,16 +25,33 @@ type LifeLossEngine struct {
 	ResultsHeader     []string
 }
 
+func Init() LifeLossEngine {
+	var HighPD paireddata.PairedData
+	json.Unmarshal(DefaultHighLethalityBytes, &HighPD)
+	var LowPD paireddata.PairedData
+	json.Unmarshal(DefaultLowLethalityBytes, &LowPD)
+	High := LethalityCurve{data: HighPD}
+	Low := LethalityCurve{data: LowPD}
+	lethalityCurves := make(map[LethalityZone]LethalityCurve)
+	lethalityCurves[HighLethality] = High
+	lethalityCurves[LowLethality] = Low
+	stabilityCriteria := make(map[string]StabilityCriteria)
+	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
+	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
+	stabilityCriteria["masonryconcretebrick"] = RescDamMasonryConcreteBrick
+	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria}
+}
+
 func LifeLossHeader() []string {
 	return []string{"ll_u65", "ll_o65", "ll_tot"}
 }
 func LifeLossDefaultResults() []interface{} {
 	return []interface{}{0.0, 0.0, 0.0}
 }
-func computeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
+func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//reduce population somehow?
 	if e.Has(hazards.Velocity) {
-		sc, err := determineStability(s)
+		sc, err := le.determineStability(s)
 		if err != nil {
 			return consequences.Result{}, err
 		}
@@ -70,4 +89,14 @@ func submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterminis
 func evaluateMobility(s structures.StructureDeterministic) Mobility {
 	//determine based on age and disability
 	return Mobile
+}
+
+func (le LifeLossEngine) determineStability(s structures.StructureDeterministic) (StabilityCriteria, error) {
+	//add construction type to optional parameters and provide default criteria
+	if s.OccType.Name == "RES2" {
+		return le.StabilityCriteria["woodunanchored"], nil
+	}
+	//get construction type.
+
+	return le.StabilityCriteria["woodanchored"], nil
 }

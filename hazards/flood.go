@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//DepthEvent describes a Hazard with Depth Only
+// DepthEvent describes a Hazard with Depth Only
 type DepthEvent struct {
 	depth float64
 }
@@ -38,15 +38,18 @@ func (h DepthEvent) Salinity() bool {
 func (h DepthEvent) Qualitative() string {
 	return ""
 }
+func (h DepthEvent) DV() float64 {
+	return -901.0
+}
 
-//Parameters implements the HazardEvent interface
+// Parameters implements the HazardEvent interface
 func (h DepthEvent) Parameters() Parameter {
 	dp := Default
 	dp = SetHasDepth(dp)
 	return dp
 }
 
-//Has implements the HazardEvent Interface
+// Has implements the HazardEvent Interface
 func (h DepthEvent) Has(p Parameter) bool {
 	dp := h.Parameters()
 	return dp&p != 0
@@ -56,7 +59,7 @@ func (d DepthEvent) MarshalJSON() ([]byte, error) {
 	return []byte(s), nil
 }
 
-//ArrivalandDurationEvent describes an event with an arrival time and a duration in days
+// ArrivalandDurationEvent describes an event with an arrival time and a duration in days
 type ArrivalandDurationEvent struct {
 	arrivalTime    time.Time
 	durationInDays float64
@@ -96,8 +99,11 @@ func (h ArrivalandDurationEvent) Salinity() bool {
 func (h ArrivalandDurationEvent) Qualitative() string {
 	return ""
 }
+func (h ArrivalandDurationEvent) DV() float64 {
+	return -901.0
+}
 
-//Parameters implements the HazardEvent interface
+// Parameters implements the HazardEvent interface
 func (ad ArrivalandDurationEvent) Parameters() Parameter {
 	adp := Default
 	adp = SetHasDuration(adp)
@@ -105,13 +111,13 @@ func (ad ArrivalandDurationEvent) Parameters() Parameter {
 	return adp
 }
 
-//Has implements the HazardEvent Interface
+// Has implements the HazardEvent Interface
 func (ad ArrivalandDurationEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0
 }
 
-//ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
+// ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
 type ArrivalDepthandDurationEvent struct {
 	arrivalTime    time.Time
 	depth          float64
@@ -155,8 +161,11 @@ func (h ArrivalDepthandDurationEvent) Salinity() bool {
 func (h ArrivalDepthandDurationEvent) Qualitative() string {
 	return ""
 }
+func (h ArrivalDepthandDurationEvent) DV() float64 {
+	return -901.0
+}
 
-//Parameters implements the HazardEvent interface
+// Parameters implements the HazardEvent interface
 func (ad ArrivalDepthandDurationEvent) Parameters() Parameter {
 	adp := Default
 	adp = SetHasDuration(adp)
@@ -165,13 +174,13 @@ func (ad ArrivalDepthandDurationEvent) Parameters() Parameter {
 	return adp
 }
 
-//Has implements the HazardEvent Interface
+// Has implements the HazardEvent Interface
 func (ad ArrivalDepthandDurationEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0
 }
 
-//ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
+// ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
 type QualitativeEvent struct {
 	qualitative string
 }
@@ -208,14 +217,14 @@ func (h *QualitativeEvent) SetQualitative(message string) {
 	h.qualitative = message
 }
 
-//Parameters implements the HazardEvent interface
+// Parameters implements the HazardEvent interface
 func (q QualitativeEvent) Parameters() Parameter {
 	qp := Default
 	qp = SetHasQualitative(qp)
 	return qp
 }
 
-//Has implements the HazardEvent Interface
+// Has implements the HazardEvent Interface
 func (q QualitativeEvent) Has(p Parameter) bool {
 	qp := q.Parameters()
 	return qp&p != 0

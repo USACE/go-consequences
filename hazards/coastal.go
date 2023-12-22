@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//CoastalEvent describes a coastal event
+// CoastalEvent describes a coastal event
 type CoastalEvent struct {
 	depth         float64 `default:"-901.0"` //still depth
 	waveHeight    float64 `default:"-901.0"` //continuous variable.
@@ -68,8 +68,11 @@ func (h *CoastalEvent) SetSalinity(d bool) {
 func (h CoastalEvent) Qualitative() string {
 	return ""
 }
+func (h CoastalEvent) DV() float64 {
+	return -901.0
+}
 
-//Parameters implements the HazardEvent interface
+// Parameters implements the HazardEvent interface
 func (ad CoastalEvent) Parameters() Parameter {
 	adp := Default
 
@@ -98,7 +101,7 @@ func (ad CoastalEvent) Parameters() Parameter {
 	return adp
 }
 
-//Has implements the HazardEvent Interface
+// Has implements the HazardEvent Interface
 func (ad CoastalEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0

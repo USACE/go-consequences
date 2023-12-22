@@ -1,15 +1,6 @@
 package lifeloss
 
-import (
-	"encoding/json"
-	"io/fs"
-	"testing"
-
-	"os"
-
-	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
-)
-
+/*
 func TestGenerateLowLethality(t *testing.T) {
 	//low fatality rates
 	frequencies := []float64{0.000000000000, 0.000003213863, 0.000006427726, 0.000009641590, 0.000012855450, 0.000016069320, 0.000019283180, 0.000022497040, 0.000025710910, 1.000000000000}
@@ -38,3 +29,4 @@ func TestGenerateHighLethality(t *testing.T) {
 	}
 	os.WriteFile("/workspaces/Go_Consequences/structures/highlethality.json", bytes, fs.ModeAppend)
 }
+*/
