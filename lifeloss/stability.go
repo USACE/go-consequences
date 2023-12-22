@@ -6,6 +6,13 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
+type Stability uint
+
+const (
+	Stable    Stability = 1 //1
+	Collapsed Stability = 2 //2
+)
+
 type StabilityCriteria struct {
 	//curve paireddata.PairedData //assume x is depth and y is velocity?
 	//curve paireddata.UncertaintyPairedData
@@ -30,7 +37,7 @@ var RescDamMasonryConcreteBrick = StabilityCriteria{
 	DepthTimesVelocity: 75.3,
 }
 
-func (sc StabilityCriteria) Evaluate(e hazards.HazardEvent) bool {
+func (sc StabilityCriteria) Evaluate(e hazards.HazardEvent) Stability {
 	depth := 0.0    //expected to be maximum depth across all time
 	velocity := 0.0 //expected to be maximum velocity
 	dv := 0.0
@@ -62,11 +69,11 @@ func (sc StabilityCriteria) Evaluate(e hazards.HazardEvent) bool {
 	if depth > sc.MinimumDepth {
 		if velocity > sc.MinimumVelocity {
 			if dv >= sc.DepthTimesVelocity {
-				return true
+				return Collapsed
 			}
 		}
 	}
-	return false
+	return Stable
 	//the below psuedo code would work great if i have the instantaneous depth and velocity at the time of the maximum of their product - if i dont have that, using d*V calculated externally is a better overall approach
 	/*
 		depth := 0.0    //this should be depth at the time of the peak velocity*depth calculation.

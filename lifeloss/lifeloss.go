@@ -56,32 +56,53 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 			return consequences.Result{}, err
 		}
 		//apply building stability criteria
-		if sc.Evaluate(e) {
+		if sc.Evaluate(e) == Collapsed {
 			//select high fataility rate
 			lethalityRate := le.LethalityCurves[HighLethality].Sample()
 			//apply same fatality rate to everyone
 			log.Println(lethalityRate)
-			return consequences.Result{}, errors.New("under construction")
+			return consequences.Result{}, nil
 		} else {
-			return submergenceCriteria(e, s)
+			return le.submergenceCriteria(e, s)
 		}
 	} else {
 		//apply submergence criteria
-		return submergenceCriteria(e, s)
+		return le.submergenceCriteria(e, s)
 	}
 }
-func submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
+func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//apply submergence criteria
-	depth := 0.0
-	//set depth
-	if depth > 0.0 {
+	header := LifeLossHeader()
+	depth := e.Depth()
+	if depth < 0.0 {
 		//no lifeloss
-		return consequences.Result{}, errors.New("under construction")
+
+		result := LifeLossDefaultResults()
+		return consequences.Result{Headers: header, Result: result}, nil
 	} else {
 		//for all individuals using different probabilities for over and under 65 based on nsi attributes
+		immobleDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0
+		mobileDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0
+		hasAtticAccess := false
+		immobleDepthThreshold += 5.0 + s.FoundHt
+		mobileDepthThreshold += 8.0 + s.FoundHt //9-1...
+		if hasAtticAccess {
+			mobileDepthThreshold += 1.0 + 6.0 + 4.0
+			immobleDepthThreshold += 9.0
+		}
 		mobility := evaluateMobility(s)
 		if mobility == Mobile {
-
+			if depth > float64(mobileDepthThreshold) {
+				log.Println(lle.LethalityCurves[HighLethality].Sample())
+			} else {
+				log.Println(lle.LethalityCurves[LowLethality].Sample())
+			}
+		} else {
+			if depth > float64(immobleDepthThreshold) {
+				log.Println(lle.LethalityCurves[HighLethality].Sample())
+			} else {
+				log.Println(lle.LethalityCurves[LowLethality].Sample())
+			}
 		}
 	}
 	return consequences.Result{}, errors.New("under construction")
