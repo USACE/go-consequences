@@ -41,76 +41,46 @@ func TestComputeSpecialEAD(t *testing.T) {
 }
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
-	//nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/nsi.gpkg", "nsi")
-	//nsp.SetDeterministic(true)
-
+	dataset := "wabaunsee"
 	nsp := structureprovider.InitNSISP()
+
 	//initialize a set of frequencies
-	frequencies := []float64{1, .5, .2, .1, .05, .02, .01, .005, .002, .001}
+	frequencies := []float64{.1, .04, .02, .01, .002}
 	//specify a working directory for data
-	root := "/workspaces/Go_Consequences/data/humbolt/"
+	root := fmt.Sprintf("/workspaces/Go_Consequences/data/kc_silverjackets/%v/", dataset)
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(frequencies))
 
-	hp1year, err := hazardproviders.Init(fmt.Sprint(root, "1 Year/raster_elev_937_8_4326_deflate.tif"))
+	hp1, err := hazardproviders.Init(fmt.Sprint(root, "Depth_10pct_4326_deflate.tif"))
 	if err != nil {
 		t.Fail()
 	}
-	hazardProviders[0] = hp1year
+	hazardProviders[0] = hp1
 
-	hp2year, err := hazardproviders.Init(fmt.Sprint(root, "2 Year/raster_elev_947_1_4326_deflate.tif"))
+	hp2, err := hazardproviders.Init(fmt.Sprint(root, "Depth_04pct_4326_deflate.tif"))
 	if err != nil {
 		t.Fail()
 	}
-	hazardProviders[1] = hp2year
+	hazardProviders[1] = hp2
 
-	hp5year, err := hazardproviders.Init(fmt.Sprint(root, "5 Year/raster_elev_950_1_4326_deflate.tif"))
+	hp3, err := hazardproviders.Init(fmt.Sprint(root, "Depth_02pct_4326_deflate.tif"))
 	if err != nil {
 		t.Fail()
 	}
-	hazardProviders[2] = hp5year
+	hazardProviders[2] = hp3
 
-	hp10year, err := hazardproviders.Init(fmt.Sprint(root, "10 Year/raster_elev_951_8_4326_deflate.tif"))
+	hp4, err := hazardproviders.Init(fmt.Sprint(root, "Depth_01pct_4326_deflate.tif"))
 	if err != nil {
 		t.Fail()
 	}
-	hazardProviders[3] = hp10year
+	hazardProviders[3] = hp4
 
-	hp20year, err := hazardproviders.Init(fmt.Sprint(root, "20 Year/raster_elev_953_4_4326_deflate.tif"))
+	hp5, err := hazardproviders.Init(fmt.Sprint(root, "Depth_0_2pct_4326_deflate.tif"))
 	if err != nil {
 		t.Fail()
 	}
-	hazardProviders[4] = hp20year
+	hazardProviders[4] = hp5
 
-	hp50year, err := hazardproviders.Init(fmt.Sprint(root, "50 Year/raster_elev_955_6_4326_deflate.tif"))
-	if err != nil {
-		t.Fail()
-	}
-	hazardProviders[5] = hp50year
-
-	hp100year, err := hazardproviders.Init(fmt.Sprint(root, "100 Year/raster_elev_957_1_4326_deflate.tif"))
-	if err != nil {
-		t.Fail()
-	}
-	hazardProviders[6] = hp100year
-
-	hp200year, err := hazardproviders.Init(fmt.Sprint(root, "200 Year/raster_elev_958_4_4326_deflate.tif"))
-	if err != nil {
-		t.Fail()
-	}
-	hazardProviders[7] = hp200year
-
-	hp500year, err := hazardproviders.Init(fmt.Sprint(root, "500 Year/raster_elev_960_0_4326_deflate.tif"))
-	if err != nil {
-		t.Fail()
-	}
-	hazardProviders[8] = hp500year
-
-	hp1000year, err := hazardproviders.Init(fmt.Sprint(root, "1000 Year/raster_elev_962_2_4326_deflate.tif"))
-	if err != nil {
-		t.Fail()
-	}
-	hazardProviders[9] = hp1000year
 	//create a result writer based on the name of the depth grid.
 	w, _ := resultswriters.InitGpkResultsWriter(root+"consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()

@@ -28,3 +28,4 @@ RUN go build main.go
 FROM osgeo/gdal:alpine-normal-3.5.2 as prod
 WORKDIR /app
 COPY --from=builder /app/go-consequences/main .
+ENTRYPOINT ["/main"]

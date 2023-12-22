@@ -127,12 +127,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 			//compute damages based on hazard being able to provide depth
 
 			if err == nil {
-				//TODO:REMOVE BELOW LOGIC WHEN YOU GET DEPTH GRID!!!!
-				depth := d.Depth()
-				depth = depth - (s.GroundElevation * 1) //3.28084) ///meters to feet, need to remove if moving to nsi 2022
-				depthHazard := hazards.DepthEvent{}
-				depthHazard.SetDepth(depth)
-				r, err3 := f.Compute(depthHazard)
+				r, err3 := f.Compute(d)
 				if err3 == nil {
 					gotWet = true
 					sdam, err := r.Fetch("structure damage")
@@ -154,7 +149,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 				}
 				results = append(results, sEADs[index])
 				results = append(results, cEADs[index])
-				b, _ := json.Marshal(depthHazard)
+				b, _ := json.Marshal(d)
 				shaz := string(b)
 				results = append(results, shaz)
 			} else {
