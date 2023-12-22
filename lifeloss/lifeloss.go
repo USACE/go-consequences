@@ -50,7 +50,7 @@ func LifeLossDefaultResults() []interface{} {
 }
 func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//reduce population somehow?
-	if e.Has(hazards.Velocity) {
+	if e.Has(hazards.DV) {
 		sc, err := le.determineStability(s)
 		if err != nil {
 			return consequences.Result{}, err
@@ -58,7 +58,7 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 		//apply building stability criteria
 		if sc.Evaluate(e) {
 			//select high fataility rate
-			lethalityRate := 987654321.0 //HighLethality.Sample()
+			lethalityRate := le.LethalityCurves[HighLethality].Sample()
 			//apply same fatality rate to everyone
 			log.Println(lethalityRate)
 			return consequences.Result{}, errors.New("under construction")

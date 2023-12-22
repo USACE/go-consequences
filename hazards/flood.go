@@ -229,3 +229,62 @@ func (q QualitativeEvent) Has(p Parameter) bool {
 	qp := q.Parameters()
 	return qp&p != 0
 }
+
+// DepthandDVEvent describes an event with an arrival time and a duration in days
+type DepthandDVEvent struct {
+	depth float64
+	dv    float64
+}
+
+func (d DepthandDVEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"depthanddvevent\":{\"depth\":%f,\"dv\":%f}}", d.Depth(), d.DV())
+	return []byte(s), nil
+}
+func (h DepthandDVEvent) Depth() float64 {
+	return h.depth
+}
+func (h *DepthandDVEvent) SetDepth(value float64) {
+	h.depth = value
+}
+func (h DepthandDVEvent) Velocity() float64 {
+	return -901.0
+}
+
+func (h DepthandDVEvent) ArrivalTime() time.Time {
+	return time.Time{}
+}
+func (h DepthandDVEvent) Erosion() float64 {
+	return -901.0
+}
+func (h DepthandDVEvent) Duration() float64 {
+	return -901.0
+}
+func (h DepthandDVEvent) WaveHeight() float64 {
+	return -901.0
+}
+func (h DepthandDVEvent) Salinity() bool {
+	return false
+}
+func (h DepthandDVEvent) Qualitative() string {
+	return ""
+}
+func (h DepthandDVEvent) DV() float64 {
+	return h.dv
+}
+func (h *DepthandDVEvent) SetDV(value float64) {
+	h.dv = value
+}
+
+// Parameters implements the HazardEvent interface
+func (ad DepthandDVEvent) Parameters() Parameter {
+	adp := Default
+	adp = SetHasDepth(adp)
+	adp = SetHasDV(adp)
+	return adp
+}
+
+// Has implements the HazardEvent Interface
+func (ad DepthandDVEvent) Has(p Parameter) bool {
+	adp := ad.Parameters()
+	return adp&p != 0
+}

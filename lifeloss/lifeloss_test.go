@@ -1,5 +1,80 @@
 package lifeloss
 
+import (
+	"math"
+	"testing"
+
+	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
+	"github.com/USACE/go-consequences/hazards"
+	"github.com/USACE/go-consequences/structures"
+)
+
+func TestComputeLifeloss(t *testing.T) {
+	lle := Init()
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := []float64{10.0, 20.0, 30.0, 40.0}
+	pd := paireddata.PairedData{Xvals: x, Yvals: y}
+	sm := make(map[hazards.Parameter]structures.DamageFunction)
+	var sdf = structures.DamageFunctionFamily{DamageFunctions: sm}
+
+	df := structures.DamageFunction{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	sdf.DamageFunctions[hazards.Default] = df
+	cm := make(map[hazards.Parameter]structures.DamageFunction)
+	var cdf = structures.DamageFunctionFamily{DamageFunctions: cm}
+	cdf.DamageFunctions[hazards.Default] = df
+	componentmap := make(map[string]structures.DamageFunctionFamily)
+	componentmap["contents"] = cdf
+	componentmap["structure"] = sdf
+	var o = structures.OccupancyTypeDeterministic{Name: "RES1`", ComponentDamageFunctions: componentmap}
+	var s = structures.StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, ConstructionType: "M", BaseStructure: structures.BaseStructure{DamCat: "category"}}
+
+	//test depth values
+	var d = hazards.DepthandDVEvent{}
+	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5, 12}
+	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0, 40.0}
+	for idx := range depths {
+		d.SetDepth(depths[idx])
+		d.SetDV(75.3)
+		r, err := s.Compute(d)
+
+		if err != nil {
+			panic(err)
+		}
+		dr, err := r.Fetch("structure damage")
+		if err != nil {
+			panic(err)
+		}
+		got := dr.(float64)
+		diff := expectedResults[idx] - got
+		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
+			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
+		}
+		lle.ComputeLifeLoss(d, s)
+	}
+	//test interpolation due to foundation height putting depth back in range
+	s.FoundHt = 8.1
+	r, err := s.Compute(d)
+	if err != nil {
+		panic(err)
+	}
+	dr, err := r.Fetch("structure damage")
+	if err != nil {
+		panic(err)
+	}
+	got := dr.(float64)
+	if got != 39.0 {
+		t.Errorf("Compute(%f) = %f; expected %f", 39.0, got, 39.0)
+	}
+
+	//add a test for content value as well
+	//add a test for different hazard types (float64 and fire?)
+}
+
 /*
 func TestGenerateLowLethality(t *testing.T) {
 	//low fatality rates

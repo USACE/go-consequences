@@ -17,17 +17,17 @@ type StabilityCriteria struct {
 var RescDamWoodUnanchored = StabilityCriteria{
 	MinimumVelocity:    0.0,
 	MinimumDepth:       0.0,
-	DepthTimesVelocity: 21.5,
+	DepthTimesVelocity: 32.3,
 }
 var RescDamWoodAnchored = StabilityCriteria{
 	MinimumVelocity:    0.0,
 	MinimumDepth:       0.0,
-	DepthTimesVelocity: 32.3,
+	DepthTimesVelocity: 75.3,
 }
 var RescDamMasonryConcreteBrick = StabilityCriteria{
 	MinimumVelocity:    6.6,
 	MinimumDepth:       0.0,
-	DepthTimesVelocity: 32.3,
+	DepthTimesVelocity: 75.3,
 }
 
 func (sc StabilityCriteria) Evaluate(e hazards.HazardEvent) bool {
@@ -43,7 +43,12 @@ func (sc StabilityCriteria) Evaluate(e hazards.HazardEvent) bool {
 				//get velocity from the hazard
 				velocity = e.Velocity()
 			} else {
-				velocity = dv / depth // assumes max depth happened at the same time as max velocity - which is not true, so this is an underestimate of max velocity
+				if depth == 0 {
+					velocity = dv
+				} else {
+					velocity = dv / depth // assumes max depth happened at the same time as max velocity - which is not true, so this is an underestimate of max velocity
+				}
+
 				//ergo velocity was strictly greater than this value at some point, if i compare this velocity to the threshold of minimum velocity that must be exceeded
 				//for concrete strucures, it will yeild the correct result less frequently (because velocity could be greater at some point)
 			}
