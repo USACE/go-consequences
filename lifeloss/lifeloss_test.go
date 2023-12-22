@@ -31,8 +31,21 @@ func TestComputeLifeloss(t *testing.T) {
 	componentmap["contents"] = cdf
 	componentmap["structure"] = sdf
 	var o = structures.OccupancyTypeDeterministic{Name: "RES1`", ComponentDamageFunctions: componentmap}
-	var s = structures.StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, ConstructionType: "M", BaseStructure: structures.BaseStructure{DamCat: "category"}}
-
+	var s = structures.StructureDeterministic{
+		BaseStructure:    structures.BaseStructure{DamCat: "category"},
+		OccType:          o,
+		FoundType:        "",
+		ConstructionType: "M",
+		StructVal:        100.0,
+		ContVal:          100.0,
+		FoundHt:          0.0,
+		Pop2pmo65:        100,
+		Pop2pmu65:        100,
+		Pop2amo65:        100,
+		Pop2amu65:        100,
+		NumStories:       1,
+	}
+	//lle.WarningSystem.WarningFunction()(&s)
 	//test depth values
 	var d = hazards.DepthandDVEvent{}
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5, 12}

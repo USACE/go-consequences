@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"math/rand"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/structures"
+	"github.com/USACE/go-consequences/warning"
 )
 
 type Mobility uint
@@ -22,6 +24,7 @@ const (
 type LifeLossEngine struct {
 	LethalityCurves   map[LethalityZone]LethalityCurve
 	StabilityCriteria map[string]StabilityCriteria
+	WarningSystem     warning.WarningResponseSystem
 	ResultsHeader     []string
 }
 
@@ -39,7 +42,7 @@ func Init() LifeLossEngine {
 	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
 	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
 	stabilityCriteria["masonryconcretebrick"] = RescDamMasonryConcreteBrick
-	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria}
+	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warning.ComplianceBasedWarningSystem{ComplianceRate: .75}}
 }
 
 func LifeLossHeader() []string {
@@ -49,7 +52,9 @@ func LifeLossDefaultResults() []interface{} {
 	return []interface{}{0.0, 0.0, 0.0}
 }
 func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
-	//reduce population somehow?
+	//reduce population based off of the warning system's warning function
+	rng := rand.New(rand.NewSource(123454))
+	le.WarningSystem.WarningFunction()(&s)
 	if e.Has(hazards.DV) {
 		sc, err := le.determineStability(s)
 		if err != nil {
@@ -61,7 +66,11 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 			lethalityRate := le.LethalityCurves[HighLethality].Sample()
 			//apply same fatality rate to everyone
 			log.Println(lethalityRate)
-			return consequences.Result{}, nil
+			llo65 := applylethalityRateToPopulation(lethalityRate, s.Pop2amo65, rng)
+			//llo65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmo65, rng)
+			llu65 := applylethalityRateToPopulation(lethalityRate, s.Pop2amu65, rng)
+			//llu65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmu65, rng)
+			return consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
 		} else {
 			return le.submergenceCriteria(e, s)
 		}
@@ -69,6 +78,15 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 		//apply submergence criteria
 		return le.submergenceCriteria(e, s)
 	}
+}
+func applylethalityRateToPopulation(lethalityrate float64, population int32, rng *rand.Rand) int32 {
+	result := 0
+	for i := 0; i < int(population); i++ {
+		if rng.Float64() < lethalityrate {
+			result++
+		}
+	}
+	return int32(result)
 }
 func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//apply submergence criteria
