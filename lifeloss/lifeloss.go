@@ -2,7 +2,6 @@ package lifeloss
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"math/rand"
 
@@ -111,7 +110,8 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 		result := LifeLossDefaultResults()
 		return consequences.Result{Headers: header, Result: result}, nil
 	} else {
-		//for all individuals using different probabilities for over and under 65 based on nsi attributes
+		//for all ages of individuals using different probabilities to assign mobility
+		// for over and under 65 based on nsi attribute of "percent not mobile"
 		immobleDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0
 		mobileDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0
 		hasAtticAccess := false
@@ -122,27 +122,54 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 			immobleDepthThreshold += 9.0
 		}
 
-		mobility := evaluateMobility(s, rng)
-		for k, v := range mobility {
+		mobilitySet := evaluateMobility(s, rng)
+		llu65 := 0
+		llo65 := 0
+		for k, v := range mobilitySet {
 			//apply to the appropriate age/time of day
 			log.Println(v)
 			if k == Mobile {
 				if depth > float64(mobileDepthThreshold) {
-					log.Println(lle.LethalityCurves[HighLethality].Sample())
+					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
+					llu65 += ret.u652am
+					llo65 += ret.o652am
 				} else {
-					log.Println(lle.LethalityCurves[LowLethality].Sample())
+					ret := lle.createLifeLossSet(v, lle.LethalityCurves[LowLethality], rng)
+					llu65 += ret.u652am
+					llo65 += ret.o652am
 				}
 			} else {
 				if depth > float64(immobleDepthThreshold) {
-					log.Println(lle.LethalityCurves[HighLethality].Sample())
+					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
+					llu65 += ret.u652am
+					llo65 += ret.o652am
 				} else {
-					log.Println(lle.LethalityCurves[LowLethality].Sample())
+					ret := lle.createLifeLossSet(v, lle.LethalityCurves[LowLethality], rng)
+					llu65 += ret.u652am
+					llo65 += ret.o652am
 				}
 			}
 		}
-
+		return consequences.Result{Headers: header, Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
 	}
-	return consequences.Result{}, errors.New("under construction")
+}
+func (lle LifeLossEngine) createLifeLossSet(popset PopulationSet, lc LethalityCurve, rng *rand.Rand) PopulationSet {
+	result := PopulationSet{0, 0, 0, 0}
+	result.o652am = lle.evaluateLifeLoss(popset.o652am, lle.LethalityCurves[HighLethality], rng)
+	result.o652pm = lle.evaluateLifeLoss(popset.o652pm, lle.LethalityCurves[HighLethality], rng)
+	result.u652am = lle.evaluateLifeLoss(popset.u652am, lle.LethalityCurves[HighLethality], rng)
+	result.u652pm = lle.evaluateLifeLoss(popset.u652pm, lle.LethalityCurves[HighLethality], rng)
+	log.Println(result)
+	return result
+}
+func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int, lc LethalityCurve, rng *rand.Rand) int {
+	result := 0
+	for i := 0; i < populationRemaining; i++ {
+		if lc.Sample() < rng.Float64() {
+			result++
+		}
+	}
+	return result
 }
 func evaluateMobility(s structures.StructureDeterministic, rng *rand.Rand) map[Mobility]PopulationSet {
 	//determine based on age and disability
@@ -185,7 +212,7 @@ func evaluateMobility(s structures.StructureDeterministic, rng *rand.Rand) map[M
 		}
 	}
 	for i := 0; i < int(s.Pop2pmu65); i++ {
-		if rng.Float64() < .75 {
+		if rng.Float64() < .98 {
 			popset := result[Mobile]
 			popset.u652pm = popset.u652pm + 1
 			result[Mobile] = popset
