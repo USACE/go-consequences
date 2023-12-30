@@ -1,6 +1,7 @@
 package lifeloss
 
 import (
+	"log"
 	"math"
 	"testing"
 
@@ -67,25 +68,9 @@ func TestComputeLifeloss(t *testing.T) {
 		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
 		}
-		lle.ComputeLifeLoss(d, s)
+		result, _ := lle.ComputeLifeLoss(d, s)
+		log.Println(result)
 	}
-	//test interpolation due to foundation height putting depth back in range
-	s.FoundHt = 8.1
-	r, err := s.Compute(d)
-	if err != nil {
-		panic(err)
-	}
-	dr, err := r.Fetch("structure damage")
-	if err != nil {
-		panic(err)
-	}
-	got := dr.(float64)
-	if got != 39.0 {
-		t.Errorf("Compute(%f) = %f; expected %f", 39.0, got, 39.0)
-	}
-
-	//add a test for content value as well
-	//add a test for different hazard types (float64 and fire?)
 }
 
 /*

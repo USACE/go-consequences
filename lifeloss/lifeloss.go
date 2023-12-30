@@ -74,15 +74,18 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 		}
 		//apply building stability criteria
 		if sc.Evaluate(e) == Collapsed {
+			log.Println("Stability Based Lifeloss")
 			//select high fataility rate
 			lethalityRate := le.LethalityCurves[HighLethality].Sample()
 			//apply same fatality rate to everyone
-			log.Println(lethalityRate)
+			//log.Println(lethalityRate)
 			llo65 := applylethalityRateToPopulation(lethalityRate, s.Pop2amo65, rng)
 			//llo65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmo65, rng)
 			llu65 := applylethalityRateToPopulation(lethalityRate, s.Pop2amu65, rng)
 			//llu65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmu65, rng)
-			return consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
+			result := consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}
+			//log.Println(result)
+			return result, nil
 		} else {
 			return le.submergenceCriteria(e, s, rng)
 		}
@@ -102,6 +105,7 @@ func applylethalityRateToPopulation(lethalityrate float64, population int32, rng
 }
 func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic, rng *rand.Rand) (consequences.Result, error) {
 	//apply submergence criteria
+	log.Println("Submergence Based Lifeloss")
 	header := LifeLossHeader()
 	depth := e.Depth()
 	if depth < 0.0 {
@@ -127,7 +131,7 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 		llo65 := 0
 		for k, v := range mobilitySet {
 			//apply to the appropriate age/time of day
-			log.Println(v)
+			//log.Println(v)
 			if k == Mobile {
 				if depth > float64(mobileDepthThreshold) {
 					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
@@ -159,7 +163,7 @@ func (lle LifeLossEngine) createLifeLossSet(popset PopulationSet, lc LethalityCu
 	result.o652pm = lle.evaluateLifeLoss(popset.o652pm, lle.LethalityCurves[HighLethality], rng)
 	result.u652am = lle.evaluateLifeLoss(popset.u652am, lle.LethalityCurves[HighLethality], rng)
 	result.u652pm = lle.evaluateLifeLoss(popset.u652pm, lle.LethalityCurves[HighLethality], rng)
-	log.Println(result)
+	//log.Println(result)
 	return result
 }
 func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int, lc LethalityCurve, rng *rand.Rand) int {
