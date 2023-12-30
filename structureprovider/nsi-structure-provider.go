@@ -183,11 +183,12 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		FoundHt:          consequences.ParameterValue{Value: f.Properties.FoundHt},
 		FoundType:        f.Properties.FoundType,
 		ConstructionType: f.Properties.ConstructionType,
-		Pop2pmo65:        f.Properties.Pop2pmo65,
-		Pop2pmu65:        f.Properties.Pop2pmu65,
-		Pop2amo65:        f.Properties.Pop2amo65,
-		Pop2amu65:        f.Properties.Pop2amu65,
-		NumStories:       f.Properties.NumStories,
+		PopulationSet: structures.PopulationSet{
+			Pop2pmo65: f.Properties.Pop2pmo65,
+			Pop2pmu65: f.Properties.Pop2pmu65,
+			Pop2amo65: f.Properties.Pop2amo65,
+			Pop2amu65: f.Properties.Pop2amu65},
+		NumStories: f.Properties.NumStories,
 		BaseStructure: structures.BaseStructure{
 			Name:            strconv.Itoa(f.Properties.Name),
 			CBFips:          f.Properties.CB,

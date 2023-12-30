@@ -40,10 +40,7 @@ func TestComputeLifeloss(t *testing.T) {
 		StructVal:        100.0,
 		ContVal:          100.0,
 		FoundHt:          0.0,
-		Pop2pmo65:        100,
-		Pop2pmu65:        100,
-		Pop2amo65:        100,
-		Pop2amu65:        100,
+		PopulationSet:    structures.PopulationSet{100, 100, 100, 100},
 		NumStories:       1,
 	}
 	//lle.WarningSystem.WarningFunction()(&s)

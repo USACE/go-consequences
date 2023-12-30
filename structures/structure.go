@@ -17,24 +17,29 @@ type BaseStructure struct {
 	CBFips                string
 	X, Y, GroundElevation float64
 }
+type PopulationSet struct {
+	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65 int32
+}
 
 // StructureStochastic is a base structure with an occupancy type stochastic and parameter values for all parameters
 type StructureStochastic struct {
 	BaseStructure
-	UseUncertainty                                         bool //defaults to false!
-	OccType                                                OccupancyTypeStochastic
-	FoundType, FirmZone, ConstructionType                  string
-	StructVal, ContVal, FoundHt                            consequences.ParameterValue
-	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
+	UseUncertainty                        bool //defaults to false!
+	OccType                               OccupancyTypeStochastic
+	FoundType, FirmZone, ConstructionType string
+	StructVal, ContVal, FoundHt           consequences.ParameterValue
+	NumStories                            int32
+	PopulationSet
 }
 
 // StructureDeterministic is a base strucure with a deterministic occupancy type and deterministic parameters
 type StructureDeterministic struct {
 	BaseStructure
-	OccType                                                OccupancyTypeDeterministic
-	FoundType, ConstructionType                            string
-	StructVal, ContVal, FoundHt                            float64
-	Pop2pmo65, Pop2pmu65, Pop2amo65, Pop2amu65, NumStories int32
+	OccType                     OccupancyTypeDeterministic
+	FoundType, ConstructionType string
+	StructVal, ContVal, FoundHt float64
+	NumStories                  int32
+	PopulationSet
 }
 
 // GetX implements consequences.Locatable
@@ -68,10 +73,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		FoundType:        s.FoundType,
 		ConstructionType: s.ConstructionType,
 		FoundHt:          fh,
-		Pop2pmo65:        s.Pop2pmo65,
-		Pop2pmu65:        s.Pop2pmu65,
-		Pop2amo65:        s.Pop2amo65,
-		Pop2amu65:        s.Pop2amu65,
+		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
 		NumStories:       s.NumStories,
 		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }

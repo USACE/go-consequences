@@ -20,12 +20,6 @@ const (
 	NotMobile Mobility = 2 //2
 )
 
-type PopulationSet struct {
-	o652am int
-	o652pm int
-	u652am int
-	u652pm int
-}
 type LifeLossEngine struct {
 	LethalityCurves   map[LethalityZone]LethalityCurve
 	StabilityCriteria map[string]StabilityCriteria
@@ -127,102 +121,103 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 		}
 
 		mobilitySet := evaluateMobility(s, rng)
-		llu65 := 0
-		llo65 := 0
+		var llu65 int32 = 0
+		var llo65 int32 = 0
 		for k, v := range mobilitySet {
 			//apply to the appropriate age/time of day
 			//log.Println(v)
 			if k == Mobile {
 				if depth > float64(mobileDepthThreshold) {
 					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
-					llu65 += ret.u652am
-					llo65 += ret.o652am
+					llu65 += ret.Pop2amu65
+					llo65 += ret.Pop2amo65
 				} else {
 					ret := lle.createLifeLossSet(v, lle.LethalityCurves[LowLethality], rng)
-					llu65 += ret.u652am
-					llo65 += ret.o652am
+					llu65 += ret.Pop2amu65
+					llo65 += ret.Pop2amo65
 				}
 			} else {
 				if depth > float64(immobleDepthThreshold) {
 					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
-					llu65 += ret.u652am
-					llo65 += ret.o652am
+					llu65 += ret.Pop2amu65
+					llo65 += ret.Pop2amo65
 				} else {
 					ret := lle.createLifeLossSet(v, lle.LethalityCurves[LowLethality], rng)
-					llu65 += ret.u652am
-					llo65 += ret.o652am
+					llu65 += ret.Pop2amu65
+					llo65 += ret.Pop2amo65
 				}
 			}
 		}
 		return consequences.Result{Headers: header, Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
 	}
 }
-func (lle LifeLossEngine) createLifeLossSet(popset PopulationSet, lc LethalityCurve, rng *rand.Rand) PopulationSet {
-	result := PopulationSet{0, 0, 0, 0}
-	result.o652am = lle.evaluateLifeLoss(popset.o652am, lle.LethalityCurves[HighLethality], rng)
-	result.o652pm = lle.evaluateLifeLoss(popset.o652pm, lle.LethalityCurves[HighLethality], rng)
-	result.u652am = lle.evaluateLifeLoss(popset.u652am, lle.LethalityCurves[HighLethality], rng)
-	result.u652pm = lle.evaluateLifeLoss(popset.u652pm, lle.LethalityCurves[HighLethality], rng)
+func (lle LifeLossEngine) createLifeLossSet(popset structures.PopulationSet, lc LethalityCurve, rng *rand.Rand) structures.PopulationSet {
+	result := structures.PopulationSet{0, 0, 0, 0}
+	result.Pop2amo65 = lle.evaluateLifeLoss(popset.Pop2amo65, lle.LethalityCurves[HighLethality], rng)
+	result.Pop2pmo65 = lle.evaluateLifeLoss(popset.Pop2pmo65, lle.LethalityCurves[HighLethality], rng)
+	result.Pop2amu65 = lle.evaluateLifeLoss(popset.Pop2amu65, lle.LethalityCurves[HighLethality], rng)
+	result.Pop2pmu65 = lle.evaluateLifeLoss(popset.Pop2pmu65, lle.LethalityCurves[HighLethality], rng)
 	//log.Println(result)
 	return result
 }
-func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int, lc LethalityCurve, rng *rand.Rand) int {
-	result := 0
-	for i := 0; i < populationRemaining; i++ {
+func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int32, lc LethalityCurve, rng *rand.Rand) int32 {
+	var result int32 = 0
+	var i int32 = 0
+	for i = 0; i < populationRemaining; i++ {
 		if lc.Sample() < rng.Float64() {
 			result++
 		}
 	}
 	return result
 }
-func evaluateMobility(s structures.StructureDeterministic, rng *rand.Rand) map[Mobility]PopulationSet {
+func evaluateMobility(s structures.StructureDeterministic, rng *rand.Rand) map[Mobility]structures.PopulationSet {
 	//determine based on age and disability
-	result := make(map[Mobility]PopulationSet)
-	mobileset := PopulationSet{0, 0, 0, 0}
-	notmobileset := PopulationSet{0, 0, 0, 0}
+	result := make(map[Mobility]structures.PopulationSet)
+	mobileset := structures.PopulationSet{0, 0, 0, 0}
+	notmobileset := structures.PopulationSet{0, 0, 0, 0}
 	result[Mobile] = mobileset
 	result[NotMobile] = notmobileset
 	for i := 0; i < int(s.Pop2amo65); i++ {
 		if rng.Float64() < .75 { //get this from nick
 			popset := result[Mobile]
-			popset.o652am = popset.o652am + 1
+			popset.Pop2amo65 = popset.Pop2amo65 + 1
 			result[Mobile] = popset
 		} else {
 			popset := result[NotMobile]
-			popset.o652am = popset.o652am + 1
+			popset.Pop2amo65 = popset.Pop2amo65 + 1
 			result[NotMobile] = popset
 		}
 	}
 	for i := 0; i < int(s.Pop2amu65); i++ {
 		if rng.Float64() < .98 { //get this from nick
 			popset := result[Mobile]
-			popset.u652am = popset.u652am + 1
+			popset.Pop2amu65 = popset.Pop2amu65 + 1
 			result[Mobile] = popset
 		} else {
 			popset := result[NotMobile]
-			popset.u652am = popset.u652am + 1
+			popset.Pop2amu65 = popset.Pop2amu65 + 1
 			result[NotMobile] = popset
 		}
 	}
 	for i := 0; i < int(s.Pop2pmo65); i++ {
 		if rng.Float64() < .75 {
 			popset := result[Mobile]
-			popset.o652pm = popset.o652pm + 1
+			popset.Pop2pmo65 = popset.Pop2pmo65 + 1
 			result[Mobile] = popset
 		} else {
 			popset := result[NotMobile]
-			popset.o652pm = popset.o652pm + 1
+			popset.Pop2pmo65 = popset.Pop2pmo65 + 1
 			result[NotMobile] = popset
 		}
 	}
 	for i := 0; i < int(s.Pop2pmu65); i++ {
 		if rng.Float64() < .98 {
 			popset := result[Mobile]
-			popset.u652pm = popset.u652pm + 1
+			popset.Pop2pmu65 = popset.Pop2pmu65 + 1
 			result[Mobile] = popset
 		} else {
 			popset := result[NotMobile]
-			popset.u652pm = popset.u652pm + 1
+			popset.Pop2pmu65 = popset.Pop2pmu65 + 1
 			result[NotMobile] = popset
 		}
 	}
