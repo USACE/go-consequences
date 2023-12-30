@@ -21,6 +21,12 @@ const (
 	NotMobile Mobility = 2 //2
 )
 
+type PopulationSet struct {
+	o652am int
+	o652pm int
+	u652am int
+	u652pm int
+}
 type LifeLossEngine struct {
 	LethalityCurves   map[LethalityZone]LethalityCurve
 	StabilityCriteria map[string]StabilityCriteria
@@ -28,16 +34,23 @@ type LifeLossEngine struct {
 	ResultsHeader     []string
 }
 
+// Init in the lifeloss package creates a life loss engine with the default settings
 func Init() LifeLossEngine {
+	//initialize the default high lethality rate relationship
 	var HighPD paireddata.PairedData
 	json.Unmarshal(DefaultHighLethalityBytes, &HighPD)
+	//initialize the default low lethality rate relationships
 	var LowPD paireddata.PairedData
 	json.Unmarshal(DefaultLowLethalityBytes, &LowPD)
+	//create a lethality curve instance for High Lethality
 	High := LethalityCurve{data: HighPD}
+	//create a lethality curve instance for Low Lethality
 	Low := LethalityCurve{data: LowPD}
+	//create a map of lethality zone to lethality curve
 	lethalityCurves := make(map[LethalityZone]LethalityCurve)
 	lethalityCurves[HighLethality] = High
 	lethalityCurves[LowLethality] = Low
+	//initalize the stability criteria
 	stabilityCriteria := make(map[string]StabilityCriteria)
 	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
 	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
@@ -72,11 +85,11 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 			//llu65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmu65, rng)
 			return consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
 		} else {
-			return le.submergenceCriteria(e, s)
+			return le.submergenceCriteria(e, s, rng)
 		}
 	} else {
 		//apply submergence criteria
-		return le.submergenceCriteria(e, s)
+		return le.submergenceCriteria(e, s, rng)
 	}
 }
 func applylethalityRateToPopulation(lethalityrate float64, population int32, rng *rand.Rand) int32 {
@@ -88,7 +101,7 @@ func applylethalityRateToPopulation(lethalityrate float64, population int32, rng
 	}
 	return int32(result)
 }
-func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
+func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic, rng *rand.Rand) (consequences.Result, error) {
 	//apply submergence criteria
 	header := LifeLossHeader()
 	depth := e.Depth()
@@ -108,26 +121,81 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 			mobileDepthThreshold += 1.0 + 6.0 + 4.0
 			immobleDepthThreshold += 9.0
 		}
-		mobility := evaluateMobility(s)
-		if mobility == Mobile {
-			if depth > float64(mobileDepthThreshold) {
-				log.Println(lle.LethalityCurves[HighLethality].Sample())
+
+		mobility := evaluateMobility(s, rng)
+		for k, v := range mobility {
+			//apply to the appropriate age/time of day
+			log.Println(v)
+			if k == Mobile {
+				if depth > float64(mobileDepthThreshold) {
+					log.Println(lle.LethalityCurves[HighLethality].Sample())
+				} else {
+					log.Println(lle.LethalityCurves[LowLethality].Sample())
+				}
 			} else {
-				log.Println(lle.LethalityCurves[LowLethality].Sample())
-			}
-		} else {
-			if depth > float64(immobleDepthThreshold) {
-				log.Println(lle.LethalityCurves[HighLethality].Sample())
-			} else {
-				log.Println(lle.LethalityCurves[LowLethality].Sample())
+				if depth > float64(immobleDepthThreshold) {
+					log.Println(lle.LethalityCurves[HighLethality].Sample())
+				} else {
+					log.Println(lle.LethalityCurves[LowLethality].Sample())
+				}
 			}
 		}
+
 	}
 	return consequences.Result{}, errors.New("under construction")
 }
-func evaluateMobility(s structures.StructureDeterministic) Mobility {
+func evaluateMobility(s structures.StructureDeterministic, rng *rand.Rand) map[Mobility]PopulationSet {
 	//determine based on age and disability
-	return Mobile
+	result := make(map[Mobility]PopulationSet)
+	mobileset := PopulationSet{0, 0, 0, 0}
+	notmobileset := PopulationSet{0, 0, 0, 0}
+	result[Mobile] = mobileset
+	result[NotMobile] = notmobileset
+	for i := 0; i < int(s.Pop2amo65); i++ {
+		if rng.Float64() < .75 { //get this from nick
+			popset := result[Mobile]
+			popset.o652am = popset.o652am + 1
+			result[Mobile] = popset
+		} else {
+			popset := result[NotMobile]
+			popset.o652am = popset.o652am + 1
+			result[NotMobile] = popset
+		}
+	}
+	for i := 0; i < int(s.Pop2amu65); i++ {
+		if rng.Float64() < .98 { //get this from nick
+			popset := result[Mobile]
+			popset.u652am = popset.u652am + 1
+			result[Mobile] = popset
+		} else {
+			popset := result[NotMobile]
+			popset.u652am = popset.u652am + 1
+			result[NotMobile] = popset
+		}
+	}
+	for i := 0; i < int(s.Pop2pmo65); i++ {
+		if rng.Float64() < .75 {
+			popset := result[Mobile]
+			popset.o652pm = popset.o652pm + 1
+			result[Mobile] = popset
+		} else {
+			popset := result[NotMobile]
+			popset.o652pm = popset.o652pm + 1
+			result[NotMobile] = popset
+		}
+	}
+	for i := 0; i < int(s.Pop2pmu65); i++ {
+		if rng.Float64() < .75 {
+			popset := result[Mobile]
+			popset.u652pm = popset.u652pm + 1
+			result[Mobile] = popset
+		} else {
+			popset := result[NotMobile]
+			popset.u652pm = popset.u652pm + 1
+			result[NotMobile] = popset
+		}
+	}
+	return result
 }
 
 func (le LifeLossEngine) determineStability(s structures.StructureDeterministic) (StabilityCriteria, error) {
