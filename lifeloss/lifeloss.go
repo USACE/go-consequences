@@ -25,6 +25,7 @@ type LifeLossEngine struct {
 	StabilityCriteria map[string]StabilityCriteria
 	WarningSystem     warning.WarningResponseSystem
 	ResultsHeader     []string
+	SeedGenerator     *rand.Rand
 }
 
 // Init in the lifeloss package creates a life loss engine with the default settings
@@ -48,7 +49,8 @@ func Init() LifeLossEngine {
 	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
 	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
 	stabilityCriteria["masonryconcretebrick"] = RescDamMasonryConcreteBrick
-	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warning.ComplianceBasedWarningSystem{ComplianceRate: .75}}
+	rng := rand.New(rand.NewSource(123454))
+	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warning.ComplianceBasedWarningSystem{ComplianceRate: .75}, SeedGenerator: rng}
 }
 
 func LifeLossHeader() []string {
@@ -59,9 +61,9 @@ func LifeLossDefaultResults() []interface{} {
 }
 func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//reduce population based off of the warning system's warning function
-	rng := rand.New(rand.NewSource(123454))
+	rng := rand.New(rand.NewSource(le.SeedGenerator.Int63()))
 	le.WarningSystem.WarningFunction()(&s)
-	if e.Has(hazards.DV) {
+	if e.Has(hazards.DV) && e.Has(hazards.Depth) || e.Has(hazards.Velocity) && e.Has(hazards.Depth) {
 		sc, err := le.determineStability(s)
 		if err != nil {
 			return consequences.Result{}, err

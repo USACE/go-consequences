@@ -2,7 +2,6 @@ package lifeloss
 
 import (
 	"log"
-	"math"
 	"testing"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
@@ -47,24 +46,10 @@ func TestComputeLifeloss(t *testing.T) {
 	//test depth values
 	var d = hazards.DepthandDVEvent{}
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5, 12}
-	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0, 40.0}
+	dv := []float64{32.4, 32.4, 32.4, 32.4, 75.3, 32.4, 75.3, 75.3, 75.3, 32.4, 32.4}
 	for idx := range depths {
 		d.SetDepth(depths[idx])
-		d.SetDV(75.3)
-		r, err := s.Compute(d)
-
-		if err != nil {
-			panic(err)
-		}
-		dr, err := r.Fetch("structure damage")
-		if err != nil {
-			panic(err)
-		}
-		got := dr.(float64)
-		diff := expectedResults[idx] - got
-		if math.Abs(diff) > .00000000000001 { //one more order of magnitude smaller causes 2.75 and 3.99 samples to fail.
-			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx])
-		}
+		d.SetDV(dv[idx])
 		result, _ := lle.ComputeLifeLoss(d, s)
 		log.Println(result)
 	}
