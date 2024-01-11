@@ -29,7 +29,11 @@ func main() {
 	}
 	var config compute.Config
 	json.Unmarshal(b, &config)
-	err = config.Compute()
+	computable, err := config.CreateComputable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = computable.Compute()
 	if err != nil {
 		log.Fatal(err)
 	}
