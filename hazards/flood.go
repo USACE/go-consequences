@@ -192,6 +192,9 @@ func (d QualitativeEvent) MarshalJSON() ([]byte, error) {
 func (h QualitativeEvent) Depth() float64 {
 	return -901.0
 }
+func (h QualitativeEvent) DV() float64 {
+	return -901.0
+}
 func (h QualitativeEvent) Velocity() float64 {
 	return -901.0
 }
