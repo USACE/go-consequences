@@ -7,10 +7,12 @@ import (
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/structures"
+	"github.com/USACE/go-consequences/warning"
 )
 
 func TestComputeLifeloss(t *testing.T) {
-	lle := Init()
+	warningSystem := warning.InitComplianceBasedWarningSystem(12345, .75)
+	lle := Init(12345678, warningSystem)
 	//build a basic structure with a defined depth damage relationship.
 	x := []float64{1.0, 2.0, 3.0, 4.0}
 	y := []float64{10.0, 20.0, 30.0, 40.0}

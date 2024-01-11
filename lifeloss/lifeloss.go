@@ -29,7 +29,7 @@ type LifeLossEngine struct {
 }
 
 // Init in the lifeloss package creates a life loss engine with the default settings
-func Init() LifeLossEngine {
+func Init(seed int64, warningSystem warning.WarningResponseSystem) LifeLossEngine {
 	//initialize the default high lethality rate relationship
 	var HighPD paireddata.PairedData
 	json.Unmarshal(DefaultHighLethalityBytes, &HighPD)
@@ -49,8 +49,9 @@ func Init() LifeLossEngine {
 	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
 	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
 	stabilityCriteria["masonryconcretebrick"] = RescDamMasonryConcreteBrick
-	rng := rand.New(rand.NewSource(123454))
-	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warning.ComplianceBasedWarningSystem{ComplianceRate: .75}, SeedGenerator: rng}
+	rng := rand.New(rand.NewSource(seed))
+
+	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warningSystem, SeedGenerator: rng}
 }
 
 func LifeLossHeader() []string {
@@ -62,7 +63,7 @@ func LifeLossDefaultResults() []interface{} {
 func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//reduce population based off of the warning system's warning function
 	rng := rand.New(rand.NewSource(le.SeedGenerator.Int63()))
-	le.WarningSystem.WarningFunction()(&s)
+	remainingPop, _ := le.WarningSystem.WarningFunction()(s, e)
 	if e.Has(hazards.DV) && e.Has(hazards.Depth) || e.Has(hazards.Velocity) && e.Has(hazards.Depth) {
 		sc, err := le.determineStability(s)
 		if err != nil {
@@ -75,19 +76,19 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 			lethalityRate := le.LethalityCurves[HighLethality].Sample()
 			//apply same fatality rate to everyone
 			//log.Println(lethalityRate)
-			llo65 := applylethalityRateToPopulation(lethalityRate, s.Pop2amo65, rng)
-			//llo65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmo65, rng)
-			llu65 := applylethalityRateToPopulation(lethalityRate, s.Pop2amu65, rng)
-			//llu65 += applylethalityRateToPopulation(lethalityRate, s.Pop2pmu65, rng)
+			llo65 := applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2amo65, rng)
+			//llo65 += applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2pmo65, rng)
+			llu65 := applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2amu65, rng)
+			//llu65 += applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2pmu65, rng)
 			result := consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}
 			//log.Println(result)
 			return result, nil
 		} else {
-			return le.submergenceCriteria(e, s, rng)
+			return le.submergenceCriteria(e, s, remainingPop, rng)
 		}
 	} else {
 		//apply submergence criteria
-		return le.submergenceCriteria(e, s, rng)
+		return le.submergenceCriteria(e, s, remainingPop, rng)
 	}
 }
 func applylethalityRateToPopulation(lethalityrate float64, population int32, rng *rand.Rand) int32 {
@@ -99,7 +100,7 @@ func applylethalityRateToPopulation(lethalityrate float64, population int32, rng
 	}
 	return int32(result)
 }
-func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic, rng *rand.Rand) (consequences.Result, error) {
+func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic, remainingPop structures.PopulationSet, rng *rand.Rand) (consequences.Result, error) {
 	//apply submergence criteria
 	log.Println("Submergence Based Lifeloss")
 	header := LifeLossHeader()
@@ -122,7 +123,7 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 			immobleDepthThreshold += 9.0
 		}
 
-		mobilitySet := evaluateMobility(s, rng)
+		mobilitySet := evaluateMobility(remainingPop, rng)
 		var llu65 int32 = 0
 		var llo65 int32 = 0
 		for k, v := range mobilitySet {
@@ -172,7 +173,7 @@ func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int32, lc Lethali
 	}
 	return result
 }
-func evaluateMobility(s structures.StructureDeterministic, rng *rand.Rand) map[Mobility]structures.PopulationSet {
+func evaluateMobility(s structures.PopulationSet, rng *rand.Rand) map[Mobility]structures.PopulationSet {
 	//determine based on age and disability
 	result := make(map[Mobility]structures.PopulationSet)
 	mobileset := structures.PopulationSet{0, 0, 0, 0}

@@ -101,7 +101,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		return
 	}
 	//set up output tables for all frequencies.
-	header := []string{"fd_id", "x", "y", "damcat", "occtype", "s EAD", "c EAD", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "found_ht"}
+	header := []string{"fd_id", "x", "y", "damcat", "occtype", "s EAD", "c EAD", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "found_ht", "cb_id"}
 
 	for _, f := range freqs {
 		header = append(header, fmt.Sprintf("%2.6fS", f))
@@ -114,7 +114,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		if !sok {
 			return
 		}
-		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, s.Pop2amu65, s.Pop2amo65, s.Pop2pmu65, s.Pop2pmo65, s.FoundHt.CentralTendency()}
+		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, s.Pop2amu65, s.Pop2amo65, s.Pop2pmu65, s.Pop2pmo65, s.FoundHt.CentralTendency(), s.CBFips}
 
 		sEADs := make([]float64, len(freqs))
 		cEADs := make([]float64, len(freqs))

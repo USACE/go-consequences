@@ -41,7 +41,7 @@ func TestComputeSpecialEAD(t *testing.T) {
 }
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
-	dataset := "wabaunsee"
+	dataset := "umdc"
 	nsp := structureprovider.InitNSISP()
 
 	//initialize a set of frequencies
@@ -116,7 +116,8 @@ func Test_Config(t *testing.T) {
 		os.Remove(configPath)
 	}
 	os.WriteFile(configPath, b, os.ModeAppend)
-	err = config.Compute()
+	computable, err := config.CreateComputable()
+	err = computable.Compute()
 	if err != nil {
 		t.Fail()
 	}

@@ -35,10 +35,10 @@ type StructureStochastic struct {
 // StructureDeterministic is a base strucure with a deterministic occupancy type and deterministic parameters
 type StructureDeterministic struct {
 	BaseStructure
-	OccType                     OccupancyTypeDeterministic
-	FoundType, ConstructionType string
-	StructVal, ContVal, FoundHt float64
-	NumStories                  int32
+	OccType                               OccupancyTypeDeterministic
+	FoundType, FirmZone, ConstructionType string
+	StructVal, ContVal, FoundHt           float64
+	NumStories                            int32
 	PopulationSet
 }
 
@@ -72,6 +72,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		ContVal:          cv,
 		FoundType:        s.FoundType,
 		ConstructionType: s.ConstructionType,
+		FirmZone:         s.FirmZone,
 		FoundHt:          fh,
 		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
 		NumStories:       s.NumStories,

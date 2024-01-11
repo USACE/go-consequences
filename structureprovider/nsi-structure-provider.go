@@ -183,6 +183,7 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		FoundHt:          consequences.ParameterValue{Value: f.Properties.FoundHt},
 		FoundType:        f.Properties.FoundType,
 		ConstructionType: f.Properties.ConstructionType,
+		FirmZone:         f.Properties.FirmZone,
 		PopulationSet: structures.PopulationSet{
 			Pop2pmo65: f.Properties.Pop2pmo65,
 			Pop2pmu65: f.Properties.Pop2pmu65,
