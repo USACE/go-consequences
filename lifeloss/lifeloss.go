@@ -2,7 +2,6 @@ package lifeloss
 
 import (
 	"encoding/json"
-	"log"
 	"math/rand"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
@@ -75,7 +74,7 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 		}
 		//apply building stability criteria
 		if sc.Evaluate(e) == Collapsed {
-			log.Println("Stability Based Lifeloss")
+			//log.Println("Stability Based Lifeloss")
 			//select high fataility rate
 			lethalityRate := le.LethalityCurves[HighLethality].Sample()
 			//apply same fatality rate to everyone
@@ -106,7 +105,7 @@ func applylethalityRateToPopulation(lethalityrate float64, population int32, rng
 }
 func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic, remainingPop structures.PopulationSet, rng *rand.Rand) (consequences.Result, error) {
 	//apply submergence criteria
-	log.Println("Submergence Based Lifeloss")
+	//log.Println("Submergence Based Lifeloss")
 	header := LifeLossHeader()
 	depth := e.Depth()
 	if depth < 0.0 {
