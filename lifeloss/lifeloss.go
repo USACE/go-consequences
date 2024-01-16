@@ -58,7 +58,11 @@ func LifeLossHeader() []string {
 	return []string{"ll_u65", "ll_o65", "ll_tot"}
 }
 func LifeLossDefaultResults() []interface{} {
-	return []interface{}{0, 0, 0}
+	var ll_u65, ll_o65, ll_tot int32
+	ll_u65 = 0
+	ll_o65 = 0
+	ll_tot = 0
+	return []interface{}{ll_u65, ll_o65, ll_tot}
 }
 func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
 	//reduce population based off of the warning system's warning function
