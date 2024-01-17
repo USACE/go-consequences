@@ -32,6 +32,7 @@ func OptionalSchema() []string {
 	s[4] = "pop2pmo65"
 	s[5] = "ground_elv"
 	s[6] = "bldgtype"
+	s[7] = "firmzone"
 	return s
 }
 
@@ -101,6 +102,9 @@ func featuretoStructure(
 	}
 	if oidxs[6] != -1 {
 		s.ConstructionType = f.FieldAsString(oidxs[6])
+	}
+	if oidxs[7] != -1 {
+		s.FirmZone = f.FieldAsString(oidxs[7])
 	}
 	return s, nil
 }
@@ -181,6 +185,9 @@ func featuretoDeterministicStructure(
 	}
 	if oidxs[6] != -1 {
 		s.ConstructionType = f.FieldAsString(oidxs[6])
+	}
+	if oidxs[7] != -1 {
+		s.FirmZone = f.FieldAsString(oidxs[7])
 	}
 	return s, nil
 }
