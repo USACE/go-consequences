@@ -19,7 +19,7 @@ type nassTiffReader struct {
 func Init(fp string) nassTiffReader {
 	//read the file path
 	//make sure it is a tif
-	ds, err := gdal.Open(fp, gdal.ReadOnly)
+	ds, err := gdal.Open(fp, gdal.Access(gdal.ReadOnly))
 	if err != nil {
 		log.Fatalln("Cannot connect to NASS GeoTiff.  Killing everything! " + err.Error())
 	}
@@ -39,7 +39,7 @@ func (ncp *nassTiffReader) getCropValue(y float64, x float64) (crops.Crop, error
 	px := int(igt[0] + y*igt[1] + x*igt[2])
 	py := int(igt[3] + y*igt[4] + x*igt[5])
 	buffer := make([]uint8, 1*1)
-	rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
+	rb.IO(gdal.RWFlag(gdal.Read), px, py, 1, 1, buffer, 1, 1, 0, 0)
 	s := strconv.Itoa(int(buffer[0]))
 	if ncp.converter == nil {
 		ncp.converter = crops.NASSCropMap()

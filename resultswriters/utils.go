@@ -9,10 +9,10 @@ import (
 )
 
 var gdalTypes map[reflect.Kind]gdal.FieldType = map[reflect.Kind]gdal.FieldType{
-	reflect.Float32: gdal.FT_Real,
-	reflect.Float64: gdal.FT_Real,
-	reflect.Int32:   gdal.FT_Integer,
-	reflect.String:  gdal.FT_String,
+	reflect.Float32: gdal.FieldType(gdal.FT_Real),
+	reflect.Float64: gdal.FieldType(gdal.FT_Real),
+	reflect.Int32:   gdal.FieldType(gdal.FT_Integer),
+	reflect.String:  gdal.FieldType(gdal.FT_String),
 }
 
 type ResultsWriterType string
@@ -22,6 +22,7 @@ const (
 	JSON    ResultsWriterType = "JSON"    //1
 	GPKG    ResultsWriterType = "GPKG"    //2
 	SHP     ResultsWriterType = "SHP"
+	PARQUET ResultsWriterType = "Parquet"
 )
 
 type ResultsWriterInfo struct {
@@ -37,6 +38,8 @@ func (info ResultsWriterInfo) CreateResultsWriter() (consequences.ResultsWriter,
 		return InitGpkResultsWriter(info.FilePath, "results")
 	case SHP:
 		return InitShpResultsWriter(info.FilePath, "results")
+	case PARQUET:
+		return InitGeoparquetResultsWriter(info.FilePath, "results")
 	default:
 		return nil, errors.New("could not create a result writer of that type")
 	}

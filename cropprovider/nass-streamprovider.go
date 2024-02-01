@@ -47,7 +47,7 @@ func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[str
 	nXs := rb.XSize()
 	offset := 0
 	arr := make([]byte, nYs*nXs, nYs*nXs)
-	err := rb.IO(gdal.Read, offset, offset, nXs, nYs, arr, nXs, nYs, 0, 0)
+	err := rb.IO(gdal.RWFlag(gdal.Read), offset, offset, nXs, nYs, arr, nXs, nYs, 0, 0)
 	if err != nil {
 		panic(err)
 	}

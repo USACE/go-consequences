@@ -33,6 +33,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer computable.ResultsWriter.Close()
+	defer computable.HazardProvider.Close()
 	err = computable.Compute()
 	if err != nil {
 		log.Fatal(err)

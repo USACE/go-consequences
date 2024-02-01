@@ -71,6 +71,7 @@ func (computable Computeable) Compute() error {
 		}
 	} else {
 		StreamAbstract(computable.HazardProvider, computable.StructureProvider, computable.ResultsWriter) //bybbox. need to add logic for fips.
+		computable.ResultsWriter.Close()
 	}
 
 	return nil
