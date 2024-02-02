@@ -84,7 +84,7 @@ func (computable Computeable) computeWithLifelossByFips(hp hazardproviders.Hazar
 	//err := errors.New("error")
 	sp.ByFips(computable.FipsCode, func(f consequences.Receptor) {
 		err := computeLifelossPerStructure(hp, f, rng, lle, w)
-		if err == nil {
+		if err != nil {
 			log.Fatal(err)
 		}
 	})
@@ -101,7 +101,7 @@ func (computable Computeable) computeWithLifelossByBbox(hp hazardproviders.Hazar
 	}
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		err := computeLifelossPerStructure(hp, f, rng, lle, w)
-		if err == nil {
+		if err != nil {
 			log.Fatal(err)
 		}
 	})

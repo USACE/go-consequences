@@ -101,8 +101,8 @@ func Test_Config(t *testing.T) {
 			},
 		},
 		ResultsWriterInfo: resultswriters.ResultsWriterInfo{
-			Type:     resultswriters.PARQUET,
-			FilePath: "/workspaces/Go_Consequences/data/clipped_sample",
+			Type:     resultswriters.GPKG,
+			FilePath: "/workspaces/Go_Consequences/data/clipped_sample.gpkg",
 		},
 	}
 	b, err := json.Marshal(config)
