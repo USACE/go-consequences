@@ -90,26 +90,29 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 func Test_Config(t *testing.T) {
 	config := Config{
 		StructureProviderInfo: structureprovider.StructureProviderInfo{
-			StructureProviderType: structureprovider.NSIAPI,
+			StructureProviderType:   structureprovider.OGR,
+			StructureProviderDriver: "PARQUET",
+			LayerName:               "lower_kanawha_lower_elk",
+			StructureFilePath:       "/workspaces/Go_Consequences/data/ffrd/lower_kanawha_lower_elk.parquet",
 		},
 		HazardProviderInfo: hazardproviders.HazardProviderInfo{
 			Hazards: []hazardproviders.HazardProviderParameterAndPath{
 				hazardproviders.HazardProviderParameterAndPath{
 					Hazard:   hazards.Depth,
-					FilePath: "/workspaces/Go_Consequences/data/clipped_sample.tif",
+					FilePath: "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid.vrt",
 				},
 			},
 		},
 		ResultsWriterInfo: resultswriters.ResultsWriterInfo{
 			Type:     resultswriters.JSON,
-			FilePath: "/workspaces/Go_Consequences/data/clipped_sample.json",
+			FilePath: "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid_consequences.json",
 		},
 	}
 	b, err := json.Marshal(config)
 	if err != nil {
 		t.Fail()
 	}
-	configPath := "/workspaces/Go_Consequences/data/configexample.json"
+	configPath := "/workspaces/Go_Consequences/data/ffrd/configexample.json"
 	if _, err := os.Stat(configPath); errors.Is(err, os.ErrNotExist) {
 		//does not exist
 	} else {
@@ -117,6 +120,9 @@ func Test_Config(t *testing.T) {
 	}
 	os.WriteFile(configPath, b, os.ModeAppend)
 	computable, err := config.CreateComputable()
+	if err != nil {
+		t.Fail()
+	}
 	err = computable.Compute()
 	if err != nil {
 		t.Fail()
