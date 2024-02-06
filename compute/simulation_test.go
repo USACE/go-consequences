@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
-	"github.com/planetlabs/gpq/cmd/gpq/command"
 )
 
 func TestComputeEAD(t *testing.T) {
@@ -101,8 +101,8 @@ func Test_Config(t *testing.T) {
 			},
 		},
 		ResultsWriterInfo: resultswriters.ResultsWriterInfo{
-			Type:     resultswriters.GPKG,
-			FilePath: "/workspaces/Go_Consequences/data/clipped_sample.gpkg",
+			Type:     resultswriters.JSON,
+			FilePath: "/workspaces/Go_Consequences/data/clipped_sample.json",
 		},
 	}
 	b, err := json.Marshal(config)
@@ -126,6 +126,8 @@ func Test_Config(t *testing.T) {
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
 	//nsp := structureprovider.InitNSISP()
+	now := time.Now()
+	fmt.Println(now)
 	nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower")
 	nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
@@ -146,13 +148,7 @@ func Test_StreamAbstract(t *testing.T) {
 	})
 	//compute consequences.
 	StreamAbstract(dfr, nsp, w)
-	cmd := &command.ConvertCmd{
-		From:   "geojson",
-		Input:  root + "_consequences.json",
-		To:     "parquet",
-		Output: root + "_consequences.geoparquet",
-	}
-	cmd.Run()
+	fmt.Println(time.Since(now))
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()

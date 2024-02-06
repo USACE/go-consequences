@@ -13,6 +13,8 @@ type cogReader struct {
 	ds               *gdal.Dataset
 	nodata           float64
 	verticalIsMeters bool //default false
+	rb               gdal.RasterBand
+	igt              [6]float64
 }
 
 func initCR_Meters(fp string) (cogReader, error) {
@@ -30,8 +32,17 @@ func initCR(fp string) (cogReader, error) {
 	if err != nil {
 		return cogReader{}, errors.New("Cannot connect to raster at path " + fp + err.Error())
 	}
-	v, valid := ds.RasterBand(1).NoDataValue()
-	cr := cogReader{FilePath: fp, ds: &ds, verticalIsMeters: false}
+	rb := ds.RasterBand(1)
+	igt := ds.InvGeoTransform()
+	v, valid := rb.NoDataValue()
+	cr := cogReader{
+		FilePath:         fp,
+		ds:               &ds,
+		nodata:           -9999,
+		verticalIsMeters: false,
+		rb:               rb,
+		igt:              igt,
+	}
 	if valid {
 		cr.nodata = v
 	}
@@ -41,19 +52,17 @@ func (cr *cogReader) Close() {
 	cr.ds.Close()
 }
 func (cr *cogReader) ProvideValue(l geography.Location) (float64, error) {
-	rb := cr.ds.RasterBand(1)
-
-	igt := cr.ds.InvGeoTransform()
+	igt := cr.igt
 	px := int(igt[0] + l.X*igt[1] + l.Y*igt[2])
 	py := int(igt[3] + l.X*igt[4] + l.Y*igt[5])
 	buffer := make([]float32, 1*1)
-	if px < 0 || px > rb.XSize() {
+	if px < 0 || px > cr.rb.XSize() {
 		return cr.nodata, NoDataHazardError{Input: "X is out of range"}
 	}
-	if py < 0 || py > rb.YSize() {
+	if py < 0 || py > cr.rb.YSize() {
 		return cr.nodata, NoDataHazardError{Input: "Y is out of range"}
 	}
-	err := rb.IO(gdal.RWFlag(gdal.Read), px, py, 1, 1, buffer, 1, 1, 0, 0)
+	err := cr.rb.IO(gdal.RWFlag(gdal.Read), px, py, 1, 1, buffer, 1, 1, 0, 0)
 	if err != nil {
 		return cr.nodata, NoDataHazardError{Input: err.Error()}
 	}
