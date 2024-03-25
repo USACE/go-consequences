@@ -9,10 +9,10 @@ import (
 )
 
 func TestHSIP(t *testing.T) {
-	list := []Layer{Hospitals}
+	list := []Layer{Hospitals, PowerPlants}
 	provider := InitHsipProvider(list)
 	bbox := geography.BBox{
-		Bbox: []float64{-95, 40, -94.32, 41},
+		Bbox: []float64{-80, 35.5, -79.5, 36},
 	}
 	provider.ByBbox(bbox, func(ci consequences.Receptor) {
 		ci.Compute(hazards.DepthEvent{})

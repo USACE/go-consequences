@@ -14,17 +14,24 @@ import (
 
 var hsip_root string = "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/"
 var esri_bbox string = "&geometryType=esriGeometryEnvelope&geometry="
-var hsip_suffix string = "&outSR=4326&f=json"
+var hsip_suffix string = "&outSR=4326&f=geojson"
 
 type Layer int
 
 // Parameter types describe different parameters for hazards
 const (
 	Hospitals Layer = iota
+	PowerPlants
 )
 
 func (l Layer) String() string {
-	return [...]string{"Hospital"}[l]
+	return [...]string{"Hospital", "Plants_gdb"}[l]
+}
+func (l Layer) OccupancyType() string {
+	return [...]string{"Hospital", "Power Plants"}[l]
+}
+func (l Layer) DamageCategory() string {
+	return [...]string{"Health and Medical", "Energy"}[l]
 }
 
 type HsipProvider struct {
@@ -41,7 +48,7 @@ type CriticalInfrastructureReturn struct {
 	Features []CriticalInfrastructureFeature `json:"features"`
 }
 type CriticalInfrastructureFeature struct {
-	Attributes CriticalInfrastructureAttributes `json:"attributes"`
+	Attributes CriticalInfrastructureAttributes `json:"properties"`
 }
 type CriticalInfrastructureAttributes struct {
 	Name           string  `json:"NAME"`
@@ -68,10 +75,10 @@ func (h HsipProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProcesso
 	for _, l := range h.FilterList {
 		queryString := fmt.Sprintf("%s%s/FeatureServer/0/query?outFields=*%s%s", hsip_root, l, bbstring, hsip_suffix)
 		fmt.Println(queryString)
-		processQuery(queryString, sp)
+		processQuery(queryString, sp, l)
 	}
 }
-func processQuery(url string, sp consequences.StreamProcessor) {
+func processQuery(url string, sp consequences.StreamProcessor, l Layer) {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
@@ -88,8 +95,11 @@ func processQuery(url string, sp consequences.StreamProcessor) {
 	//fmt.Println(string(b))
 	var ci CriticalInfrastructureReturn
 	json.Unmarshal(b, &ci)
-
+	damcat := l.DamageCategory()
+	occtype := l.OccupancyType()
 	for _, cielement := range ci.Features {
+		cielement.Attributes.DamageCategory = damcat
+		cielement.Attributes.OccupancyType = occtype
 		sp(cielement)
 	}
 }
