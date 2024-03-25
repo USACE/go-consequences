@@ -22,16 +22,17 @@ type Layer int
 const (
 	Hospitals Layer = iota
 	PowerPlants
+	FireStations //Fire_Station
 )
 
 func (l Layer) String() string {
-	return [...]string{"Hospital", "Plants_gdb"}[l]
+	return [...]string{"Hospital", "Plants_gdb", "Fire_Station"}[l]
 }
 func (l Layer) OccupancyType() string {
-	return [...]string{"Hospital", "Power Plants"}[l]
+	return [...]string{"Hospital", "Power Plants", "Fire Stations"}[l]
 }
 func (l Layer) DamageCategory() string {
-	return [...]string{"Health and Medical", "Energy"}[l]
+	return [...]string{"Health and Medical", "Energy", "Safety and Security"}[l]
 }
 
 type HsipProvider struct {
