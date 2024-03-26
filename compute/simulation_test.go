@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/USACE/go-consequences/criticalinfrastructure"
 	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
@@ -134,12 +135,13 @@ func Test_StreamAbstract(t *testing.T) {
 	//nsp := structureprovider.InitNSISP()
 	now := time.Now()
 	fmt.Println(now)
-	nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower")
-	nsp.SetDeterministic(true)
+	//nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower")
+	//nsp.SetDeterministic(true)
+	hsip := criticalinfrastructure.InitHsipProvider([]criticalinfrastructure.Layer{criticalinfrastructure.Hospitals, criticalinfrastructure.FireStations, criticalinfrastructure.PowerPlants})
 	//identify the depth grid to apply to the structures.
 	root := "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid"
 	filepath := root + ".vrt"
-	w, _ := resultswriters.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	w, _ := resultswriters.InitGeoJsonResultsWriterFromFile(root + "_criticalInfrastructure.json")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
@@ -153,7 +155,7 @@ func Test_StreamAbstract(t *testing.T) {
 		return process(valueIn, hazard)
 	})
 	//compute consequences.
-	StreamAbstract(dfr, nsp, w)
+	StreamAbstract(dfr, hsip, w)
 	fmt.Println(time.Since(now))
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/USACE/go-consequences/consequences"
@@ -53,15 +54,19 @@ type CriticalInfrastructureFeature struct {
 }
 type CriticalInfrastructureAttributes struct {
 	Name           string  `json:"NAME"`
-	X              float64 `json:"LATITUDE"`
-	Y              float64 `json:"LONGITUDE"`
+	X              float64 `json:"LONGITUDE"`
+	Y              float64 `json:"LATITUDE"`
 	DamageCategory string
 	OccupancyType  string `json:"NAICS_DESC"`
 }
 
+var header = []string{"name", "x", "y", "damage category", "occupancy type", "hazard"}
+
 func (c CriticalInfrastructureFeature) Compute(h hazards.HazardEvent) (consequences.Result, error) {
-	fmt.Println(c)
-	return consequences.Result{}, nil
+
+	results := []interface{}{c.Attributes.Name, c.Attributes.X, c.Attributes.Y, c.Attributes.DamageCategory, c.Attributes.OccupancyType, h}
+	var ret = consequences.Result{Headers: header, Result: results}
+	return ret, nil
 }
 func (c CriticalInfrastructureFeature) Location() geography.Location {
 	return geography.Location{
@@ -72,12 +77,15 @@ func (c CriticalInfrastructureFeature) Location() geography.Location {
 }
 
 func (h HsipProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
-	bbstring := fmt.Sprintf("%s%v,%v,%v,%v", esri_bbox, bbox.Bbox[0], bbox.Bbox[1], bbox.Bbox[2], bbox.Bbox[3])
+	bbstring := fmt.Sprintf("%s%v,%v,%v,%v", esri_bbox, bbox.Bbox[0], bbox.Bbox[3], bbox.Bbox[2], bbox.Bbox[1])
 	for _, l := range h.FilterList {
 		queryString := fmt.Sprintf("%s%s/FeatureServer/0/query?outFields=*%s%s", hsip_root, l, bbstring, hsip_suffix)
 		fmt.Println(queryString)
 		processQuery(queryString, sp, l)
 	}
+}
+func (h HsipProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
+	log.Fatal("fips query not implemented for hsip provider")
 }
 func processQuery(url string, sp consequences.StreamProcessor, l Layer) {
 	transCfg := &http.Transport{
