@@ -137,7 +137,7 @@ func Test_StreamAbstract(t *testing.T) {
 	fmt.Println(now)
 	//nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower")
 	//nsp.SetDeterministic(true)
-	hsip := criticalinfrastructure.InitHsipProvider([]criticalinfrastructure.Layer{criticalinfrastructure.Hospitals, criticalinfrastructure.FireStations, criticalinfrastructure.PowerPlants})
+	hsip := criticalinfrastructure.InitHsipProvider([]criticalinfrastructure.Layer{criticalinfrastructure.Hospitals, criticalinfrastructure.FireStations, criticalinfrastructure.PowerPlants, criticalinfrastructure.WasteWater, criticalinfrastructure.LawEnforcement})
 	//identify the depth grid to apply to the structures.
 	root := "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid"
 	filepath := root + ".vrt"
