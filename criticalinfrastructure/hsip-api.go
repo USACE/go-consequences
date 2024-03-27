@@ -17,26 +17,28 @@ var hsip_root string = "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/res
 var esri_bbox string = "&geometryType=esriGeometryEnvelope&geometry="
 var hsip_suffix string = "&outSR=4326&f=geojson"
 
+// https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Emergency_Medical_Service_(EMS)_Stations_gdb/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 type Layer int
 
 // Parameter types describe different parameters for hazards
 const (
 	Hospitals Layer = iota
 	PowerPlants
-	FireStations   //Fire_Station
-	WasteWater     //Wastewater
-	LawEnforcement //Local_Law_Enforcement_Locations
-
+	FireStations             //Fire_Station
+	WasteWater               //Wastewater
+	LawEnforcement           //Local_Law_Enforcement_Locations
+	EmergencyMedicalServices //Emergency_Medical_Service_(EMS)_Stations_gdb
+	AmtrakStations           //https://geo.dot.gov/server/rest/services/Hosted/Amtrak_Stations_DS/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 )
 
 func (l Layer) String() string {
-	return [...]string{"Hospital", "Plants_gdb", "Fire_Station", "WasteWater", "Local_Law_Enforcement_Locations"}[l]
+	return [...]string{"Hospital", "Plants_gdb", "Fire_Station", "WasteWater", "Local_Law_Enforcement_Locations", "Emergency_Medical_Service_(EMS)_Stations_gdb", "Amtrak_Stations_DS"}[l]
 }
 func (l Layer) OccupancyType() string {
-	return [...]string{"Hospital", "Power Plants", "Fire Stations", "Waste Water Treatment Plants", "Local Law Enforcement"}[l]
+	return [...]string{"Hospital", "Power Plant", "Fire Station", "Waste Water Treatment Plant", "Local Law Enforcement", "Emergency Medical Service Station", "Amtrak Stations"}[l]
 }
 func (l Layer) DamageCategory() string {
-	return [...]string{"Health and Medical", "Energy", "Safety and Security", "Water Systems", "Safety and Security"}[l]
+	return [...]string{"Health and Medical", "Energy", "Safety and Security", "Water Systems", "Safety and Security", "Health and Medical", "Transportation"}[l]
 }
 
 type HsipProvider struct {
@@ -54,29 +56,28 @@ type CriticalInfrastructureReturn struct {
 }
 type CriticalInfrastructureFeature struct {
 	Attributes CriticalInfrastructureAttributes `json:"properties"`
+	Geometry   geography.GeoJsonGeometry        `json:"geometry"`
 }
 type CriticalInfrastructureAttributes struct {
-	Name           string  `json:"NAME"`
-	X              float64 `json:"LONGITUDE"`
-	Y              float64 `json:"LATITUDE"`
+	Name string `json:"NAME"`
+	//X              float64 `json:"LONGITUDE"`
+	//Y              float64 `json:"LATITUDE"`
 	DamageCategory string
 	OccupancyType  string `json:"NAICS_DESC"`
 }
 
-var header = []string{"name", "x", "y", "damage category", "occupancy type", "hazard"}
+var header = []string{"name", "x", "y", "Lifeline", "Dataset", "hazard"}
 
 func (c CriticalInfrastructureFeature) Compute(h hazards.HazardEvent) (consequences.Result, error) {
-
-	results := []interface{}{c.Attributes.Name, c.Attributes.X, c.Attributes.Y, c.Attributes.DamageCategory, c.Attributes.OccupancyType, h}
+	location := c.Geometry.ToLocation()
+	results := []interface{}{c.Attributes.Name, location.X, location.Y, c.Attributes.DamageCategory, c.Attributes.OccupancyType, h}
 	var ret = consequences.Result{Headers: header, Result: results}
 	return ret, nil
 }
 func (c CriticalInfrastructureFeature) Location() geography.Location {
-	return geography.Location{
-		X:    c.Attributes.X,
-		Y:    c.Attributes.Y,
-		SRID: "4326",
-	}
+	location := c.Geometry.ToLocation()
+	location.SRID = "4326"
+	return location
 }
 
 func (h HsipProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
