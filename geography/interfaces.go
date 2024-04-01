@@ -1,6 +1,8 @@
 package geography
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Location struct {
 	X    float64
@@ -10,6 +12,10 @@ type Location struct {
 
 type BBox struct {
 	Bbox []float64
+}
+type Projected interface {
+	SpatialReference() string
+	UpdateSpatialReference(sr_wkt string)
 }
 
 func (bb BBox) ToString() string {

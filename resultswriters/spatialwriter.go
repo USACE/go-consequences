@@ -20,7 +20,7 @@ type spatialResultsWriter struct {
 	index         int
 }
 
-func InitSpatialResultsWriter_Projected(filepath string, layerName string, driver string, ESPG int) (*spatialResultsWriter, error) {
+func InitSpatialResultsWriter_EPSG_Projected(filepath string, layerName string, driver string, ESPG int) (*spatialResultsWriter, error) {
 	driverOut := gdal.OGRDriverByName(driver)
 	dsOut, okOut := driverOut.Create(filepath, []string{})
 	if !okOut {
@@ -35,8 +35,23 @@ func InitSpatialResultsWriter_Projected(filepath string, layerName string, drive
 
 	return &spatialResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}, nil
 }
+func InitSpatialResultsWriter_WKT_Projected(filepath string, layerName string, driver string, WKT string) (*spatialResultsWriter, error) {
+	driverOut := gdal.OGRDriverByName(driver)
+	dsOut, okOut := driverOut.Create(filepath, []string{})
+	if !okOut {
+		//error out?
+		return &spatialResultsWriter{}, errors.New("spatial writer at path " + filepath + " of driver type " + driver + " not created")
+	}
+	//defer dsOut.Destroy() -> probably should destroy on close?
+	//set spatial reference?
+	sr := gdal.CreateSpatialReference("")
+	sr.FromWKT(WKT)
+	newLayer := dsOut.CreateLayer(layerName, sr, gdal.GeometryType(gdal.GT_Point), []string{"GEOMETRY_NAME=shape"}) //forcing point data type.  source type (using lyaer.type()) from postgis was a generic geometry
+
+	return &spatialResultsWriter{FilePath: filepath, LayerName: layerName, ds: &dsOut, Layer: &newLayer, index: 0}, nil
+}
 func InitSpatialResultsWriter(filepath string, layerName string, driver string) (*spatialResultsWriter, error) {
-	return InitSpatialResultsWriter_Projected(filepath, layerName, driver, 4326)
+	return InitSpatialResultsWriter_EPSG_Projected(filepath, layerName, driver, 4326)
 }
 func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	//if header has not been built:
