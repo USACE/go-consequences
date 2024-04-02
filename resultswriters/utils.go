@@ -35,13 +35,13 @@ type ResultsWriterInfo struct {
 func (info ResultsWriterInfo) CreateResultsWriter() (consequences.ResultsWriter, error) {
 	switch info.Type {
 	case JSON:
-		return InitGeoJsonResultsWriterFromFile(info.FilePath)
+		return InitSpatialResultsWriter(info.FilePath, "results", "GeoJSON")
 	case GPKG:
-		return InitGpkResultsWriter(info.FilePath, "results")
+		return InitSpatialResultsWriter(info.FilePath, "results", "GPKG")
 	case SHP:
-		return InitShpResultsWriter(info.FilePath, "results")
+		return InitSpatialResultsWriter(info.FilePath, "results", "ESRI Shapefile")
 	case PARQUET:
-		return InitGeoparquetResultsWriter(info.FilePath, "results")
+		return InitSpatialResultsWriter(info.FilePath, "results", "Parquet")
 	case OGR:
 		return InitSpatialResultsWriter(info.FilePath, "results", info.Driver)
 	default:
