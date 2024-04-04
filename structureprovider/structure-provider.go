@@ -164,13 +164,15 @@ func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.St
 	l := gpk.ds.LayerByName(gpk.LayerName)
 	l.SetSpatialFilterRect(bbox.Bbox[0], bbox.Bbox[3], bbox.Bbox[2], bbox.Bbox[1])
 	fc, _ := l.FeatureCount(true)
+	r := rand.New(rand.NewSource(gpk.seed))
 	for idx < fc { // Iterate and fetch the records from result cursor
 		f := l.NextFeature()
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			sd := s.SampleStructure(r.Int63())
 			if err == nil {
-				sp(s)
+				sp(sd)
 			}
 		}
 	}
