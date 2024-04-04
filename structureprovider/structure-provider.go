@@ -116,6 +116,7 @@ func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.Stream
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s.UseUncertainty = true
 			sd := s.SampleStructure(r.Int63())
 			if err == nil {
 				sp(sd)
@@ -170,6 +171,7 @@ func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.St
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s.UseUncertainty = true
 			sd := s.SampleStructure(r.Int63())
 			if err == nil {
 				sp(sd)
