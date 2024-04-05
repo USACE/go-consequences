@@ -43,8 +43,10 @@ type NsiFeature struct {
 }
 
 type nsiStreamProvider struct {
-	ApiURL          string
-	OccTypeProvider structures.OccupancyTypeProvider
+	ApiURL                string
+	OccTypeProvider       structures.OccupancyTypeProvider
+	FoundationUncertainty *structures.FoundationUncertainty
+	UseUncertainty        bool
 }
 
 func InitNSISP() nsiStreamProvider {
@@ -54,7 +56,8 @@ func InitNSISP() nsiStreamProvider {
 	//url := urlFinder()
 	url := "https://nsi.sec.usace.army.mil/nsiapi/structures"
 	// TODO probably don't hard code a possibly changing url
-	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp}
+	fh, _ := structures.InitFoundationUncertainty()
+	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp, FoundationUncertainty: fh}
 }
 func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
 	//this will only work with go1.16+
@@ -63,7 +66,8 @@ func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
 	//url := urlFinder()
 	url := "https://nsi.sec.usace.army.mil/nsiapi/structures"
 	// TODO probably don't hard code a possibly changing url
-	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp}
+	fh, _ := structures.InitFoundationUncertainty()
+	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp, FoundationUncertainty: fh}
 }
 func urlFinder() string {
 	url := "https://www.hec.usace.army.mil/fwlink/?linkid=1&type=string"
@@ -126,7 +130,7 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 				break
 			}
 		}
-		sp(NsiFeaturetoStructure(n, m, defaultOcctype))
+		sp(NsiFeaturetoStructure(n, m, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
 	}
 }
 func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, sp consequences.StreamProcessor) {
@@ -158,12 +162,12 @@ func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, 
 				break
 			}
 		}
-		sp(NsiFeaturetoStructure(n, m, defaultOcctype))
+		sp(NsiFeaturetoStructure(n, m, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
 	}
 }
 
 // NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
-func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic) structures.StructureStochastic {
+func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, useUncertainty bool, fh *structures.FoundationUncertainty) structures.StructureStochastic {
 	var occtype = defaultOcctype
 	if otf, okf := m[f.Properties.Occtype+"-"+f.Properties.FoundType]; okf {
 		occtype = otf
@@ -176,7 +180,7 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 			fmt.Print(msg) //panic(msg)
 		}
 	}
-	return structures.StructureStochastic{
+	s := structures.StructureStochastic{
 		OccType:          occtype,
 		StructVal:        consequences.ParameterValue{Value: f.Properties.StructVal},
 		ContVal:          consequences.ParameterValue{Value: f.Properties.ContVal},
@@ -199,6 +203,9 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 			GroundElevation: f.Properties.GroundElevation,
 		},
 	}
+	s.UseUncertainty = useUncertainty
+	s.ApplyFoundationHeightUncertanty(fh)
+	return s
 }
 
 // NsiStreamProcessor is a function used to process an in memory NsiFeature through the NsiStreaming service endpoints
