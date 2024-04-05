@@ -130,6 +130,7 @@ func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.Stream
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s.ApplyFoundationHeightUncertanty(gpk.FoundationUncertainty)
 			s.UseUncertainty = true
 			sd := s.SampleStructure(r.Int63())
 			if err == nil {
