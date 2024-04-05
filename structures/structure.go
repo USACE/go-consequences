@@ -48,8 +48,10 @@ func (f *StructureStochastic) ApplyFoundationHeightUncertanty(fu *FoundationUnce
 	} else {
 		queryString = "default"
 	}
-	if f.FoundType == "pile" {
-		queryString = fmt.Sprintf("%v_pier", queryString)
+	if f.FoundType == "I" {
+		queryString = fmt.Sprintf("%v_P", queryString)
+	} else if f.FoundType == "W" {
+		queryString = fmt.Sprintf("%v_C", queryString)
 	} else {
 		queryString = fmt.Sprintf("%v_%v", queryString, f.FoundType)
 	}

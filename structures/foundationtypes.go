@@ -38,7 +38,7 @@ func InitFoundationUncertaintyFromFile(file string) (*FoundationUncertainty, err
 func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 	//todo update to file in resources
 	m := make(map[string]FoundationHeightUncertainty, 0)
-	m["default_slab"] = FoundationHeightUncertainty{
+	m["default_S"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              0.53,
 			StandardDeviation: 1.01,
@@ -48,7 +48,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 1.08,
 		},
 	}
-	m["default_craw"] = FoundationHeightUncertainty{
+	m["default_C"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              0.53,
 			StandardDeviation: 1.01,
@@ -58,7 +58,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 0.78,
 		},
 	}
-	m["default_base"] = FoundationHeightUncertainty{
+	m["default_B"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              0.53,
 			StandardDeviation: 1.01,
@@ -68,7 +68,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 1.56,
 		},
 	}
-	m["default_pier"] = FoundationHeightUncertainty{
+	m["default_P"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              0.53,
 			StandardDeviation: 1.01,
@@ -79,7 +79,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 		},
 	}
 	//RES2
-	m["RES2_slab"] = FoundationHeightUncertainty{
+	m["RES2_S"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              2.0,
 			StandardDeviation: 0.93,
@@ -89,7 +89,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 0.93,
 		},
 	}
-	m["RES2_craw"] = FoundationHeightUncertainty{
+	m["RES2_C"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              2.0,
 			StandardDeviation: 0.93,
@@ -99,7 +99,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 0.93,
 		},
 	}
-	m["RES2_base"] = FoundationHeightUncertainty{
+	m["RES2_B"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              2.0,
 			StandardDeviation: 0.93,
@@ -109,7 +109,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 0.93,
 		},
 	}
-	m["RES2_pier"] = FoundationHeightUncertainty{
+	m["RES2_P"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              2.0,
 			StandardDeviation: 0.93,
@@ -120,7 +120,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 		},
 	}
 	//RES1,RES3A RES3B
-	m["RES1_RES3A_RES3B_slab"] = FoundationHeightUncertainty{
+	m["RES1_RES3A_RES3B_S"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              0.77,
 			StandardDeviation: 0.91,
@@ -130,7 +130,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 0.91,
 		},
 	}
-	m["RES1_RES3A_RES3B_craw"] = FoundationHeightUncertainty{
+	m["RES1_RES3A_RES3B_C"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              1.74,
 			StandardDeviation: 0.78,
@@ -140,7 +140,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 0.78,
 		},
 	}
-	m["RES1_RES3A_RES3B_base"] = FoundationHeightUncertainty{
+	m["RES1_RES3A_RES3B_B"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              2.91,
 			StandardDeviation: 1.56,
@@ -150,7 +150,7 @@ func InitFoundationUncertainty() (*FoundationUncertainty, error) {
 			StandardDeviation: 1.56,
 		},
 	}
-	m["RES1_RES3A_RES3B_pier"] = FoundationHeightUncertainty{
+	m["RES1_RES3A_RES3B_P"] = FoundationHeightUncertainty{
 		DefaultDistribution: statistics.NormalDistribution{
 			Mean:              7.6,
 			StandardDeviation: 3.46,
