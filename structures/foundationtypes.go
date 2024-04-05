@@ -3,6 +3,7 @@ package structures
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
@@ -23,6 +24,147 @@ type FoundationUncertaintyContainer struct {
 	Values map[string]FoundationHeightUncertaintyContainer `json:"values"`
 }
 
+func InitFoundationUncertaintyFromFile(file string) (*FoundationUncertainty, error) {
+	fbytes, err := os.ReadFile(file)
+	fu := FoundationUncertainty{
+		Values: map[string]FoundationHeightUncertainty{},
+	}
+	if err != nil {
+		return &fu, err
+	}
+	err = fu.Unmarshal(fbytes)
+	return &fu, err
+}
+func InitFoundationUncertainty() (*FoundationUncertainty, error) {
+	//todo update to file in resources
+	m := make(map[string]FoundationHeightUncertainty, 0)
+	m["default_slab"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              0.53,
+			StandardDeviation: 1.01,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              0.44,
+			StandardDeviation: 1.08,
+		},
+	}
+	m["default_craw"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              0.53,
+			StandardDeviation: 1.01,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              1.74,
+			StandardDeviation: 0.78,
+		},
+	}
+	m["default_base"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              0.53,
+			StandardDeviation: 1.01,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              2.19,
+			StandardDeviation: 1.56,
+		},
+	}
+	m["default_pier"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              0.53,
+			StandardDeviation: 1.01,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              7.6,
+			StandardDeviation: 3.46,
+		},
+	}
+	//RES2
+	m["RES2_slab"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+	}
+	m["RES2_craw"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+	}
+	m["RES2_base"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+	}
+	m["RES2_pier"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              2.0,
+			StandardDeviation: 0.93,
+		},
+	}
+	//RES1,RES3A RES3B
+	m["RES1_RES3A_RES3B_slab"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              0.77,
+			StandardDeviation: 0.91,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              0.77,
+			StandardDeviation: 0.91,
+		},
+	}
+	m["RES1_RES3A_RES3B_craw"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              1.74,
+			StandardDeviation: 0.78,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              1.74,
+			StandardDeviation: 0.78,
+		},
+	}
+	m["RES1_RES3A_RES3B_base"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              2.91,
+			StandardDeviation: 1.56,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              2.91,
+			StandardDeviation: 1.56,
+		},
+	}
+	m["RES1_RES3A_RES3B_pier"] = FoundationHeightUncertainty{
+		DefaultDistribution: statistics.NormalDistribution{
+			Mean:              7.6,
+			StandardDeviation: 3.46,
+		},
+		VzoneDistribution: statistics.NormalDistribution{
+			Mean:              7.6,
+			StandardDeviation: 3.46,
+		},
+	}
+	f := FoundationUncertainty{
+		Values: m,
+	}
+	return &f, nil
+}
 func (fu *FoundationUncertainty) MarshalJSON() ([]byte, error) {
 	var sb strings.Builder
 	sb.WriteString("{\"values\":{")

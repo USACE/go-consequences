@@ -12,27 +12,41 @@ import (
 )
 
 type gdalDataSet struct {
-	FilePath          string
-	LayerName         string
-	schemaIDX         []int
-	optionalSchemaIDX []int
-	ds                *gdal.DataSource
-	deterministic     bool
-	seed              int64
-	OccTypeProvider   structures.OccupancyTypeProvider
+	FilePath              string
+	LayerName             string
+	schemaIDX             []int
+	optionalSchemaIDX     []int
+	ds                    *gdal.DataSource
+	deterministic         bool
+	seed                  int64
+	OccTypeProvider       structures.OccupancyTypeProvider
+	FoundationUncertainty *structures.FoundationUncertainty
 }
 
-func InitStructureProvider(filepath string, layername string, driver string) (gdalDataSet, error) {
+func InitStructureProvider(filepath string, layername string, driver string) (*gdalDataSet, error) {
 	//validation?
 	gpk, err := initalizestructureprovider(filepath, layername, driver)
 	gpk.setOcctypeProvider(false, "")
-	return gpk, err
+	gpk.UpdateFoundationHeightUncertainty(false, "")
+	return &gpk, err
 }
-func InitStructureProviderwithOcctypePath(filepath string, layername string, driver string, occtypefp string) (gdalDataSet, error) {
+func InitStructureProviderwithOcctypePath(filepath string, layername string, driver string, occtypefp string) (*gdalDataSet, error) {
 	//validation?
 	gpk, err := initalizestructureprovider(filepath, layername, driver)
 	gpk.setOcctypeProvider(true, occtypefp)
-	return gpk, err
+	return &gpk, err
+}
+func (ds *gdalDataSet) UpdateFoundationHeightUncertainty(useFile bool, foundationHeightUncertaintyJsonFilePath string) {
+	if useFile {
+		fh, err := structures.InitFoundationUncertaintyFromFile(foundationHeightUncertaintyJsonFilePath)
+		if err != nil {
+			fh, _ = structures.InitFoundationUncertainty()
+		}
+		ds.FoundationUncertainty = fh
+	} else {
+		fh, _ := structures.InitFoundationUncertainty()
+		ds.FoundationUncertainty = fh
+	}
 }
 func initalizestructureprovider(filepath string, layername string, driver string) (gdalDataSet, error) {
 	driverOut := gdal.OGRDriverByName(driver)
@@ -171,6 +185,7 @@ func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.St
 		idx++
 		if f != nil {
 			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s.ApplyFoundationHeightUncertanty(gpk.FoundationUncertainty)
 			s.UseUncertainty = true
 			sd := s.SampleStructure(r.Int63())
 			if err == nil {
