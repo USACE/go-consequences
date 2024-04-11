@@ -33,13 +33,12 @@ const (
 	// Beginning of HIFLD additions
 
 	// services1.arcgis.com HIFLD additions
-	BRSandEBSTransmitters //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Broadband_Radio_Service_(BRS)_and_Educational_Broadband_Service_(EBS)_Transmitters/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson Broadband Radio Service (BRS) and Educational Broadband Service (EBS) Transmitters
-	CellularTowers        //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Cellular_Towers_New/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	DialysisCenters       //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Dialysis_Centers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	EPAandFRSPowerPlants  //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Environmental_Protection_Agency_EPA_Facility_Registry_Service_FRS_Power_Plants/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	FacilityInterests     //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Facility_Interest/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	GeneratingUnits       //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/GeneratingUnits1/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	// Hospitals
+	BRSandEBSTransmitters                  //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Broadband_Radio_Service_(BRS)_and_Educational_Broadband_Service_(EBS)_Transmitters/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson Broadband Radio Service (BRS) and Educational Broadband Service (EBS) Transmitters
+	CellularTowers                         //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Cellular_Towers_New/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+	DialysisCenters                        //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Dialysis_Centers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+	EPAandFRSPowerPlants                   //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Environmental_Protection_Agency_EPA_Facility_Registry_Service_FRS_Power_Plants/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+	FacilityInterests                      //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Facility_Interest/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+	GeneratingUnits                        //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/GeneratingUnits1/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	HurricaneEvacuationRoutes              //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hurricane_Evacuation_Routes/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	LandMobileBroadcastTowers              //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Land_Mobile_Broadcast_Towers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	LandMobileCommercialTransmissionTowers //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Land_Mobile_Commercial_Towers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
@@ -49,7 +48,6 @@ const (
 	NursingHomes                           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/NursingHomes/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	PagingTransmissionTowers               //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Paging_Transmission_Towers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	Pharmacies                             //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Paging_Transmission_Towers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	// PowerPlants
 	PSAP911ServiceAreaBoundaries           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/PSAP_911_Service_Area_Boundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	PublicHealthDepartments                //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Public_Health_Departments/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	PublicRefrigeratedWarehouses           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Public_Refrigerated_Warehouses/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
@@ -131,7 +129,6 @@ func (l Layer) String() string {
 		"Nursing_Homes",
 		"Paging_Transmission_Towers",
 		"Pharmacies",
-		"Power_Plants",
 		"PSAP_911_Service_Area_Boundaries",
 		"Public_Health_Departments",
 		"Public_Refrigerated_Warehouses",
@@ -203,7 +200,6 @@ func (l Layer) OccupancyType() string {
 		"Environmental Protection Agency (EPA) Facility Registry Service (FRS) Power Plants",
 		"Facility Interests",
 		"Generating Units",
-		// "Hospitals",
 		"Hurricane Evacuation Routes",
 		"Land Mobile Broadcast Towers",
 		"Land Mobile Commercial Transmission Towers",
@@ -213,7 +209,6 @@ func (l Layer) OccupancyType() string {
 		"Nursing Homes",
 		"Paging Transmission Towers",
 		"Pharmacies",
-		"Power Plants",
 		"PSAP 911 Service Area Boundaries",
 		"Public Health Departments",
 		"Public Refrigerated Warehouses",
@@ -287,7 +282,6 @@ func (l Layer) DamageCategory() string {
 		"Energy",
 		"Energy",
 		"Energy",
-		// "Health & Medical",
 		"Transportation",
 		"Communications",
 		"Communications",
@@ -297,7 +291,6 @@ func (l Layer) DamageCategory() string {
 		"Health & Medical",
 		"Communications",
 		"Health & Medical",
-		"Energy",
 		"Safety & Security",
 		"Health & Medical",
 		"Food, Hydration, Shelter",

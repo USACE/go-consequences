@@ -15,7 +15,7 @@ func TestHSIP(t *testing.T) {
 	bbox := geography.BBox{
 		Bbox: []float64{-80, 36, -79.5, 35.5},
 	}
-	rw, _ := resultswriters.InitSpatialResultsWriter_Projected("/workspaces/Go_Consequences/data/test5", "criticalInfrastructure", string(resultswriters.PARQUET), 4326)
+	rw, _ := resultswriters.InitSpatialResultsWriter_EPSG_Projected("/workspaces/Go_Consequences/data/test5", "criticalInfrastructure", string(resultswriters.PARQUET), 4326)
 	defer rw.Close()
 	provider.ByBbox(bbox, func(ci consequences.Receptor) {
 		result, _ := ci.Compute(hazards.DepthEvent{})
