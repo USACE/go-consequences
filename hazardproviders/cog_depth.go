@@ -54,3 +54,9 @@ func (chp cogHazardProvider) Hazard(l geography.Location) (hazards.HazardEvent, 
 func (chp cogHazardProvider) HazardBoundary() (geography.BBox, error) {
 	return chp.depthcr.GetBoundingBox()
 }
+func (chp cogHazardProvider) SpatialReference() string {
+	return chp.depthcr.SpatialReference()
+}
+func (chp cogHazardProvider) UpdateSpatialReference(sr_wkt string) {
+	chp.depthcr.UpdateSpatialReference(sr_wkt)
+}

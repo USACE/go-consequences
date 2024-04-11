@@ -87,3 +87,9 @@ func (cr *cogReader) GetBoundingBox() (geography.BBox, error) {
 	bbox[3] = gt[3] + gt[5]*float64(dy) //lower right y
 	return geography.BBox{Bbox: bbox}, nil
 }
+func (cr *cogReader) SpatialReference() string {
+	return cr.ds.Projection()
+}
+func (cr *cogReader) UpdateSpatialReference(sr_wkt string) {
+	cr.ds.SetProjection(sr_wkt)
+}

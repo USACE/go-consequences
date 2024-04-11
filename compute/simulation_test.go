@@ -83,7 +83,7 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	hazardProviders[4] = hp5
 
 	//create a result writer based on the name of the depth grid.
-	w, _ := resultswriters.InitGpkResultsWriter(root+"consequences_nsi.gpkg", "nsi_result")
+	w, _ := resultswriters.InitSpatialResultsWriter(root+"consequences_nsi.gpkg", "nsi_result", "GPKG")
 	defer w.Close()
 	//compute consequences.
 	StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)
@@ -135,13 +135,12 @@ func Test_StreamAbstract(t *testing.T) {
 	//nsp := structureprovider.InitNSISP()
 	now := time.Now()
 	fmt.Println(now)
-	//nsp, _ := structureprovider.InitGPK("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower")
-	//nsp.SetDeterministic(true)
-	hsip := criticalinfrastructure.InitHsipProvider([]criticalinfrastructure.Layer{criticalinfrastructure.Hospitals, criticalinfrastructure.FireStations, criticalinfrastructure.PowerPlants, criticalinfrastructure.WasteWater, criticalinfrastructure.LawEnforcement})
+	nsp, _ := structureprovider.InitStructureProvider("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower", "GPKG")
+	nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
 	root := "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid"
 	filepath := root + ".vrt"
-	w, _ := resultswriters.InitGeoJsonResultsWriterFromFile(root + "_criticalInfrastructure.json")
+	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.json", "results", "GeoJSON")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
@@ -170,7 +169,7 @@ func Test_StreamAbstract_smallDataset(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	root := "/workspaces/Go_Consequences/data/clipped_sample"
 	filepath := root + ".tif"
-	w, _ := resultswriters.InitGeoJsonResultsWriterFromFile(root + "_consequences.json")
+	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.json", "results", "GeoJSON")
 	defer w.Close()
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)

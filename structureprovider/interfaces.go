@@ -75,8 +75,14 @@ func featuretoStructure(
 
 	s.OccType = occtype
 	s.CBFips = f.FieldAsString(idxs[1])
-	s.X = f.FieldAsFloat64(idxs[2])
-	s.Y = f.FieldAsFloat64(idxs[3])
+	g := f.Geometry()
+	if g.IsNull() || g.IsEmpty() {
+		s.X = f.FieldAsFloat64(idxs[2])
+		s.Y = f.FieldAsFloat64(idxs[3])
+	} else {
+		s.X = f.Geometry().X(0)
+		s.Y = f.Geometry().Y(0)
+	}
 	s.DamCat = f.FieldAsString(idxs[4])
 	s.FoundType = f.FieldAsString(idxs[9])
 	s.StructVal = consequences.ParameterValue{Value: f.FieldAsFloat64(idxs[6])}
@@ -158,8 +164,14 @@ func featuretoDeterministicStructure(
 
 	s.OccType = occtype
 	s.CBFips = f.FieldAsString(idxs[1])
-	s.X = f.FieldAsFloat64(idxs[2])
-	s.Y = f.FieldAsFloat64(idxs[3])
+	g := f.Geometry()
+	if g.IsNull() || g.IsEmpty() {
+		s.X = f.FieldAsFloat64(idxs[2])
+		s.Y = f.FieldAsFloat64(idxs[3])
+	} else {
+		s.X = f.Geometry().X(0)
+		s.Y = f.Geometry().Y(0)
+	}
 	s.DamCat = f.FieldAsString(idxs[4])
 	s.StructVal = f.FieldAsFloat64(idxs[6])
 	s.ContVal = f.FieldAsFloat64(idxs[7])

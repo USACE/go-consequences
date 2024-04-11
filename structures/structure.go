@@ -2,8 +2,10 @@ package structures
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/rand"
+	"strings"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -30,6 +32,42 @@ type StructureStochastic struct {
 	StructVal, ContVal, FoundHt           consequences.ParameterValue
 	NumStories                            int32
 	PopulationSet
+}
+
+func (f *StructureStochastic) ApplyFoundationHeightUncertanty(fu *FoundationUncertainty) {
+	queryString := "default_slab"
+	default_FHU := fu.Values[queryString]
+	if f.OccType.Name == "RES2" {
+		queryString = "RES2"
+	} else if f.OccType.Name == "RES3A" {
+		queryString = "RES1_RES3A_RES3B"
+	} else if f.OccType.Name == "RES3A" {
+		queryString = "RES1_RES3A_RES3B"
+	} else if strings.Contains(f.OccType.Name, "RES1") {
+		queryString = "RES1_RES3A_RES3B"
+	} else {
+		queryString = "default"
+	}
+	if f.FoundType == "I" {
+		queryString = fmt.Sprintf("%v_P", queryString)
+	} else if f.FoundType == "W" {
+		queryString = fmt.Sprintf("%v_C", queryString)
+	} else {
+		queryString = fmt.Sprintf("%v_%v", queryString, f.FoundType)
+	}
+	FHU, ok := fu.Values[queryString]
+	if !ok {
+		FHU = default_FHU
+	}
+	if f.FirmZone == "V" {
+		f.FoundHt = consequences.ParameterValue{
+			Value: FHU.VzoneDistribution,
+		}
+	} else {
+		f.FoundHt = consequences.ParameterValue{
+			Value: FHU.DefaultDistribution,
+		}
+	}
 }
 
 // StructureDeterministic is a base strucure with a deterministic occupancy type and deterministic parameters
@@ -59,6 +97,9 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		sv = s.StructVal.SampleValue(r.Float64())
 		cv = s.ContVal.SampleValue(r.Float64())
 		fh = s.FoundHt.SampleValue(r.Float64())
+		if fh < 0 {
+			fh = 0.0
+		}
 	} else {
 		ot = s.OccType.CentralTendency()
 		sv = s.StructVal.CentralTendency()

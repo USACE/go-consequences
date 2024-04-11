@@ -65,18 +65,18 @@ func (spi StructureProviderInfo) CreateStructureProvider() (StructureProvider, e
 
 	case SHP:
 		if len(spi.OccTypeFilePath) == 0 {
-			p, err = InitSHP(spi.StructureFilePath)
+			p, err = InitStructureProvider(spi.StructureFilePath, spi.LayerName, "ESRI Shapefile")
 		} else {
-			p, err = InitSHPwithOcctypeFile(spi.StructureFilePath, spi.OccTypeFilePath)
+			p, err = InitStructureProviderwithOcctypePath(spi.StructureFilePath, spi.LayerName, "ESRI Shapefile", spi.OccTypeFilePath)
 		}
 	case GPKG:
 		if spi.LayerName == "" {
 			return nil, errors.New("NewStructureProvider - LayerName must be specified in StructureProviderInfo for geopackage provider")
 		}
 		if len(spi.OccTypeFilePath) == 0 {
-			p, err = InitGPK(spi.StructureFilePath, spi.LayerName)
+			p, err = InitStructureProvider(spi.StructureFilePath, spi.LayerName, "GPKG")
 		} else {
-			p, err = InitGPKwithOcctypePath(spi.StructureFilePath, spi.LayerName, spi.OccTypeFilePath)
+			p, err = InitStructureProviderwithOcctypePath(spi.StructureFilePath, spi.LayerName, "GPKG", spi.OccTypeFilePath)
 		}
 	case OGR:
 		if spi.LayerName == "" {
