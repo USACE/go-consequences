@@ -28,7 +28,7 @@ const (
 	WasteWater                            //Wastewater
 	LawEnforcement                        //Local_Law_Enforcement_Locations
 	EmergencyMedicalServices              //Emergency_Medical_Service_(EMS)_Stations_gdb
-	AmtrakStations                        //https://geo.dot.gov/server/rest/services/Hosted/Amtrak_Stations_DS/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+	//AmtrakStations                        //https://geo.dot.gov/server/rest/services/Hosted/Amtrak_Stations_DS/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 
 	// Beginning of HIFLD additions
 
@@ -48,7 +48,7 @@ const (
 	NursingHomes                           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/NursingHomes/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	PagingTransmissionTowers               //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Paging_Transmission_Towers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	Pharmacies                             //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Paging_Transmission_Towers/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-	PSAP911ServiceAreaBoundaries           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/PSAP_911_Service_Area_Boundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+	// polygon //PSAP911ServiceAreaBoundaries           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/PSAP_911_Service_Area_Boundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	PublicHealthDepartments                //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Public_Health_Departments/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	PublicRefrigeratedWarehouses           //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Public_Refrigerated_Warehouses/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
 	UrgentCareFacilities                   //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
@@ -129,7 +129,7 @@ func (l Layer) String() string {
 		"Nursing_Homes",
 		"Paging_Transmission_Towers",
 		"Pharmacies",
-		"PSAP_911_Service_Area_Boundaries",
+		//"PSAP_911_Service_Area_Boundaries",
 		"Public_Health_Departments",
 		"Public_Refrigerated_Warehouses",
 		"Urgent_Care_Facilities",
@@ -189,7 +189,7 @@ func (l Layer) OccupancyType() string {
 		"Waste Water Treatment Plant",
 		"Local Law Enforcement",
 		"Emergency Medical Service Station",
-		"Amtrak Stations",
+		//"Amtrak Stations",
 
 		// Beginning of HIFLD additions
 
@@ -209,7 +209,7 @@ func (l Layer) OccupancyType() string {
 		"Nursing Homes",
 		"Paging Transmission Towers",
 		"Pharmacies",
-		"PSAP 911 Service Area Boundaries",
+		//"PSAP 911 Service Area Boundaries",
 		"Public Health Departments",
 		"Public Refrigerated Warehouses",
 		"Urgent Care Facilities",
@@ -270,7 +270,7 @@ func (l Layer) DamageCategory() string {
 		"Water Systems",
 		"Safety and Security",
 		"Health and Medical",
-		"Transportation",
+		//"Transportation",
 
 		// Beginning of HIFLD additions
 		// Based on the FEMA Lifeline Designation and the naming of past categories
@@ -291,7 +291,7 @@ func (l Layer) DamageCategory() string {
 		"Health & Medical",
 		"Communications",
 		"Health & Medical",
-		"Safety & Security",
+		//"Safety & Security",
 		"Health & Medical",
 		"Food, Hydration, Shelter",
 		"Health & Medical",
