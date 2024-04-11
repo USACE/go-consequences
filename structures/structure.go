@@ -48,9 +48,9 @@ func (f *StructureStochastic) ApplyFoundationHeightUncertanty(fu *FoundationUnce
 	} else {
 		queryString = "default"
 	}
-	if f.FoundType == "I" {
+	if f.FoundType == "I" { //pile maps to peir
 		queryString = fmt.Sprintf("%v_P", queryString)
-	} else if f.FoundType == "W" {
+	} else if f.FoundType == "W" { //wall maps to crawl space.
 		queryString = fmt.Sprintf("%v_C", queryString)
 	} else {
 		queryString = fmt.Sprintf("%v_%v", queryString, f.FoundType)
