@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/USACE/go-consequences/criticalinfrastructure"
 	"github.com/USACE/go-consequences/hazardproviders"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
@@ -153,7 +154,7 @@ func Test_StreamAbstract(t *testing.T) {
 		return process(valueIn, hazard)
 	})
 	//compute consequences.
-	StreamAbstract(dfr, nsp, w)
+	StreamAbstract(dfr, hsip, w)
 	fmt.Println(time.Since(now))
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
