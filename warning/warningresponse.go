@@ -21,7 +21,7 @@ type ComplianceBasedWarningSystem struct {
 func InitComplianceBasedWarningSystem(seed int64, complianceRate float64) ComplianceBasedWarningSystem {
 	return ComplianceBasedWarningSystem{rng: rand.New(rand.NewSource(seed)), ComplianceRate: complianceRate}
 }
-func (c ComplianceBasedWarningSystem) WarningFunction() PopulationReductionFunction {
+func (c ComplianceBasedWarningSystem) WarningFunction() PopulationReductionFunction { //@TODO:Consider housing groups instead of simply assuming each individual is independent
 	return func(s structures.StructureDeterministic, hazard hazards.HazardEvent) (structures.PopulationSet, consequences.Result) {
 		pop2amo65 := 0
 		pop2amu65 := 0

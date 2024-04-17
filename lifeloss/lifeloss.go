@@ -54,7 +54,7 @@ func Init(seed int64, warningSystem warning.WarningResponseSystem) LifeLossEngin
 }
 
 func LifeLossHeader() []string {
-	return []string{"ll_u65", "ll_o65", "ll_tot"}
+	return []string{"ll_u65", "ll_o65", "ll_tot"} //@TODO: Consider adding structure stability state, fatality rates, and sampled hazard parameters
 }
 func LifeLossDefaultResults() []interface{} {
 	var ll_u65, ll_o65, ll_tot int32
@@ -89,7 +89,7 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 		} else {
 			return le.submergenceCriteria(e, s, remainingPop, rng)
 		}
-	} else {
+	} else { //@TODO:ensure i have depth at least!!!
 		//apply submergence criteria
 		return le.submergenceCriteria(e, s, remainingPop, rng)
 	}
