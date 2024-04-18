@@ -1,21 +1,34 @@
-package hazards
+package hazards_test
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/USACE/go-consequences/hazards"
 )
 
+func ExampleDepthEvent() {
+	d := hazards.DepthEvent{}
+	d.SetDepth(2.5)
+	fmt.Println(d.Has(hazards.Depth))
+	fmt.Println(d.Has(hazards.Velocity))
+	fmt.Println(d.Depth())
+	// Output:
+	// true
+	// false
+	// 2.5
+}
 func TestDepth(t *testing.T) {
-	d := DepthEvent{}
+	d := hazards.DepthEvent{}
 	d.SetDepth(2.5)
 	if d.Depth() != 2.5 {
 		t.Errorf("Expected %f, got %f", 2.5, d.Depth())
 	}
 }
 func TestArrivalandDurationEvent(t *testing.T) {
-	d := ArrivalandDurationEvent{}
+	d := hazards.ArrivalandDurationEvent{}
 	d.SetDuration(2.5)
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
 	d.SetArrivalTime(at)
@@ -27,7 +40,7 @@ func TestArrivalandDurationEvent(t *testing.T) {
 	}
 }
 func TestArrivalDepthandDurationEvent(t *testing.T) {
-	d := ArrivalDepthandDurationEvent{}
+	d := hazards.ArrivalDepthandDurationEvent{}
 	d.SetDuration(2.5)
 	d.SetDepth(5)
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
@@ -45,50 +58,53 @@ func TestArrivalDepthandDurationEvent(t *testing.T) {
 	fmt.Printf(string(s) + "\n")
 }
 func TestDepthEventParameters(t *testing.T) {
-	d := DepthEvent{depth: 2.5}
-	if d.Has(Depth) {
+	d := hazards.DepthEvent{}
+	d.SetDepth(2.5)
+	if d.Has(hazards.Depth) {
 		fmt.Println("Depth")
 	}
-	if d.Has(ArrivalTime) {
+	if d.Has(hazards.ArrivalTime) {
 		fmt.Println("Arrival Time")
 	}
-	if d.Has(Erosion) {
+	if d.Has(hazards.Erosion) {
 		fmt.Println("Erosion")
 	}
-	if d.Has(Duration) {
+	if d.Has(hazards.Duration) {
 		fmt.Println("Duration")
 	}
-	if d.Has(Velocity) {
+	if d.Has(hazards.Velocity) {
 		fmt.Println("Velocity")
 	}
 }
 func TestArrivalandDurationEventParameters(t *testing.T) {
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
-	d := ArrivalandDurationEvent{arrivalTime: at, durationInDays: 180}
-	if d.Has(Depth) {
+	d := hazards.ArrivalandDurationEvent{}
+	d.SetArrivalTime(at)
+	d.SetDuration(180)
+	if d.Has(hazards.Depth) {
 		fmt.Println("Depth")
 	}
-	if d.Has(ArrivalTime) {
+	if d.Has(hazards.ArrivalTime) {
 		fmt.Println("Arrival Time")
 	}
-	if d.Has(Erosion) {
+	if d.Has(hazards.Erosion) {
 		fmt.Println("Erosion")
 	}
-	if d.Has(Duration) {
+	if d.Has(hazards.Duration) {
 		fmt.Println("Duration")
 	}
-	if d.Has(Velocity) {
+	if d.Has(hazards.Velocity) {
 		fmt.Println("Velocity")
 	}
 }
 func TestMarshalJSON(t *testing.T) {
-	d := DepthEvent{}
+	d := hazards.DepthEvent{}
 	d.SetDepth(2.5)
 	b, _ := json.Marshal(d)
 	fmt.Println(string(b))
 }
 func TestMarshalParameterJSON(t *testing.T) {
-	d := Default
+	d := hazards.Default
 	b, _ := json.Marshal(d)
 	fmt.Println(string(b))
 }
