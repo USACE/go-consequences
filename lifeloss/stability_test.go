@@ -8,7 +8,7 @@ import (
 	"github.com/USACE/go-consequences/lifeloss"
 )
 
-func ExampleStabilityEvaluation() {
+func ExampleStabilityCriteria() {
 
 	sc := lifeloss.RescDamWoodUnanchored
 
@@ -17,11 +17,7 @@ func ExampleStabilityEvaluation() {
 	h.SetDepth(100)
 	result := sc.Evaluate(h)
 	fmt.Println(result)
-
-	h.SetDV(35)
-	h.SetDepth(100)
-	result = sc.Evaluate(h)
-	fmt.Println(result)
+	// Output: Stable
 }
 
 func Test_RescDamUnanchoredWoodStability(t *testing.T) {

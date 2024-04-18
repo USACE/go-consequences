@@ -13,6 +13,10 @@ const (
 	Collapsed Stability = 2 //2
 )
 
+func (s Stability) String() string {
+	return []string{"Stable", "Collapsed"}[s-1]
+}
+
 type StabilityCriteria struct {
 	//curve paireddata.PairedData //assume x is depth and y is velocity?
 	//curve paireddata.UncertaintyPairedData
