@@ -28,6 +28,6 @@ func (lc LethalityCurve) Sample() float64 {
 	return lc.data.SampleValue(rand.Float64())
 }
 
-func (lc LethalityCurve) SampleWithSeededRand(rand rand.Rand) float64 {
+func (lc LethalityCurve) SampleWithSeededRand(rand *rand.Rand) float64 {
 	return lc.data.SampleValue(rand.Float64())
 }

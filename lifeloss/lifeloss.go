@@ -2,9 +2,11 @@ package lifeloss
 
 import (
 	"encoding/json"
+	"log"
 	"math/rand"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/structures"
@@ -25,6 +27,12 @@ type LifeLossEngine struct {
 	WarningSystem     warning.WarningResponseSystem
 	ResultsHeader     []string
 	SeedGenerator     *rand.Rand
+}
+
+type LifeLossProcess interface {
+	RedistributePopulation(e hazards.HazardEvent, s structures.StructureDeterministic) (structures.PopulationSet, error)
+	EvaluateStability(e hazards.HazardEvent, s structures.StructureDeterministic) (Stability, error)
+	ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic, stability Stability) (consequences.Result, error)
 }
 
 // Init in the lifeloss package creates a life loss engine with the default settings
@@ -63,34 +71,44 @@ func LifeLossDefaultResults() []interface{} {
 	ll_tot = 0
 	return []interface{}{ll_u65, ll_o65, ll_tot}
 }
-func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic) (consequences.Result, error) {
-	//reduce population based off of the warning system's warning function
-	rng := rand.New(rand.NewSource(le.SeedGenerator.Int63()))
+func (le LifeLossEngine) RedistributePopulation(e hazards.HazardEvent, s structures.StructureDeterministic) (structures.StructureDeterministic, error) {
 	remainingPop, _ := le.WarningSystem.WarningFunction()(s, e)
+	sout := s.Clone()
+	sout.PopulationSet = remainingPop
+	return sout, nil
+}
+func (le LifeLossEngine) EvaluateStabilityCriteria(e hazards.HazardEvent, s structures.StructureDeterministic) (Stability, error) {
 	if e.Has(hazards.DV) && e.Has(hazards.Depth) || e.Has(hazards.Velocity) && e.Has(hazards.Depth) {
 		sc, err := le.determineStability(s)
 		if err != nil {
-			return consequences.Result{}, err
+			return Stable, err
 		}
-		//apply building stability criteria
-		if sc.Evaluate(e) == Collapsed {
-			//log.Println("Stability Based Lifeloss")
-			//select high fataility rate
-			lethalityRate := le.LethalityCurves[HighLethality].Sample()
-			//apply same fatality rate to everyone
-			//log.Println(lethalityRate)
-			llo65 := applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2amo65, rng)
-			//llo65 += applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2pmo65, rng)
-			llu65 := applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2amu65, rng)
-			//llu65 += applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2pmu65, rng)
-			result := consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}
-			//log.Println(result)
-			return result, nil
-		} else {
-			return le.submergenceCriteria(e, s, remainingPop, rng)
-		}
-	} else { //@TODO:ensure i have depth at least!!!
-		//apply submergence criteria
+		result := sc.Evaluate(e)
+		return result, nil
+	} else {
+		return Stable, nil
+	}
+}
+func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.StructureDeterministic, stability Stability) (consequences.Result, error) {
+	//reduce population based off of the warning system's warning function
+	rng := rand.New(rand.NewSource(le.SeedGenerator.Int63()))
+	remainingPop := s.PopulationSet
+	//apply building stability criteria
+	if stability == Collapsed {
+		//log.Println("Stability Based Lifeloss")
+		//select high fataility rate
+		lethalityRate := le.LethalityCurves[HighLethality].Sample()
+		log.Printf("high lethality rate: %v\n", lethalityRate)
+		//apply same fatality rate to everyone
+		//log.Println(lethalityRate)
+		llo65 := applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2amo65, rng)
+		//llo65 += applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2pmo65, rng)
+		llu65 := applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2amu65, rng)
+		//llu65 += applylethalityRateToPopulation(lethalityRate, remainingPop.Pop2pmu65, rng)
+		result := consequences.Result{Headers: LifeLossHeader(), Result: []interface{}{llu65, llo65, llu65 + llo65}}
+		//log.Println(result)
+		return result, nil
+	} else {
 		return le.submergenceCriteria(e, s, remainingPop, rng)
 	}
 }
@@ -116,39 +134,59 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 	} else {
 		//for all ages of individuals using different probabilities to assign mobility
 		// for over and under 65 based on nsi attribute of "percent not mobile"
-		immobleDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0
+		immobleDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0 //hard coded to 9 feet, probably should make it an attribute on the structure inventory?
 		mobileDepthThreshold := (float64(s.NumStories) - 1.0) * 9.0
-		hasAtticAccess := false
+		hasAtticAccess := false //@TODO: probability of if attic access is determined by random number .95 (default)
+		depthFromCeilingDistribution := statistics.TriangularDistribution{
+			Min:        0.5,
+			MostLikely: 1,
+			Max:        1.5,
+		}
+		depthOnRoofDistribution := statistics.TriangularDistribution{
+			Min:        3,
+			MostLikely: 4,
+			Max:        5,
+		}
+		depthFromFloorImmobileDistribution := statistics.TriangularDistribution{
+			Min:        4,
+			MostLikely: 5,
+			Max:        6,
+		}
+		depthFromCeiling := depthFromCeilingDistribution.InvCDF(rng.Float64())
 		immobleDepthThreshold += 5.0 + s.FoundHt
-		mobileDepthThreshold += 8.0 + s.FoundHt //9-1...
-		if hasAtticAccess {
-			mobileDepthThreshold += 1.0 + 6.0 + 4.0
+		mobileDepthThreshold += 9.0 + s.FoundHt - depthFromCeiling //9-1... height of ceiling minus 1 foot
+		if hasAtticAccess {                                        //@TODO: "Roof access from attic is another random number .9(default)" - stored at the occupancy type level in lifesim.
+			mobileDepthThreshold += depthFromCeiling + depthFromFloorImmobileDistribution.InvCDF(rng.Float64()) + depthOnRoofDistribution.InvCDF(rng.Float64()) //depth from ceiling + attic access + high hazard depth 4 feet above top of roof (should be a random number triangular distribution 4,5,6)
 			immobleDepthThreshold += 9.0
 		}
 
 		mobilitySet := evaluateMobility(remainingPop, rng)
 		var llu65 int32 = 0
 		var llo65 int32 = 0
+		lowLethality := lle.LethalityCurves[LowLethality].SampleWithSeededRand(rng)
+		log.Printf("low lethality rate: %v\n", lowLethality)
+		highLethality := lle.LethalityCurves[HighLethality].SampleWithSeededRand(rng)
+		log.Printf("high lethality rate: %v\n", highLethality)
 		for k, v := range mobilitySet {
 			//apply to the appropriate age/time of day
 			//log.Println(v)
 			if k == Mobile {
 				if depth > float64(mobileDepthThreshold) {
-					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
+					ret := lle.createLifeLossSet(v, highLethality, rng)
 					llu65 += ret.Pop2amu65
 					llo65 += ret.Pop2amo65
 				} else {
-					ret := lle.createLifeLossSet(v, lle.LethalityCurves[LowLethality], rng)
+					ret := lle.createLifeLossSet(v, lowLethality, rng)
 					llu65 += ret.Pop2amu65
 					llo65 += ret.Pop2amo65
 				}
 			} else {
 				if depth > float64(immobleDepthThreshold) {
-					ret := lle.createLifeLossSet(v, lle.LethalityCurves[HighLethality], rng)
+					ret := lle.createLifeLossSet(v, highLethality, rng)
 					llu65 += ret.Pop2amu65
 					llo65 += ret.Pop2amo65
 				} else {
-					ret := lle.createLifeLossSet(v, lle.LethalityCurves[LowLethality], rng)
+					ret := lle.createLifeLossSet(v, lowLethality, rng)
 					llu65 += ret.Pop2amu65
 					llo65 += ret.Pop2amo65
 				}
@@ -157,20 +195,20 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 		return consequences.Result{Headers: header, Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
 	}
 }
-func (lle LifeLossEngine) createLifeLossSet(popset structures.PopulationSet, lc LethalityCurve, rng *rand.Rand) structures.PopulationSet {
+func (lle LifeLossEngine) createLifeLossSet(popset structures.PopulationSet, lethalityRate float64, rng *rand.Rand) structures.PopulationSet {
 	result := structures.PopulationSet{0, 0, 0, 0}
-	result.Pop2amo65 = lle.evaluateLifeLoss(popset.Pop2amo65, lle.LethalityCurves[HighLethality], rng)
-	result.Pop2pmo65 = lle.evaluateLifeLoss(popset.Pop2pmo65, lle.LethalityCurves[HighLethality], rng)
-	result.Pop2amu65 = lle.evaluateLifeLoss(popset.Pop2amu65, lle.LethalityCurves[HighLethality], rng)
-	result.Pop2pmu65 = lle.evaluateLifeLoss(popset.Pop2pmu65, lle.LethalityCurves[HighLethality], rng)
+	result.Pop2amo65 = lle.evaluateLifeLoss(popset.Pop2amo65, lethalityRate, rng)
+	result.Pop2pmo65 = lle.evaluateLifeLoss(popset.Pop2pmo65, lethalityRate, rng)
+	result.Pop2amu65 = lle.evaluateLifeLoss(popset.Pop2amu65, lethalityRate, rng)
+	result.Pop2pmu65 = lle.evaluateLifeLoss(popset.Pop2pmu65, lethalityRate, rng)
 	//log.Println(result)
 	return result
 }
-func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int32, lc LethalityCurve, rng *rand.Rand) int32 {
+func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int32, lethalityRate float64, rng *rand.Rand) int32 {
 	var result int32 = 0
 	var i int32 = 0
 	for i = 0; i < populationRemaining; i++ {
-		if lc.Sample() < rng.Float64() {
+		if lethalityRate < rng.Float64() {
 			result++
 		}
 	}

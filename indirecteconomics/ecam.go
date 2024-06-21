@@ -37,6 +37,7 @@ func ComputeEcam(stateFips string, countyFips string, capitalLoss float64, labor
 	ecamRoot += "&State_Name=" + "ST"
 	ecamRoot += "&County_Name=" + "CN" + "_" + "ST" //countyname_st
 	ecamRoot += "&Time=" + time.Now().Format("20121101:0304:05")
+	fmt.Println(ecamRoot)
 	response, err = client.Get(ecamRoot)
 	if err != nil {
 		return EcamResult{}, err

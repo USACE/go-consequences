@@ -13,9 +13,9 @@ func TestHSIP(t *testing.T) {
 	list := []Layer{Hospitals, PowerPlants, FireStations, WasteWater, LawEnforcement, EmergencyMedicalServices, BRSandEBSTransmitters, CellularTowers, DialysisCenters, EPAandFRSPowerPlants, FacilityInterests, GeneratingUnits, HurricaneEvacuationRoutes, LandMobileBroadcastTowers, LandMobileCommercialTransmissionTowers, LocalEmergencyOperationsCenterEOC, LocalLawEnforcementLocations, MicrowaveServiceTowers, NursingHomes, PagingTransmissionTowers, Pharmacies, PublicHealthDepartments, PublicRefrigeratedWarehouses, UrgentCareFacilities, VeteransHealthAdministrationFacilities}
 	provider := InitHsipProvider(list)
 	bbox := geography.BBox{
-		Bbox: []float64{-80, 36, -79.5, 35.5},
+		Bbox: []float64{-106.6456, 47.4567, -66.9499, 24.5231},
 	}
-	rw, _ := resultswriters.InitSpatialResultsWriter_EPSG_Projected("/workspaces/Go_Consequences/data/test6.parquet", "criticalInfrastructure", string(resultswriters.PARQUET), 4326)
+	rw, _ := resultswriters.InitSpatialResultsWriter_EPSG_Projected("/workspaces/Go_Consequences/data/sct_base_data.gpkg", "criticalInfrastructure", string(resultswriters.GPKG), 4326)
 	defer rw.Close()
 	provider.ByBbox(bbox, func(ci consequences.Receptor) {
 		result, _ := ci.Compute(hazards.DepthEvent{})

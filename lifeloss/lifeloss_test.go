@@ -1,58 +1,41 @@
-package lifeloss
+package lifeloss_test
 
 import (
 	"log"
 	"testing"
 
-	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/USACE/go-consequences/hazards"
+	"github.com/USACE/go-consequences/lifeloss"
 	"github.com/USACE/go-consequences/structures"
 	"github.com/USACE/go-consequences/warning"
 )
 
-func TestComputeLifeloss(t *testing.T) {
-	warningSystem := warning.InitComplianceBasedWarningSystem(12345, .75)
-	lle := Init(12345678, warningSystem)
+func TestComputeLifelossDepthAndDV(t *testing.T) {
+	warningSystem := warning.InitComplianceBasedWarningSystem(12345, 0)
+	lle := lifeloss.Init(12345678, warningSystem)
 	//build a basic structure with a defined depth damage relationship.
-	x := []float64{1.0, 2.0, 3.0, 4.0}
-	y := []float64{10.0, 20.0, 30.0, 40.0}
-	pd := paireddata.PairedData{Xvals: x, Yvals: y}
-	sm := make(map[hazards.Parameter]structures.DamageFunction)
-	var sdf = structures.DamageFunctionFamily{DamageFunctions: sm}
+	s := createLifeLossStructureDeterministicForTesting(2, 1, "M", "RES1-1SNB", 100)
 
-	df := structures.DamageFunction{}
-	df.Source = "fabricated"
-	df.DamageFunction = pd
-	df.DamageDriver = hazards.Depth
-
-	sdf.DamageFunctions[hazards.Default] = df
-	cm := make(map[hazards.Parameter]structures.DamageFunction)
-	var cdf = structures.DamageFunctionFamily{DamageFunctions: cm}
-	cdf.DamageFunctions[hazards.Default] = df
-	componentmap := make(map[string]structures.DamageFunctionFamily)
-	componentmap["contents"] = cdf
-	componentmap["structure"] = sdf
-	var o = structures.OccupancyTypeDeterministic{Name: "RES1`", ComponentDamageFunctions: componentmap}
-	var s = structures.StructureDeterministic{
-		BaseStructure:    structures.BaseStructure{DamCat: "category"},
-		OccType:          o,
-		FoundType:        "",
-		ConstructionType: "M",
-		StructVal:        100.0,
-		ContVal:          100.0,
-		FoundHt:          0.0,
-		PopulationSet:    structures.PopulationSet{100, 100, 100, 100},
-		NumStories:       1,
-	}
-	//lle.WarningSystem.WarningFunction()(&s)
-	//test depth values
+	//create a depth and DV event.
 	var d = hazards.DepthandDVEvent{}
+
+	//test depth and DV combinations
+	/*d.SetDV(32.4)
+	d.SetDepth(2.5)
+	result, _ := lle.ComputeLifeLoss(d, s)
+	log.Println(result)
+	*/
+	//r, err := lle.ComputeLifeLoss(d, s)
+	log.Println("break")
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5, 12}
 	dv := []float64{32.4, 32.4, 32.4, 32.4, 75.3, 32.4, 75.3, 75.3, 75.3, 32.4, 32.4}
+	sPopReduced, _ := lle.RedistributePopulation(d, s)
 	for idx := range depths {
 		d.SetDepth(depths[idx])
 		d.SetDV(dv[idx])
-		result, _ := lle.ComputeLifeLoss(d, s)
+		stability, _ := lle.EvaluateStabilityCriteria(d, sPopReduced)
+		log.Println(stability)
+		result, _ := lle.ComputeLifeLoss(d, sPopReduced, stability)
 		log.Println(result)
 	}
 }
@@ -87,3 +70,35 @@ func TestGenerateHighLethality(t *testing.T) {
 	os.WriteFile("/workspaces/Go_Consequences/structures/highlethality.json", bytes, fs.ModeAppend)
 }
 */
+
+// createLifeLossStructureDeterministicForTesting gives a structure with blank data except for those that are influential in life loss calculations
+func createLifeLossStructureDeterministicForTesting(foundationheight float64, numstories int32, constructionType string, occtypeName string, population int32) structures.StructureDeterministic {
+	s := structures.StructureDeterministic{
+		BaseStructure: structures.BaseStructure{
+			Name:            "blank",
+			DamCat:          "blank",
+			CBFips:          "blank",
+			X:               0,
+			Y:               0,
+			GroundElevation: 0,
+		},
+		OccType: structures.OccupancyTypeDeterministic{
+			Name:                     occtypeName,
+			ComponentDamageFunctions: map[string]structures.DamageFunctionFamily{},
+		},
+		FoundType:        "blank",
+		FirmZone:         "blank",
+		ConstructionType: constructionType,
+		StructVal:        0,
+		ContVal:          0,
+		FoundHt:          foundationheight,
+		NumStories:       numstories,
+		PopulationSet: structures.PopulationSet{
+			Pop2pmo65: population,
+			Pop2pmu65: population,
+			Pop2amo65: population,
+			Pop2amu65: population,
+		},
+	}
+	return s
+}

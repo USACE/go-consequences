@@ -150,7 +150,11 @@ func computeLifelossPerStructure(hp hazardproviders.HazardProvider, f consequenc
 		}
 		//
 		//compute lifeloss
-		llr, err := lle.ComputeLifeLoss(llevent, sd)
+		stability, err := lle.EvaluateStabilityCriteria(llevent, sd)
+		if err != nil {
+			return err
+		}
+		llr, err := lle.ComputeLifeLoss(llevent, sd, stability)
 		if err != nil {
 			return err
 		}

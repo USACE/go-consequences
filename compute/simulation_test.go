@@ -41,48 +41,51 @@ func TestComputeSpecialEAD(t *testing.T) {
 }
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
-	dataset := "umdc"
+	dataset := "Rice_CowCreek_depth"
 	nsp := structureprovider.InitNSISP()
 
 	//initialize a set of frequencies
-	frequencies := []float64{.1, .04, .02, .01, .002}
+	frequencies := []float64{.10, .04, .02, .01, .002}
 	//specify a working directory for data
+	//root := fmt.Sprintf("/vsis3/mmc-storage-6/nsi/Kansas_Silver_Jackets/kansas_ble/%v/", dataset)
 	root := fmt.Sprintf("/workspaces/Go_Consequences/data/kc_silverjackets/%v/", dataset)
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(frequencies))
 
-	hp1, err := hazardproviders.Init(fmt.Sprint(root, "Depth_10pct_4326_deflate.tif"))
+	hp1, err := hazardproviders.Init(fmt.Sprint(root, "Depth_10pct.tif"))
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[0] = hp1
 
-	hp2, err := hazardproviders.Init(fmt.Sprint(root, "Depth_04pct_4326_deflate.tif"))
+	hp2, err := hazardproviders.Init(fmt.Sprint(root, "Depth_04pct.tif"))
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[1] = hp2
 
-	hp3, err := hazardproviders.Init(fmt.Sprint(root, "Depth_02pct_4326_deflate.tif"))
+	hp3, err := hazardproviders.Init(fmt.Sprint(root, "Depth_02pct.tif"))
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[2] = hp3
 
-	hp4, err := hazardproviders.Init(fmt.Sprint(root, "Depth_01pct_4326_deflate.tif"))
+	hp4, err := hazardproviders.Init(fmt.Sprint(root, "Depth_01pct.tif"))
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[3] = hp4
 
-	hp5, err := hazardproviders.Init(fmt.Sprint(root, "Depth_0_2pct_4326_deflate.tif"))
+	hp5, err := hazardproviders.Init(fmt.Sprint(root, "Depth_0_2pct.tif"))
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[4] = hp5
 
 	//create a result writer based on the name of the depth grid.
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"consequences_nsi.gpkg", "nsi_result", "GPKG")
+	//write local
+	path := fmt.Sprintf("/workspaces/Go_Consequences/data/kc_silverjackets/%v/%v_consequences_nsi.gpkg", dataset, dataset)
+	w, _ := resultswriters.InitSpatialResultsWriter(path, "nsi_result", "GPKG")
 	defer w.Close()
 	//compute consequences.
 	StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)

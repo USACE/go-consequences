@@ -25,6 +25,7 @@ type StabilityCriteria struct {
 	DepthTimesVelocity float64
 }
 
+// @TODO: add interface for Stability as well as adding Engineered Stability mobile homes stability which will require paired data, max velocity, uncertainty and probably some other features.
 var RescDamWoodUnanchored = StabilityCriteria{
 	MinimumVelocity:    0.0,
 	MinimumDepth:       0.0,
