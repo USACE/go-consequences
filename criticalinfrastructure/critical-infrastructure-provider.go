@@ -40,7 +40,7 @@ func initalizeprovider(filepath string, layername string, driver string) (gdalDa
 	}
 	l := ds.LayerByName(layername)
 	def := l.Definition()
-	s := header[:len(header)-2]
+	s := header[:len(header)-1]
 	sIDX := make([]int, len(s))
 	for i, f := range s {
 		idx := def.FieldIndex(f)
@@ -85,8 +85,8 @@ func featuretoCI(f *gdal.Feature, idxs []int) CriticalInfrastructureFeature {
 	var y = 0.0
 	g := f.Geometry()
 	if g.IsNull() || g.IsEmpty() {
-		x = f.FieldAsFloat64(idxs[2])
-		y = f.FieldAsFloat64(idxs[3])
+		x = f.FieldAsFloat64(idxs[1])
+		y = f.FieldAsFloat64(idxs[2])
 	} else {
 		x = f.Geometry().X(0)
 		y = f.Geometry().Y(0)
