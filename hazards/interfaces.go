@@ -68,19 +68,22 @@ type Parameter uint //switch to uint64 if we hit 32 slots and need another.
 
 // Parameter types describe different parameters for hazards
 const (
-	Default          Parameter = 0    //0
-	Depth            Parameter = 1    //1
-	Velocity         Parameter = 2    //2
-	ArrivalTime      Parameter = 4    //3
-	ArrivalTime2ft   Parameter = 8    //4
-	Erosion          Parameter = 16   //5
-	Duration         Parameter = 32   //6
-	WaveHeight       Parameter = 64   //7
-	MediumWaveHeight Parameter = 128  //8
-	HighWaveHeight   Parameter = 256  //9
-	Salinity         Parameter = 512  //10
-	Qualitative      Parameter = 1024 //11
-	DV               Parameter = 2048 //12
+	Default          Parameter = 0     //0
+	Depth            Parameter = 1     //1
+	Velocity         Parameter = 2     //2
+	ArrivalTime      Parameter = 4     //3
+	ArrivalTime2ft   Parameter = 8     //4
+	Erosion          Parameter = 16    //5
+	Duration         Parameter = 32    //6
+	WaveHeight       Parameter = 64    //7
+	MediumWaveHeight Parameter = 128   //8
+	HighWaveHeight   Parameter = 256   //9
+	Salinity         Parameter = 512   //10
+	Qualitative      Parameter = 1024  //11
+	DV               Parameter = 2048  //12
+	ModerateVelocity Parameter = 4096  //13
+	HighVelocity     Parameter = 8192  //14
+	LongDuration     Parameter = 16384 //15
 )
 
 var parametersToStrings = map[Parameter]string{
@@ -123,6 +126,16 @@ func SetHasVelocity(h Parameter) Parameter {
 	return h | Velocity
 }
 
+// SetHasModerateVelocity turns on a bitflag for the Parameter Velocity
+func SetHasModerateVelocity(h Parameter) Parameter {
+	return h | ModerateVelocity
+}
+
+// SetHasHighVelocity turns on a bitflag for the Parameter Velocity
+func SetHasHighVelocity(h Parameter) Parameter {
+	return h | HighVelocity
+}
+
 // SetHasArrivalTime turns on a bitflag for the Parameter Arrival Time
 func SetHasArrivalTime(h Parameter) Parameter {
 	return h | ArrivalTime
@@ -136,6 +149,11 @@ func SetHasErosion(h Parameter) Parameter {
 // SetHasDuration turns on a bitflag for the Parameter Duration
 func SetHasDuration(h Parameter) Parameter {
 	return h | Duration
+}
+
+// SetHasDuration turns on a bitflag for the Parameter Duration
+func SetHasLongDuration(h Parameter) Parameter {
+	return h | LongDuration
 }
 
 // SetHasWaveHeight turns on a bitflag for the Parameter WaveHeight

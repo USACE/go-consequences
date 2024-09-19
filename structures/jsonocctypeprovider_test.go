@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/go-consequences/hazards"
 )
 
@@ -29,6 +31,90 @@ func Test_JsonReading(t *testing.T) {
 
 		}
 	}
+}
+func Test_ModifyDefault(t *testing.T) {
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	//modify the defaults to include FFRD curves.
+	//all damage functions use the same depth range.
+	depths := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+
+	//ONE-STORY SLAB ON GRADE
+	res11snb := "RES1-1SNB"
+	//depth only
+	depthParameter := hazards.Depth
+	depthDamage := []float64{0, 0, 0, 0, 6, 20, 27, 32, 37, 41, 46, 49, 52, 55, 57, 59, 60, 62, 64, 65, 66}
+	//long duration
+	durationParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity
+	durationDamage := []float64{0, 0, 0, 0, 7, 22, 30, 35, 41, 45, 51, 54, 57, 61, 62, 65, 66, 68, 70, 72, 73}
+	//moderate velocity //2-5 f/s
+	moderateVParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity | hazards.ModerateVelocity
+	moderateVelocityDamage := []float64{0, 0, 0, 0, 7, 22, 30, 35, 41, 45, 51, 54, 57, 61, 62, 65, 66, 68, 70, 72, 73}
+	//high velocity //5+ f/s - note about 5-10...
+	highVParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity | hazards.HighVelocity
+	highVelocityDamage := []float64{0, 0, 0, 0, 10, 29, 39, 45, 52, 58, 65, 69, 74, 78, 80, 83, 85, 88, 90, 92, 94}
+	cdf := make(map[string]DamageFunctionFamilyStochastic)
+	dffs := DamageFunctionFamilyStochastic{
+		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
+	}
+	dffs.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage),
+		},
+	}
+	dffs.DamageFunctions[durationParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(durationDamage),
+		},
+	}
+	dffs.DamageFunctions[moderateVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage),
+		},
+	}
+	dffs.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage),
+		},
+	}
+	cdf["structure"] = dffs
+	cdf["content"] = dffs //make them the same? no clue. thats what ill do.
+	o := OccupancyTypeStochastic{
+		Name:                     res11snb,
+		ComponentDamageFunctions: cdf,
+	}
+	fmt.Println(o)
+	for OccupancyTypeName, v := range jotp.occupancyTypesContainer.OccupancyTypes {
+		fmt.Println(OccupancyTypeName)
+		for loss_component, component_damageFunctions := range v.ComponentDamageFunctions {
+			s := loss_component + ":\n"
+			for damageFunctionParameter, damageFunction := range component_damageFunctions.DamageFunctions {
+				s += "\t" + damageFunctionParameter.String() + ", " + damageFunction.Source + "\n"
+			}
+			fmt.Println(s)
+		}
+	}
+}
+func toContinuousDistribution(data []float64) []statistics.ContinuousDistribution {
+	dists := make([]statistics.ContinuousDistribution, len(data))
+	for i, v := range data {
+		dists[i] = statistics.DeterministicDistribution{
+			Value: v,
+		}
+	}
+	return dists
 }
 
 /*

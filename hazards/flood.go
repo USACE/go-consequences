@@ -316,6 +316,13 @@ func HazardDataToMultiParameter(hd HazardData) MultiParameterEvent {
 	if hd.Velocity != -901 {
 		mpe.velocity = hd.Velocity
 		parameter = SetHasVelocity(parameter)
+		if mpe.velocity >= 2 { //fema specification
+			if mpe.velocity < 5 { //fema specification
+				parameter = SetHasModerateVelocity(parameter)
+			} else {
+				parameter = SetHasHighVelocity(parameter)
+			}
+		}
 	}
 	testTime := time.Time{}
 	if hd.ArrivalTime != testTime {
@@ -329,6 +336,9 @@ func HazardDataToMultiParameter(hd HazardData) MultiParameterEvent {
 	if hd.Duration != -901 {
 		mpe.duration = hd.Duration
 		parameter = SetHasDuration(parameter)
+		if mpe.duration >= 72 {
+			parameter = SetHasLongDuration(parameter)
+		}
 	}
 	if hd.WaveHeight != -901 {
 		mpe.waveHeight = hd.WaveHeight
