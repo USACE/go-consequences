@@ -48,10 +48,10 @@ func Test_ModifyDefault(t *testing.T) {
 	durationParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity
 	durationDamage := []float64{0, 0, 0, 0, 7, 22, 30, 35, 41, 45, 51, 54, 57, 61, 62, 65, 66, 68, 70, 72, 73}
 	//moderate velocity //2-5 f/s
-	moderateVParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity | hazards.ModerateVelocity
+	moderateVParameter := hazards.Depth | hazards.Duration | hazards.Velocity | hazards.ModerateVelocity
 	moderateVelocityDamage := []float64{0, 0, 0, 0, 7, 22, 30, 35, 41, 45, 51, 54, 57, 61, 62, 65, 66, 68, 70, 72, 73}
 	//high velocity //5+ f/s - note about 5-10...
-	highVParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity | hazards.HighVelocity
+	highVParameter := hazards.Depth | hazards.Duration | hazards.Velocity | hazards.HighVelocity
 	highVelocityDamage := []float64{0, 0, 0, 0, 10, 29, 39, 45, 52, 58, 65, 69, 74, 78, 80, 83, 85, 88, 90, 92, 94}
 	cdf := make(map[string]DamageFunctionFamilyStochastic)
 	dffs := DamageFunctionFamilyStochastic{
