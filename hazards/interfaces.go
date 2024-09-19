@@ -3,6 +3,7 @@ package hazards
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -34,6 +35,32 @@ type HazardData struct {
 	Salinity    bool
 	Qualitative string
 	DV          float64
+}
+
+func (hd *HazardData) SetParameter(p Parameter, value any) {
+	switch p {
+	case Depth:
+		hd.Depth = value.(float64)
+	case Velocity:
+		hd.Velocity = value.(float64)
+	case ArrivalTime:
+		hd.ArrivalTime = value.(time.Time)
+	case Erosion:
+		hd.Erosion = value.(float64)
+	case Duration:
+		hd.Duration = value.(float64) //decimal hours.
+	case WaveHeight:
+		hd.WaveHeight = value.(float64)
+	case Salinity:
+		hd.Salinity = value.(bool)
+	case Qualitative:
+		hd.Qualitative = value.(string)
+	case DV:
+		hd.DV = value.(float64)
+	default:
+		//do nothing?
+		fmt.Println("unrecognized parameter provided " + p.String())
+	}
 }
 
 // Parameter is a bitflag enum

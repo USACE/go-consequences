@@ -2,6 +2,7 @@ package hazardproviders
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
@@ -12,12 +13,14 @@ type HazardProviderParameterAndPath struct {
 	FilePath string            `json:"hazard_provider_file_path"` //this should get fixed to be able to represent more complex information. e.g. what parameter?
 }
 type HazardProviderInfo struct {
-	Hazards []HazardProviderParameterAndPath `json:"hazards"`
+	Hazards   []HazardProviderParameterAndPath `json:"hazards"`
+	StartTime time.Time                        `json:"start_time"`
+	EndTime   time.Time                        `json:"end_time"`
 }
 
 func (info HazardProviderInfo) CreateHazardProvider() (HazardProvider, error) {
 	//ultimately make this more flexible, but for now...
-	return Init(info.Hazards[0].FilePath)
+	return InitMulti(info)
 }
 
 // HazardProvider provides hazards as a return for an argument input

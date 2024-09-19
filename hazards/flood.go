@@ -291,3 +291,143 @@ func (ad DepthandDVEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0
 }
+
+// DepthEvent describes a Hazard with Depth Only
+type MultiParameterEvent struct {
+	depth       float64
+	velocity    float64
+	arrivalTime time.Time
+	erosion     float64
+	duration    float64
+	waveHeight  float64
+	salinity    bool
+	qualitative string
+	dV          float64
+	parameter   Parameter
+}
+
+func HazardDataToMultiParameter(hd HazardData) MultiParameterEvent {
+	mpe := MultiParameterEvent{}
+	parameter := Default
+	if hd.Depth != -901 {
+		mpe.SetDepth(hd.Depth)
+		parameter = SetHasDepth(parameter)
+	}
+	if hd.Velocity != -901 {
+		mpe.velocity = hd.Velocity
+		parameter = SetHasVelocity(parameter)
+	}
+	testTime := time.Time{}
+	if hd.ArrivalTime != testTime {
+		mpe.arrivalTime = hd.ArrivalTime
+		parameter = SetHasArrivalTime(parameter)
+	}
+	if hd.Erosion != -901 {
+		mpe.erosion = hd.Erosion
+		parameter = SetHasErosion(parameter)
+	}
+	if hd.Duration != -901 {
+		mpe.duration = hd.Duration
+		parameter = SetHasDuration(parameter)
+	}
+	if hd.WaveHeight != -901 {
+		mpe.waveHeight = hd.WaveHeight
+		parameter = SetHasWaveHeight(parameter)
+		if mpe.WaveHeight() < 3.0 {
+			parameter = SetHasMediumWaveHeight(parameter)
+		} else {
+			parameter = SetHasHighWaveHeight(parameter)
+		}
+	}
+	if hd.Salinity { //trust the provider.
+		mpe.salinity = hd.Salinity
+		parameter = SetHasSalinity(parameter)
+	}
+	if hd.Qualitative != "" {
+		mpe.qualitative = hd.Qualitative
+		parameter = SetHasQualitative(parameter)
+	}
+	if hd.DV != -901 {
+		mpe.dV = hd.DV
+		parameter = SetHasDV(parameter)
+	}
+	mpe.parameter = parameter
+	return mpe
+}
+func (h MultiParameterEvent) Depth() float64 {
+	return h.depth
+}
+func (h *MultiParameterEvent) SetDepth(d float64) {
+	//fmt.Println(d)
+	h.depth = d
+}
+func (h MultiParameterEvent) Velocity() float64 {
+	return h.velocity
+}
+func (h MultiParameterEvent) ArrivalTime() time.Time {
+	return h.arrivalTime
+}
+func (h MultiParameterEvent) Erosion() float64 {
+	return h.erosion
+}
+func (h MultiParameterEvent) Duration() float64 {
+	return h.duration
+}
+func (h MultiParameterEvent) WaveHeight() float64 {
+	return h.waveHeight
+}
+func (h MultiParameterEvent) Salinity() bool {
+	return h.salinity
+}
+func (h MultiParameterEvent) Qualitative() string {
+	return h.qualitative
+}
+func (h MultiParameterEvent) DV() float64 {
+	return h.dV
+}
+
+// Parameters implements the HazardEvent interface
+func (h MultiParameterEvent) Parameters() Parameter {
+	return h.parameter
+}
+
+// Has implements the HazardEvent Interface
+func (h MultiParameterEvent) Has(p Parameter) bool {
+
+	return h.parameter&p != 0
+}
+func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
+	s := "{\"multiparameterevent\":"
+	if d.Has(Depth) {
+		s += fmt.Sprintf("{\"depth\":%f}", d.Depth())
+	}
+	if d.Has(Velocity) {
+		s += fmt.Sprintf("{\"velocity\":%f}", d.Velocity())
+	}
+	if d.Has(ArrivalTime) {
+		s += fmt.Sprintf("{\"arrival_time\":%v}", d.ArrivalTime().String())
+	}
+	if d.Has(Erosion) {
+		s += fmt.Sprintf("{\"erosion\":%f}", d.Erosion())
+	}
+	if d.Has(Duration) {
+		s += fmt.Sprintf("{\"duration\":%f}", d.Duration())
+	}
+	if d.Has(WaveHeight) {
+		s += fmt.Sprintf("{\"wave_height\":%f}", d.WaveHeight())
+	}
+	if d.Has(Salinity) {
+		s += fmt.Sprintf("{\"salinity\":%v}", "t")
+	} else {
+		s += fmt.Sprintf("{\"salinity\":%v}", "f")
+	}
+	if d.Has(Qualitative) {
+		s += fmt.Sprintf("{\"qualitative\":%s}", d.Qualitative())
+	}
+	if d.Has(DV) {
+		s += fmt.Sprintf("{\"depth_times_velocity\":%f}", d.DV())
+	}
+
+	s += "}"
+	return []byte(s), nil
+}
