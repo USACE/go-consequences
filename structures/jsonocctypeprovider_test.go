@@ -95,7 +95,8 @@ func Test_ModifyDefault(t *testing.T) {
 		Name:                     res11snb,
 		ComponentDamageFunctions: cdf,
 	}
-	fmt.Println(o)
+	//fmt.Println(o)
+	jotp.occupancyTypesContainer.OccupancyTypes[o.Name] = o
 	for OccupancyTypeName, v := range jotp.occupancyTypesContainer.OccupancyTypes {
 		fmt.Println(OccupancyTypeName)
 		for loss_component, component_damageFunctions := range v.ComponentDamageFunctions {
@@ -106,6 +107,10 @@ func Test_ModifyDefault(t *testing.T) {
 			fmt.Println(s)
 		}
 	}
+	/*err := jotp.Write("./data/Inland_FFRD_damageFunctions.json")
+	if err!=nil{
+		panic(err)
+	}*/
 }
 func toContinuousDistribution(data []float64) []statistics.ContinuousDistribution {
 	dists := make([]statistics.ContinuousDistribution, len(data))
