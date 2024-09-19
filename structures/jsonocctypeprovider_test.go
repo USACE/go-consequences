@@ -220,7 +220,7 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs4.DamageFunctions[depthParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
-		DamageFunction: paireddata.UncertaintyPairedData{
+		DamageFunction: paireddata.UncertaintyPairedData{ 
 			Xvals: depths,
 			Yvals: toContinuousDistribution(depthDamage4),
 		},
@@ -318,7 +318,7 @@ func Test_ModifyDefault(t *testing.T) {
 	//moderate velocity //2-5 f/s
 	moderateVelocityDamage6 := []float64{0, 0, 0, 5, 13, 25, 32, 36, 40, 44, 48, 51, 54, 57, 58, 60, 61, 63, 64, 66, 67}
 	//high velocity //5+ f/s - note about 5-10...
-	highVelocityDamage6 := []float64{0, 0, 0, 10, 20, 35, 43, 54, 59, 64, 67, 71, 74, 76, 79, 81, 82, 84, 86, 87}
+	highVelocityDamage6 := []float64{0, 0, 0, 10, 20, 35, 43, 48, 54, 59, 64, 67, 71, 74, 76, 79, 81, 82, 84, 86, 87}
 	cdf6 := make(map[string]DamageFunctionFamilyStochastic)
 	dffs6 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
