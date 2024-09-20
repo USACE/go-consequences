@@ -151,7 +151,7 @@ func Test_ModifyDefault(t *testing.T) {
 	}
 
 	// 3: ONE-STORY w/ PIER/CRAWLSPACE w/ OPENINGS
-	res11swbo := "RES1-1SWB"
+	res11snbc := "RES1-1SNB-C"
 	//depth only
 	depthDamage3 := []float64{0, 0, 0, 5, 14, 27, 35, 39, 44, 48, 53, 56, 59, 62, 64, 66, 68, 69, 71, 73, 74}
 	//long duration
@@ -199,12 +199,12 @@ func Test_ModifyDefault(t *testing.T) {
 	cdf3["structure"] = dffs3
 	cdf3["content"] = dffs3 //make them the same? no clue. thats what ill do.
 	o3 := OccupancyTypeStochastic{
-		Name:                     res11swbo,
+		Name:                     res11snbc,
 		ComponentDamageFunctions: cdf3,
 	}
 
 	// 4: TWO-STORY w/ PIER/CRAWLSPACE w/ OPENINGS
-	res12swbo := "RES1-2SWB"
+	res12snbc := "RES1-2SNB-C"
 	//depth only
 	depthDamage4 := []float64{0, 0, 0, 5, 11, 22, 27, 31, 34, 37, 41, 43, 46, 48, 49, 51, 52, 53, 55, 56, 57}
 	//long duration
@@ -252,12 +252,12 @@ func Test_ModifyDefault(t *testing.T) {
 	cdf4["structure"] = dffs4
 	cdf4["content"] = dffs4 //make them the same? no clue. thats what ill do.
 	o4 := OccupancyTypeStochastic{
-		Name:                     res12swbo,
+		Name:                     res12snbc,
 		ComponentDamageFunctions: cdf4,
 	}
 
 	// 5: ONE-STORY w/ PIER/CRAWLSPACE w/o OPENINGS
-	res11swbno := "RES1-1SWB"
+	res11snbp := "RES1-1SNB-P"
 	//depth only
 	depthDamage5 := []float64{0, 0, 0, 5, 14, 27, 35, 39, 44, 48, 53, 56, 59, 62, 64, 66, 68, 69, 71, 73, 74}
 	//long duration
@@ -305,12 +305,12 @@ func Test_ModifyDefault(t *testing.T) {
 	cdf5["structure"] = dffs5
 	cdf5["content"] = dffs5 //make them the same? no clue. thats what ill do.
 	o5 := OccupancyTypeStochastic{
-		Name:                     res11swbno,
+		Name:                     res11snbp,
 		ComponentDamageFunctions: cdf5,
 	}
 
 	// 6: TWO-STORY w/ PIER/CRAWLSPACE w/o OPENINGS
-	res12swbno := "RES1-2SWB"
+	res12snbp := "RES1-2SNB-P"
 	//depth only
 	depthDamage6 := []float64{0, 0, 0, 5, 11, 22, 27, 31, 34, 37, 41, 43, 46, 48, 49, 51, 52, 53, 55, 56, 57}
 	//long duration
@@ -358,7 +358,7 @@ func Test_ModifyDefault(t *testing.T) {
 	cdf6["structure"] = dffs6
 	cdf6["content"] = dffs6 //make them the same? no clue. thats what ill do.
 	o6 := OccupancyTypeStochastic{
-		Name:                     res12swbno,
+		Name:                     res12snbp,
 		ComponentDamageFunctions: cdf6,
 	}
 
@@ -469,7 +469,14 @@ func Test_ModifyDefault(t *testing.T) {
 	}
 
 	//fmt.Println(o)
-	jotp.occupancyTypesContainer.OccupancyTypes[o.Name] = o
+	jotp.occupancyTypesContainer.OccupancyTypes[o1.Name] = o1
+	jotp.occupancyTypesContainer.OccupancyTypes[o2.Name] = o2
+	jotp.occupancyTypesContainer.OccupancyTypes[o3.Name] = o3
+	jotp.occupancyTypesContainer.OccupancyTypes[o4.Name] = o4
+	jotp.occupancyTypesContainer.OccupancyTypes[o5.Name] = o5
+	jotp.occupancyTypesContainer.OccupancyTypes[o6.Name] = o6
+	jotp.occupancyTypesContainer.OccupancyTypes[o7.Name] = o7
+	jotp.occupancyTypesContainer.OccupancyTypes[o8.Name] = o8
 	for OccupancyTypeName, v := range jotp.occupancyTypesContainer.OccupancyTypes {
 		fmt.Println(OccupancyTypeName)
 		for loss_component, component_damageFunctions := range v.ComponentDamageFunctions {
