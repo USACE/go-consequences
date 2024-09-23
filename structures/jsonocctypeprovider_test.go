@@ -875,10 +875,10 @@ func Test_ModifyDefault(t *testing.T) {
 			fmt.Println(s)
 		}
 	}
-	err := jotp.Write("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions.json")
-	if err != nil {
-		panic(err)
-	}
+	//err := jotp.Write("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions.json")
+	//if err != nil {
+	//	panic(err)
+	//}
 }
 func toContinuousDistribution(data []float64) []statistics.ContinuousDistribution {
 	dists := make([]statistics.ContinuousDistribution, len(data))
@@ -891,6 +891,64 @@ func toContinuousDistribution(data []float64) []statistics.ContinuousDistributio
 }
 
 /*
+	func Test_FixingFEMACurves(t *testing.T) {
+		jotp := JsonOccupancyTypeProvider{}
+		jotp.InitLocalPath("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions.json")
+		r11snbpier := jotp.occupancyTypesContainer.OccupancyTypes["RES1-1SNB-PIER"]
+		r11snbp := jotp.occupancyTypesContainer.OccupancyTypes["RES1-1SNB-P"]
+		r11snbp = CombineOcctypes(r11snbp, r11snbpier)
+		r12snbpier := jotp.occupancyTypesContainer.OccupancyTypes["RES1-2SNB-PIER"]
+		r12snbp := jotp.occupancyTypesContainer.OccupancyTypes["RES1-2SNB-P"]
+		r12snbp = CombineOcctypes(r12snbp, r12snbpier)
+
+		jotp.occupancyTypesContainer.OccupancyTypes["RES1-1SNB-P"] = r11snbp
+		jotp.occupancyTypesContainer.OccupancyTypes["RES1-2SNB-P"] = r12snbp
+
+		delete(jotp.occupancyTypesContainer.OccupancyTypes, "RES1-1SNB-PIER")
+		delete(jotp.occupancyTypesContainer.OccupancyTypes, "RES1-2SNB-PIER")
+
+		err := jotp.Write("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions_final.json")
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	func Test_FEMACurves(t *testing.T) {
+		jotp := JsonOccupancyTypeProvider{}
+		jotp.InitLocalPath("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions_final.json")
+		for OccupancyTypeName, v := range jotp.occupancyTypesContainer.OccupancyTypes {
+			fmt.Println(OccupancyTypeName)
+			for loss_component, component_damageFunctions := range v.ComponentDamageFunctions {
+				s := loss_component + ":\n"
+				for damageFunctionParameter, damageFunction := range component_damageFunctions.DamageFunctions {
+					s += "\t" + damageFunctionParameter.String() + ", " + damageFunction.Source + "\n"
+				}
+				fmt.Println(s)
+			}
+		}
+	}
+
+	func CombineOcctypes(a OccupancyTypeStochastic, b OccupancyTypeStochastic) OccupancyTypeStochastic {
+		for componentkey, adff := range a.ComponentDamageFunctions {
+			bdff, componentExists := b.ComponentDamageFunctions[componentkey]
+			if componentExists {
+				for parameterkey, sdf := range bdff.DamageFunctions {
+					_, sdfexists := adff.DamageFunctions[parameterkey]
+					if sdfexists {
+						fmt.Println("structures: occupancy type " + a.Name + " already exists with parameter " + parameterkey.String() + " on component " + componentkey + ", skipping.")
+						//return a, errors.New()
+					} else {
+						adff.DamageFunctions[parameterkey] = sdf
+					}
+				}
+				a.ComponentDamageFunctions[componentkey] = adff
+			} else {
+				a.ComponentDamageFunctions[componentkey] = adff
+			}
+		}
+		return a
+	}
+*/
 func Test_JsonMerging(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.InitDefault()
@@ -903,7 +961,7 @@ func Test_JsonMerging(t *testing.T) {
 	}
 	fmt.Println(jotp.occupancyTypesContainer.OccupancyTypes["COM1"].ComponentDamageFunctions["contents"].DamageFunctions[hazards.Erosion].Source)
 }
-*/
+
 /*
 func Test_JsonWriting(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
