@@ -38,12 +38,16 @@ func Test_ModifyDefault(t *testing.T) {
 	//modify the defaults to include FFRD curves.
 	//all damage functions use the same depth range.
 	depths := []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
-
-	depthParameter := hazards.Depth
+	defaultParameter := hazards.Default
+	depthParameter := hazards.Depth | hazards.Duration | hazards.Velocity //add combinations in the case of missing parameters to all.
+	depthandVelocityParameter := hazards.Depth | hazards.Velocity
 	durationParameter := hazards.Depth | hazards.Duration | hazards.LongDuration | hazards.Velocity
 	moderateVParameter := hazards.Depth | hazards.Duration | hazards.Velocity | hazards.ModerateVelocity
+	moderateVLDParameter := hazards.Depth | hazards.Duration | hazards.Velocity | hazards.ModerateVelocity | hazards.LongDuration
+	moderateV_noD_Parameter := hazards.Depth | hazards.Velocity | hazards.ModerateVelocity
+	highVLDParameter := hazards.Depth | hazards.Duration | hazards.Velocity | hazards.HighVelocity | hazards.LongDuration //assign this to the same damage functions as hvparameter. essentially high v wins.
 	highVParameter := hazards.Depth | hazards.Duration | hazards.Velocity | hazards.HighVelocity
-
+	highVnoDParameter := hazards.Depth | hazards.Velocity | hazards.HighVelocity
 	// 1: ONE-STORY SLAB ON GRADE
 	res11snb := "RES1-1SNB"
 	//depth only
@@ -58,7 +62,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs1 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs1.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage1),
+		},
+	}
 	dffs1.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage1),
+		},
+	}
+	dffs1.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -82,7 +102,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage1),
 		},
 	}
+	dffs1.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage1),
+		},
+	}
+	dffs1.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage1),
+		},
+	}
 	dffs1.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage1),
+		},
+	}
+	dffs1.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage1),
+		},
+	}
+	dffs1.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -111,7 +163,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs2 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs2.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage2),
+		},
+	}
 	dffs2.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage2),
+		},
+	}
+	dffs2.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -135,7 +203,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage2),
 		},
 	}
+	dffs2.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage2),
+		},
+	}
+	dffs2.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage2),
+		},
+	}
 	dffs2.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage2),
+		},
+	}
+	dffs2.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage2),
+		},
+	}
+	dffs2.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -164,7 +264,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs3 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs3.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage3),
+		},
+	}
 	dffs3.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage3),
+		},
+	}
+	dffs3.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -188,7 +304,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage3),
 		},
 	}
+	dffs3.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage3),
+		},
+	}
+	dffs3.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage3),
+		},
+	}
 	dffs3.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage3),
+		},
+	}
+	dffs3.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage3),
+		},
+	}
+	dffs3.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -217,10 +365,26 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs4 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs4.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage4),
+		},
+	}
 	dffs4.DamageFunctions[depthParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
-		DamageFunction: paireddata.UncertaintyPairedData{ 
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage4),
+		},
+	}
+	dffs4.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
 			Xvals: depths,
 			Yvals: toContinuousDistribution(depthDamage4),
 		},
@@ -241,7 +405,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage4),
 		},
 	}
+	dffs4.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage4),
+		},
+	}
+	dffs4.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage4),
+		},
+	}
 	dffs4.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage4),
+		},
+	}
+	dffs4.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage4),
+		},
+	}
+	dffs4.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -270,7 +466,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs5 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs5.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage5),
+		},
+	}
 	dffs5.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage5),
+		},
+	}
+	dffs5.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -294,7 +506,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage5),
 		},
 	}
+	dffs5.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage5),
+		},
+	}
+	dffs5.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage5),
+		},
+	}
 	dffs5.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage5),
+		},
+	}
+	dffs5.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage5),
+		},
+	}
+	dffs5.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -323,7 +567,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs6 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs6.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage6),
+		},
+	}
 	dffs6.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage6),
+		},
+	}
+	dffs6.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -347,7 +607,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage6),
 		},
 	}
+	dffs6.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage6),
+		},
+	}
+	dffs6.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage6),
+		},
+	}
 	dffs6.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage6),
+		},
+	}
+	dffs6.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage6),
+		},
+	}
+	dffs6.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -376,7 +668,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs7 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs7.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage7),
+		},
+	}
 	dffs7.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage7),
+		},
+	}
+	dffs7.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -400,7 +708,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage7),
 		},
 	}
+	dffs7.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage7),
+		},
+	}
+	dffs7.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage7),
+		},
+	}
 	dffs7.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage7),
+		},
+	}
+	dffs7.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage7),
+		},
+	}
+	dffs7.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -429,7 +769,23 @@ func Test_ModifyDefault(t *testing.T) {
 	dffs8 := DamageFunctionFamilyStochastic{
 		DamageFunctions: map[hazards.Parameter]DamageFunctionStochastic{},
 	}
+	dffs8.DamageFunctions[defaultParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage8),
+		},
+	}
 	dffs8.DamageFunctions[depthParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(depthDamage8),
+		},
+	}
+	dffs8.DamageFunctions[depthandVelocityParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -453,7 +809,39 @@ func Test_ModifyDefault(t *testing.T) {
 			Yvals: toContinuousDistribution(moderateVelocityDamage8),
 		},
 	}
+	dffs8.DamageFunctions[moderateVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage8),
+		},
+	}
+	dffs8.DamageFunctions[moderateV_noD_Parameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(moderateVelocityDamage8),
+		},
+	}
 	dffs8.DamageFunctions[highVParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage8),
+		},
+	}
+	dffs8.DamageFunctions[highVLDParameter] = DamageFunctionStochastic{
+		Source:       "FEMA Inland Damage Functions Report 20211001",
+		DamageDriver: hazards.Depth,
+		DamageFunction: paireddata.UncertaintyPairedData{
+			Xvals: depths,
+			Yvals: toContinuousDistribution(highVelocityDamage8),
+		},
+	}
+	dffs8.DamageFunctions[highVnoDParameter] = DamageFunctionStochastic{
 		Source:       "FEMA Inland Damage Functions Report 20211001",
 		DamageDriver: hazards.Depth,
 		DamageFunction: paireddata.UncertaintyPairedData{
@@ -487,10 +875,10 @@ func Test_ModifyDefault(t *testing.T) {
 			fmt.Println(s)
 		}
 	}
-	/*err := jotp.Write("./data/Inland_FFRD_damageFunctions.json")
-	if err!=nil{
+	err := jotp.Write("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions.json")
+	if err != nil {
 		panic(err)
-	}*/
+	}
 }
 func toContinuousDistribution(data []float64) []statistics.ContinuousDistribution {
 	dists := make([]statistics.ContinuousDistribution, len(data))

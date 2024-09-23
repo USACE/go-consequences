@@ -99,6 +99,9 @@ var parametersToStrings = map[Parameter]string{
 	Salinity:         "salinity",
 	Qualitative:      "qualitative",
 	DV:               "depthtimesvelocity",
+	ModerateVelocity: "moderatevelocity",
+	HighVelocity:     "highvelocity",
+	LongDuration:     "longduration",
 }
 
 var stringsToParameters = map[string]Parameter{
@@ -114,6 +117,9 @@ var stringsToParameters = map[string]Parameter{
 	"salinity":           Salinity,
 	"qualitative":        Qualitative,
 	"depthtimesvelocity": DV,
+	"moderatevelocity":   ModerateVelocity,
+	"highvelocity":       HighVelocity,
+	"longduration":       LongDuration,
 }
 
 // SetHasDepth turns on a bitflag for the Parameter Depth
