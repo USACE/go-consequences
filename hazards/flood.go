@@ -2,6 +2,7 @@ package hazards
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -408,36 +409,37 @@ func (h MultiParameterEvent) Has(p Parameter) bool {
 }
 func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 	s := "{\"multiparameterevent\":{"
+	s += fmt.Sprintf("\"parameters\":[%v],", d.Parameters())
 	if d.Has(Depth) {
-		s += fmt.Sprintf("\"depth\":%f", d.Depth())
+		s += fmt.Sprintf("\"depth\":%f,", d.Depth())
 	}
 	if d.Has(Velocity) {
-		s += fmt.Sprintf("\"velocity\":%f", d.Velocity())
+		s += fmt.Sprintf("\"velocity\":%f,", d.Velocity())
 	}
 	if d.Has(ArrivalTime) {
-		s += fmt.Sprintf("\"arrival_time\":%v", d.ArrivalTime().String())
+		s += fmt.Sprintf("\"arrival_time\":%v,", d.ArrivalTime().String())
 	}
 	if d.Has(Erosion) {
-		s += fmt.Sprintf("\"erosion\":%f", d.Erosion())
+		s += fmt.Sprintf("\"erosion\":%f,", d.Erosion())
 	}
 	if d.Has(Duration) {
-		s += fmt.Sprintf("\"duration\":%f", d.Duration())
+		s += fmt.Sprintf("\"duration\":%f,", d.Duration())
 	}
 	if d.Has(WaveHeight) {
-		s += fmt.Sprintf("\"wave_height\":%f", d.WaveHeight())
+		s += fmt.Sprintf("\"wave_height\":%f,", d.WaveHeight())
 	}
 	if d.Has(Salinity) {
-		s += fmt.Sprintf("\"salinity\":%v", "t")
+		s += fmt.Sprintf("\"salinity\":%v,", "t")
 	} else {
-		s += fmt.Sprintf("\"salinity\":%v", "f")
+		s += fmt.Sprintf("\"salinity\":%v,", "f")
 	}
 	if d.Has(Qualitative) {
-		s += fmt.Sprintf("\"qualitative\":%s", d.Qualitative())
+		s += fmt.Sprintf("\"qualitative\":%s,", d.Qualitative())
 	}
 	if d.Has(DV) {
-		s += fmt.Sprintf("\"depth_times_velocity\":%f", d.DV())
+		s += fmt.Sprintf("\"depth_times_velocity\":%f,", d.DV())
 	}
-
+	s = strings.TrimRight(s, ",")
 	s += "}}"
 	return []byte(s), nil
 }
