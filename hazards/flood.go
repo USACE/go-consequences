@@ -438,6 +438,6 @@ func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 		s += fmt.Sprintf("\"depth_times_velocity\":%f", d.DV())
 	}
 
-	s += "}"
+	s += "}}"
 	return []byte(s), nil
 }
