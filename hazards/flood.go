@@ -409,7 +409,7 @@ func (h MultiParameterEvent) Has(p Parameter) bool {
 }
 func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 	s := "{\"multiparameterevent\":{"
-	s += fmt.Sprintf("\"parameters\":[%v],", d.Parameters())
+	//s += fmt.Sprintf("\"parameters\":[%v],", d.Parameters())
 	if d.Has(Depth) {
 		s += fmt.Sprintf("\"depth\":%f,", d.Depth())
 	}
@@ -429,9 +429,9 @@ func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 		s += fmt.Sprintf("\"wave_height\":%f,", d.WaveHeight())
 	}
 	if d.Has(Salinity) {
-		s += fmt.Sprintf("\"salinity\":%v,", "t")
+		s += fmt.Sprintf("\"salinity\":%v,", "true")
 	} else {
-		s += fmt.Sprintf("\"salinity\":%v,", "f")
+		s += fmt.Sprintf("\"salinity\":%v,", "false")
 	}
 	if d.Has(Qualitative) {
 		s += fmt.Sprintf("\"qualitative\":%s,", d.Qualitative())
