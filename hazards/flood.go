@@ -409,10 +409,10 @@ func (h MultiParameterEvent) Has(p Parameter) bool {
 func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 	s := "{\"multiparameterevent\":{"
 	if d.Has(Depth) {
-		s += fmt.Sprintf("{\"depth\":%f}", d.Depth())
+		s += fmt.Sprintf("\"depth\":%f", d.Depth())
 	}
 	if d.Has(Velocity) {
-		s += fmt.Sprintf("{\"velocity\":%f", d.Velocity())
+		s += fmt.Sprintf("\"velocity\":%f", d.Velocity())
 	}
 	if d.Has(ArrivalTime) {
 		s += fmt.Sprintf("\"arrival_time\":%v", d.ArrivalTime().String())
