@@ -134,15 +134,15 @@ func Test_Config(t *testing.T) {
 }
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
-	//nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitNSISP()
 	now := time.Now()
 	fmt.Println(now)
-	nsp, _ := structureprovider.InitStructureProvider("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower", "GPKG")
-	nsp.SetDeterministic(true)
+	//nsp, _ := structureprovider.InitStructureProvider("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower", "GPKG")
+	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	root := "/workspaces/Go_Consequences/data/ffrd/LowKanLowElk/depth_grid"
-	filepath := root + ".vrt"
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.json", "results", "GeoJSON")
+	root := "/workspaces/Go_Consequences/data/kc_silverjackets/Douglas_Co_depth/DG_Depth_01pct"
+	filepath := root + ".tif"
+	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences3.gpkg", "results", "GPKG")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")

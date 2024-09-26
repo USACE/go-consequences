@@ -101,6 +101,19 @@ func (gpk *gdalDataSet) SetDeterministic(useDeterministic bool) {
 func (gpk *gdalDataSet) SetSeed(seed int64) {
 	gpk.seed = seed
 }
+func (gpk *gdalDataSet) SpatialReference() string {
+	l := gpk.ds.LayerByName(gpk.LayerName)
+	sr := l.SpatialReference()
+	wkt, err := sr.ToWKT()
+	if err != nil {
+		return ""
+	}
+	return wkt
+}
+func (gpk *gdalDataSet) UpdateSpatialReference(sr_wkt string) {
+	// unimplemented
+	fmt.Println("could not set spatial reference")
+}
 
 // StreamByFips a streaming service for structure stochastic based on a bounding box
 func (gpk gdalDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) {
