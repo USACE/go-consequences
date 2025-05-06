@@ -93,13 +93,13 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	//if header has been built, add the feature, and the attributes.
 
 	feature := layerDef.Create()
-	//defer feature.Destroy()
+	defer feature.Destroy() // Destroy feature. I believe this also destroys the geometry object g, defined below. If feature is not destroyed, memory is not released
 	feature.SetFieldInteger(0, srw.index)
 	//create a point geometry - not sure the best way to do that.
 	x := 0.0
 	y := 0.0
 	g := gdal.Create(gdal.GeometryType(gdal.GT_Point))
-	defer g.Destroy()
+	// defer g.Destroy() // Don't Destroy g (I believe this is handled in feature.Destroy())
 	for i, val := range r.Headers {
 		if val == "x" {
 			x = result[i].(float64)
@@ -182,7 +182,6 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	}
 
 	srw.index++ //incriment.
-	//feature.Destroy() //testing an explicit call.//causes seg fault error, probably not calling causes a memory leak... oy vey.
 }
 func (srw *spatialResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
