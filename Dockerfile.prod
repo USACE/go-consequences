@@ -1,4 +1,5 @@
-FROM debian:bullseye as builder
+# Stage 1: Builder
+FROM debian:bullseye AS builder
 
 ENV TZ=America/New_York
 ENV PATH=/go/bin:$PATH
@@ -6,11 +7,13 @@ ENV GOROOT=/go
 ENV GOPATH=/src/go
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &&\
-    mkdir /go &&\
+    mkdir -p /go &&\
     mkdir -p /src/go &&\
     apt update &&\
     apt -y install build-essential &&\
-    apt -y install gdal-bin gdal-data libgdal-dev &&\
+    apt -y install libgdal-dev &&\
+    apt -y install gdal-bin &&\
+    apt -y install gdal-data &&\
     apt -y install wget &&\
     wget https://golang.org/dl/go1.19.5.linux-amd64.tar.gz -P / &&\
     tar -xvzf /go1.19.5.linux-amd64.tar.gz -C / &&\
@@ -22,14 +25,22 @@ RUN git clone https://github.com/USACE/go-consequences.git
 WORKDIR /app/go-consequences
 RUN go mod download
 RUN go mod tidy
-RUN go build main.go
+RUN go build -o main .
 
+# Stage 2: Production
+FROM ghcr.io/osgeo/gdal:ubuntu-full-3.8.3 AS prod
 
-FROM ghcr.io/osgeo/gdal:ubuntu-full-3.8.3 as prod
-RUN apt update &&\
-    apt -y install build-essential &&\
-    apt -y install pkg-config &&\
-    apt -y install gdal-bin gdal-data libgdal-dev
+# Move the executable from build to production
 WORKDIR /app
-COPY --from=builder /app/go-consequences/main .
-ENTRYPOINT ["/main"]
+COPY --from=builder /app/go-consequences/main ./
+
+# Install necessary GDAL libraries
+RUN apt update && \
+    apt install -y libgdal-dev && \
+    ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.28 && \
+    ldconfig
+
+# Verify library dependencies for debugging
+RUN ldd ./main
+
+ENTRYPOINT ["/app/main"]
