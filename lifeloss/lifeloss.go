@@ -37,28 +37,42 @@ type LifeLossProcess interface {
 
 // Init in the lifeloss package creates a life loss engine with the default settings
 func Init(seed int64, warningSystem warning.WarningResponseSystem) LifeLossEngine {
-	//initialize the default high lethality rate relationship
-	var HighPD paireddata.PairedData
-	json.Unmarshal(DefaultHighLethalityBytes, &HighPD)
-	//initialize the default low lethality rate relationships
-	var LowPD paireddata.PairedData
-	json.Unmarshal(DefaultLowLethalityBytes, &LowPD)
-	//create a lethality curve instance for High Lethality
-	High := LethalityCurve{data: HighPD}
-	//create a lethality curve instance for Low Lethality
-	Low := LethalityCurve{data: LowPD}
-	//create a map of lethality zone to lethality curve
-	lethalityCurves := make(map[LethalityZone]LethalityCurve)
-	lethalityCurves[HighLethality] = High
-	lethalityCurves[LowLethality] = Low
-	//initalize the stability criteria
-	stabilityCriteria := make(map[string]StabilityCriteria)
-	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
-	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
-	stabilityCriteria["masonryconcretebrick"] = RescDamMasonryConcreteBrick
+	createLethalityCurve := func(data []byte) (LethalityCurve, error) {
+		var pd paireddata.PairedData
+		if err := json.Unmarshal(data, &pd); err != nil {
+			return LethalityCurve{}, err
+		}
+		return LethalityCurve{data: pd}, nil
+	}
+	high, err := createLethalityCurve(DefaultHighLethalityBytes)
+	if err != nil {
+		log.Fatalf("Failed to initialize high lethality curve: %v", err)
+	}
+	low, err := createLethalityCurve(DefaultLowLethalityBytes)
+	if err != nil {
+		log.Fatalf("Failed to initialize low lethality curve: %v", err)
+	}
+	lethalityCurves := map[LethalityZone]LethalityCurve{
+		HighLethality: high,
+		LowLethality:  low,
+	}
+	const (
+		WoodUnanchoredKey       = "woodunanchored"
+		WoodAnchoredKey         = "woodanchored"
+		MasonryConcreteBrickKey = "masonryconcretebrick"
+	)
+	stabilityCriteria := map[string]StabilityCriteria{
+		WoodUnanchoredKey:       RescDamWoodUnanchored,
+		WoodAnchoredKey:         RescDamWoodAnchored,
+		MasonryConcreteBrickKey: RescDamMasonryConcreteBrick,
+	}
 	rng := rand.New(rand.NewSource(seed))
-
-	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warningSystem, SeedGenerator: rng}
+	return LifeLossEngine{
+		LethalityCurves:   lethalityCurves,
+		StabilityCriteria: stabilityCriteria,
+		WarningSystem:     warningSystem,
+		SeedGenerator:     rng,
+	}
 }
 
 func LifeLossHeader() []string {
