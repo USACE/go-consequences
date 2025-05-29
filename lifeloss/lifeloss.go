@@ -56,11 +56,6 @@ func Init(seed int64, warningSystem warning.WarningResponseSystem) LifeLossEngin
 		HighLethality: high,
 		LowLethality:  low,
 	}
-	const (
-		WoodUnanchoredKey       = "woodunanchored"
-		WoodAnchoredKey         = "woodanchored"
-		MasonryConcreteBrickKey = "masonryconcretebrick"
-	)
 	stabilityCriteria := map[string]StabilityCriteria{
 		WoodUnanchoredKey:       RescDamWoodUnanchored,
 		WoodAnchoredKey:         RescDamWoodAnchored,
