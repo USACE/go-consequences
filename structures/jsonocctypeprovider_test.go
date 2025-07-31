@@ -1,5 +1,6 @@
-/*package structures
+package structures
 
+/*
 import (
 	"fmt"
 	"testing"
