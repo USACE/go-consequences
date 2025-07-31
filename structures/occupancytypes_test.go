@@ -244,7 +244,14 @@ func Test_OccupancyType_Report(t *testing.T) {
 	b, _ := jotp.occupancyTypesContainer.OcctypeReport()
 	fmt.Println(string(b))
 }
+func Test_OccupancyType_Report_Inland_damageFunctions(t *testing.T) {
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitLocalPath("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions.json")
+	b, _ := jotp.occupancyTypesContainer.OcctypeReport()
+	fmt.Println(string(b))
+}
 
+//
 /*
 func Test_JsonOcctypes_toFile(t *testing.T) {
 	path := "/workspaces/Go_Consequences/data/occtypes.json"

@@ -39,9 +39,20 @@ func TestComputeSpecialEAD(t *testing.T) {
 		t.Errorf("computeEAD() yeilded %f; expected %f", val, 1.875)
 	}
 }
+func DepthHazardFunctionModified() hazardproviders.HazardFunction {
+	return func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		d := hazards.DepthEvent{}
+		if valueIn.Depth > 1000 {
+			return d, hazardproviders.NoDataHazardError{}
+		}
+
+		d.SetDepth(valueIn.Depth)
+		return d, nil
+	}
+}
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
-	dataset := "Rice_CowCreek_depth"
+	dataset := "HP"
 	nsp := structureprovider.InitNSISP()
 
 	//initialize a set of frequencies
@@ -52,31 +63,31 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(frequencies))
 
-	hp1, err := hazardproviders.Init(fmt.Sprint(root, "Depth_10pct.tif"))
+	hp1, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_10pct.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[0] = hp1
 
-	hp2, err := hazardproviders.Init(fmt.Sprint(root, "Depth_04pct.tif"))
+	hp2, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_04pct.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[1] = hp2
 
-	hp3, err := hazardproviders.Init(fmt.Sprint(root, "Depth_02pct.tif"))
+	hp3, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_02pct.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[2] = hp3
 
-	hp4, err := hazardproviders.Init(fmt.Sprint(root, "Depth_01pct.tif"))
+	hp4, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_01pct.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[3] = hp4
 
-	hp5, err := hazardproviders.Init(fmt.Sprint(root, "Depth_0_2pct.tif"))
+	hp5, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_0_2pct.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}

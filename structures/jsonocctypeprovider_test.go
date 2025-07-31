@@ -912,30 +912,37 @@ func toContinuousDistribution(data []float64) []statistics.ContinuousDistributio
 			panic(err)
 		}
 	}
-
+*/
+/*
 func Test_FEMACurves(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
-	jotp.InitLocalPath("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions_final_final.json")
+	jotp.InitLocalPath("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions_final.json")
 	//addedVals := []float64{15, 16}
 	for OccupancyTypeName, v := range jotp.occupancyTypesContainer.OccupancyTypes {
 		fmt.Println(OccupancyTypeName)
 		for loss_component, component_damageFunctions := range v.ComponentDamageFunctions {
 			s := loss_component + ":\n"
-			for damageFunctionParameter, damageFunction := range component_damageFunctions.DamageFunctions {
+			if loss_component == "content" {
+				//switch to contents
+				v.ComponentDamageFunctions["contents"] = component_damageFunctions
+				delete(v.ComponentDamageFunctions, "content")
+			}
+			/*for damageFunctionParameter, damageFunction := range component_damageFunctions.DamageFunctions {
 				s += "\t" + damageFunctionParameter.String() + ", " + damageFunction.Source + "\n"
-				/*if damageFunction.Source == "FEMA Inland Damage Functions Report 20211001" {
+				if damageFunction.Source == "FEMA Inland Damage Functions Report 20211001" {
 					//extend depth to include 15 and 16 ft.
 					damageFunction.DamageFunction.Xvals = append(damageFunction.DamageFunction.Xvals, addedVals...)
 					component_damageFunctions.DamageFunctions[damageFunctionParameter] = damageFunction
-				}*/
-/*}
+				}
+			}*/ /*
 			//v.ComponentDamageFunctions[loss_component] = component_damageFunctions
 			fmt.Println(s)
 		}
 	}
-	//jotp.Write("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions_final_final.json")
+	//jotp.Write("/workspaces/Go_Consequences/data/Inland_FFRD_damageFunctions_final.json")
 }
-
+*/
+/*
 
 	func CombineOcctypes(a OccupancyTypeStochastic, b OccupancyTypeStochastic) OccupancyTypeStochastic {
 		for componentkey, adff := range a.ComponentDamageFunctions {
