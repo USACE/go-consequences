@@ -37,33 +37,43 @@ type LifeLossProcess interface {
 
 // Init in the lifeloss package creates a life loss engine with the default settings
 func Init(seed int64, warningSystem warning.WarningResponseSystem) LifeLossEngine {
-	//initialize the default high lethality rate relationship
-	var HighPD paireddata.PairedData
-	json.Unmarshal(DefaultHighLethalityBytes, &HighPD)
-	//initialize the default low lethality rate relationships
-	var LowPD paireddata.PairedData
-	json.Unmarshal(DefaultLowLethalityBytes, &LowPD)
-	//create a lethality curve instance for High Lethality
-	High := LethalityCurve{data: HighPD}
-	//create a lethality curve instance for Low Lethality
-	Low := LethalityCurve{data: LowPD}
-	//create a map of lethality zone to lethality curve
-	lethalityCurves := make(map[LethalityZone]LethalityCurve)
-	lethalityCurves[HighLethality] = High
-	lethalityCurves[LowLethality] = Low
-	//initalize the stability criteria
-	stabilityCriteria := make(map[string]StabilityCriteria)
-	stabilityCriteria["woodunanchored"] = RescDamWoodUnanchored
-	stabilityCriteria["woodanchored"] = RescDamWoodAnchored
-	stabilityCriteria["masonryconcretebrick"] = RescDamMasonryConcreteBrick
+	createLethalityCurve := func(data []byte) (LethalityCurve, error) {
+		var pd paireddata.PairedData
+		if err := json.Unmarshal(data, &pd); err != nil {
+			return LethalityCurve{}, err
+		}
+		return LethalityCurve{data: pd}, nil
+	}
+	high, err := createLethalityCurve(DefaultHighLethalityBytes)
+	if err != nil {
+		log.Fatalf("Failed to initialize high lethality curve: %v", err)
+	}
+	low, err := createLethalityCurve(DefaultLowLethalityBytes)
+	if err != nil {
+		log.Fatalf("Failed to initialize low lethality curve: %v", err)
+	}
+	lethalityCurves := map[LethalityZone]LethalityCurve{
+		HighLethality: high,
+		LowLethality:  low,
+	}
+	stabilityCriteria := map[string]StabilityCriteria{
+		WoodUnanchoredKey:       RescDamWoodUnanchored,
+		WoodAnchoredKey:         RescDamWoodAnchored,
+		MasonryConcreteBrickKey: RescDamMasonryConcreteBrick,
+	}
 	rng := rand.New(rand.NewSource(seed))
-
-	return LifeLossEngine{LethalityCurves: lethalityCurves, StabilityCriteria: stabilityCriteria, WarningSystem: warningSystem, SeedGenerator: rng}
+	return LifeLossEngine{
+		LethalityCurves:   lethalityCurves,
+		StabilityCriteria: stabilityCriteria,
+		WarningSystem:     warningSystem,
+		SeedGenerator:     rng,
+	}
 }
 
 func LifeLossHeader() []string {
 	return []string{"ll_u65", "ll_o65", "ll_tot"} //@TODO: Consider adding structure stability state, fatality rates, and sampled hazard parameters
 }
+
 func LifeLossDefaultResults() []interface{} {
 	var ll_u65, ll_o65, ll_tot int32
 	ll_u65 = 0
@@ -71,12 +81,14 @@ func LifeLossDefaultResults() []interface{} {
 	ll_tot = 0
 	return []interface{}{ll_u65, ll_o65, ll_tot}
 }
+
 func (le LifeLossEngine) RedistributePopulation(e hazards.HazardEvent, s structures.StructureDeterministic) (structures.StructureDeterministic, error) {
 	remainingPop, _ := le.WarningSystem.WarningFunction()(s, e)
 	sout := s.Clone()
 	sout.PopulationSet = remainingPop
 	return sout, nil
 }
+
 func (le LifeLossEngine) EvaluateStabilityCriteria(e hazards.HazardEvent, s structures.StructureDeterministic) (Stability, error) {
 	if e.Has(hazards.DV) && e.Has(hazards.Depth) || e.Has(hazards.Velocity) && e.Has(hazards.Depth) {
 		sc, err := le.determineStability(s)
@@ -112,6 +124,7 @@ func (le LifeLossEngine) ComputeLifeLoss(e hazards.HazardEvent, s structures.Str
 		return le.submergenceCriteria(e, s, remainingPop, rng)
 	}
 }
+
 func applylethalityRateToPopulation(lethalityrate float64, population int32, rng *rand.Rand) int32 {
 	result := 0
 	for i := 0; i < int(population); i++ {
@@ -121,6 +134,7 @@ func applylethalityRateToPopulation(lethalityrate float64, population int32, rng
 	}
 	return int32(result)
 }
+
 func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structures.StructureDeterministic, remainingPop structures.PopulationSet, rng *rand.Rand) (consequences.Result, error) {
 	//apply submergence criteria
 	//log.Println("Submergence Based Lifeloss")
@@ -195,6 +209,7 @@ func (lle LifeLossEngine) submergenceCriteria(e hazards.HazardEvent, s structure
 		return consequences.Result{Headers: header, Result: []interface{}{llu65, llo65, llu65 + llo65}}, nil
 	}
 }
+
 func (lle LifeLossEngine) createLifeLossSet(popset structures.PopulationSet, lethalityRate float64, rng *rand.Rand) structures.PopulationSet {
 	result := structures.PopulationSet{0, 0, 0, 0}
 	result.Pop2amo65 = lle.evaluateLifeLoss(popset.Pop2amo65, lethalityRate, rng)
@@ -204,6 +219,7 @@ func (lle LifeLossEngine) createLifeLossSet(popset structures.PopulationSet, let
 	//log.Println(result)
 	return result
 }
+
 func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int32, lethalityRate float64, rng *rand.Rand) int32 {
 	var result int32 = 0
 	var i int32 = 0
@@ -214,6 +230,7 @@ func (lle LifeLossEngine) evaluateLifeLoss(populationRemaining int32, lethalityR
 	}
 	return result
 }
+
 func evaluateMobility(s structures.PopulationSet, rng *rand.Rand) map[Mobility]structures.PopulationSet {
 	//determine based on age and disability
 	result := make(map[Mobility]structures.PopulationSet)
