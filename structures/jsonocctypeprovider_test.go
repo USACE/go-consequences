@@ -1,4 +1,4 @@
-package structures
+/*package structures
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ const path2 = "./data/erosion_trial8.json"
 //const path = "/workspaces/Go_Consequences/data/occtypes.json"
 
 //const path2 = "/workspaces/Go_Consequences/data/erosion_trial8.json"
-/*
+
 func Test_JsonReading(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.InitLocalPath(path2)
