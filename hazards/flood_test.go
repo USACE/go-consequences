@@ -55,7 +55,7 @@ func TestArrivalDepthandDurationEvent(t *testing.T) {
 		t.Errorf("Expected %s, got %s", at, d.ArrivalTime())
 	}
 	s, _ := d.MarshalJSON()
-	fmt.Printf(string(s) + "\n")
+	fmt.Printf("%v\n", string(s))
 }
 func TestDepthEventParameters(t *testing.T) {
 	d := hazards.DepthEvent{}
