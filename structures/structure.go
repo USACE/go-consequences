@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazards"
@@ -250,12 +251,10 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 
 	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForHazard("reconstruction", e)
 	if rderr != nil {
-		// TODO: set rDamFun to a default value rather than return
-		// this allows compute to continue if user is using older occtypes.json (or custom)
-		// TODO: a more ideal solution is to have a separate computeConsequencesWithReconstruction or some other way to allow the
-		//	user to indicate they want this result.
-		return ret, cderr
+		// this default reconstruction function will return -901 days for all input values of sdampercent
+		rDamFun = DamageFunction{Source: "DefaultNull", DamageDriver: hazards.Depth, DamageFunction: paireddata.PairedData{Xvals: []float64{0.0, 1.0}, Yvals: []float64{-901.0, -901.0}}}
 	}
+
 	//TODO: Do we want to return the date that construction will be complete? Only useful if event has arrival time
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
@@ -279,10 +278,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 			depthAboveFFE := e.Depth() - s.FoundHt
 			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-			duration := math.Max(0.0, e.Duration())                                          // if no duration, value is -901
-			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) + duration //NOTE: structure and contents use a normal distribution for yvals. Here we use triangular.
-			//TODO: ensure that the use of triangular distribution is compatible with SampleValue
-			//TODO: check that use of e.Duration() doesn't break function when using a basic depth event
+			duration := math.Max(0.0, e.Duration()) // if no duration, value is -901
+			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) + duration
 		case hazards.Erosion:
 			sdampercent = sDamFun.DamageFunction.SampleValue(e.Erosion()) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(e.Erosion()) / 100

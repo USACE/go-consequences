@@ -143,6 +143,7 @@ func Test_Config(t *testing.T) {
 	}
 
 }
+
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
 	// nsp := structureprovider.InitNSISP()
