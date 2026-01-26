@@ -233,8 +233,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 */
 
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "reconstruction_days", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "reconstruction_days"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0.0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	sval := s.StructVal
@@ -279,7 +279,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 			depthAboveFFE := e.Depth() - s.FoundHt
 			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) + e.Duration() //NOTE: structure and contents use a normal distribution for yvals. Here we use triangular.
+			duration := math.Max(0.0, e.Duration())                                          // if no duration, value is -901
+			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) + duration //NOTE: structure and contents use a normal distribution for yvals. Here we use triangular.
 			//TODO: ensure that the use of triangular distribution is compatible with SampleValue
 			//TODO: check that use of e.Duration() doesn't break function when using a basic depth event
 		case hazards.Erosion:
@@ -298,14 +299,15 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[5] = s.OccType.Name
 		ret.Result[6] = sdampercent * sval
 		ret.Result[7] = cdampercent * conval
-		ret.Result[8] = reconstruction_days
-		ret.Result[9] = s.Pop2amu65
-		ret.Result[10] = s.Pop2amo65
-		ret.Result[11] = s.Pop2pmu65
-		ret.Result[12] = s.Pop2pmo65
-		ret.Result[13] = s.CBFips
-		ret.Result[14] = sdampercent
-		ret.Result[15] = cdampercent
+		ret.Result[8] = s.Pop2amu65
+		ret.Result[9] = s.Pop2amo65
+		ret.Result[10] = s.Pop2pmu65
+		ret.Result[11] = s.Pop2pmo65
+		ret.Result[12] = s.CBFips
+		ret.Result[13] = sdampercent
+		ret.Result[14] = cdampercent
+		ret.Result[15] = reconstruction_days
+
 	} else if e.Has(hazards.Qualitative) {
 		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
 		ret.Result[0] = s.BaseStructure.Name
@@ -316,12 +318,12 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[5] = s.OccType.Name
 		ret.Result[6] = 0.0
 		ret.Result[7] = 0.0
-		ret.Result[8] = 0.0
-		ret.Result[9] = s.Pop2amu65
-		ret.Result[10] = s.Pop2amo65
-		ret.Result[11] = s.Pop2pmu65
-		ret.Result[12] = s.Pop2pmo65
-		ret.Result[13] = s.CBFips
+		ret.Result[8] = s.Pop2amu65
+		ret.Result[9] = s.Pop2amo65
+		ret.Result[10] = s.Pop2pmu65
+		ret.Result[11] = s.Pop2pmo65
+		ret.Result[12] = s.CBFips
+		ret.Result[13] = 0.0
 		ret.Result[14] = 0.0
 		ret.Result[15] = 0.0
 	} else {
