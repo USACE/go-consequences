@@ -6,13 +6,13 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
-//Receptor is an interface for all things that can have consequences from a hazard event
+// Receptor is an interface for all things that can have consequences from a hazard event
 type Receptor interface {
-	Compute(event hazards.HazardEvent) (Result, error)
+	Compute(event hazards.HazardEvent) (Result, error) // IDEA: Compute(event []hazards.HazardEvent) this allows us to handle multi-hazard, but requires a fix to every receptor's existing compute method
 	Location() geography.Location
 }
 
-//Inventory provides a struct to allow for a slice of ConcequenceReceptor
+// Inventory provides a struct to allow for a slice of ConcequenceReceptor
 type Inventory struct {
 	Inventory []Receptor
 }
@@ -26,12 +26,12 @@ type ResultsWriter interface {
 	Close()
 }
 
-//ParameterValue is a way to allow parameters to be either a scalar or a distribution.
+// ParameterValue is a way to allow parameters to be either a scalar or a distribution.
 type ParameterValue struct {
 	Value interface{}
 }
 
-//CentralTendency on a ParameterValue is intended to help set structure values content values and foundaiton heights to central tendencies.
+// CentralTendency on a ParameterValue is intended to help set structure values content values and foundaiton heights to central tendencies.
 func (p ParameterValue) CentralTendency() float64 {
 	pval, okf := p.Value.(float64) //if the ParameterValue.Value is a float - pass it on back.
 	if okf {
@@ -44,7 +44,7 @@ func (p ParameterValue) CentralTendency() float64 {
 	return 0
 }
 
-//SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
+// SampleValue on a ParameterValue is intended to help set structure values content values and foundaiton heights to uncertain parameters - this is a first draft of this interaction.
 func (p ParameterValue) SampleValue(input interface{}) float64 {
 	pval, okf := p.Value.(float64) //if the ParameterValue.Value is a float - pass it on back.
 	if okf {
