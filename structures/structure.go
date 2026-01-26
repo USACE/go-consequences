@@ -149,6 +149,7 @@ func (s StructureDeterministic) Clone() StructureDeterministic {
 		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
+/*
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
@@ -229,8 +230,9 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	}
 	return ret, err
 }
+*/
 
-func computeConsequencesWithReconstruction(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
+func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "reconstruction_days", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
@@ -248,9 +250,13 @@ func computeConsequencesWithReconstruction(e hazards.HazardEvent, s StructureDet
 
 	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForHazard("reconstruction", e)
 	if rderr != nil {
+		// TODO: set rDamFun to a default value rather than return
+		// this allows compute to continue if user is using older occtypes.json (or custom)
+		// TODO: a more ideal solution is to have a separate computeConsequencesWithReconstruction or some other way to allow the
+		//	user to indicate they want this result.
 		return ret, cderr
 	}
-
+	//TODO: Do we want to return the date that construction will be complete? Only useful if event has arrival time
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
 		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
@@ -267,13 +273,15 @@ func computeConsequencesWithReconstruction(e hazards.HazardEvent, s StructureDet
 		sdampercent := 0.0
 		cdampercent := 0.0
 		reconstruction_days := 0.0
+
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
 			depthAboveFFE := e.Depth() - s.FoundHt
 			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) //NOTE: structure and contents use a normal distribution for yvals. Here we use triangular.
+			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) + e.Duration() //NOTE: structure and contents use a normal distribution for yvals. Here we use triangular.
 			//TODO: ensure that the use of triangular distribution is compatible with SampleValue
+			//TODO: check that use of e.Duration() doesn't break function when using a basic depth event
 		case hazards.Erosion:
 			sdampercent = sDamFun.DamageFunction.SampleValue(e.Erosion()) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(e.Erosion()) / 100
