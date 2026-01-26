@@ -148,6 +148,7 @@ func (s StructureDeterministic) Clone() StructureDeterministic {
 		NumStories:       s.NumStories,
 		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
+
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
@@ -163,6 +164,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	if cderr != nil {
 		return ret, cderr
 	}
+
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
 		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
@@ -222,6 +224,98 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[12] = s.CBFips
 		ret.Result[13] = 0.0
 		ret.Result[14] = 0.0
+	} else {
+		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
+	}
+	return ret, err
+}
+
+func computeConsequencesWithReconstruction(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "reconstruction_days", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
+	var ret = consequences.Result{Headers: header, Result: results}
+	var err error = nil
+	sval := s.StructVal
+	conval := s.ContVal
+	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", e)
+	if sderr != nil {
+		return ret, sderr
+	}
+	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("contents", e)
+	if cderr != nil {
+		return ret, cderr
+	}
+
+	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForHazard("reconstruction", e)
+	if rderr != nil {
+		return ret, cderr
+	}
+
+	if sDamFun.DamageDriver == hazards.Depth {
+		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
+		representativeStories := math.Ceil(damagefunctionMax / 9.0)
+		if s.NumStories > int32(representativeStories) {
+			//there is great potential that the value of the structure is not representative of the damage function range.
+			modifier := representativeStories / float64(s.NumStories)
+			sval *= modifier
+			conval *= modifier
+		}
+	} //else dont modify value because damage is not driven by depth
+	if e.Has(sDamFun.DamageDriver) && e.Has(cDamFun.DamageDriver) && e.Has(rDamFun.DamageDriver) {
+		//they exist!
+		sdampercent := 0.0
+		cdampercent := 0.0
+		reconstruction_days := 0.0
+		switch sDamFun.DamageDriver {
+		case hazards.Depth:
+			depthAboveFFE := e.Depth() - s.FoundHt
+			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
+			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent) //NOTE: structure and contents use a normal distribution for yvals. Here we use triangular.
+			//TODO: ensure that the use of triangular distribution is compatible with SampleValue
+		case hazards.Erosion:
+			sdampercent = sDamFun.DamageFunction.SampleValue(e.Erosion()) / 100 //assumes what type the damage array is in
+			cdampercent = cDamFun.DamageFunction.SampleValue(e.Erosion()) / 100
+			reconstruction_days = rDamFun.DamageFunction.SampleValue(sdampercent)
+		default:
+			return consequences.Result{}, errors.New("structures: could not understand the damage driver")
+		}
+
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = e
+		ret.Result[4] = s.BaseStructure.DamCat
+		ret.Result[5] = s.OccType.Name
+		ret.Result[6] = sdampercent * sval
+		ret.Result[7] = cdampercent * conval
+		ret.Result[8] = reconstruction_days
+		ret.Result[9] = s.Pop2amu65
+		ret.Result[10] = s.Pop2amo65
+		ret.Result[11] = s.Pop2pmu65
+		ret.Result[12] = s.Pop2pmo65
+		ret.Result[13] = s.CBFips
+		ret.Result[14] = sdampercent
+		ret.Result[15] = cdampercent
+	} else if e.Has(hazards.Qualitative) {
+		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = e
+		ret.Result[4] = s.BaseStructure.DamCat
+		ret.Result[5] = s.OccType.Name
+		ret.Result[6] = 0.0
+		ret.Result[7] = 0.0
+		ret.Result[8] = 0.0
+		ret.Result[9] = s.Pop2amu65
+		ret.Result[10] = s.Pop2amo65
+		ret.Result[11] = s.Pop2pmu65
+		ret.Result[12] = s.Pop2pmo65
+		ret.Result[13] = s.CBFips
+		ret.Result[14] = 0.0
+		ret.Result[15] = 0.0
 	} else {
 		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}
