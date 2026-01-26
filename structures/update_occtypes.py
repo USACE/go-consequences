@@ -35,6 +35,14 @@ def build_null_df(df):
 def build_damage_function(df):
     output = {
         "damagefunctions": {
+            "default": {
+                "source": "Assumed values",
+                "damagedriver": "depth",
+                "damagefunction": {
+                    "xvalues":[],
+                    "ydistributions": []
+                }
+            },
             "depth": {
                 "source": "Assumed values",
                 "damagedriver": "depth",
@@ -62,11 +70,13 @@ def build_damage_function(df):
 
         output['damagefunctions']['depth']['damagefunction']['xvalues'].append(row['dmg_pct'])
         output['damagefunctions']['depth']['damagefunction']['ydistributions'].append(ydist)
+        output['damagefunctions']['default']['damagefunction']['xvalues'].append(row['dmg_pct'])
+        output['damagefunctions']['default']['damagefunction']['ydistributions'].append(ydist)
 
     return(output)
 
 def read_occtypes():
-    with open("occtypes.json", "r") as f:
+    with open("occtypes_original.json", "r") as f:
         occtypes = json.load(f)
     
     for ot in occtypes['occupancytypes'].keys():
@@ -90,7 +100,7 @@ def main():
     ind = pd.read_excel("reconstruction_curves.xlsx", sheet_name = "IND")
     pub = pd.read_excel("reconstruction_curves.xlsx", sheet_name = "PUB")
 
-    with open("occtypes.json", "r") as f:
+    with open("occtypes_original.json", "r") as f:
         occtypes = json.load(f)
 
     df_res = build_damage_function(res)
@@ -114,7 +124,7 @@ def main():
         else:
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['reconstruction'] = dfnull
 
-    with open("occtypes_reconstruction.json", "w") as out:
+    with open("occtypes.json", "w") as out:
         json.dump(occtypes_out, out, indent=4)
 
 
