@@ -16,6 +16,12 @@
     - however, if we create a separate computeConsequencesWithReconstruction() func, there is no pathway for the receptor's Compute() method to call that func
     - commented out code shows a prototype of this where computeConsequencesWithReconstruction() was called for hazard events with arrival and duration, but I think it is reasonable that a user may want reconstruction time for a standard depth event.
 
+### Brainstorming
+
+- In `compute-configuration.go` the `Computable` struct includes a `ComputeLifeloss` bool. We could add another bool for `ComputeReconstruction` that would enable that calculation without making it a default.
+
+- Idea discussed with Will: we could update the `Compute` method for Receptors to take an array of HazardEvents rather than a single event
+    - this would look like `Compute(event []hazards.HazardEvent) (Result, error)` rather than `Compute(event hazards.HazardEvent) (Result, error)`
 
 ## 2. Implement MultiHazardProvider
 

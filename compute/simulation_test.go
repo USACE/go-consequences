@@ -171,41 +171,6 @@ func Test_StreamAbstract(t *testing.T) {
 	fmt.Println(time.Since(now))
 }
 
-func Test_StreamAbstract_Reconstruction(t *testing.T) {
-	now := time.Now()
-	fmt.Println(now)
-	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/lifecycle/nsi_2022_test.gpkg", "nsi", "GPKG")
-	nsp.SetDeterministic(true)
-	//identify the depth grid to apply to the structures.
-	root := "/workspaces/go-consequences/data/lifecycle/event1"
-	filepath := root + ".tiff"
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.gpkg", "results", "GPKG")
-	defer w.Close()
-
-	//initialize a hazard provider based on the depth grid.
-	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
-		if valueIn.Depth == 0 {
-			return hazard, hazardproviders.NoHazardFoundError{}
-		}
-		process := hazardproviders.DepthDurationHazardFunction()
-		valueIn.SetParameter(hazards.Duration, 100.0)
-		return process(valueIn, hazard)
-	})
-	//compute consequences.
-	StreamAbstractReconstruction(dfr, nsp, w)
-	fmt.Println(time.Since(now))
-}
-
-/*
-	func Test_StreamAbstract_LifeCycle(t *testing.T) {
-		nsp := structureprovider.InitNSISP()
-		now := time.Now()
-		fmt.Println(now)
-
-		// define hazard providers
-
-}
-*/
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	filepath := "/workspaces/Go_Consequences/data/Base.tif"

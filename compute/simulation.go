@@ -91,6 +91,7 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 	})
 }
 
+/*
 func StreamAbstractReconstruction(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
@@ -111,6 +112,7 @@ func StreamAbstractReconstruction(hp hazardproviders.HazardProvider, sp conseque
 		}
 	})
 }
+*/
 
 /*
 func StreamAbstractLifeCycle(hps []hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
