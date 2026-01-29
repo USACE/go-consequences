@@ -143,19 +143,20 @@ func Test_Config(t *testing.T) {
 	}
 
 }
-
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
-	// nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitNSISP()
 	now := time.Now()
 	fmt.Println(now)
-	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/lifecycle/nsi_2022_test.gpkg", "nsi", "GPKG")
-	nsp.SetDeterministic(true)
+	//nsp, _ := structureprovider.InitStructureProvider("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower", "GPKG")
+	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	root := "/workspaces/go-consequences/data/lifecycle/event1"
-	filepath := root + ".tiff"
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.gpkg", "results", "GPKG")
-
+	root := "/workspaces/Go_Consequences/data/kc_silverjackets/Douglas_Co_depth/DG_Depth_01pct"
+	filepath := root + ".tif"
+	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences3.gpkg", "results", "GPKG")
+	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	//create a result writer based on the name of the depth grid.
+	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
 	//initialize a hazard provider based on the depth grid.
 	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
@@ -163,14 +164,12 @@ func Test_StreamAbstract(t *testing.T) {
 			return hazard, hazardproviders.NoHazardFoundError{}
 		}
 		process := hazardproviders.DepthHazardFunction()
-
 		return process(valueIn, hazard)
 	})
 	//compute consequences.
 	StreamAbstract(dfr, nsp, w)
 	fmt.Println(time.Since(now))
 }
-
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	filepath := "/workspaces/Go_Consequences/data/Base.tif"

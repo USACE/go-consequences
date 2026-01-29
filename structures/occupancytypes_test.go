@@ -244,7 +244,6 @@ func Test_OccupancyType_Report(t *testing.T) {
 	b, _ := jotp.occupancyTypesContainer.OcctypeReport()
 	fmt.Println(string(b))
 }
-
 /*
 func Test_OccupancyType_Report_Inland_damageFunctions(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}

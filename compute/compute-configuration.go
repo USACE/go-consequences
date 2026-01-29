@@ -31,12 +31,11 @@ type Computeable struct {
 	structureprovider.StructureProvider
 	hazardproviders.HazardProvider
 	consequences.ResultsWriter
-	ComputeLifeloss bool // this could be replaced with a string and the Compute func can be updated with a case-switch
-	// option 2, add second bool ComputeMultiHazard
-	LifelossSeed   int64
-	ComplianceRate float64
-	ComputeByFips  bool
-	FipsCode       string
+	ComputeLifeloss bool
+	LifelossSeed    int64
+	ComplianceRate  float64
+	ComputeByFips   bool
+	FipsCode        string
 }
 
 func (config Config) CreateComputable() (Computeable, error) {

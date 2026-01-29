@@ -68,7 +68,6 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
-
 func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
@@ -80,7 +79,6 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
 		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
-
 		//compute damages based on hazard being able to provide depth
 		if err2 == nil {
 			r, err3 := f.Compute(d)
@@ -90,69 +88,6 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 		}
 	})
 }
-
-/*
-func StreamAbstractReconstruction(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
-	//get boundingbox
-	fmt.Println("Getting bbox")
-	bbox, err := hp.HazardBoundary()
-	if err != nil {
-		log.Panicf("Unable to get the raster bounding box: %s", err)
-	}
-	fmt.Println(bbox.ToString())
-	sp.ByBbox(bbox, func(f consequences.Receptor) {
-		//ProvideHazard works off of a geography.Location
-		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
-		//compute damages based on hazard being able to provide depth
-		if err2 == nil {
-			r, err3 := f.Compute(d) //TODO: How to get this call to route to ComputeConsequencesWithReconstruction?
-			if err3 == nil {
-				w.Write(r)
-			}
-		}
-	})
-}
-*/
-
-/*
-func StreamAbstractLifeCycle(hps []hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
-
-	fmt.Println("Getting bbox")
-	// StreamAbstract MultiFrequency gets bbox for larget hazard.
-	//   For lifecycle, it may make more sense to use a pre-defined study area boundary
-	//   unless depth grid tifs used for input are pre-processed to only include depths within the study bounds.
-	// NOTE: would there be an error if we try to sample a tiff at coordinates outside the tiff bounds? If so,
-	//    is that type of error already handled in cog_reader?
-	hp1 := hps[0]
-	bbox, err := hp1.HazardBoundary()
-	if err != nil {
-		log.Panicf("Unable to get the raster bounding box: %s", err)
-	}
-	fmt.Println(bbox.ToString())
-
-	// TODO: How do we want to write results? Lifecycle analysis might include 100+ storms for a single assett.
-	//	For multi-frequency, we write the results for each RP as a new column in the result
-	//	This is not ideal for time series data, especially with that many entries
-	//	- can a consequences.ResultsWriter write to two files?
-	//		- we could write results for each storm in a condensed format and then calculate totals/summary statistics to write
-	//			to the nsi points. The time series files could then be joined by building id for further analysis
-
-	sp.ByBbox(bbox, func(f consequences.Receptor) {
-		//ProvideHazard works off of a geography.Location
-		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
-		//compute damages based on hazard being able to provide depth
-		if err2 == nil {
-			r, err3 := f.Compute(d)
-			// TODO: will probably need to parse the Result (r) before passing to the
-			// ResultsWriter (w) especially if we go with multiple ResultsWriters.
-			if err3 == nil {
-				w.Write(r)
-			}
-		}
-	})
-}
-*/
-
 func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Printf("Computing %v frequencies\n", len(hps))
 	//ASSUMPTION hazard providers and frequencies are in the same order

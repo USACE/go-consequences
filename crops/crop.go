@@ -8,7 +8,7 @@ import (
 	"github.com/USACE/go-consequences/hazards"
 )
 
-// Crop describes a crop that can be used to compute agricultural consequences
+//Crop describes a crop that can be used to compute agricultural consequences
 type Crop struct {
 	id                 byte
 	name               string
@@ -43,58 +43,58 @@ func (c Crop) toSubstitute() Substitute {
 	return s
 }
 
-// BuildCrop builds a crop since the properties of crop are not exported
+//BuildCrop builds a crop since the properties of crop are not exported
 func BuildCrop(cropid byte, cropname string) Crop {
 	return Crop{id: cropid, name: cropname}
 }
 
-// WithLocation allows the construction of a location on a crop
+//WithLocation allows the construction of a location on a crop
 func (c *Crop) WithLocation(xloc float64, yloc float64) Crop {
 	c.x = xloc
 	c.y = yloc
 	return *c
 }
 
-// WithOutput allows the setting of the yeild per acre and price per unit of output and resulting value per output
+//WithOutput allows the setting of the yeild per acre and price per unit of output and resulting value per output
 func (c *Crop) WithOutput(cropYeild float64, price float64) Crop {
 	c.totalMarketValue = cropYeild * price
 	return *c
 }
 
-// WithProductionFunction allows the setting of the production function
+//WithProductionFunction allows the setting of the production function
 func (c *Crop) WithProductionFunction(pf productionFunction) Crop {
 	c.productionFunction = pf
 	return *c
 }
 
-// WithLossFunction allows the setting of the loss function
+//WithLossFunction allows the setting of the loss function
 func (c *Crop) WithLossFunction(lf DamageFunction) Crop {
 	c.lossFunction = lf
 	return *c
 }
 
-// WithCropSchedule allows the setting of the cropschedule
+//WithCropSchedule allows the setting of the cropschedule
 func (c *Crop) WithCropSchedule(cs CropSchedule) Crop {
 	c.cropSchedule = cs
 	return *c
 }
 
-// GetCropID fulfils the crops.CropType interface
+//GetCropID fulfils the crops.CropType interface
 func (c Crop) GetCropID() byte {
 	return c.id
 }
 
-// GetCropName fulfils the crops.CropType interface
+//GetCropName fulfils the crops.CropType interface
 func (c Crop) GetCropName() string {
 	return c.name
 }
 
-// GetX fulfils the consequences.Locatable interface
+//GetX fulfils the consequences.Locatable interface
 func (c Crop) GetX() float64 {
 	return c.x
 }
 
-// GetY fulfils the consequences.Locatable interface
+//GetY fulfils the consequences.Locatable interface
 func (c Crop) GetY() float64 {
 	return c.y
 }
@@ -102,12 +102,12 @@ func (c Crop) Location() geography.Location {
 	return geography.Location{X: c.x, Y: c.y}
 }
 
-// GetTotalMarketValue returns crop.totalMarketValue
+//GetTotalMarketValue returns crop.totalMarketValue
 func (c Crop) GetTotalMarketValue() float64 {
 	return c.totalMarketValue
 }
 
-// Compute implements concequence.Receptor on crop
+//Compute implements concequence.Receptor on crop
 func (c Crop) Compute(event hazards.HazardEvent) (consequences.Result, error) {
 	//Check event to determine if it is an arrival time and duration event
 	header := []string{"Crop", "x", "y", "Damage Outcome", "Damage", "Duration", "Arrival Time"}
