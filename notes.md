@@ -29,9 +29,36 @@
         - Structure components that were damaged in the previous event but have not been replaced will still require replacement after the next event.
         - 
 
-## 3. Implement LifeCycle consequence calculation
+## G2CRM Implementation - Structure.cs
 
-- Most likely as StreamAbstractLifecycle()
+### Rebuild
+
+- param "rebuildFactor" - amount of structure to rebuild. 
+    - range: 0.0-1.0
+    - rebuildFactor < 1.0 ==> partial rebuild due to storm occuring during rebuild
+    - e.g. rebuildFactor = 0.75 means rebuild 75% of the structure damage
+        - **Where does this comefrom?**
+
+- structureAmountToRebuild = CalculateStructureDepreciatedReplacementValue(year) - CalculateCurrentStructureValue(year)
+    - = CSDRV(year) - CCSV(year)
+    - = CSDRV(year) - (CSDRV(year) * (1 - CurrentStructureDamageFactor)
+    - **structureAmountToRebuild = Structure Value * pct_damage**
+    - ==> So rebuild the damage that occurred from the event
+
+- `if (rebuildFactor < 1.0) { structureAmountToRebuild *= rebuildFactor }`
+    - When function is called we know rebuildFactor. e.g. We know we want to repair 75% of the damage.
+    - but why is it only partial rebuild? where is rebuildFactor calculated? What does this represent?
+    - 
+
+### Damage
+
+- structureModifier ==> pct_damage
+    - From damage function triangular distribution (`G2CRM.Core.Math.TriangularDistribution.triangularDegen()`)
+
+- structureAmountToDamage = CalculateCurrentStructureValue(year) * structureModifier
+    - ==> like go-consequences `sval * sdampercent`
+
+
 
 ## General Brainstorming
 

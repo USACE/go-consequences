@@ -443,3 +443,9 @@ func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 	s += "}}"
 	return []byte(s), nil
 }
+
+// ArrivalandDurationEventMulti describes a series of events with an arrival time, depth and a duration in days
+type ArrivalDepthandDurationEventMulti struct {
+	index  int
+	events []ArrivalDepthandDurationEvent
+}

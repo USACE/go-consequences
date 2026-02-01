@@ -288,24 +288,60 @@ func TestComputeConsequencesMulti(t *testing.T) {
 
 	// create a series of hazardEvents
 	var d1 = hazards.ArrivalDepthandDurationEvent{}
-	d1.SetDuration(5.0)
+	d1.SetDuration(0)
 	d1.SetDepth(1.0) // reconstruction time should be 10 days + Duration
 	t1 := time.Date(1984, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
 	d1.SetArrivalTime(t1)
 
 	var d2 = hazards.ArrivalDepthandDurationEvent{}
-	d2.SetDuration(0.0)
+	d2.SetDuration(5.0)
 	d2.SetDepth(1.0)                                               // reconstruction time should be 10 days
-	t2 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC) // reconstruction from event 1 should be 50% complete at this time
+	t2 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC) // reconstruction from event 1 should be 100% complete at this time
 	d2.SetArrivalTime(t2)
 
-	events := []hazards.HazardEvent{d1, d2}
+	var d3 = hazards.ArrivalDepthandDurationEvent{}
+	d3.SetDuration(0.0)
+	d3.SetDepth(1.0) // reconstruction time should be 10 days
+	t3 := time.Date(1984, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	d3.SetArrivalTime(t3)
 
-	et1 := time.Date(1984, time.Month(1), 16, 0, 0, 0, 0, time.UTC)
-	et2 := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
+	var d4 = hazards.ArrivalDepthandDurationEvent{}
+	d4.SetDuration(0.0)
+	d4.SetDepth(2.0) // reconstruction time should be 20 days
+	t4 := time.Date(1985, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d4.SetArrivalTime(t4)
 
-	expectedResults := []time.Time{et1, et2}
-	expectedDmgs := []float64{10.0, 5.0}
+	var d5 = hazards.ArrivalDepthandDurationEvent{}
+	d5.SetDuration(0.0)
+	d5.SetDepth(2.0) // reconstruction time should be 20 days
+	t5 := time.Date(1985, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d5.SetArrivalTime(t5)
+
+	events := []hazards.HazardEvent{d1, d2, d3, d4, d5}
+
+	et1 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	et2 := time.Date(1984, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	et3 := time.Date(1984, time.Month(1), 31, 0, 0, 0, 0, time.UTC)
+	et4 := time.Date(1985, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	et5 := time.Date(1985, time.Month(1), 31, 0, 0, 0, 0, time.UTC)
+
+	expectedResults := []time.Time{et1, et2, et3, et4, et5}
+	expectedDmgs := []float64{10.0, 10.0, 9.5, 20.0, 18.0}
+	// event 1 (10% dmg) arrives first (obviously). No adjustments required. dmg = 100*0.1 = 10.0
+	// event 2 (10% dmg) arrives after event 1 completes reconstruction. No adjustments required. dmg = 100*0.1 = 10.0
+	// event 3 interrupts event 2 reconstruction @ 50% complete
+	// event 2 had dmg=10, so structure was repaired by 5 when event 3 hit.
+	// structure value when event 3 hits is 100-(10-5)=95
+	// event 3 does 10% damage ==> expected damage = 0.1*95 = 9.5
+	// event 4 occurs after event 3 reconstruction complete. No adjustments required. dmg = 100*0.2 = 20
+	// event 5 interrupts event 4 reconstruction @ 50% complete
+	// structure value when event 5 hits is 100 - (20-10) = 90.
+	// event 5 does 20% damage ==> expected damage = 0.2*90 = 18.0
+
+	// This currently not working as expected.
+	// The issue seems to be coming from how i am adding value back to the structure from a repair.
+	// In debugging, I observed the case where reconstruction was 100% complete, but the damage factor was still >0.
+	// Will investigate this Monday.
 
 	results, err := computeConsequencesMulti(events, s)
 	if err != nil {
