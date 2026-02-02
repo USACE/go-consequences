@@ -372,25 +372,26 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 				pct_complete = 1.0
 			}
 
-			sPctloss_prev, err := ret[i-1].Fetch("s_dam_per") //
-			if err != nil {
-				return ret, errors.New("structures: unable to get structure damage percent for previous hazard event")
-			}
-			cPctloss_prev, err := ret[i-1].Fetch("c_dam_per") //
-			if err != nil {
-				return ret, errors.New("structures: unable to get content damage percent for previous hazard event")
-			}
-			// sloss_cur = sloss_prev.(float64) * (1.0 - pct_complete)
-			// closs_cur = closs_prev.(float64) * (1.0 - pct_complete)
+			// sPctloss_prev, err := ret[i-1].Fetch("s_dam_per") //
+			// if err != nil {
+			// 	return ret, errors.New("structures: unable to get structure damage percent for previous hazard event")
+			// }
+			// cPctloss_prev, err := ret[i-1].Fetch("c_dam_per") //
+			// if err != nil {
+			// 	return ret, errors.New("structures: unable to get content damage percent for previous hazard event")
+			// }
+			// sPctloss_rebuilt := sPctloss_prev.(float64) * pct_complete
+			// cPctloss_rebuilt := cPctloss_prev.(float64) * pct_complete
 
-			sPctloss_rebuilt := sPctloss_prev.(float64) * pct_complete
-			cPctloss_rebuilt := cPctloss_prev.(float64) * pct_complete
+			sPctloss_rebuilt := sDamageFactor * pct_complete
+			cPctloss_rebuilt := cDamageFactor * pct_complete
 
 			// update structure damage factor to reflect completed construction
 			sDamageFactor = sDamageFactor - sPctloss_rebuilt
 			if sDamageFactor < 0.0 {
 				sDamageFactor = 0
 			}
+
 			cDamageFactor = cDamageFactor - cPctloss_rebuilt
 			if cDamageFactor < 0.0 {
 				cDamageFactor = 0
@@ -438,7 +439,8 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 					duration = e.Duration()
 				}
 
-				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sdampercent) + duration)
+				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
+				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
 				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
 
 			case hazards.Erosion:

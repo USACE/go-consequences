@@ -331,7 +331,7 @@ func TestComputeConsequencesMulti(t *testing.T) {
 	// event 2 (10% dmg) arrives after event 1 completes reconstruction. No adjustments required. dmg = 100*0.1 = 10.0
 	// event 3 interrupts event 2 reconstruction @ 50% complete
 	// event 2 had dmg=10, so structure was repaired by 5 when event 3 hit.
-	// structure value when event 3 hits is 100-(10-5)=95
+	// structure value when event 3 hits is 100-(10-5)=95. Damage factor is 0.5
 	// event 3 does 10% damage ==> expected damage = 0.1*95 = 9.5
 	// event 4 occurs after event 3 reconstruction complete. No adjustments required. dmg = 100*0.2 = 20
 	// event 5 interrupts event 4 reconstruction @ 50% complete
