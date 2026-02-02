@@ -452,7 +452,8 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 				sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
 				cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
 				arrival := e.ArrivalTime()
-				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sdampercent))
+				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
+				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor))
 				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
 
 			default:
