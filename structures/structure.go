@@ -128,10 +128,10 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result
 
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
-	/*add, addok := d.(hazards.ArrivalDepthandDurationEvent)
-	if addok {
-		return computeConsequencesWithReconstruction(add, s)
-	}*/
+	addMulti, ok := d.(hazards.MultiHazardEvent)
+	if ok {
+		return computeConsequencesMultiHazard(addMulti, s)
+	}
 	return computeConsequences(d, s)
 }
 
@@ -372,17 +372,6 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 				pct_complete = 1.0
 			}
 
-			// sPctloss_prev, err := ret[i-1].Fetch("s_dam_per") //
-			// if err != nil {
-			// 	return ret, errors.New("structures: unable to get structure damage percent for previous hazard event")
-			// }
-			// cPctloss_prev, err := ret[i-1].Fetch("c_dam_per") //
-			// if err != nil {
-			// 	return ret, errors.New("structures: unable to get content damage percent for previous hazard event")
-			// }
-			// sPctloss_rebuilt := sPctloss_prev.(float64) * pct_complete
-			// cPctloss_rebuilt := cPctloss_prev.(float64) * pct_complete
-
 			sPctloss_rebuilt := sDamageFactor * pct_complete
 			cPctloss_rebuilt := cDamageFactor * pct_complete
 
@@ -477,6 +466,185 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 			err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 		}
 		ret[i] = result
+	}
+	return ret, err
+}
+
+func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureDeterministic) (consequences.Result, error) {
+	// this function needs to return a single result. Not a slice of results
+	// Make a nested Result where each column is itself a Result
+	// TODO: understand whether and how this type of result can be passed to results writers.
+	indexHeader := make([]string, 0)
+	results := make([]interface{}, 0)
+
+	var ret = consequences.Result{Headers: indexHeader, Result: results}
+	var err error = nil
+
+	// damage functions for structure
+	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", event)
+	if sderr != nil {
+		return ret, sderr
+	}
+	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("contents", event)
+	if cderr != nil {
+		return ret, cderr
+	}
+	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForHazard("reconstruction", event)
+	if rderr != nil {
+		return ret, cderr
+	}
+
+	// variables for tracking value and damage across hazards
+	sval := s.StructVal
+	svalcurr := sval
+	sDamageFactor := 0.0 // this is the current pct_damage to the structure
+	conval := s.ContVal
+	convalcurr := conval
+	cDamageFactor := 0.0 // this is the current pct_damage to the contents
+
+	// adjust value for tall structures
+	if sDamFun.DamageDriver == hazards.Depth {
+		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
+		representativeStories := math.Ceil(damagefunctionMax / 9.0)
+		if s.NumStories > int32(representativeStories) {
+			//there is great potential that the value of the structure is not representative of the damage function range.
+			modifier := representativeStories / float64(s.NumStories)
+			sval *= modifier
+			conval *= modifier
+		}
+	} //else dont modify value because damage is not driven by depth
+
+	for {
+		// Calculate reconstruction from previous hazard if we aren't on the first one
+		if event.HasPrevious() {
+
+			pr, err := ret.Fetch(fmt.Sprintf("%d", event.Index()-1))
+			if err != nil {
+				return ret, fmt.Errorf("structures: Unable to fetch previous result at index = %v", event.Index())
+			}
+			previous_result := pr.(consequences.Result)
+			tc0, err := previous_result.Fetch("completion_date")
+			if err != nil {
+				return ret, errors.New("structures: unable to get completion date for previous hazard event")
+			}
+			last_completion_time := tc0.(time.Time)
+
+			previous_event, err := event.Previous()
+			if err != nil {
+				return ret, err
+			}
+
+			// calculate reconstruction progress assuming linear rebuild
+			t0 := previous_event.ArrivalTime().AddDate(0, 0, int(previous_event.Duration()))               // this is the time reconstruction began
+			pct_complete := (float64(event.ArrivalTime().Sub(t0)) / float64(last_completion_time.Sub(t0))) // this is the percentage of the reconstruction that is complete
+
+			if pct_complete > 1.0 {
+				pct_complete = 1.0
+			}
+
+			sPctloss_rebuilt := sDamageFactor * pct_complete
+			cPctloss_rebuilt := cDamageFactor * pct_complete
+
+			// update structure damage factor to reflect completed construction
+			sDamageFactor = sDamageFactor - sPctloss_rebuilt
+			if sDamageFactor < 0.0 {
+				sDamageFactor = 0
+			}
+
+			cDamageFactor = cDamageFactor - cPctloss_rebuilt
+			if cDamageFactor < 0.0 {
+				cDamageFactor = 0
+			}
+
+			// update structure value to reflect completed construction
+			svalcurr = sval * (1 - sDamageFactor)
+			convalcurr = conval * (1 - cDamageFactor)
+		}
+
+		header := []string{"fd_id", "structure damage", "content damage", "s_dam_per", "c_dam_per", "reconstruction_days", "completion_date", "structure_value", "content_value"}
+		values := []interface{}{"updateme", 0.0, 0.0, 0.0, 0.0, 0.0, time.Time{}, 0.0, 0.0}
+		result := consequences.Result{Headers: header, Result: values}
+
+		if event.Has(sDamFun.DamageDriver) && event.Has(cDamFun.DamageDriver) && event.Has(rDamFun.DamageDriver) {
+			//they exist!
+			sdampercent := 0.0
+			sdamage := 0.0
+			cdampercent := 0.0
+			cdamage := 0.0
+
+			reconstruction_days := 0.0
+			completion_date := time.Time{}
+
+			switch sDamFun.DamageDriver {
+			case hazards.Depth:
+				depthAboveFFE := event.Depth() - s.FoundHt
+				sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+				cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
+				sdamage = svalcurr * sdampercent
+				cdamage = convalcurr * cdampercent
+
+				sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
+				cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
+				// total time to complete reconstruction consists of three parts
+				//	1. Time between the start and end of the event. This is e.Duration()
+				//	2. Time between the end of the event and the beginning of reconstruction.
+				//		- In reality, this would depend on a lot but simplest assumption is that reconstruction can begin as soon as event ends.
+				//	3. Time between reconstruction start and reconstruction end. This is the value returned from the damage function
+
+				arrival := event.ArrivalTime() // do we need a check that the ArrivalTime is not just the default time.Time{}?
+
+				duration := 0.0
+				if event.Duration() > 0.0 { // nodata value for e.Duration == -901.0
+					duration = event.Duration()
+				}
+
+				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
+				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
+				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+
+			case hazards.Erosion:
+				sdampercent = sDamFun.DamageFunction.SampleValue(event.Erosion()) / 100 //assumes what type the damage array is in
+				cdampercent = cDamFun.DamageFunction.SampleValue(event.Erosion()) / 100
+				sdamage = svalcurr * sdampercent
+				cdamage = convalcurr * cdampercent
+
+				sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
+				cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
+				arrival := event.ArrivalTime()
+				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
+				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor))
+				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+
+			default:
+				return ret, errors.New("structures: could not understand the damage driver")
+			}
+
+			svalcurr = svalcurr * (1 - sDamageFactor)
+			convalcurr = convalcurr * (1 - cDamageFactor)
+
+			result.Result[0] = s.BaseStructure.Name
+			result.Result[1] = sdamage
+			result.Result[2] = cdamage
+			result.Result[3] = sdampercent
+			result.Result[3] = cdampercent
+			result.Result[5] = math.Ceil(reconstruction_days)
+			result.Result[6] = completion_date
+			result.Result[7] = svalcurr
+			result.Result[8] = convalcurr
+
+		} else {
+			err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
+		}
+		indexHeader = append(indexHeader, fmt.Sprintf("%d", event.Index()))
+		results = append(results, result)
+		ret = consequences.Result{Headers: indexHeader, Result: results}
+
+		if event.HasNext() {
+			event.Increment() // go to the next event and restart loop
+		} else {
+			break
+		}
 	}
 	return ret, err
 }

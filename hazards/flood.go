@@ -1,7 +1,9 @@
 package hazards
 
 import (
+	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 )
@@ -447,5 +449,112 @@ func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 // ArrivalandDurationEventMulti describes a series of events with an arrival time, depth and a duration in days
 type ArrivalDepthandDurationEventMulti struct {
 	index  int
-	events []ArrivalDepthandDurationEvent
+	Events []ArrivalDepthandDurationEvent
+}
+
+func (h ArrivalDepthandDurationEventMulti) Depth() float64 {
+	return h.Events[h.index].Depth()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Velocity() float64 {
+	return h.Events[h.index].Velocity()
+}
+
+func (h ArrivalDepthandDurationEventMulti) ArrivalTime() time.Time {
+	return h.Events[h.index].ArrivalTime()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Erosion() float64 {
+	return h.Events[h.index].Erosion()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Duration() float64 {
+	return h.Events[h.index].Duration()
+}
+
+func (h ArrivalDepthandDurationEventMulti) WaveHeight() float64 {
+	return h.Events[h.index].WaveHeight()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Salinity() bool {
+	return h.Events[h.index].Salinity()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Qualitative() string {
+	return h.Events[h.index].Qualitative()
+}
+
+func (h ArrivalDepthandDurationEventMulti) DV() float64 {
+	return h.Events[h.index].DV()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Parameters() Parameter {
+	return h.Events[h.index].Parameters()
+}
+
+func (h ArrivalDepthandDurationEventMulti) Has(p Parameter) bool {
+	return h.Events[h.index].Has(p)
+}
+
+func (h ArrivalDepthandDurationEventMulti) Index() int {
+	return h.index
+}
+
+func (h ArrivalDepthandDurationEventMulti) HasNext() bool {
+	return h.index < (len(h.Events) - 1)
+}
+
+func (h ArrivalDepthandDurationEventMulti) HasPrevious() bool {
+	return h.index > 0
+}
+
+func (h ArrivalDepthandDurationEventMulti) Next() (HazardEvent, error) {
+	var err error = nil
+	if h.HasNext() {
+		return h.Events[h.index+1], err
+	} else {
+		return ArrivalDepthandDurationEvent{}, errors.New("hazards: ArrivalDepthandDurationEventMulti does not have Next event")
+	}
+}
+
+func (h ArrivalDepthandDurationEventMulti) Previous() (HazardEvent, error) {
+	var err error = nil
+	if h.HasPrevious() {
+		return h.Events[h.index-1], err
+	} else {
+		return ArrivalDepthandDurationEvent{}, errors.New("hazards: ArrivalDepthandDurationEventMulti does not have Previous event")
+	}
+}
+
+func (h *ArrivalDepthandDurationEventMulti) Increment() {
+	if h.HasNext() {
+		h.index++
+	}
+}
+
+func (h *ArrivalDepthandDurationEventMulti) ResetIndex() {
+	h.index = 0
+}
+
+func (h ArrivalDepthandDurationEventMulti) Sort() { // ensure the hazard events are in order of arrival time
+	sort.Sort(h)
+}
+
+func (h ArrivalDepthandDurationEventMulti) IsSorted() bool {
+	return sort.IsSorted(h)
+}
+
+// Len is part of sort.Interface.
+func (h ArrivalDepthandDurationEventMulti) Len() int {
+	return len(h.Events)
+}
+
+// Swap is part of sort.Interface.
+func (h ArrivalDepthandDurationEventMulti) Swap(i, j int) {
+	h.Events[i], h.Events[j] = h.Events[j], h.Events[i]
+}
+
+// Less is part of sort.Interface
+func (h ArrivalDepthandDurationEventMulti) Less(i, j int) bool {
+	return h.Events[i].ArrivalTime().Before(h.Events[j].ArrivalTime())
 }

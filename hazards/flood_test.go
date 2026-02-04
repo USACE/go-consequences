@@ -108,3 +108,81 @@ func TestMarshalParameterJSON(t *testing.T) {
 	b, _ := json.Marshal(d)
 	fmt.Println(string(b))
 }
+
+func TestADDMulti(t *testing.T) {
+	// create a series of hazardEvents
+	var d1 = hazards.ArrivalDepthandDurationEvent{}
+	d1.SetDuration(0)
+	d1.SetDepth(1.0)
+	t1 := time.Date(1984, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d1.SetArrivalTime(t1)
+
+	var d2 = hazards.ArrivalDepthandDurationEvent{}
+	d2.SetDuration(5.0)
+	d2.SetDepth(1.0)
+	t2 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d2.SetArrivalTime(t2)
+
+	var d3 = hazards.ArrivalDepthandDurationEvent{}
+	d3.SetDuration(0.0)
+	d3.SetDepth(1.0)
+	t3 := time.Date(1984, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	d3.SetArrivalTime(t3)
+
+	var d4 = hazards.ArrivalDepthandDurationEvent{}
+	d4.SetDuration(0.0)
+	d4.SetDepth(2.0)
+	t4 := time.Date(1985, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d4.SetArrivalTime(t4)
+
+	var d5 = hazards.ArrivalDepthandDurationEvent{}
+	d5.SetDuration(0.0)
+	d5.SetDepth(2.0)
+	t5 := time.Date(1985, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d5.SetArrivalTime(t5)
+
+	events := []hazards.ArrivalDepthandDurationEvent{d1, d2, d3, d4, d5}
+	addm := hazards.ArrivalDepthandDurationEventMulti{Events: events}
+
+	depths := []float64{}
+	expected := []float64{1.0, 1.0, 1.0, 2.0, 2.0}
+
+	for {
+		depths = append(depths, addm.Depth())
+		if addm.HasNext() {
+			addm.Increment()
+		} else {
+			break
+		}
+	}
+
+	// check that we properly read all depths and iterated through the events
+	for i := range expected {
+		if expected[i] != depths[i] {
+			t.Errorf("Expected: %v. Got: %v\n", expected[i], depths[i])
+		}
+	}
+
+	// check that we can reset the index
+	addm.ResetIndex()
+	if addm.Index() != 0 {
+		t.Errorf("Index not reset")
+	}
+	// check that we can read the Parameters for the events
+	for {
+		if !addm.Has(hazards.Depth) {
+			t.Errorf("Event didn't have Depth")
+		}
+		if !addm.Has(hazards.Duration) {
+			t.Errorf("Event didn't have Duration")
+		}
+		if !addm.Has(hazards.ArrivalTime) {
+			t.Errorf("Event didn't have ArrivalTime")
+		}
+		if addm.HasNext() {
+			addm.Increment()
+		} else {
+			break
+		}
+	}
+}

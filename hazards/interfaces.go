@@ -236,11 +236,21 @@ func (p *Parameter) UnmarshalJSON(b []byte) error {
 
 type MultiHazardEvent interface {
 	HazardEvent
+	Index() int
 	HasNext() bool
-	Next() // advances an id value in the implementing struct
+	HasPrevious() bool
+	Next() (HazardEvent, error)
+	Previous() (HazardEvent, error)
+	Increment()
+	ResetIndex()
+	Sort()
+	IsSorted() bool
 }
 
-type MultiHazardFrequencyEvent interface {
-	MultiHazardEvent
-	Frequency() float64
-}
+// TODO: multihazardprovider
+// start with csv of arrival depth duration
+
+// type MultiHazardFrequencyEvent interface {
+// 	MultiHazardEvent
+// 	Frequency() float64
+// }
