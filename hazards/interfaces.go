@@ -239,6 +239,7 @@ type MultiHazardEvent interface {
 	Index() int
 	HasNext() bool
 	HasPrevious() bool
+	This() HazardEvent
 	Next() (HazardEvent, error)
 	Previous() (HazardEvent, error)
 	Increment()

@@ -508,6 +508,10 @@ func (h ArrivalDepthandDurationEventMulti) HasPrevious() bool {
 	return h.index > 0
 }
 
+func (h ArrivalDepthandDurationEventMulti) This() HazardEvent {
+	return h.Events[h.index]
+}
+
 func (h ArrivalDepthandDurationEventMulti) Next() (HazardEvent, error) {
 	var err error = nil
 	if h.HasNext() {
@@ -536,7 +540,8 @@ func (h *ArrivalDepthandDurationEventMulti) ResetIndex() {
 	h.index = 0
 }
 
-func (h *ArrivalDepthandDurationEventMulti) Append(newEvent ArrivalDepthandDurationEvent) {
+func (h *ArrivalDepthandDurationEventMulti) Append(n HazardEvent) {
+	newEvent := n.(ArrivalDepthandDurationEvent)
 	h.Events = append(h.Events, newEvent)
 }
 

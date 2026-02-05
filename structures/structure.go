@@ -135,6 +135,10 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Res
 	return computeConsequences(d, s)
 }
 
+func (s StructureDeterministic) Compute2(d hazards.MultiHazardEvent) {
+	fmt.Println("Delete this function")
+}
+
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Clone() StructureDeterministic {
 	return StructureDeterministic{
@@ -473,11 +477,27 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	// this function needs to return a single result. Not a slice of results
 	// Make a nested Result where each column is itself a Result
-	// TODO: understand whether and how this type of result can be passed to results writers.
-	indexHeader := make([]string, 0)
-	results := make([]interface{}, 0)
 
-	var ret = consequences.Result{Headers: indexHeader, Result: results}
+	// Rethinking the results format. The current version repeats the structure info for each result.
+	// The main result body can include the structure info, and we can simply store the details of the iteration results in a column as json.
+	mainHeader := []string{
+		"fd_id", "x", "y", "damage category", "occupancy type",
+		"pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips",
+		"original structure value", "original content value", "final structure value", "final content value", //
+		"original ffe", "final ffe", "times rebuilt", "times raised", "StructureTotalLoss", "ContentsTotalLoss",
+		"hazard results",
+	}
+	subResultsHeader := make([]string, 0)
+	subResultsResult := make([]interface{}, 0)
+	subResult := consequences.Result{Headers: subResultsHeader, Result: subResultsResult}
+	mainResults := []interface{}{
+		"updateme", 0.0, 0.0, "damcat", "occtype",
+		0.0, 0.0, 0.0, 0.0, "cbfips",
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		subResult,
+	}
+	var ret = consequences.Result{Headers: mainHeader, Result: mainResults}
 	var err error = nil
 
 	// damage functions for structure
@@ -519,7 +539,8 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		// Calculate reconstruction from previous hazard if we aren't on the first one
 		if event.HasPrevious() {
 
-			pr, err := ret.Fetch(fmt.Sprintf("%d", event.Index()-1))
+			pr, err := subResult.Fetch(fmt.Sprintf("%d", event.Index()-1))
+			// pr, err := ret.Fetch(fmt.Sprintf("%d", event.Index()-1))
 			if err != nil {
 				return ret, fmt.Errorf("structures: Unable to fetch previous result at index = %v", event.Index())
 			}
@@ -562,8 +583,8 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			convalcurr = conval * (1 - cDamageFactor)
 		}
 
-		header := []string{"fd_id", "structure damage", "content damage", "s_dam_per", "c_dam_per", "reconstruction_days", "completion_date", "structure_value", "content_value"}
-		values := []interface{}{"updateme", 0.0, 0.0, 0.0, 0.0, 0.0, time.Time{}, 0.0, 0.0}
+		header := []string{"hazard", "structure damage", "content damage", "s_dam_per", "c_dam_per", "reconstruction_days", "completion_date", "structure_value", "content_value"}
+		values := []interface{}{event.This(), 0.0, 0.0, 0.0, 0.0, 0.0, time.Time{}, 0.0, 0.0}
 		result := consequences.Result{Headers: header, Result: values}
 
 		if event.Has(sDamFun.DamageDriver) && event.Has(cDamFun.DamageDriver) && event.Has(rDamFun.DamageDriver) {
@@ -623,7 +644,6 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			svalcurr = svalcurr * (1 - sDamageFactor)
 			convalcurr = convalcurr * (1 - cDamageFactor)
 
-			result.Result[0] = s.BaseStructure.Name
 			result.Result[1] = sdamage
 			result.Result[2] = cdamage
 			result.Result[3] = sdampercent
@@ -636,9 +656,10 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		} else {
 			err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 		}
-		indexHeader = append(indexHeader, fmt.Sprintf("%d", event.Index()))
-		results = append(results, result)
-		ret = consequences.Result{Headers: indexHeader, Result: results}
+		subResultsHeader = append(subResultsHeader, fmt.Sprintf("%d", event.Index()))
+		subResultsResult = append(subResultsResult, result)
+		subResult = consequences.Result{Headers: subResultsHeader, Result: subResultsResult}
+		ret.Result[20] = subResult
 
 		if event.HasNext() {
 			event.Increment() // go to the next event and restart loop

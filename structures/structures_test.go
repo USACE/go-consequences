@@ -462,8 +462,14 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 		panic(err)
 	}
 
+	hr, err := results.Fetch("hazard results")
+	if err != nil {
+		panic(err)
+	}
+	hazardResults := hr.(consequences.Result)
+
 	for i := range expectedResults {
-		r, err := results.Fetch(fmt.Sprintf("%d", i))
+		r, err := hazardResults.Fetch(fmt.Sprintf("%d", i))
 		if err != nil {
 			panic(err)
 		}
