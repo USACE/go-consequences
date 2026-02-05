@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/USACE/go-consequences/geography"
+	"github.com/USACE/go-consequences/hazards"
 )
 
 func TestInitADDMHP(t *testing.T) {
@@ -21,7 +22,8 @@ func TestInitADDMHP(t *testing.T) {
 		SRID: "",
 	}
 
-	h, err := ADDMHP.Hazard(loc)
+	haz, err := ADDMHP.Hazard(loc)
+	h := haz.(hazards.ArrivalDepthandDurationEventMulti)
 	if err != nil {
 		panic(err)
 	}

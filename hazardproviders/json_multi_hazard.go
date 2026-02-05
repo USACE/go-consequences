@@ -74,7 +74,7 @@ func (j jsonArrivalDepthDurationMultiHazardProvider) Close() {
 	}
 }
 
-func (j jsonArrivalDepthDurationMultiHazardProvider) Hazard(l geography.Location) (hazards.ArrivalDepthandDurationEventMulti, error) {
+func (j jsonArrivalDepthDurationMultiHazardProvider) Hazard(l geography.Location) (hazards.HazardEvent, error) {
 	var hm hazards.ArrivalDepthandDurationEventMulti
 	for i, cr := range j.depthCRs {
 		d, err := cr.ProvideValue(l)
@@ -95,7 +95,7 @@ func (j jsonArrivalDepthDurationMultiHazardProvider) Hazard(l geography.Location
 		h, err = j.process(hd, h)
 		hm.Append(h.(hazards.ArrivalDepthandDurationEvent))
 	}
-	return hm, nil
+	return &hm, nil
 }
 
 func (j jsonArrivalDepthDurationMultiHazardProvider) HazardBoundary() (geography.BBox, error) {

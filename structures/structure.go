@@ -135,10 +135,6 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Res
 	return computeConsequences(d, s)
 }
 
-func (s StructureDeterministic) Compute2(d hazards.MultiHazardEvent) {
-	fmt.Println("Delete this function")
-}
-
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Clone() StructureDeterministic {
 	return StructureDeterministic{
@@ -659,6 +655,20 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		subResultsHeader = append(subResultsHeader, fmt.Sprintf("%d", event.Index()))
 		subResultsResult = append(subResultsResult, result)
 		subResult = consequences.Result{Headers: subResultsHeader, Result: subResultsResult}
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = s.BaseStructure.DamCat
+		ret.Result[4] = s.OccType.Name
+		ret.Result[5] = s.Pop2amu65
+		ret.Result[6] = s.Pop2amo65
+		ret.Result[7] = s.Pop2pmu65
+		ret.Result[8] = s.Pop2pmo65
+		ret.Result[9] = s.CBFips
+		ret.Result[10] = sval
+		ret.Result[11] = conval
+		ret.Result[12] = svalcurr
+		ret.Result[13] = convalcurr
 		ret.Result[20] = subResult
 
 		if event.HasNext() {
