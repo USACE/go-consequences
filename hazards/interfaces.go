@@ -243,12 +243,10 @@ type MultiHazardEvent interface {
 	Previous() (HazardEvent, error)
 	Increment()
 	ResetIndex()
+	Append(HazardEvent)
 	Sort()
 	IsSorted() bool
 }
-
-// TODO: multihazardprovider
-// start with csv of arrival depth duration
 
 // type MultiHazardFrequencyEvent interface {
 // 	MultiHazardEvent

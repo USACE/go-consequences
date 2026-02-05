@@ -536,6 +536,10 @@ func (h *ArrivalDepthandDurationEventMulti) ResetIndex() {
 	h.index = 0
 }
 
+func (h *ArrivalDepthandDurationEventMulti) Append(newEvent ArrivalDepthandDurationEvent) {
+	h.Events = append(h.Events, newEvent)
+}
+
 func (h ArrivalDepthandDurationEventMulti) Sort() { // ensure the hazard events are in order of arrival time
 	sort.Sort(h)
 }
