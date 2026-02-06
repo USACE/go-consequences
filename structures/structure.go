@@ -471,11 +471,7 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 }
 
 func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureDeterministic) (consequences.Result, error) {
-	// this function needs to return a single result. Not a slice of results
-	// Make a nested Result where each column is itself a Result
 
-	// Rethinking the results format. The current version repeats the structure info for each result.
-	// The main result body can include the structure info, and we can simply store the details of the iteration results in a column as json.
 	mainHeader := []string{
 		"fd_id", "x", "y", "damage category", "occupancy type",
 		"pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips",
@@ -677,5 +673,6 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			break
 		}
 	}
+	// ret.Result[20] = fmt.Sprintf("%v", subResult) // saving the results as a string
 	return ret, err
 }

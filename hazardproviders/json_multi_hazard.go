@@ -17,7 +17,7 @@ type jsonArrivalDepthDurationMultiHazardProvider struct {
 	process   HazardFunction
 }
 
-type ADDProperties struct { // will try to not use this
+type ADDProperties struct {
 	Year      float64 `json:"year"`
 	Month     float64 `json:"month"`
 	Day       float64 `json:"day"`
@@ -93,6 +93,9 @@ func (j jsonArrivalDepthDurationMultiHazardProvider) Hazard(l geography.Location
 		}
 		var h hazards.HazardEvent
 		h, err = j.process(hd, h)
+		if err != nil {
+			panic(err)
+		}
 		hm.Append(h.(hazards.ArrivalDepthandDurationEvent))
 	}
 	return &hm, nil
