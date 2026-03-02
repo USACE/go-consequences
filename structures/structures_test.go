@@ -1,9 +1,11 @@
 package structures
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
@@ -183,7 +185,6 @@ func TestComputeConsequences_erosion(t *testing.T) {
 	}
 }
 
-/*
 func TestComputeConsequencesWithReconstruction(t *testing.T) {
 
 	//build a basic structure with a defined depth damage relationship.
@@ -200,7 +201,24 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 	cm := make(map[hazards.Parameter]DamageFunction)
 	var cdf = DamageFunctionFamily{DamageFunctions: cm}
 	cdf.DamageFunctions[hazards.Default] = pddf
-	var o = OccupancyTypeDeterministic{Name: "test", StructureDFF: sdf, ContentDFF: cdf}
+
+	xr := []float64{0.0, 1.0}
+	yr := []float64{0, 100.0}
+	pdr := paireddata.PairedData{Xvals: xr, Yvals: yr}
+	pdrdf := DamageFunction{}
+	pdrdf.DamageFunction = pdr
+	pdrdf.DamageDriver = hazards.Depth
+	pdrdf.Source = "created for this test"
+	dm := make(map[hazards.Parameter]DamageFunction)
+	var rdf = DamageFunctionFamily{DamageFunctions: dm}
+	rdf.DamageFunctions[hazards.Default] = pdrdf
+
+	components := make(map[string]DamageFunctionFamily)
+	components["structure"] = sdf
+	components["contents"] = cdf
+	components["reconstruction"] = rdf
+
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: components}
 	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
 	//test depth values
@@ -212,29 +230,270 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 	expectedResults := []float64{0.0, 0.0, 10.0, 10.001, 22.5, 25.0, 27.5, 39.9, 40.0, 40.0}
 	for idx := range depths {
 		d.SetDepth(depths[idx])
-		r, err := s.Compute(d)
+		r, err := computeConsequencesWithReconstruction(d, s)
 		if err != nil {
 			panic(err)
 		}
-		out, err := r.Fetch("daystoreconstruction")
+
+		out, err := r.Fetch("reconstruction_days")
 		if err != nil {
 			panic(err)
 		}
 		got := out.(float64)
-
-		diff := (expectedResults[idx]*1.8 + d.Duration()) - got //180.0/100=1.8
+		fmt.Printf("Reconstruction time was %3.2f days.\n", got)
+		diff := (expectedResults[idx] + d.Duration()) - got //180.0/100=1.8
 		if math.Abs(diff) > .0000000000001 {
 			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.8+d.Duration())
 		}
-		out2, err := r.Fetch("rebuilddate")
-		if err != nil {
-			panic(err)
-		}
-		gotdate := out2.(time.Time)
-		if !gotdate.Equal(d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration()))) {
-			t.Errorf("Compute(%f) = %s; expected %s", depths[idx], gotdate, d.ArrivalTime().AddDate(0, 0, int(expectedResults[idx]*1.8+d.Duration())))
-		}
+
 	}
 
 }
-*/
+
+func TestComputeConsequencesMulti(t *testing.T) {
+
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := []float64{10.0, 20.0, 30.0, 40.0}
+	pd := paireddata.PairedData{Xvals: x, Yvals: y}
+	pddf := DamageFunction{}
+	pddf.DamageFunction = pd
+	pddf.DamageDriver = hazards.Depth
+	pddf.Source = "created for this test"
+	sm := make(map[hazards.Parameter]DamageFunction)
+	var sdf = DamageFunctionFamily{DamageFunctions: sm}
+	sdf.DamageFunctions[hazards.Default] = pddf
+	cm := make(map[hazards.Parameter]DamageFunction)
+	var cdf = DamageFunctionFamily{DamageFunctions: cm}
+	cdf.DamageFunctions[hazards.Default] = pddf
+
+	xr := []float64{0.0, 1.0}
+	yr := []float64{0, 100.0}
+	pdr := paireddata.PairedData{Xvals: xr, Yvals: yr}
+	pdrdf := DamageFunction{}
+	pdrdf.DamageFunction = pdr
+	pdrdf.DamageDriver = hazards.Depth
+	pdrdf.Source = "created for this test"
+	dm := make(map[hazards.Parameter]DamageFunction)
+	var rdf = DamageFunctionFamily{DamageFunctions: dm}
+	rdf.DamageFunctions[hazards.Default] = pdrdf
+
+	components := make(map[string]DamageFunctionFamily)
+	components["structure"] = sdf
+	components["contents"] = cdf
+	components["reconstruction"] = rdf
+
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: components}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
+
+	// create a series of hazardEvents
+	var d1 = hazards.ArrivalDepthandDurationEvent{}
+	d1.SetDuration(0)
+	d1.SetDepth(1.0)
+	t1 := time.Date(1984, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d1.SetArrivalTime(t1)
+
+	var d2 = hazards.ArrivalDepthandDurationEvent{}
+	d2.SetDuration(5.0)
+	d2.SetDepth(1.0)
+	t2 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d2.SetArrivalTime(t2)
+
+	var d3 = hazards.ArrivalDepthandDurationEvent{}
+	d3.SetDuration(0.0)
+	d3.SetDepth(1.0)
+	t3 := time.Date(1984, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	d3.SetArrivalTime(t3)
+
+	var d4 = hazards.ArrivalDepthandDurationEvent{}
+	d4.SetDuration(0.0)
+	d4.SetDepth(2.0)
+	t4 := time.Date(1985, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d4.SetArrivalTime(t4)
+
+	var d5 = hazards.ArrivalDepthandDurationEvent{}
+	d5.SetDuration(0.0)
+	d5.SetDepth(2.0)
+	t5 := time.Date(1985, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d5.SetArrivalTime(t5)
+
+	events := []hazards.HazardEvent{d1, d2, d3, d4, d5}
+
+	et1 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	et2 := time.Date(1984, time.Month(1), 26, 0, 0, 0, 0, time.UTC)
+	et3 := time.Date(1984, time.Month(2), 5, 0, 0, 0, 0, time.UTC)
+	et4 := time.Date(1985, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	et5 := time.Date(1985, time.Month(2), 8, 0, 0, 0, 0, time.UTC)
+
+	expectedResults := []time.Time{et1, et2, et3, et4, et5}
+	expectedDmgs := []float64{10.0, 10.0, 9.5, 20.0, 18.0}
+	// event 1 (10% dmg) arrives first (obviously). No adjustments required. dmg = 100*0.1 = 10.0
+	// event 2 (10% dmg) arrives after event 1 completes reconstruction. No adjustments required. dmg = 100*0.1 = 10.0
+	// event 3 interrupts event 2 reconstruction @ 50% complete
+	// 		event 2 had dmg=10, so structure was repaired by 5 when event 3 hit.
+	// 		structure value when event 3 hits is 100-(10-5)=95.
+	// 		event 3 does 10% damage ==> expected damage = 0.1*95 = 9.5
+	//		damageFactor to calculate reconstruction = 1 - (1-sDamageFactor)*(1-sdampercent) = 1 - (1-0.05)*(1-.1) = 0.145 ==> 14.5 reconstruction days (rounds to 15)
+	//		completion date should be 1984/2/5
+	// event 4 occurs after event 3 reconstruction complete. No adjustments required. dmg = 100*0.2 = 20
+	// event 5 interrupts event 4 reconstruction @ 50% complete
+	// 		structure value when event 5 hits is 100 - (20-10) = 90.
+	// 		event 5 does 20% damage ==> expected damage = 0.2*90 = 18.0
+	//		damageFactor to calculate reconstruction = 1 - (1-sDamageFactor)*(1-sdampercent) = 1 - (1-0.1)*(1-.2) = 0.28 ==> 28 reconstruction days
+
+	results, err := computeConsequencesMulti(events, s)
+	if err != nil {
+		panic(err)
+	}
+
+	for idx := range results {
+		out, err := results[idx].Fetch("completion_date")
+		if err != nil {
+			panic(err)
+		}
+
+		dif := expectedResults[idx].Sub(out.(time.Time))
+		fmt.Printf("Completion date was %v. Expected: %v. Diff: %v\n", out, expectedResults[idx], dif)
+		if math.Abs(float64(dif)) > float64(time.Minute) { // if the error is greater than about 1 minute
+			t.Errorf("Completion date was %v. Expected: %v. Diff: %v\n", out, expectedResults[idx], dif)
+
+		}
+
+		dmgout, err := results[idx].Fetch("structure damage")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Damage was %3.2f. Expected: %3.2f\n", dmgout, expectedDmgs[idx])
+		if math.Abs(dmgout.(float64)-float64(expectedDmgs[idx])) > 0.000000001 {
+			t.Errorf("Damage was %3.2f. Expected: %3.2f\n", dmgout, expectedDmgs[idx])
+		}
+
+	}
+
+}
+
+func TestComputeConsequencesMultiHazard(t *testing.T) {
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := []float64{10.0, 20.0, 30.0, 40.0}
+	pd := paireddata.PairedData{Xvals: x, Yvals: y}
+	pddf := DamageFunction{}
+	pddf.DamageFunction = pd
+	pddf.DamageDriver = hazards.Depth
+	pddf.Source = "created for this test"
+	sm := make(map[hazards.Parameter]DamageFunction)
+	var sdf = DamageFunctionFamily{DamageFunctions: sm}
+	sdf.DamageFunctions[hazards.Default] = pddf
+	cm := make(map[hazards.Parameter]DamageFunction)
+	var cdf = DamageFunctionFamily{DamageFunctions: cm}
+	cdf.DamageFunctions[hazards.Default] = pddf
+
+	xr := []float64{0.0, 1.0}
+	yr := []float64{0, 100.0}
+	pdr := paireddata.PairedData{Xvals: xr, Yvals: yr}
+	pdrdf := DamageFunction{}
+	pdrdf.DamageFunction = pdr
+	pdrdf.DamageDriver = hazards.Depth
+	pdrdf.Source = "created for this test"
+	dm := make(map[hazards.Parameter]DamageFunction)
+	var rdf = DamageFunctionFamily{DamageFunctions: dm}
+	rdf.DamageFunctions[hazards.Default] = pdrdf
+
+	components := make(map[string]DamageFunctionFamily)
+	components["structure"] = sdf
+	components["contents"] = cdf
+	components["reconstruction"] = rdf
+
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: components}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
+
+	// create a series of hazardEvents
+	var d1 = hazards.ArrivalDepthandDurationEvent{}
+	d1.SetDuration(0)
+	d1.SetDepth(1.0)
+	t1 := time.Date(1984, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d1.SetArrivalTime(t1)
+
+	var d2 = hazards.ArrivalDepthandDurationEvent{}
+	d2.SetDuration(5.0)
+	d2.SetDepth(1.0)
+	t2 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d2.SetArrivalTime(t2)
+
+	var d3 = hazards.ArrivalDepthandDurationEvent{}
+	d3.SetDuration(0.0)
+	d3.SetDepth(1.0)
+	t3 := time.Date(1984, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	d3.SetArrivalTime(t3)
+
+	var d4 = hazards.ArrivalDepthandDurationEvent{}
+	d4.SetDuration(0.0)
+	d4.SetDepth(2.0)
+	t4 := time.Date(1985, time.Month(1), 1, 0, 0, 0, 0, time.UTC)
+	d4.SetArrivalTime(t4)
+
+	var d5 = hazards.ArrivalDepthandDurationEvent{}
+	d5.SetDuration(0.0)
+	d5.SetDepth(2.0)
+	t5 := time.Date(1985, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	d5.SetArrivalTime(t5)
+
+	events := []hazards.ArrivalDepthandDurationEvent{d5, d1, d2, d3, d4}
+
+	addMulti := &hazards.ArrivalDepthandDurationEventMulti{Events: events} //need to use the pointer reference because methods on MultiHazardEvent require pointers
+
+	// test that we can sort events by ArrivalTime
+	if !addMulti.IsSorted() {
+		fmt.Println("Sorting...")
+		addMulti.Sort()
+	}
+
+	et1 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
+	et2 := time.Date(1984, time.Month(1), 26, 0, 0, 0, 0, time.UTC)
+	et3 := time.Date(1984, time.Month(2), 5, 0, 0, 0, 0, time.UTC)
+	et4 := time.Date(1985, time.Month(1), 21, 0, 0, 0, 0, time.UTC)
+	et5 := time.Date(1985, time.Month(2), 8, 0, 0, 0, 0, time.UTC)
+
+	expectedResults := []time.Time{et1, et2, et3, et4, et5}
+	expectedDmgs := []float64{10.0, 10.0, 9.5, 20.0, 18.0}
+
+	results, err := s.Compute(addMulti)
+	if err != nil {
+		panic(err)
+	}
+
+	hr, err := results.Fetch("hazard results")
+	if err != nil {
+		panic(err)
+	}
+	hazardResults := hr.(consequences.Result)
+
+	for i := range expectedResults {
+		r, err := hazardResults.Fetch(fmt.Sprintf("%d", i))
+		if err != nil {
+			panic(err)
+		}
+		result := r.(consequences.Result)
+		out, err := result.Fetch("completion_date")
+		if err != nil {
+			panic(err)
+		}
+
+		dif := expectedResults[i].Sub(out.(time.Time))
+		fmt.Printf("Completion date was %v. Expected: %v. Diff: %v\n", out, expectedResults[i], dif)
+		if math.Abs(float64(dif)) > float64(time.Minute) { // if the error is greater than about 1 minute
+			t.Errorf("Completion date was %v. Expected: %v. Diff: %v\n", out, expectedResults[i], dif)
+
+		}
+
+		dmgout, err := result.Fetch("structure damage")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Damage was %3.2f. Expected: %3.2f\n", dmgout, expectedDmgs[i])
+		if math.Abs(dmgout.(float64)-float64(expectedDmgs[i])) > 0.000000001 {
+			t.Errorf("Damage was %3.2f. Expected: %3.2f\n", dmgout, expectedDmgs[i])
+		}
+
+	}
+}

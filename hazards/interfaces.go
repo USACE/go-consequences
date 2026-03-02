@@ -233,3 +233,23 @@ func (p *Parameter) UnmarshalJSON(b []byte) error {
 	*p = toParameter(s)
 	return nil
 }
+
+type MultiHazardEvent interface {
+	HazardEvent
+	Index() int
+	HasNext() bool
+	HasPrevious() bool
+	This() HazardEvent
+	Next() (HazardEvent, error)
+	Previous() (HazardEvent, error)
+	Increment()
+	ResetIndex()
+	Append(HazardEvent)
+	Sort()
+	IsSorted() bool
+}
+
+// type MultiHazardFrequencyEvent interface {
+// 	MultiHazardEvent
+// 	Frequency() float64
+// }
