@@ -48,6 +48,25 @@ func ArrivalAndDurationHazardFunction() HazardFunction {
 	}
 }
 
+func ArrivalDepthAndDurationHazardFunction() HazardFunction {
+	return func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		d := hazards.ArrivalDepthandDurationEvent{}
+		d.SetDepth(valueIn.Depth)
+		d.SetDuration(valueIn.Duration)
+		d.SetArrivalTime(valueIn.ArrivalTime)
+		return d, nil
+	}
+}
+
+func DepthAndDurationHazardFunction() HazardFunction {
+	return func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		d := hazards.ArrivalDepthandDurationEvent{}
+		d.SetDepth(valueIn.Depth)
+		d.SetDuration(valueIn.Duration)
+		return d, nil
+	}
+}
+
 // NoHazardFoundError is an error for a situation where no hazard could be computed for the given args
 type NoHazardFoundError struct {
 	Input string
