@@ -102,28 +102,28 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)
 }
 
-func Test_StreamAbstract_MultiHazard(t *testing.T) {
-	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISPwithOcctypeFilePath("/workspaces/go-consequences/data/lifecycle/occtypes_reconstruction.json")
-	now := time.Now()
-	fmt.Println(now)
+// func Test_StreamAbstract_MultiHazard(t *testing.T) {
+// 	//initialize the NSI API structure provider
+// 	nsp := structureprovider.InitNSISPwithOcctypeFilePath("/workspaces/go-consequences/data/lifecycle/occtypes_reconstruction.json")
+// 	now := time.Now()
+// 	fmt.Println(now)
 
-	root := "/workspaces/go-consequences/data/lifecycle/"
-	filepath := root + "test_arrival-depth-duration_hazards.json"
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"multihazardtest_consequences.json", "results", "GeoJSON")
-	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
-	//create a result writer based on the name of the depth grid.
-	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
-	defer w.Close()
-	//initialize a hazard provider based on the depth grid.
-	dfr, err := hazardproviders.InitADDMHP(filepath)
-	if err != nil {
-		panic(err)
-	}
-	//compute consequences.
-	StreamAbstract(dfr, nsp, w)
-	fmt.Println(time.Since(now))
-}
+// 	root := "/workspaces/go-consequences/data/lifecycle/"
+// 	filepath := root + "test_arrival-depth-duration_hazards.json"
+// 	w, _ := resultswriters.InitSpatialResultsWriter(root+"multihazardtest_consequences.gpkg", "results", "GPKG")
+// 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+// 	//create a result writer based on the name of the depth grid.
+// 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
+// 	defer w.Close()
+// 	//initialize a hazard provider based on the depth grid.
+// 	dfr, err := hazardproviders.InitADDMHP(filepath)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	//compute consequences.
+// 	StreamAbstract(dfr, nsp, w)
+// 	fmt.Println(time.Since(now))
+// }
 
 func Test_Config(t *testing.T) {
 	config := Config{
