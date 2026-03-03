@@ -223,7 +223,7 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 
 	//test depth values
 	var d = hazards.ArrivalDepthandDurationEvent{}
-	d.SetDuration(2.5)
+	d.SetDuration(3)
 	at := time.Date(1984, time.Month(1), 22, 0, 0, 0, 0, time.UTC)
 	d.SetArrivalTime(at)
 	depths := []float64{0.0, 0.5, 1.0, 1.0001, 2.25, 2.5, 2.75, 3.99, 4, 5}
@@ -240,10 +240,11 @@ func TestComputeConsequencesWithReconstruction(t *testing.T) {
 			panic(err)
 		}
 		got := out.(float64)
+		expect := math.Ceil(expectedResults[idx] + d.Duration())
 		fmt.Printf("Reconstruction time was %3.2f days.\n", got)
-		diff := (expectedResults[idx] + d.Duration()) - got //180.0/100=1.8
+		diff := expect - got //180.0/100=1.8
 		if math.Abs(diff) > .0000000000001 {
-			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expectedResults[idx]*1.8+d.Duration())
+			t.Errorf("Compute(%f) = %f; expected %f", depths[idx], got, expect)
 		}
 
 	}
