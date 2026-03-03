@@ -57,10 +57,41 @@
 - structureAmountToDamage = CalculateCurrentStructureValue(year) * structureModifier
     - ==> like go-consequences `sval * sdampercent`
 
+## 3. Write results to file
+
+- Assumption: we don't want to write several hundred columns to store results for every HazardEvent in a MultiHazardEvent
+    - Depending on the number of hazards and variables tracked, it may not be possible: "The default setting for SQLITE_MAX_COLUMN is 2000" (https://sqlite.org/limits.html)
+
+### Proposal 1: dedicate 1 column in the `consequences.Result` to results for specific hazard events
+    - Result.Header[i] = "hazard results"
+    - subResult = consequences.Result{}
+    - Result.Results[i] = subResult
+        - for event in events:
+            1. create a new result with the fields we want to report for each event
+            2. subResult.Header = append(subResult.Header, fmt.Sprintf("%d", event.Index())
+            3. subResult.Results = append(subResult.Results, consequences.Result{Header: subHeader, Results: event_results}
+
+Pros:
+    1. This works and we can utilize the Fetch() method on the nested results to get results for specific events
+
+Cons:
+    1. the string headers for the results of individual events are repeated each time wasting space
+    2. cannot save the results to gpkg unless the entire result column is converted to a string which removes our ability to parse as structs.
+        - instead of just casting as a string, should I be using the MarshalJSON method?
+
+
+### Proposal 2: Use consequences.Results{IsTable: true}
+    - 
+
 
 
 ## General Brainstorming
 
 - In `compute-configuration.go` the `Computable` struct includes a `ComputeLifeloss` bool. We could add another bool for `ComputeReconstruction` that would enable that calculation without making it a default.
 
+# TODO today
+
+1. [x] json_multi_hazard_test.go - replace printline with asserts that check expected values
+2. [x] flood_test.go - when checking if event has given parameters, also assert that the values are as expected
+3. [x] make a csv hazard provider that simply provides a constant arrival, depth, and duration for all locations. 
 
