@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"://github.com"
+	"github.com/USACE/go-consequences/consequences"
 )
 
 type geoJsonResultsWriter struct {
