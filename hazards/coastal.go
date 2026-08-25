@@ -1,7 +1,9 @@
 package hazards
 
 import (
+	"errors"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -105,4 +107,131 @@ func (ad CoastalEvent) Parameters() Parameter {
 func (ad CoastalEvent) Has(p Parameter) bool {
 	adp := ad.Parameters()
 	return adp&p != 0
+}
+
+type MultiFrequencyCoastalEvent struct {
+	index       int
+	Frequencies []float64
+	Events      []CoastalEvent
+}
+
+func (h MultiFrequencyCoastalEvent) Depth() float64 {
+	return h.Events[h.index].Depth()
+}
+
+func (h MultiFrequencyCoastalEvent) Velocity() float64 {
+	return h.Events[h.index].Velocity()
+}
+
+func (h MultiFrequencyCoastalEvent) ArrivalTime() time.Time {
+	return h.Events[h.index].ArrivalTime()
+}
+
+func (h MultiFrequencyCoastalEvent) Erosion() float64 {
+	return h.Events[h.index].Erosion()
+}
+
+func (h MultiFrequencyCoastalEvent) Duration() float64 {
+	return h.Events[h.index].Duration()
+}
+
+func (h MultiFrequencyCoastalEvent) WaveHeight() float64 {
+	return h.Events[h.index].WaveHeight()
+}
+
+func (h MultiFrequencyCoastalEvent) Salinity() bool {
+	return h.Events[h.index].Salinity()
+}
+
+func (h MultiFrequencyCoastalEvent) Qualitative() string {
+	return h.Events[h.index].Qualitative()
+}
+
+func (h MultiFrequencyCoastalEvent) DV() float64 {
+	return h.Events[h.index].DV()
+}
+
+func (h MultiFrequencyCoastalEvent) Frequency() float64 {
+	return h.Frequencies[h.index]
+}
+
+func (h MultiFrequencyCoastalEvent) Parameters() Parameter {
+	return h.Events[h.index].Parameters()
+}
+
+func (h MultiFrequencyCoastalEvent) Has(p Parameter) bool {
+	return h.Events[h.index].Has(p)
+}
+
+func (h MultiFrequencyCoastalEvent) Index() int {
+	return h.index
+}
+
+func (h MultiFrequencyCoastalEvent) HasNext() bool {
+	return h.index < (len(h.Events) - 1)
+}
+
+func (h MultiFrequencyCoastalEvent) HasPrevious() bool {
+	return h.index > 0
+}
+
+func (h MultiFrequencyCoastalEvent) This() HazardEvent {
+	return h.Events[h.index]
+}
+
+func (h MultiFrequencyCoastalEvent) Next() (HazardEvent, error) {
+	var err error = nil
+	if h.HasNext() {
+		return h.Events[h.index+1], err
+	} else {
+		return ArrivalDepthandDurationEvent{}, errors.New("hazards: MultiFrequencyCoastalEvent does not have Next event")
+	}
+}
+
+func (h MultiFrequencyCoastalEvent) Previous() (HazardEvent, error) {
+	var err error = nil
+	if h.HasPrevious() {
+		return h.Events[h.index-1], err
+	} else {
+		return ArrivalDepthandDurationEvent{}, errors.New("hazards: MultiFrequencyCoastalEvent does not have Previous event")
+	}
+}
+
+func (h *MultiFrequencyCoastalEvent) Increment() {
+	if h.HasNext() {
+		h.index++
+	}
+}
+
+func (h *MultiFrequencyCoastalEvent) ResetIndex() {
+	h.index = 0
+}
+
+func (h *MultiFrequencyCoastalEvent) Append(n HazardEvent) {
+	newEvent := n.(CoastalEvent)
+	h.Events = append(h.Events, newEvent)
+}
+
+func (h MultiFrequencyCoastalEvent) Sort() { // ensure the hazard events are in order of arrival time
+	sort.Sort(h)
+}
+
+func (h MultiFrequencyCoastalEvent) IsSorted() bool {
+	return sort.IsSorted(h)
+}
+
+// Len is part of sort.Interface.
+func (h MultiFrequencyCoastalEvent) Len() int {
+	return len(h.Events)
+}
+
+// Swap is part of sort.Interface.
+func (h MultiFrequencyCoastalEvent) Swap(i, j int) {
+	h.Events[i], h.Events[j] = h.Events[j], h.Events[i]
+}
+
+// Less is part of sort.Interface
+func (h MultiFrequencyCoastalEvent) Less(i, j int) bool {
+	return h.Frequencies[i] < h.Frequencies[j] // This means the 500-year flood is "Less" than the 100-year event because we are sorting on frequency
+
 }

@@ -25,6 +25,28 @@ type HazardEvent interface {
 	Parameters() Parameter
 	Has(p Parameter) bool
 }
+
+type MultiHazardEvent interface {
+	HazardEvent
+	Index() int
+	HasNext() bool
+	HasPrevious() bool
+	This() HazardEvent
+	Next() (HazardEvent, error)
+	Previous() (HazardEvent, error)
+	Increment()
+	ResetIndex()
+	Append(HazardEvent)
+	Sort()
+	IsSorted() bool
+}
+
+type MultiFrequencyHazardEvent interface {
+	MultiHazardEvent
+	SetIndex(index int) error
+	Frequencies() []float64
+}
+
 type HazardData struct {
 	Depth       float64
 	Velocity    float64
@@ -232,24 +254,4 @@ func (p *Parameter) UnmarshalJSON(b []byte) error {
 	// Note that if the string cannot be found then it will be set to the zero value, 'default' in this case.
 	*p = toParameter(s)
 	return nil
-}
-
-type MultiHazardEvent interface {
-	HazardEvent
-	Index() int
-	HasNext() bool
-	HasPrevious() bool
-	This() HazardEvent
-	Next() (HazardEvent, error)
-	Previous() (HazardEvent, error)
-	Increment()
-	ResetIndex()
-	Append(HazardEvent)
-	Sort()
-	IsSorted() bool
-}
-
-type MultiHazardFrequencyEvent interface {
-	MultiHazardEvent
-	Frequency() float64
 }
