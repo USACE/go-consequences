@@ -109,10 +109,42 @@ func (ad CoastalEvent) Has(p Parameter) bool {
 	return adp&p != 0
 }
 
+type CoastalFrequencyEvent struct {
+	CoastalEvent
+	frequency float64
+}
+
+func NewCoastalFrequencyEvent(c CoastalFrequencyEvent) *CoastalFrequencyEvent {
+
+	e := c
+
+	if c.depth == 0.0 {
+		e.depth = -901.0
+	}
+
+	if c.waveHeight == 0.0 {
+		e.waveHeight = -901.0
+	}
+
+	return &e
+}
+
+func (d CoastalFrequencyEvent) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("{\"coastalfrequencyevent\":{\"depth\":%f, \"waveheight\":%f,\"salinity\":%t,\"frequency\":%f}}", d.Depth(), d.WaveHeight(), d.Salinity(), d.Frequency())
+	return []byte(s), nil
+}
+
+func (h CoastalFrequencyEvent) Frequency() float64 {
+	return h.frequency
+}
+func (h *CoastalFrequencyEvent) SetFrequency(f float64) {
+	h.frequency = f
+}
+
 type MultiFrequencyCoastalEvent struct {
-	index       int
-	Frequencies []float64
-	Events      []CoastalEvent
+	index int
+	// Frequencies []float64
+	Events []CoastalFrequencyEvent
 }
 
 func (h MultiFrequencyCoastalEvent) Depth() float64 {
@@ -152,7 +184,7 @@ func (h MultiFrequencyCoastalEvent) DV() float64 {
 }
 
 func (h MultiFrequencyCoastalEvent) Frequency() float64 {
-	return h.Frequencies[h.index]
+	return h.Events[h.index].Frequency()
 }
 
 func (h MultiFrequencyCoastalEvent) Parameters() Parameter {
@@ -208,7 +240,7 @@ func (h *MultiFrequencyCoastalEvent) ResetIndex() {
 }
 
 func (h *MultiFrequencyCoastalEvent) Append(n HazardEvent) {
-	newEvent := n.(CoastalEvent)
+	newEvent := n.(CoastalFrequencyEvent)
 	h.Events = append(h.Events, newEvent)
 }
 
@@ -230,8 +262,21 @@ func (h MultiFrequencyCoastalEvent) Swap(i, j int) {
 	h.Events[i], h.Events[j] = h.Events[j], h.Events[i]
 }
 
-// Less is part of sort.Interface
 func (h MultiFrequencyCoastalEvent) Less(i, j int) bool {
-	return h.Frequencies[i] < h.Frequencies[j] // This means the 500-year flood is "Less" than the 100-year event because we are sorting on frequency
+	return h.Events[i].Frequency() < h.Events[j].Frequency() // This means the 500-year flood is "Less" than the 100-year event because we are sorting on frequency
+}
 
+func (h *MultiFrequencyCoastalEvent) SetIndex(i int) error {
+	if i < (len(h.Events)) {
+		h.index = i
+		return nil
+	}
+	return errors.New("hazards: Attempted to set out of bounds index on DepthEventMultiFrequency event.")
+}
+func (h MultiFrequencyCoastalEvent) HazardFrequencies() []float64 {
+	f := make([]float64, len(h.Events))
+	for i, e := range h.Events {
+		f[i] = e.Frequency()
+	}
+	return f
 }

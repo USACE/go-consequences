@@ -13,6 +13,11 @@ type DepthEvent struct {
 	depth float64
 }
 
+type DepthFrequencyEvent struct {
+	DepthEvent
+	frequency float64
+}
+
 func (h DepthEvent) Depth() float64 {
 	return h.depth
 }
@@ -60,6 +65,13 @@ func (h DepthEvent) Has(p Parameter) bool {
 func (d DepthEvent) MarshalJSON() ([]byte, error) {
 	s := fmt.Sprintf("{\"depthevent\":{\"depth\":%f}}", d.Depth())
 	return []byte(s), nil
+}
+func (d DepthFrequencyEvent) Frequency() float64 {
+	return d.frequency
+}
+func (h *DepthFrequencyEvent) SetFrequency(f float64) {
+	//fmt.Println(d)
+	h.frequency = f
 }
 
 // ArrivalandDurationEvent describes an event with an arrival time and a duration in days
@@ -573,9 +585,8 @@ func (h ArrivalDepthandDurationEventMulti) Less(i, j int) bool {
 }
 
 type DepthEventMultiFrequency struct {
-	index       int
-	Frequencies []float64
-	Events      []DepthEvent
+	index  int
+	Events []DepthFrequencyEvent
 }
 
 func (h DepthEventMultiFrequency) Depth() float64 {
@@ -667,7 +678,7 @@ func (h *DepthEventMultiFrequency) ResetIndex() {
 }
 
 func (h *DepthEventMultiFrequency) Append(n HazardEvent) {
-	newEvent := n.(DepthEvent)
+	newEvent := n.(DepthFrequencyEvent)
 	h.Events = append(h.Events, newEvent)
 }
 
@@ -691,14 +702,25 @@ func (h DepthEventMultiFrequency) Swap(i, j int) {
 
 // Less is part of sort.Interface
 func (h DepthEventMultiFrequency) Less(i, j int) bool {
-	// Sort order is most to least frequent
-	return h.Frequencies[i] > h.Frequencies[j]
+	return h.Events[i].Frequency() < h.Events[j].Frequency() // This means the 500-year flood is "Less" than the 100-year event because we are sorting on frequency
 }
 
 func (h *DepthEventMultiFrequency) SetIndex(i int) error {
-	if i < (len(h.Events) - 1) {
+	if i < (len(h.Events)) {
 		h.index = i
 		return nil
 	}
 	return errors.New("hazards: Attempted to set out of bounds index on DepthEventMultiFrequency event.")
+}
+
+func (h DepthEventMultiFrequency) Frequency() float64 {
+	return h.Events[h.index].Frequency()
+}
+
+func (h DepthEventMultiFrequency) Frequencies() []float64 {
+	f := make([]float64, len(h.Events))
+	for i, e := range h.Events {
+		f[i] = e.Frequency()
+	}
+	return f
 }

@@ -39,6 +39,15 @@ func DepthHazardFunction() HazardFunction {
 		return d, nil
 	}
 }
+func DepthFrequencyHazardFunction() HazardFunction {
+	return func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		d := hazards.DepthFrequencyEvent{}
+		d.SetDepth(valueIn.Depth)
+		d.SetFrequency(valueIn.Frequency)
+		return d, nil
+	}
+}
+
 func ArrivalAndDurationHazardFunction() HazardFunction {
 	return func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
 		d := hazards.ArrivalDepthandDurationEvent{}

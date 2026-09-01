@@ -26,6 +26,11 @@ type HazardEvent interface {
 	Has(p Parameter) bool
 }
 
+type FrequencyEvent interface {
+	HazardEvent
+	Frequency()
+}
+
 type MultiHazardEvent interface {
 	HazardEvent
 	Index() int
@@ -36,13 +41,17 @@ type MultiHazardEvent interface {
 	Previous() (HazardEvent, error)
 	Increment()
 	ResetIndex()
-	Append(HazardEvent)
+	Append(HazardEvent) // return error?
 	Sort()
 	IsSorted() bool
 }
 
 type MultiFrequencyHazardEvent interface {
 	MultiHazardEvent
+	FrequencyEvent
+	// SetIndex and Frequencies are methods that were implemented
+	// in the HazardProvider in go-coastal.
+	// TODO: Assess whether these methods should be kept or can be removed
 	SetIndex(index int) error
 	Frequencies() []float64
 }
@@ -57,6 +66,7 @@ type HazardData struct {
 	Salinity    bool
 	Qualitative string
 	DV          float64
+	Frequency   float64
 }
 
 func (hd *HazardData) SetParameter(p Parameter, value any) {
