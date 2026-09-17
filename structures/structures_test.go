@@ -498,3 +498,55 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 
 	}
 }
+
+func TestComputeConsequencesMultiFrequency(t *testing.T) {
+
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := []float64{10.0, 20.0, 30.0, 40.0}
+	pd := paireddata.PairedData{Xvals: x, Yvals: y}
+	sm := make(map[hazards.Parameter]DamageFunction)
+	var sdf = DamageFunctionFamily{DamageFunctions: sm}
+
+	df := DamageFunction{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	sdf.DamageFunctions[hazards.Default] = df
+	cm := make(map[hazards.Parameter]DamageFunction)
+	var cdf = DamageFunctionFamily{DamageFunctions: cm}
+	cdf.DamageFunctions[hazards.Default] = df
+	componentmap := make(map[string]DamageFunctionFamily)
+	componentmap["contents"] = cdf
+	componentmap["structure"] = sdf
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: componentmap}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
+
+	depths := []float64{1, 2, 3, 4}
+	freqs := []float64{.75, .5, .25, 0}
+
+	dmf := &hazards.DepthEventMultiFrequency{}
+	for i, d := range depths {
+		df := hazards.DepthFrequencyEvent{}
+		df.SetDepth(d)
+		df.SetFrequency(freqs[i])
+		dmf.Append(df)
+	}
+
+	//test interpolation due to foundation height putting depth back in range
+	s.FoundHt = 0
+	r, err := s.Compute(dmf)
+	if err != nil {
+		panic(err)
+	}
+
+	dr, err := r.Fetch("struct_ead")
+	if err != nil {
+		panic(err)
+	}
+	got := dr.(float64)
+	if got != 20.0 {
+		t.Errorf("Compute() = %f; expected %f", got, 2000.0)
+	}
+}

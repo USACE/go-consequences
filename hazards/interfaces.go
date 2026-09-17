@@ -28,7 +28,7 @@ type HazardEvent interface {
 
 type FrequencyEvent interface {
 	HazardEvent
-	Frequency()
+	Frequency() float64
 }
 
 type MultiHazardEvent interface {
@@ -52,7 +52,6 @@ type MultiFrequencyHazardEvent interface {
 	// SetIndex and Frequencies are methods that were implemented
 	// in the HazardProvider in go-coastal.
 	// TODO: Assess whether these methods should be kept or can be removed
-	SetIndex(index int) error
 	Frequencies() []float64
 }
 
