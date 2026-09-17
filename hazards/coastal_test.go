@@ -88,7 +88,7 @@ func TestCoastalMultiFrequency(t *testing.T) {
 
 	dmf := hazards.MultiFrequencyCoastalEvent{Events: Events}
 
-	testAllFreqs := dmf.HazardFrequencies()
+	testAllFreqs := dmf.Frequencies()
 	testFreqs := make([]float64, len(freqs))
 	testDepths := make([]float64, len(depths))
 	for {
@@ -116,3 +116,12 @@ func TestCoastalMultiFrequency(t *testing.T) {
 		}
 	}
 }
+
+// func TestInterfaceMatch(t *testing.T) {
+
+// 	var _ hazards.HazardEvent = hazards.MultiFrequencyCoastalEvent{}
+// 	var _ hazards.FrequencyEvent = hazards.MultiFrequencyCoastalEvent{}
+// 	var _ hazards.MultiHazardEvent = (*hazards.MultiFrequencyCoastalEvent)(nil)
+// 	var _ hazards.MultiFrequencyHazardEvent = (*hazards.MultiFrequencyCoastalEvent)(nil)
+
+// }

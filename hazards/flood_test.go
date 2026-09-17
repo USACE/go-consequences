@@ -229,3 +229,22 @@ func TestDepthMultiFrequency(t *testing.T) {
 		}
 	}
 }
+
+// func TestInterfaceMatch(t *testing.T) {
+// 	depths := []float64{1, 2, 3, 4}
+// 	freqs := []float64{.75, .5, .25, 0}
+
+// 	dmf := hazards.DepthEventMultiFrequency{}
+// 	for i, d := range depths {
+// 		df := hazards.DepthFrequencyEvent{}
+// 		df.SetDepth(d)
+// 		df.SetFrequency(freqs[i])
+// 		dmf.Append(df)
+// 	}
+
+// 	var _ hazards.HazardEvent = hazards.DepthEventMultiFrequency{}
+// 	var _ hazards.FrequencyEvent = hazards.DepthEventMultiFrequency{}
+// 	var _ hazards.MultiHazardEvent = (*hazards.DepthEventMultiFrequency)(nil)
+// 	var _ hazards.MultiFrequencyHazardEvent = (*hazards.DepthEventMultiFrequency)(nil)
+
+// }

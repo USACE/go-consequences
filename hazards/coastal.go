@@ -273,7 +273,7 @@ func (h *MultiFrequencyCoastalEvent) SetIndex(i int) error {
 	}
 	return errors.New("hazards: Attempted to set out of bounds index on DepthEventMultiFrequency event.")
 }
-func (h MultiFrequencyCoastalEvent) HazardFrequencies() []float64 {
+func (h MultiFrequencyCoastalEvent) Frequencies() []float64 {
 	f := make([]float64, len(h.Events))
 	for i, e := range h.Events {
 		f[i] = e.Frequency()
