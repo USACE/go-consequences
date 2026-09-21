@@ -523,14 +523,16 @@ func TestComputeConsequencesMultiFrequency(t *testing.T) {
 	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: componentmap}
 	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
 
-	depths := []float64{1, 2, 3, 4}
-	freqs := []float64{.75, .5, .25, 0}
+	depths := []float64{-9999, 1, 2, 3, 4}
+	// depths := []float64{-9999, -9999, -9999, -9999, -9999}
+	freqs := []float64{1, .75, .5, .25, 0}
 
-	dmf := &hazards.DepthEventMultiFrequency{}
+	dmf := &hazards.MultiFrequencyCoastalEvent{} // using coastal event because a DepthEvent always returns True for Has(Depth)
 	for i, d := range depths {
-		df := hazards.DepthFrequencyEvent{}
+		df := hazards.CoastalFrequencyEvent{}
 		df.SetDepth(d)
 		df.SetFrequency(freqs[i])
+		df.SetSalinity(true)
 		dmf.Append(df)
 	}
 
@@ -546,7 +548,7 @@ func TestComputeConsequencesMultiFrequency(t *testing.T) {
 		panic(err)
 	}
 	got := dr.(float64)
-	if got != 20.0 {
+	if got != 2000.0 {
 		t.Errorf("Compute() = %f; expected %f", got, 2000.0)
 	}
 }
