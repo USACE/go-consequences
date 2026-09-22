@@ -78,7 +78,7 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 	fmt.Println(bbox.ToString())
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		//ProvideHazard works off of a geography.Location
-		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		d, err2 := hp.Hazard(f.Location())
 		//compute damages based on hazard being able to provide depth
 		if err2 == nil {
 			r, err3 := f.Compute(d)

@@ -83,7 +83,7 @@ type StructureDeterministic struct {
 
 // GetX implements consequences.Locatable
 func (s BaseStructure) Location() geography.Location {
-	return geography.Location{X: s.X, Y: s.Y}
+	return geography.Location{X: s.X, Y: s.Y, Z: s.GroundElevation}
 }
 
 // SampleStructure converts a structureStochastic into a structure deterministic based on an input seed

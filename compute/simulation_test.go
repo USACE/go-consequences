@@ -5,6 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -52,7 +56,7 @@ func DepthHazardFunctionModified() hazardproviders.HazardFunction {
 }
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
-	dataset := "HP"
+	dataset := "BourbonCo_Depth"
 	nsp := structureprovider.InitNSISP()
 
 	//initialize a set of frequencies
@@ -63,31 +67,31 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(frequencies))
 
-	hp1, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_10pct.tif"), DepthHazardFunctionModified())
+	hp1, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_10pct_4326.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[0] = hp1
 
-	hp2, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_04pct.tif"), DepthHazardFunctionModified())
+	hp2, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_04pct_4326.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[1] = hp2
 
-	hp3, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_02pct.tif"), DepthHazardFunctionModified())
+	hp3, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_02pct_4326.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[2] = hp3
 
-	hp4, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_01pct.tif"), DepthHazardFunctionModified())
+	hp4, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_01pct_4326.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
 	hazardProviders[3] = hp4
 
-	hp5, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_0_2pct.tif"), DepthHazardFunctionModified())
+	hp5, err := hazardproviders.Init_CustomFunction(fmt.Sprint(root, "Depth_0_2pct_4326.tif"), DepthHazardFunctionModified())
 	if err != nil {
 		t.Fail()
 	}
@@ -210,4 +214,117 @@ func Test_StreamAbstract_smallDataset(t *testing.T) {
 	defer w.Close()
 	dfr, _ := hazardproviders.Init(filepath)
 	StreamAbstract(dfr, nsp, w)
+}
+
+// ---- EDIT THESE for the one run -----------------------------------------
+const (
+	rootDir    = "/workspaces/Go_Consequences/data/kc_silverjackets/"                               // root directory containing the folders
+	foldersCSV = "BourbonCo_Depth"                                                                  // folder names under root
+	filesCSV   = "depth_0_2pct.tif,depth_01pct.tif,depth_02pct.tif,depth_04pct.tif,depth_10pct.tif" // geotiff names expected in each folder
+	workers    = 4                                                                                  // max concurrent gdalwarp processes
+)
+
+// with4326Suffix inserts _4326 before the extension: dem.tif -> dem_4326.tif.
+// Idempotent: a name already ending in _4326 is returned unchanged.
+func with4326Suffix(name string) string {
+	ext := filepath.Ext(name)
+	base := strings.TrimSuffix(name, ext)
+	if strings.HasSuffix(base, "_4326") {
+		return name
+	}
+	return base + "_4326" + ext
+}
+
+func splitCSV(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+type job struct {
+	in  string // absolute path to input geotiff
+	out string // absolute path to output (<in>_4326)
+}
+
+func TestReproject(t *testing.T) {
+	if _, err := exec.LookPath("gdalwarp"); err != nil {
+		t.Fatalf("gdalwarp not found on PATH: %v", err)
+	}
+
+	// Build the worklist: every folder x every expected file.
+	var jobs []job
+	for _, f := range splitCSV(foldersCSV) {
+		dir := filepath.Join(rootDir, f)
+		for _, fn := range splitCSV(filesCSV) {
+			jobs = append(jobs, job{
+				in:  filepath.Join(dir, fn),
+				out: filepath.Join(dir, with4326Suffix(fn)),
+			})
+		}
+	}
+
+	sem := make(chan struct{}, workers) // bound concurrent gdalwarp processes
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var failures []string
+	var doneCount, skipCount int
+
+	for _, j := range jobs {
+		wg.Add(1)
+		go func(j job) {
+			defer wg.Done()
+			sem <- struct{}{}        // acquire a worker slot
+			defer func() { <-sem }() // release it
+
+			// Skip if the reprojected file already exists (safe to re-run).
+			if _, err := os.Stat(j.out); err == nil {
+				mu.Lock()
+				skipCount++
+				t.Logf("skip (already present): %s", j.out)
+				mu.Unlock()
+				return
+			}
+			// Fail the job if the input is missing.
+			if _, err := os.Stat(j.in); err != nil {
+				mu.Lock()
+				failures = append(failures, fmt.Sprintf("%s: input not found: %v", j.in, err))
+				mu.Unlock()
+				return
+			}
+
+			// Source SRS is read from the tiff itself, so only -t_srs is needed.
+			// -co COMPRESS=DEFLATE writes a deflate-compressed GeoTIFF.
+			cmd := exec.Command("gdalwarp",
+				"-t_srs", "EPSG:4326",
+				"-of", "GTiff",
+				"-r", "bilinear",
+				"-co", "COMPRESS=DEFLATE",
+				j.in,
+				j.out,
+			)
+			var stderr strings.Builder
+			cmd.Stderr = &stderr
+			if err := cmd.Run(); err != nil {
+				mu.Lock()
+				failures = append(failures, fmt.Sprintf("%s: gdalwarp failed: %v\n%s", j.in, err, stderr.String()))
+				mu.Unlock()
+				return
+			}
+
+			mu.Lock()
+			doneCount++
+			t.Logf("ok: %s -> %s", j.in, j.out)
+			mu.Unlock()
+		}(j)
+	}
+	wg.Wait()
+
+	t.Logf("summary: %d reprojected, %d skipped, %d failed", doneCount, skipCount, len(failures))
+	for _, f := range failures {
+		t.Error(f) // marks the test failed and prints the reason
+	}
 }

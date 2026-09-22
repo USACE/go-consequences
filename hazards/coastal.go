@@ -71,6 +71,9 @@ func (h CoastalEvent) Qualitative() string {
 func (h CoastalEvent) DV() float64 {
 	return -901.0
 }
+func (h CoastalEvent) WSE() float64 {
+	return -901.0
+}
 
 // Parameters implements the HazardEvent interface
 func (ad CoastalEvent) Parameters() Parameter {
