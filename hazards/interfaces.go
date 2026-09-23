@@ -20,6 +20,7 @@ type HazardEvent interface {
 	Salinity() bool
 	Qualitative() string
 	DV() float64
+	WSE() float64
 	//values?
 	//hazardType?
 	Parameters() Parameter
@@ -65,6 +66,7 @@ type HazardData struct {
 	Salinity    bool
 	Qualitative string
 	DV          float64
+	WSE         float64
 	Frequency   float64
 }
 
@@ -99,22 +101,23 @@ type Parameter uint //switch to uint64 if we hit 32 slots and need another.
 
 // Parameter types describe different parameters for hazards
 const (
-	Default          Parameter = 0     //0
-	Depth            Parameter = 1     //1
-	Velocity         Parameter = 2     //2
-	ArrivalTime      Parameter = 4     //3
-	ArrivalTime2ft   Parameter = 8     //4
-	Erosion          Parameter = 16    //5
-	Duration         Parameter = 32    //6
-	WaveHeight       Parameter = 64    //7
-	MediumWaveHeight Parameter = 128   //8
-	HighWaveHeight   Parameter = 256   //9
-	Salinity         Parameter = 512   //10
-	Qualitative      Parameter = 1024  //11
-	DV               Parameter = 2048  //12
-	ModerateVelocity Parameter = 4096  //13
-	HighVelocity     Parameter = 8192  //14
-	LongDuration     Parameter = 16384 //15
+	Default               Parameter = 0     //0
+	Depth                 Parameter = 1     //1
+	Velocity              Parameter = 2     //2
+	ArrivalTime           Parameter = 4     //3
+	ArrivalTime2ft        Parameter = 8     //4
+	Erosion               Parameter = 16    //5
+	Duration              Parameter = 32    //6
+	WaveHeight            Parameter = 64    //7
+	MediumWaveHeight      Parameter = 128   //8
+	HighWaveHeight        Parameter = 256   //9
+	Salinity              Parameter = 512   //10
+	Qualitative           Parameter = 1024  //11
+	DV                    Parameter = 2048  //12
+	ModerateVelocity      Parameter = 4096  //13
+	HighVelocity          Parameter = 8192  //14
+	LongDuration          Parameter = 16384 //15
+	WaterSurfaceElevation Parameter = 22768 //16
 )
 
 var parametersToStrings = map[Parameter]string{
