@@ -73,7 +73,7 @@ type ArrivalandDurationEvent struct {
 }
 
 func (d ArrivalandDurationEvent) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("{\"arrivalanddurationevent\":{\"arrivaltime\":%s,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Duration())
+	s := fmt.Sprintf("{\"arrivalanddurationevent\":{\"arrivaltime\":\"%s\",\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Duration())
 	return []byte(s), nil
 }
 func (h ArrivalandDurationEvent) Depth() float64 {
@@ -135,7 +135,7 @@ type ArrivalDepthandDurationEvent struct {
 }
 
 func (d ArrivalDepthandDurationEvent) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("{\"arrivaldepthanddurationevent\":{\"arrivaltime\":%s,\"depth\":%f,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Depth(), d.Duration())
+	s := fmt.Sprintf("{\"arrivaldepthanddurationevent\":{\"arrivaltime\":\"%s\",\"depth\":%f,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Depth(), d.Duration())
 	return []byte(s), nil
 }
 func (h *ArrivalDepthandDurationEvent) SetDepth(d float64) {
