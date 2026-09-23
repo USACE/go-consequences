@@ -642,8 +642,8 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 
 			svalcurr = svalcurr * (1 - sDamageFactor)
 			convalcurr = convalcurr * (1 - cDamageFactor)
-			cumulativeContentLoss = cdamage
-			cumulativeStructureLoss = sdamage
+			cumulativeContentLoss += cdamage
+			cumulativeStructureLoss += sdamage
 			result.Result[1] = sdamage
 			result.Result[2] = cdamage
 			result.Result[3] = sdampercent

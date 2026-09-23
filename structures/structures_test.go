@@ -497,4 +497,10 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 		}
 
 	}
+
+	for _, header := range []string{"StructureTotalLoss", "ContentsTotalLoss"} {
+		if total, _ := results.Fetch(header); total != 67.5 {
+			t.Errorf("%s = %v, want 67.5", header, total)
+		}
+	}
 }
