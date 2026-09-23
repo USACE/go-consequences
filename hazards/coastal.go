@@ -185,7 +185,9 @@ func (h MultiFrequencyCoastalEvent) Qualitative() string {
 func (h MultiFrequencyCoastalEvent) DV() float64 {
 	return h.Events[h.index].DV()
 }
-
+func (h MultiFrequencyCoastalEvent) WSE() float64 {
+	return h.Events[h.index].WSE()
+}
 func (h MultiFrequencyCoastalEvent) Frequency() float64 {
 	return h.Events[h.index].Frequency()
 }

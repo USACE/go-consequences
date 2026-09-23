@@ -653,7 +653,9 @@ func (h DepthEventMultiFrequency) Qualitative() string {
 func (h DepthEventMultiFrequency) DV() float64 {
 	return h.Events[h.index].DV()
 }
-
+func (h DepthEventMultiFrequency) WSE() float64 {
+	return h.Events[h.index].WSE()
+}
 func (h DepthEventMultiFrequency) Parameters() Parameter {
 	return h.Events[h.index].Parameters()
 }
