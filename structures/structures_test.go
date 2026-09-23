@@ -497,4 +497,14 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 		}
 
 	}
+
+	for _, header := range []string{"StructureTotalLoss", "ContentsTotalLoss"} {
+		total, err := results.Fetch(header)
+		if err != nil {
+			panic(err)
+		}
+		if math.Abs(total.(float64)-67.5) > 0.000000001 {
+			t.Errorf("%s was %3.2f. Expected: 67.50\n", header, total)
+		}
+	}
 }
