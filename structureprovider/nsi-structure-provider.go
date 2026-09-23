@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
@@ -47,6 +48,39 @@ type nsiStreamProvider struct {
 	OccTypeProvider       structures.OccupancyTypeProvider
 	FoundationUncertainty *structures.FoundationUncertainty
 	UseUncertainty        bool
+}
+
+// Bound NSI requests so a stalled API response cannot leave the compute running forever.
+const nsiRequestTimeout = 5 * time.Minute
+
+// The NSI fmt=fs endpoint emits JSON text sequences where records can be
+// prefixed by ASCII record separator bytes. Strip those bytes before passing
+// the stream to json.Decoder, which expects plain JSON tokens.
+type recordSeparatorFilterReader struct {
+	r io.Reader
+}
+
+func (rsfr recordSeparatorFilterReader) Read(p []byte) (int, error) {
+	for {
+		n, err := rsfr.r.Read(p)
+		if n == 0 {
+			return n, err
+		}
+
+		w := 0
+		for _, b := range p[:n] {
+			// 0x1e is the ASCII record separator used by JSON text sequences.
+			if b == 0x1e {
+				continue
+			}
+			p[w] = b
+			w++
+		}
+
+		if w > 0 || err != nil {
+			return w, err
+		}
+	}
 }
 
 func InitNSISP() nsiStreamProvider {
@@ -109,15 +143,21 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
-	client := &http.Client{Transport: transCfg}
+	client := &http.Client{Transport: transCfg, Timeout: nsiRequestTimeout}
 
 	response, err := client.Get(url)
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer response.Body.Close()
-	dec := json.NewDecoder(response.Body)
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		body, _ := ioutil.ReadAll(response.Body)
+		fmt.Printf("NSI API request failed with status %s: %s\n", response.Status, string(body))
+		return
+	}
+	dec := json.NewDecoder(recordSeparatorFilterReader{r: response.Body})
 	//b, err := ioutil.ReadAll(response.Body)
 	//fmt.Println(string(b))
 	for {
@@ -126,9 +166,7 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 			break
 		} else if err != nil {
 			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
-			if err == io.ErrUnexpectedEOF {
-				break
-			}
+			break
 		}
 		sp(NsiFeaturetoStructure(n, m, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
 	}
@@ -141,15 +179,21 @@ func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, 
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // accept untrusted servers
 	}
-	client := &http.Client{Transport: transCfg}
+	client := &http.Client{Transport: transCfg, Timeout: nsiRequestTimeout}
 
 	response, err := client.Post(url, "application/json", body)
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer response.Body.Close()
-	dec := json.NewDecoder(response.Body)
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		body, _ := ioutil.ReadAll(response.Body)
+		fmt.Printf("NSI API request failed with status %s: %s\n", response.Status, string(body))
+		return
+	}
+	dec := json.NewDecoder(recordSeparatorFilterReader{r: response.Body})
 	//b, err := ioutil.ReadAll(response.Body)
 	//fmt.Println(string(b))
 	for {
@@ -158,9 +202,7 @@ func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, 
 			break
 		} else if err != nil {
 			fmt.Printf("Error unmarshalling JSON record: %s.  Stopping Compute.\n", err)
-			if err == io.ErrUnexpectedEOF {
-				break
-			}
+			break
 		}
 		sp(NsiFeaturetoStructure(n, m, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
 	}

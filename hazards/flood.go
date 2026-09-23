@@ -1,6 +1,7 @@
 package hazards
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -49,6 +50,9 @@ func (h DepthEvent) Qualitative() string {
 func (h DepthEvent) DV() float64 {
 	return -901.0
 }
+func (h DepthEvent) WSE() float64 {
+	return -901.0
+}
 
 // Parameters implements the HazardEvent interface
 func (h DepthEvent) Parameters() Parameter {
@@ -81,7 +85,7 @@ type ArrivalandDurationEvent struct {
 }
 
 func (d ArrivalandDurationEvent) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("{\"arrivalanddurationevent\":{\"arrivaltime\":%s,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Duration())
+	s := fmt.Sprintf("{\"arrivalanddurationevent\":{\"arrivaltime\":\"%s\",\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Duration())
 	return []byte(s), nil
 }
 func (h ArrivalandDurationEvent) Depth() float64 {
@@ -117,6 +121,9 @@ func (h ArrivalandDurationEvent) Qualitative() string {
 func (h ArrivalandDurationEvent) DV() float64 {
 	return -901.0
 }
+func (h ArrivalandDurationEvent) WSE() float64 {
+	return -901.0
+}
 
 // Parameters implements the HazardEvent interface
 func (ad ArrivalandDurationEvent) Parameters() Parameter {
@@ -141,7 +148,7 @@ type ArrivalDepthandDurationEvent struct {
 }
 
 func (d ArrivalDepthandDurationEvent) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("{\"arrivaldepthanddurationevent\":{\"arrivaltime\":%s,\"depth\":%f,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Depth(), d.Duration())
+	s := fmt.Sprintf("{\"arrivaldepthanddurationevent\":{\"arrivaltime\":\"%s\",\"depth\":%f,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Depth(), d.Duration())
 	return []byte(s), nil
 }
 func (h *ArrivalDepthandDurationEvent) SetDepth(d float64) {
@@ -183,6 +190,9 @@ func (h *ArrivalDepthandDurationEvent) SetQualitative(id string) {
 func (h ArrivalDepthandDurationEvent) DV() float64 {
 	return -901.0
 }
+func (h ArrivalDepthandDurationEvent) WSE() float64 {
+	return -901.0
+}
 
 // Parameters implements the HazardEvent interface
 func (ad ArrivalDepthandDurationEvent) Parameters() Parameter {
@@ -212,6 +222,9 @@ func (h QualitativeEvent) Depth() float64 {
 	return -901.0
 }
 func (h QualitativeEvent) DV() float64 {
+	return -901.0
+}
+func (h QualitativeEvent) WSE() float64 {
 	return -901.0
 }
 func (h QualitativeEvent) Velocity() float64 {
@@ -296,6 +309,9 @@ func (h DepthandDVEvent) DV() float64 {
 func (h *DepthandDVEvent) SetDV(value float64) {
 	h.dv = value
 }
+func (h DepthandDVEvent) WSE() float64 {
+	return -901.0
+}
 
 // Parameters implements the HazardEvent interface
 func (ad DepthandDVEvent) Parameters() Parameter {
@@ -323,6 +339,7 @@ type MultiParameterEvent struct {
 	qualitative string
 	dV          float64
 	parameter   Parameter
+	wse         float64
 }
 
 func HazardDataToMultiParameter(hd HazardData) MultiParameterEvent {
@@ -414,6 +431,9 @@ func (h MultiParameterEvent) Qualitative() string {
 func (h MultiParameterEvent) DV() float64 {
 	return h.dV
 }
+func (h MultiParameterEvent) WSE() float64 {
+	return h.wse
+}
 
 // Parameters implements the HazardEvent interface
 func (h MultiParameterEvent) Parameters() Parameter {
@@ -456,6 +476,9 @@ func (d MultiParameterEvent) MarshalJSON() ([]byte, error) {
 	}
 	if d.Has(DV) {
 		s += fmt.Sprintf("\"depth_times_velocity\":%f,", d.DV())
+	}
+	if d.Has(WaterSurfaceElevation) {
+		s += fmt.Sprintf("\"water_surface_elevation\":%f,", d.WSE())
 	}
 	s = strings.TrimRight(s, ",")
 	s += "}}"
@@ -503,7 +526,9 @@ func (h ArrivalDepthandDurationEventMulti) Qualitative() string {
 func (h ArrivalDepthandDurationEventMulti) DV() float64 {
 	return h.Events[h.index].DV()
 }
-
+func (h ArrivalDepthandDurationEventMulti) WSE() float64 {
+	return h.Events[h.index].WSE()
+}
 func (h ArrivalDepthandDurationEventMulti) Parameters() Parameter {
 	return h.Events[h.index].Parameters()
 }
@@ -584,6 +609,10 @@ func (h ArrivalDepthandDurationEventMulti) Less(i, j int) bool {
 	return h.Events[i].ArrivalTime().Before(h.Events[j].ArrivalTime())
 }
 
+func (d ArrivalDepthandDurationEventMulti) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Events)
+}
+
 type DepthEventMultiFrequency struct {
 	index  int
 	Events []DepthFrequencyEvent
@@ -624,7 +653,9 @@ func (h DepthEventMultiFrequency) Qualitative() string {
 func (h DepthEventMultiFrequency) DV() float64 {
 	return h.Events[h.index].DV()
 }
-
+func (h DepthEventMultiFrequency) WSE() float64 {
+	return h.Events[h.index].WSE()
+}
 func (h DepthEventMultiFrequency) Parameters() Parameter {
 	return h.Events[h.index].Parameters()
 }

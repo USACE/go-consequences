@@ -7,6 +7,7 @@ import (
 type Location struct {
 	X    float64
 	Y    float64
+	Z    float64
 	SRID string
 }
 
