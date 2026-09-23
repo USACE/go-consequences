@@ -449,8 +449,8 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 				return ret, errors.New("structures: could not understand the damage driver")
 			}
 
-			svalcurr = svalcurr * (1 - sDamageFactor)
-			convalcurr = convalcurr * (1 - cDamageFactor)
+			svalcurr = sval * (1 - sDamageFactor)
+			convalcurr = conval * (1 - cDamageFactor)
 
 			result.Result[0] = s.BaseStructure.Name
 			result.Result[1] = sdamage
@@ -636,8 +636,8 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 				return ret, errors.New("structures: could not understand the damage driver")
 			}
 
-			svalcurr = svalcurr * (1 - sDamageFactor)
-			convalcurr = convalcurr * (1 - cDamageFactor)
+			svalcurr = sval * (1 - sDamageFactor)
+			convalcurr = conval * (1 - cDamageFactor)
 			cumulativeContentLoss += cdamage
 			cumulativeStructureLoss += sdamage
 			if sdampercent > 0 || cdampercent > 0 {
