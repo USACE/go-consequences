@@ -576,7 +576,10 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			// update structure value to reflect completed construction
 			svalcurr = sval * (1 - sDamageFactor)
 			convalcurr = conval * (1 - cDamageFactor)
-			timesRebuilt++
+			if sDamageFactor > 0 || cDamageFactor > 0 {
+				timesRebuilt++
+			}
+
 		}
 
 		header := []string{"hazard", "structure damage", "content damage", "s_dam_per", "c_dam_per", "reconstruction_days", "completion_date", "structure_value", "content_value"}
@@ -670,7 +673,7 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		ret.Result[11] = conval
 		ret.Result[12] = svalcurr
 		ret.Result[13] = convalcurr
-		ret.Result[16] = timesRebuilt
+		ret.Result[16] = int32(timesRebuilt)
 		ret.Result[18] = cumulativeStructureLoss
 		ret.Result[19] = cumulativeContentLoss
 		ret.Result[20] = subResult

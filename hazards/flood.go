@@ -1,6 +1,7 @@
 package hazards
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -590,4 +591,7 @@ func (h ArrivalDepthandDurationEventMulti) Swap(i, j int) {
 // Less is part of sort.Interface
 func (h ArrivalDepthandDurationEventMulti) Less(i, j int) bool {
 	return h.Events[i].ArrivalTime().Before(h.Events[j].ArrivalTime())
+}
+func (d ArrivalDepthandDurationEventMulti) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Events)
 }
