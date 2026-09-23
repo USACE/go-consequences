@@ -499,12 +499,10 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 	}
 
 	for _, header := range []string{"StructureTotalLoss", "ContentsTotalLoss"} {
-		total, err := results.Fetch(header)
-		if err != nil {
-			panic(err)
-		}
-		if math.Abs(total.(float64)-67.5) > 0.000000001 {
-			t.Errorf("%s was %3.2f. Expected: 67.50\n", header, total)
+		// Exact equality is safe: every damage in this fixture is a multiple of
+		// 0.5, which float64 represents exactly.
+		if total, _ := results.Fetch(header); total != 67.5 {
+			t.Errorf("%s = %v, want 67.5", header, total)
 		}
 	}
 
