@@ -507,4 +507,12 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 			t.Errorf("%s was %3.2f. Expected: 67.50\n", header, total)
 		}
 	}
+
+	rebuilt, err := results.Fetch("times rebuilt")
+	if err != nil {
+		panic(err)
+	}
+	if rebuilt.(int32) != 5 {
+		t.Errorf("times rebuilt was %v. Expected: 5\n", rebuilt)
+	}
 }
