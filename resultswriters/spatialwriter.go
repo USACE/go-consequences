@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
@@ -78,6 +79,9 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 						fieldName = strings.TrimSpace(fieldName)
 					}
 					gdaltype := gdalTypes[gotype]
+					if _, ok := result[i].(time.Time); ok {
+						gdaltype = gdal.FieldType(gdal.FT_DateTime)
+					}
 					fieldDef := gdal.CreateFieldDefinition(fieldName, gdaltype)
 					defer fieldDef.Destroy()
 					srw.Layer.CreateField(fieldDef, true) //approxOk.
@@ -164,6 +168,10 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 		case reflect.Uint8:
 			gval := int(value.(uint8))
 			feature.SetFieldInteger(idx, gval)
+		case reflect.Struct:
+			if t, ok := value.(time.Time); ok && !t.IsZero() {
+				feature.SetFieldDateTime(idx, t)
+			}
 		}
 
 	}
