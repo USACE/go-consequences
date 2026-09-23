@@ -503,4 +503,8 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 			t.Errorf("%s = %v, want 67.5", header, total)
 		}
 	}
+
+	if rebuilt, _ := results.Fetch("times rebuilt"); rebuilt != int32(5) {
+		t.Errorf("times rebuilt = %v, want 5", rebuilt)
+	}
 }
