@@ -24,7 +24,7 @@ func StructureSchema() []string {
 }
 
 func OptionalSchema() []string {
-	s := make([]string, 8)
+	s := make([]string, 9)
 	s[0] = "num_story"
 	s[1] = "pop2amu65"
 	s[2] = "pop2amo65"
@@ -33,6 +33,7 @@ func OptionalSchema() []string {
 	s[5] = "ground_elv"
 	s[6] = "bldgtype"
 	s[7] = "firmzone"
+	s[8] = "static_bfe"
 	return s
 }
 
@@ -111,6 +112,11 @@ func featuretoStructure(
 	}
 	if oidxs[7] != -1 {
 		s.FirmZone = f.FieldAsString(oidxs[7])
+	}
+	if oidxs[8] != -1 {
+		s.BaseFloodElevation = f.FieldAsFloat64(oidxs[8])
+	} else {
+		s.BaseFloodElevation = -9999
 	}
 	return s, nil
 }
@@ -200,6 +206,11 @@ func featuretoDeterministicStructure(
 	}
 	if oidxs[7] != -1 {
 		s.FirmZone = f.FieldAsString(oidxs[7])
+	}
+	if oidxs[8] != -1 {
+		s.BaseFloodElevation = f.FieldAsFloat64(oidxs[8])
+	} else {
+		s.BaseFloodElevation = -9999
 	}
 	return s, nil
 }

@@ -12,18 +12,6 @@ import (
 	"github.com/USACE/go-consequences/structures"
 )
 
-/*
-import (
-	"fmt"
-	"sync"
-	"testing"
-
-	"github.com/USACE/go-consequences/census"
-	"github.com/USACE/go-consequences/consequences"
-	"github.com/USACE/go-consequences/geography"
-	"github.com/USACE/go-consequences/structures"
-)
-*/
 func TestNsiByFipsStream(t *testing.T) {
 	var fips string = "15005" //Kalawao county (smallest county in the us by population)
 	n := InitNSISP()
