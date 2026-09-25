@@ -482,7 +482,7 @@ func ComputeEAD(damages []float64, freq []float64) float64 {
 func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	header := []string{"fd_id", "x", "y", "damage category", "occupancy type", "val_structure", "val_contents", "struct_ead", "cont_ead", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips"}
-	results := []interface{}{"updateme", 0.0, 0.0, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
+	results := []interface{}{"updateme", 0.0, 0.0, "dc", "ot", 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
 	var ret = consequences.Result{Headers: header, Result: results}
 	sval := s.StructVal
 	conval := s.ContVal
