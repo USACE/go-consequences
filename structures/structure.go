@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -480,7 +481,7 @@ func ComputeEAD(damages []float64, freq []float64) float64 {
 
 func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
-	header := []string{"fd_id", "x", "y", "damage category", "occupancy type", "struct_ead", "cont_ead", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips"}
+	header := []string{"fd_id", "x", "y", "damage category", "occupancy type", "val_structure", "val_contents", "struct_ead", "cont_ead", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips"}
 	results := []interface{}{"updateme", 0.0, 0.0, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
 	var ret = consequences.Result{Headers: header, Result: results}
 	sval := s.StructVal
@@ -528,7 +529,12 @@ func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, 
 
 				ret.Result = append(ret.Result, sdam)
 				ret.Result = append(ret.Result, cdam)
-				ret.Result = append(ret.Result, event.This())
+				hazardstring := ""
+				bytes, err := json.Marshal(event.This())
+				if err == nil {
+					hazardstring = string(bytes)
+				}
+				ret.Result = append(ret.Result, hazardstring)
 				successes++
 			case hazards.Erosion:
 				spct := sDamFun.DamageFunction.SampleValue(event.Erosion()) / 100 //assumes what type the damage array is in
@@ -540,14 +546,24 @@ func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, 
 
 				ret.Result = append(ret.Result, sdam)
 				ret.Result = append(ret.Result, cdam)
-				ret.Result = append(ret.Result, event.This())
+				hazardstring := ""
+				bytes, err := json.Marshal(event.This())
+				if err == nil {
+					hazardstring = string(bytes)
+				}
+				ret.Result = append(ret.Result, hazardstring)
 				successes++
 			default:
 				sdams[event.Index()] = 0.0
 				cdams[event.Index()] = 0.0
 				ret.Result = append(ret.Result, 0.0)
 				ret.Result = append(ret.Result, 0.0)
-				ret.Result = append(ret.Result, event.This())
+				hazardstring := ""
+				bytes, err := json.Marshal(event.This())
+				if err == nil {
+					hazardstring = string(bytes)
+				}
+				ret.Result = append(ret.Result, hazardstring)
 				// Do we want to error out on this? Is it possible that one but not all of the hazards in the series could have an invalid damage driver?
 				return consequences.Result{}, fmt.Errorf("structures: could not understand the damage driver for event in MultiFrequencyEvent at Index %v", event.Index())
 			}
@@ -558,7 +574,12 @@ func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, 
 			cdams[event.Index()] = 0.0
 			ret.Result = append(ret.Result, -9999)
 			ret.Result = append(ret.Result, -9999)
-			ret.Result = append(ret.Result, event.This())
+			hazardstring := ""
+			bytes, err := json.Marshal(event.This())
+			if err == nil {
+				hazardstring = string(bytes)
+			}
+			ret.Result = append(ret.Result, hazardstring)
 		}
 
 		if event.HasNext() {
@@ -574,13 +595,15 @@ func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, 
 	ret.Result[2] = s.BaseStructure.Y
 	ret.Result[3] = s.BaseStructure.DamCat
 	ret.Result[4] = s.OccType.Name
-	ret.Result[5] = sval * sEAD
-	ret.Result[6] = conval * cEAD
-	ret.Result[7] = s.Pop2amu65
-	ret.Result[8] = s.Pop2amo65
-	ret.Result[9] = s.Pop2pmu65
-	ret.Result[10] = s.Pop2pmo65
-	ret.Result[11] = s.CBFips
+	ret.Result[5] = sval
+	ret.Result[6] = conval
+	ret.Result[7] = sEAD
+	ret.Result[8] = cEAD
+	ret.Result[9] = s.Pop2amu65
+	ret.Result[10] = s.Pop2amo65
+	ret.Result[11] = s.Pop2pmu65
+	ret.Result[12] = s.Pop2pmo65
+	ret.Result[13] = s.CBFips
 	if successes == 0 {
 		return ret, errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}
