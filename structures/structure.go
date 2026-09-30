@@ -31,6 +31,7 @@ type StructureStochastic struct {
 	OccType                               OccupancyTypeStochastic
 	FoundType, FirmZone, ConstructionType string
 	StructVal, ContVal, FoundHt           consequences.ParameterValue
+	BaseFloodElevation                    float64 // Would BFE ever be stochastic and require type to be ParameterValue?
 	NumStories                            int32
 	PopulationSet
 }
@@ -74,10 +75,10 @@ func (f *StructureStochastic) ApplyFoundationHeightUncertanty(fu *FoundationUnce
 // StructureDeterministic is a base strucure with a deterministic occupancy type and deterministic parameters
 type StructureDeterministic struct {
 	BaseStructure
-	OccType                               OccupancyTypeDeterministic
-	FoundType, FirmZone, ConstructionType string
-	StructVal, ContVal, FoundHt           float64
-	NumStories                            int32
+	OccType                                         OccupancyTypeDeterministic
+	FoundType, FirmZone, ConstructionType           string
+	StructVal, ContVal, FoundHt, BaseFloodElevation float64
+	NumStories                                      int32
 	PopulationSet
 }
 
@@ -109,16 +110,17 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 	}
 
 	return StructureDeterministic{
-		OccType:          ot,
-		StructVal:        sv,
-		ContVal:          cv,
-		FoundType:        s.FoundType,
-		ConstructionType: s.ConstructionType,
-		FirmZone:         s.FirmZone,
-		FoundHt:          fh,
-		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
-		NumStories:       s.NumStories,
-		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		OccType:            ot,
+		StructVal:          sv,
+		ContVal:            cv,
+		FoundType:          s.FoundType,
+		ConstructionType:   s.ConstructionType,
+		FirmZone:           s.FirmZone,
+		FoundHt:            fh,
+		BaseFloodElevation: s.BaseFloodElevation,
+		PopulationSet:      PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
+		NumStories:         s.NumStories,
+		BaseStructure:      BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreStochastic
@@ -138,16 +140,17 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Res
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Clone() StructureDeterministic {
 	return StructureDeterministic{
-		OccType:          s.OccType,
-		StructVal:        s.StructVal,
-		ContVal:          s.ContVal,
-		FoundType:        s.FoundType,
-		ConstructionType: s.ConstructionType,
-		FirmZone:         s.FirmZone,
-		FoundHt:          s.FoundHt,
-		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
-		NumStories:       s.NumStories,
-		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		OccType:            s.OccType,
+		StructVal:          s.StructVal,
+		ContVal:            s.ContVal,
+		FoundType:          s.FoundType,
+		ConstructionType:   s.ConstructionType,
+		FirmZone:           s.FirmZone,
+		FoundHt:            s.FoundHt,
+		BaseFloodElevation: s.BaseFloodElevation,
+		PopulationSet:      PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
+		NumStories:         s.NumStories,
+		BaseStructure:      BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
