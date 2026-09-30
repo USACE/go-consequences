@@ -355,3 +355,58 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 	}
 
 }
+
+func Test_OccupancyType_RaisingParameters(t *testing.T) {
+	const (
+		rebuildsAllowedKey float64 = 1.0
+		maxRaiseHeightKey  float64 = 2.0
+		canRaiseKey        float64 = 3.0
+	)
+	xr := []float64{1.0, 2.0, 3.0}
+	yr := []float64{2.0, 10, 1.0}
+	pdr := paireddata.PairedData{Xvals: xr, Yvals: yr}
+	pdrdf := DamageFunction{}
+	pdrdf.DamageFunction = pdr
+	pdrdf.DamageDriver = hazards.Depth
+	pdrdf.Source = "created for this test"
+	dm := make(map[hazards.Parameter]DamageFunction)
+	var rdf = DamageFunctionFamily{DamageFunctions: dm}
+	rdf.DamageFunctions[hazards.Default] = pdrdf
+
+	components := make(map[string]DamageFunctionFamily)
+	components["raising"] = rdf
+
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: components}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
+
+	var d = hazards.DepthEvent{}
+	d.SetDepth(1.0)
+
+	raiseParams, err := s.OccType.GetComponentDamageFunctionForHazard("raising", d)
+	if err != nil {
+		panic(err)
+	}
+
+	rebuildsAllowed := 0.0
+	maxRaiseHeight := 0.0
+	canRaise := false
+
+	if d.Has(raiseParams.DamageDriver) {
+		rebuildsAllowed = raiseParams.DamageFunction.SampleValue(rebuildsAllowedKey)
+		maxRaiseHeight = raiseParams.DamageFunction.SampleValue(maxRaiseHeightKey)
+		canRaiseParam := raiseParams.DamageFunction.SampleValue(canRaiseKey)
+		if canRaiseParam == 1.0 {
+			canRaise = true
+		}
+	}
+
+	if rebuildsAllowed != 2.0 {
+		t.Errorf("Rebuilds allowed was %v. Expected %v.\n", rebuildsAllowed, 2.0)
+	}
+	if maxRaiseHeight != 10.0 {
+		t.Errorf("Max raise height was %v. Expected %v.\n", rebuildsAllowed, 10.0)
+	}
+	if !canRaise {
+		t.Errorf("Rebuilds allowed was %v. Expected %v.\n", canRaise, true)
+	}
+}

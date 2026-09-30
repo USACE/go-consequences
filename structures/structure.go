@@ -277,6 +277,18 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 	cumulativeStructureLoss := 0.0
 	cumulativeContentLoss := 0.0
 	timesRebuilt := 0
+	// adding vars for checking if rebuilding/raising is allowed.
+	// TODO: assess whether one or more of these values should be stored on the Structure (e.g. max allowable raising height is per occtype)
+	// rebuildsAllowed := 999
+	// cumulativeDamageThreshold := math.Inf(1)
+	maxRaiseHeight := 999
+	raisingDamageThreshold := 0.5 // G2CRM: Rebuilding with raising to a target elevation is triggered if a structure, on a given damage event, is damaged at >=50% of pre-event value.
+	canRaise := true              //TODO: this should come from the structure occtype
+	// toRaise := false // I don't think we will need this
+	// raisingCost := 0.0
+	isRaised := false
+
+	//
 
 	// adjust value for tall structures
 	if sDamFun.DamageDriver == hazards.Depth {
@@ -356,7 +368,9 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			cdamage := 0.0
 
 			reconstruction_days := 0.0
+			max_reconstruction_days := 0.0
 			completion_date := time.Time{}
+			max_completion_date := time.Time{}
 
 			switch sDamFun.DamageDriver {
 			case hazards.Depth:
@@ -383,7 +397,12 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 
 				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
 				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
+				//NOTE: G2CRM says "If raising is triggered, then we will take the time to rebuild for that event as the maximum value of the
+				// 		input time to rebuild distribution for the non-raised structure. Going forward after rebuilding, we will
+				// 		sample the new post-raising distribution for time to rebuild, at each damage event"
+				max_reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(1.0) + duration)
 				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+				max_completion_date = arrival.AddDate(0, 0, int(max_reconstruction_days))
 
 			case hazards.Erosion:
 				sdampercent = sDamFun.DamageFunction.SampleValue(event.Erosion()) / 100 //assumes what type the damage array is in
@@ -396,10 +415,17 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 				arrival := event.ArrivalTime()
 				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
 				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor))
+				max_reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(1.0))
 				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+				max_completion_date = arrival.AddDate(0, 0, int(max_reconstruction_days))
 
 			default:
 				return ret, errors.New("structures: could not understand the damage driver")
+			}
+
+			if !isRaised && sDamageFactor >= raisingDamageThreshold && canRaise {
+				reconstruction_days = max_reconstruction_days
+				completion_date = max_completion_date
 			}
 
 			svalcurr = sval * (1 - sDamageFactor)
