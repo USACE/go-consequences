@@ -13,7 +13,7 @@ func Test_InitStructureProvider(t *testing.T) {
 	//TODO: use finalized testing data
 	fp := "/workspaces/go-consequences/data/lifecycle/nsi_2026_test.gpkg"
 
-	sp, err := InitStructureProvider(fp, "nsi2022", "GPKG")
+	sp, err := InitStructureProvider(fp, "nsi2026", "GPKG")
 	if err != nil {
 		t.Error(err)
 	}
@@ -28,6 +28,11 @@ func Test_InitStructureProvider(t *testing.T) {
 			fmt.Printf("CBFips: %s\n", s.BaseStructure.CBFips)
 			fmt.Printf("X, Y: %v, %v\n", s.BaseStructure.X, s.BaseStructure.Y)
 			fmt.Printf("GroundElevation: %v\n", s.BaseStructure.GroundElevation)
+
+			raisingParams := s.OccType.Parameters
+			specifiedParams := s.OccType.SpecifiedParameters
+			fmt.Println(raisingParams)
+			fmt.Println(specifiedParams)
 		}
 		i++
 	})
