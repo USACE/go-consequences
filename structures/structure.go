@@ -241,7 +241,7 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		"pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips",
 		"original structure value", "original content value", "final structure value", "final content value", //
 		"original ffe", "final ffe", "times rebuilt", "times raised", "StructureTotalLoss", "ContentsTotalLoss",
-		"hazard results",
+		"raising cost", "removed", "hazard results",
 	}
 	subResultsHeader := make([]string, 0)
 	subResultsResult := make([]interface{}, 0)
@@ -251,7 +251,7 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		0.0, 0.0, 0.0, 0.0, "cbfips",
 		0.0, 0.0, 0.0, 0.0,
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-		subResult,
+		0.0, false, subResult,
 	}
 	var ret = consequences.Result{Headers: mainHeader, Result: mainResults}
 	var err error = nil
@@ -280,6 +280,17 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 	cumulativeStructureLoss := 0.0
 	cumulativeContentLoss := 0.0
 	timesRebuilt := 0
+	// adding vars for checking if rebuilding/raising is allowed.
+	// TODO: rebuildsAllowed, cumulativeDamageThreshold, maxRaiseHeight, canRaise, raisingCost should come from the structure occtype
+	maxRebuildsAllowed := 999
+	cumulativeDamageThreshold := math.Inf(1)
+	maxRaiseHeight := 999.0
+	canRaise := true
+	raisingCost := 0.0
+	raisingDamageThreshold := 0.5 // G2CRM: Rebuilding with raising to a target elevation is triggered if a structure, on a given damage event, is damaged at >=50% of pre-event value.
+	// toRaise := false // I don't think we will need this
+	isRaised := false
+	removedFromInventory := false //TODO: add checks during damage and reconstruction steps
 
 	// adjust value for tall structures
 	if sDamFun.DamageDriver == hazards.Depth {
@@ -363,6 +374,7 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 
 			switch sDamFun.DamageDriver {
 			case hazards.Depth:
+				BFE := s.BaseFloodElevation
 				depthAboveFFE := event.Depth() - s.FoundHt
 				sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 				cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
@@ -386,6 +398,19 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 
 				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
 				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
+
+				raiseHeight := BFE - s.GroundElevation
+				if !isRaised && canRaise && (sDamageFactor >= raisingDamageThreshold) && (raiseHeight > 0) && (raiseHeight <= maxRaiseHeight) {
+					isRaised = true
+					s.FoundHt += raiseHeight
+					// raisingCost = s.raisingCost //TODO
+
+					//NOTE: G2CRM says "If raising is triggered, then we will take the time to rebuild for that event as the maximum value of the
+					// 		input time to rebuild distribution for the non-raised structure. Going forward after rebuilding, we will
+					// 		sample the new post-raising distribution for time to rebuild, at each damage event"
+					reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(1.0) + duration)
+
+				}
 				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
 
 			case hazards.Erosion:
@@ -409,6 +434,11 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			convalcurr = conval * (1 - cDamageFactor)
 			cumulativeContentLoss += cdamage
 			cumulativeStructureLoss += sdamage
+
+			if timesRebuilt >= maxRebuildsAllowed || cumulativeStructureLoss > cumulativeDamageThreshold {
+				removedFromInventory = true
+			}
+
 			result.Result[1] = sdamage
 			result.Result[2] = cdamage
 			result.Result[3] = sdampercent
@@ -441,7 +471,9 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		ret.Result[16] = int32(timesRebuilt)
 		ret.Result[18] = cumulativeStructureLoss
 		ret.Result[19] = cumulativeContentLoss
-		ret.Result[20] = subResult
+		ret.Result[20] = raisingCost
+		ret.Result[21] = removedFromInventory
+		ret.Result[22] = subResult
 
 		if event.HasNext() {
 			event.Increment() // go to the next event and restart loop
