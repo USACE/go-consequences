@@ -31,6 +31,7 @@ func Init(fp string) nassTiffReader {
 		panic(err)
 	}
 	ds.SetProjection(srString)
+
 	return nassTiffReader{fp, &ds, nil}
 }
 func (ncp *nassTiffReader) getCropValue(y float64, x float64) (crops.Crop, error) {
@@ -38,6 +39,9 @@ func (ncp *nassTiffReader) getCropValue(y float64, x float64) (crops.Crop, error
 	igt := ncp.ds.InvGeoTransform()
 	px := int(igt[0] + y*igt[1] + x*igt[2])
 	py := int(igt[3] + y*igt[4] + x*igt[5])
+	gt := ncp.ds.GeoTransform()
+	pixelSize_m2 := gt[1] * gt[5] //pixel width * pixel height (EPSG 5070 has units meters)
+	pixelSize_acres := pixelSize_m2 / 4056.856
 	buffer := make([]uint8, 1*1)
 	rb.IO(gdal.RWFlag(gdal.Read), px, py, 1, 1, buffer, 1, 1, 0, 0)
 	s := strconv.Itoa(int(buffer[0]))
@@ -45,7 +49,7 @@ func (ncp *nassTiffReader) getCropValue(y float64, x float64) (crops.Crop, error
 		ncp.converter = crops.NASSCropMap()
 	}
 	c, ok := ncp.converter[s]
-
+	c.Acres = pixelSize_acres
 	if ok {
 		return c, nil
 	} else {
