@@ -45,6 +45,7 @@ type StructureProvider interface {
 type StructureProviderInfo struct {
 	StructureProviderDriver string                `json:"structure_provider_driver,omitempty"` // ESRI SHP, GPKG, PARQUET (OGR DRIVERS...)
 	StructureProviderType   StructureProviderType `json:"structure_provider_type"`             // Provider_NSI or Provider_Local
+	StructureProviderYear   string                `json:"structure_provider_year,omitempty"`   // nsi2022 or nsi2026. Only used if StructureProviderType == Provider_NSI. If blank, will use default url
 	StructureFilePath       string                `json:"structure_file_path,omitempty"`       // Required if StructureProviderType == Provider_Local
 	OccTypeFilePath         string                `json:"occtype_file_path,omitempty"`         // optional
 	LayerName               string                `json:"layername,omitempty"`                 // required if specified a geopackage StructureFilePath
@@ -58,9 +59,9 @@ func (spi StructureProviderInfo) CreateStructureProvider() (StructureProvider, e
 	case NSIAPI: // nsi
 
 		if len(spi.OccTypeFilePath) == 0 {
-			p = InitNSISP()
+			p = InitNSISP(spi.StructureProviderYear)
 		} else {
-			p = InitNSISPwithOcctypeFilePath(spi.OccTypeFilePath)
+			p = InitNSISPwithOcctypeFilePath(spi.OccTypeFilePath, spi.StructureProviderYear)
 		}
 
 	case SHP:
