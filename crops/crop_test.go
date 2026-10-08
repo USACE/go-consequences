@@ -61,7 +61,6 @@ func TestComputeCropDamage_FloodedAfterPlanting(t *testing.T) {
 }
 
 /*
-
  */
 func TestReadFromXML(t *testing.T) {
 	pwd, err := os.Getwd()
@@ -108,5 +107,6 @@ func createTestCrop() Crop {
 	c = c.WithProductionFunction(pf)
 	c = c.WithLossFunction(df)
 	c = c.WithCropSchedule(cs)
+	c.Acres = 1.0
 	return c
 }
