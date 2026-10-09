@@ -147,7 +147,7 @@ func TestNsiByBboxStream(t *testing.T) {
 	bbox[2] = -81.58161        //lower right x
 	bbox[3] = 30.26939         //lower right y
 	gbbx := geography.BBox{Bbox: bbox}
-	n := InitNSISP("nsi2026")
+	n := InitNSISP("nsi2022")
 	counter := 0
 	n.ByBbox(gbbx, func(s consequences.Receptor) {
 		counter++

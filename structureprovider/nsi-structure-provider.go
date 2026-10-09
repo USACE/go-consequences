@@ -89,7 +89,16 @@ func InitNSISP(year string) nsiStreamProvider {
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitDefault()
 	//url := urlFinder()
-	url := fmt.Sprintf("https://nsi.sec.usace.army.mil/nsiapi/%s/structures", year)
+
+	if !(year == "" || year == "nsi2022" || year == "nsi2026") {
+		err := fmt.Errorf("InitNSISP: Invalid nsi year supplied. Expected \"\", \"nsi2022\", or \"nsi2026\". Got: %s", year)
+		panic(err)
+	}
+	url_year := "nsi2026"
+	if year == "nsi2022" {
+		url_year = year
+	}
+	url := fmt.Sprintf("https://nsi.sec.usace.army.mil/nsiapi/%s/structures", url_year)
 	// TODO probably don't hard code a possibly changing url
 	fh, _ := structures.InitFoundationUncertainty()
 	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp, FoundationUncertainty: fh}
@@ -99,7 +108,16 @@ func InitNSISPwithOcctypeFilePath(occtypefp string, year string) nsiStreamProvid
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitLocalPath(occtypefp)
 	//url := urlFinder()
-	url := fmt.Sprintf("https://nsi.sec.usace.army.mil/nsiapi/%s/structures", year)
+
+	if !(year == "" || year == "nsi2022" || year == "nsi2026") {
+		err := fmt.Errorf("InitNSISP: Invalid nsi year supplied. Expected \"\", \"nsi2022\", or \"nsi2026\". Got: %s", year)
+		panic(err)
+	}
+	url_year := "nsi2026"
+	if year == "nsi2022" {
+		url_year = year
+	}
+	url := fmt.Sprintf("https://nsi.sec.usace.army.mil/nsiapi/%s/structures", url_year)
 	// TODO probably don't hard code a possibly changing url
 	fh, _ := structures.InitFoundationUncertainty()
 	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp, FoundationUncertainty: fh}
