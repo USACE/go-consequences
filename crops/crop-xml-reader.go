@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-//xmlCrop is used for reading xml files not for any other real purpose
+// xmlCrop is used for reading xml files not for any other real purpose
 type xmlCrop struct {
 	ID                    byte         `xml:"id"`
 	Name                  string       `xml:"name"`
@@ -34,7 +34,7 @@ type xmlDurations struct {
 	Duration []string `xml:"Duration"`
 }
 
-//ReadFromXML reads crop schedules loss functions and production functions from xml (HEC-FIA format)
+// ReadFromXML reads crop schedules loss functions and production functions from xml (HEC-FIA format)
 func ReadFromXML(filePath string) Crop {
 
 	xmlFile, err := os.Open(filePath)
@@ -51,6 +51,7 @@ func ReadFromXML(filePath string) Crop {
 	}
 	fmt.Println("Parsing " + c.Name)
 	ret := BuildCrop(c.ID, c.Name)
+	ret.Acres = 1 // 0.22 may also be a reasonable default. NASS default raster has resolution 30m, 1 acre = 4046.86m2. (30*30)/4046.86 = 0.222
 	ret = ret.WithOutput(c.Yeild, c.PricePerUnit)
 	//parse the cropschedule
 	st := xmltoTime(c.FirstPlantDate)
