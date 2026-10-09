@@ -388,7 +388,21 @@ func TestComputeConsequencesMultiHazardWithRaising(t *testing.T) {
 	components["contents"] = cdf
 	components["reconstruction"] = rdf
 
-	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: components}
+	params := make(map[string]OccupancyTypeParameter)
+	params[canRaiseKey] = OccupancyTypeParameter{Value: true}
+	params[maxRaiseHeightKey] = OccupancyTypeParameter{Value: 999.0}
+	params[raisingCostKey] = OccupancyTypeParameter{Value: 1.0}
+	params[maxRebuildsAllowedKey] = OccupancyTypeParameter{Value: 10}
+
+	sparams := OccupancyTypeSpecifiedParameters{
+		CanRaise:           true,
+		MaxRaiseHeight:     999,
+		RaisingCost:        100,
+		MaxRebuildsAllowed: 10,
+	}
+
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: components, Parameters: params, SpecifiedParameters: sparams}
+
 	var s = StructureDeterministic{
 		OccType:            o,
 		StructVal:          100.0,
