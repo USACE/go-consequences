@@ -253,6 +253,22 @@ func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForHazard(componen
 	return DamageFunction{}, errors.New("component does not exist for this occupancy type")
 }
 
+func (o OccupancyTypeDeterministic) GetOccupancyTypeParameter(parameterName string) (OccupancyTypeParameter, error) {
+	p, pok := o.Parameters[parameterName]
+	if pok {
+		return p, nil
+	}
+	return OccupancyTypeParameter{}, fmt.Errorf("Occtype %s has no parameter \"%s\"", o.Name, parameterName)
+}
+
+func (o OccupancyTypeStochastic) GetOccupancyTypeParameter(parameterName string) (OccupancyTypeParameter, error) {
+	p, pok := o.Parameters[parameterName]
+	if pok {
+		return p, nil
+	}
+	return OccupancyTypeParameter{}, fmt.Errorf("Occtype %s has no parameter \"%s\"", o.Name, parameterName)
+}
+
 // UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
 type UncertaintyOccupancyTypeSampler interface {
 	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
