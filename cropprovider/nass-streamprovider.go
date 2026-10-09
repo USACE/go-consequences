@@ -54,6 +54,8 @@ func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[str
 	gt := n.ds.GeoTransform()
 	xval := gt[0] + (gt[1] / 2)
 	yval := gt[3] + (gt[5] / 2)
+	pixelSize_m2 := gt[1] * gt[5] //pixel width * pixel height (EPSG 5070 has units meters)
+	pixelSize_acres := pixelSize_m2 / 4056.856
 	for i, b := range arr {
 		if i%nXs == 0 {
 			xval = gt[0] + (gt[1] / 2)
@@ -63,6 +65,7 @@ func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[str
 		}
 		s := strconv.Itoa(int(b)) //not sure this is right
 		c, ok := cfilter[s]
+		c.Acres = pixelSize_acres
 		//need to add location
 		c.WithLocation(xval, yval)
 		if ok {
@@ -71,28 +74,4 @@ func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[str
 		xval += gt[1]
 
 	}
-	/*
-		nXBlocksize, nYBlocksize := rb.BlockSize()
-		nXBlocks := (rb.XSize() + nXBlocksize - 1) / nXBlocksize
-		nYBlocks := (rb.YSize() + nYBlocksize - 1) / nYBlocksize
-		for iYBlock := 0; iYBlock < nYBlocks; iYBlock++ {
-			for iXBlock := 0; iXBlock < nXBlocks; iXBlock++ {
-				//int nXValid = 0
-				//int nYValid = 0
-				b := make([]byte, nXBlocksize*nYBlocksize)
-				pabyData := unsafe.Pointer(&b)
-				rb.ReadBlock(iXBlock, iYBlock, pabyData)
-				for iY := 0; iY < iYBlock; iY++ {
-					for iX := 0; iX < iXBlock; iX++ {
-						s := strconv.Itoa(int(b[iX+iY*nXBlocksize])) //not sure this is right
-						c, ok := n.converter[s]
-						//need to add location
-						if ok {
-							sp(c)
-						}
-					}
-				}
-			}
-		}
-	*/
 }
