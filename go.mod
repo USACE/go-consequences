@@ -3,7 +3,7 @@ module github.com/USACE/go-consequences
 go 1.27
 
 require (
-	github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20221221211532-e53b36ba1a67
+	github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20261015125231-029bb81f1048
 	github.com/dewberry/gdal v0.3.4
 	github.com/leekchan/accounting v1.0.0
 )
