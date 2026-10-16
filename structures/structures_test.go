@@ -389,10 +389,10 @@ func TestComputeConsequencesMultiHazardWithRaising(t *testing.T) {
 	components["reconstruction"] = rdf
 
 	params := make(map[string]OccupancyTypeParameter)
-	params[canRaiseKey] = OccupancyTypeParameter{Value: true}
-	params[maxRaiseHeightKey] = OccupancyTypeParameter{Value: 999.0}
-	params[raisingCostKey] = OccupancyTypeParameter{Value: 1.0}
-	params[maxRebuildsAllowedKey] = OccupancyTypeParameter{Value: 10}
+	params[CAN_RAISE] = OccupancyTypeParameter{Value: true}
+	params[MAX_RAISE_HEIGHT] = OccupancyTypeParameter{Value: 999.0}
+	params[RAISING_COST] = OccupancyTypeParameter{Value: 1.0}
+	params[MAX_REBUILDS_ALLOWED] = OccupancyTypeParameter{Value: 10}
 
 	sparams := OccupancyTypeSpecifiedParameters{
 		CanRaise:           true,
