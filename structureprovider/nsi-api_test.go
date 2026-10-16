@@ -14,7 +14,7 @@ import (
 
 func TestNsiByFipsStream(t *testing.T) {
 	var fips string = "15005" //Kalawao county (smallest county in the us by population)
-	n := InitNSISP()
+	n := InitNSISP("nsi2026")
 	counter := 0
 	n.ByFips(fips, func(s consequences.Receptor) {
 		counter++
@@ -49,7 +49,7 @@ func TestNsiByJsonPostStreamStressTest(t *testing.T) {
 }
 func nsiByJsonPostStream(t *testing.T) {
 	var json string = "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-121.504025,38.588017],[-121.507201,38.596202],[-121.503081,38.599623],[-121.494153,38.601568],[-121.484624,38.600428],[-121.478701,38.597342],[-121.473292,38.590835],[-121.504025,38.588017]]]},\"properties\":{}}]}"
-	n := InitNSISP()
+	n := InitNSISP("nsi2026")
 	counter := 0
 	n.ByJsonPost(json, func(s consequences.Receptor) {
 		counter++
@@ -63,7 +63,7 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 	f := census.StateToCountyFipsMap()
 	var wg sync.WaitGroup
 	wg.Add(len(f))
-	n := InitNSISP()
+	n := InitNSISP("nsi2026")
 	index := 0
 	for ss := range f {
 		go func(sfips string) {
@@ -89,7 +89,7 @@ func TestNsiByFipsStream_MultiState(t *testing.T) {
 }
 func TestNsiByFipsStream_MultiState_Sequential(t *testing.T) {
 	f := census.StateToCountyFipsMap()
-	n := InitNSISP()
+	n := InitNSISP("nsi2026")
 	index := 0
 	firmMap := make(map[string]int)
 	for ss := range f {
@@ -133,7 +133,7 @@ func TestNsiByBboxStream(t *testing.T) {
 	bbox[2] = -81.58161        //lower right x
 	bbox[3] = 30.26939         //lower right y
 	gbbx := geography.BBox{Bbox: bbox}
-	n := InitNSISP()
+	n := InitNSISP("nsi2022")
 	counter := 0
 	n.ByBbox(gbbx, func(s consequences.Receptor) {
 		counter++
@@ -156,7 +156,7 @@ func Test_StructureProvider_NSI_BBOX(t *testing.T) {
 	bbox[2] = -81.58161        //lower right x
 	bbox[3] = 30.26939         //lower right y
 	gbbx := geography.BBox{Bbox: bbox}
-	nsp := InitNSISP()
+	nsp := InitNSISP("nsi2026")
 	nsp.ByBbox(gbbx, func(c consequences.Receptor) {
 		s, _ := c.(structures.StructureStochastic)
 		fmt.Println(s.Name)

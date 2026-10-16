@@ -16,7 +16,7 @@ import (
 	"github.com/USACE/go-consequences/crops"
 )
 
-//StatisticsRow describes a row in the statistics result from the NASS stats endpoint
+// StatisticsRow describes a row in the statistics result from the NASS stats endpoint
 type StatisticsRow struct {
 	Value    int     `json:"value"`
 	Count    int     `json:"count"`
@@ -25,32 +25,32 @@ type StatisticsRow struct {
 	Acreage  float64 `json:"acreage"`
 }
 
-//StatisticsResult describes the structure of the result from the NASS stats endpoint
+// StatisticsResult describes the structure of the result from the NASS stats endpoint
 type StatisticsResult struct {
 	Success      bool            `json:"success"`
 	ErrorMessage string          `json:"errorMessage"`
 	Rows         []StatisticsRow `json:"rows"`
 }
 
-//XMLStatsURLResponse is the xml return for a stats endpoint query
+// XMLStatsURLResponse is the xml return for a stats endpoint query
 type XMLStatsURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLStatResponse"`
 	ReturnURL string   `xml:"returnURL"`
 }
 
-//XMLFileURLResponse is the xml return for the File NASS endpoint
+// XMLFileURLResponse is the xml return for the File NASS endpoint
 type XMLFileURLResponse struct {
 	XMLName   xml.Name `xml:"GetCDLFileResponse"`
 	ReturnURL string   `xml:"returnURL"`
 }
 
-//XMLExtractResponse is the xml return for the Export NASS endpoint
+// XMLExtractResponse is the xml return for the Export NASS endpoint
 type XMLExtractResponse struct {
 	XMLName   xml.Name `xml:"ExtractCDLByValuesResponse"`
 	ReturnURL string   `xml:"returnURL"`
 }
 
-//XMLCDLValueResponse is the xml return for a getCDLValue response from the NASS API
+// XMLCDLValueResponse is the xml return for a getCDLValue response from the NASS API
 type XMLCDLValueResponse struct {
 	XMLName xml.Name `xml:"GetCDLValueResponse"`
 	Result  string   `xml:"Result"`
@@ -58,7 +58,7 @@ type XMLCDLValueResponse struct {
 
 var apiStatsURL string = "http://nassgeodata.gmu.edu/axis2/services/CDLService/"
 
-//GetStatsByBbox returns the statistics of crops in a bounding box in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
+// GetStatsByBbox returns the statistics of crops in a bounding box in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
 func GetStatsByBbox(year string, minx string, miny string, maxx string, maxy string) StatisticsResult {
 	url := fmt.Sprintf("%sGetCDLStat?year=%s&bbox=%s,%s,%s,%s&format=csv", apiStatsURL, year, minx, miny, maxx, maxy) //malformed json keys are not quoted.
 	return nassStatsAPI(url)
@@ -109,10 +109,12 @@ func nassStatsAPI(url string) StatisticsResult {
 	return stats
 }
 
-//GetCDLValue returns a crop type for a year and x,y coordinates in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
+// GetCDLValue returns a crop type for a year and x,y coordinates in the projection of USA Contiguous Albers Equal Area Conic (USGS version).
 func GetCDLValue(year string, x string, y string) crops.Crop {
 	url := fmt.Sprintf("%sGetCDLValue?year=%s&x=%s&y=%s", apiStatsURL, year, x, y) //malformed json keys are not quoted.
-	return nassCDLValueAPI(url)
+	c := nassCDLValueAPI(url)
+	c.Acres = 1 // 0.22 may also be a reasonable default. NASS default raster has resolution 30m, 1 acre = 4046.86m2. (30*30)/4046.86 = 0.222
+	return c
 }
 func nassCDLValueAPI(url string) crops.Crop {
 	transCfg := &http.Transport{
@@ -146,13 +148,13 @@ func nassCDLValueAPI(url string) crops.Crop {
 	return c
 }
 
-//GetCDLFileByFIPS stores a NASS CDL Geotif for a given year and county FIPS
+// GetCDLFileByFIPS stores a NASS CDL Geotif for a given year and county FIPS
 func GetCDLFileByFIPS(year string, fips string) (nassTiffReader, error) {
 	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsURL, year, fips)
 	return nassFileAPI(url)
 }
 
-//GetCDLFileByBbox stores a NASS CDL Geotif for a given year and bounding box
+// GetCDLFileByBbox stores a NASS CDL Geotif for a given year and bounding box
 func GetCDLFileByBbox(year string, minx string, miny string, maxx string, maxy string) (nassTiffReader, error) {
 	url := fmt.Sprintf("%sGetCDLFile?year=%s&bbox=%s,%s,%s,%s", apiStatsURL, year, minx, miny, maxx, maxy)
 	return nassFileAPI(url)
@@ -199,7 +201,7 @@ func nassFileAPI(url string) (nassTiffReader, error) {
 	return ret, nil
 }
 
-//GetCDLFileByFIPSFiltered provides a filtered geotif for a fips code. croptype is the list of values to keep and can be provided as a comma separated array of values to include
+// GetCDLFileByFIPSFiltered provides a filtered geotif for a fips code. croptype is the list of values to keep and can be provided as a comma separated array of values to include
 func GetCDLFileByFIPSFiltered(year string, fips string, cropType string) bool {
 	url := fmt.Sprintf("%sGetCDLFile?year=%s&fips=%s", apiStatsURL, year, fips)
 	return nassFilteredFileAPI(url, cropType)

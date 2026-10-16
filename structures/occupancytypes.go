@@ -16,7 +16,7 @@ type OccupancyTypesContainer struct {
 	OccupancyTypes map[string]OccupancyTypeStochastic `json:"occupancytypes"`
 }
 
-//DamageFunctionFamily is to support a family of damage functions stored by hazard parameter types
+// DamageFunctionFamily is to support a family of damage functions stored by hazard parameter types
 type DamageFunctionFamily struct {
 	DamageFunctions map[hazards.Parameter]DamageFunction `json:"damagefunctions"` //parameter is a bitflag
 }
@@ -67,7 +67,7 @@ func (dff *DamageFunctionFamily) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-//DamageFunctionFamilyStochastic is to support a family of damage functions stored by hazard parameter types that can represent uncertain paired data
+// DamageFunctionFamilyStochastic is to support a family of damage functions stored by hazard parameter types that can represent uncertain paired data
 type DamageFunctionFamilyStochastic struct {
 	DamageFunctions map[hazards.Parameter]DamageFunctionStochastic `json:"damagefunctions"` //parameter is a bitflag
 }
@@ -129,16 +129,33 @@ type DamageFunctionStochastic struct {
 	DamageFunction paireddata.UncertaintyPairedData `json:"damagefunction"`
 }
 
-//OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
+type OccupancyTypeParameter struct {
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Value any    `json:"value"`
+}
+
+type OccupancyTypeSpecifiedParameters struct {
+	CanRaise           bool    `json:"canRaise"`
+	MaxRaiseHeight     float64 `json:"maxRaiseHeight"`
+	RaisingCost        float64 `json:"raisingCost"`
+	MaxRebuildsAllowed float64 `json:"maxRebuildsAllowed"`
+}
+
+// OccupancyTypeStochastic is used to describe an occupancy type with uncertainty in the damage relationships it produces an OccupancyTypeDeterministic through the UncertaintyOccupancyTypeSampler interface
 type OccupancyTypeStochastic struct { //this is mutable
 	Name                     string                                    `json:"name"`
 	ComponentDamageFunctions map[string]DamageFunctionFamilyStochastic `json:"componentdamagefunctions"`
+	Parameters               map[string]OccupancyTypeParameter         `json:"occupancytypeparameters"`
+	SpecifiedParameters      OccupancyTypeSpecifiedParameters          `json:"occupancytypespecifiedparameters"`
 }
 
-//OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
+// OccupancyTypeDeterministic is used to describe an occupancy type without uncertainty in the damage relationships
 type OccupancyTypeDeterministic struct {
-	Name                     string                          `json:"name"`
-	ComponentDamageFunctions map[string]DamageFunctionFamily `json:"componentdamagefunctions"`
+	Name                     string                            `json:"name"`
+	ComponentDamageFunctions map[string]DamageFunctionFamily   `json:"componentdamagefunctions"`
+	Parameters               map[string]OccupancyTypeParameter `json:"occupancytypeparameters"`
+	SpecifiedParameters      OccupancyTypeSpecifiedParameters  `json:"occupancytypespecifiedparameters"`
 }
 
 func (otc *OccupancyTypesContainer) ExtendMap(extension map[string]OccupancyTypeStochastic) error {
@@ -152,6 +169,7 @@ func (otc *OccupancyTypesContainer) ExtendMap(extension map[string]OccupancyType
 	}
 	return nil
 }
+
 func (otc *OccupancyTypesContainer) MergeMap(additionalDFs map[string]OccupancyTypeStochastic) error {
 	for key, value := range additionalDFs {
 		curval, exists := otc.OccupancyTypes[key] //occupancy type
@@ -221,7 +239,7 @@ func (otc OccupancyTypesContainer) OcctypeReport() ([]byte, error) {
 	return []byte(ret), nil
 }
 
-//GetComponentDamageFunctionForHazard provides a hazard specific damage function for a component (e.g. structure, content, car, or other)
+// GetComponentDamageFunctionForHazard provides a hazard specific damage function for a component (e.g. structure, content, car, or other)
 func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForHazard(component string, h hazards.HazardEvent) (DamageFunction, error) {
 	c, cok := o.ComponentDamageFunctions[component]
 	if cok {
@@ -235,13 +253,29 @@ func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForHazard(componen
 	return DamageFunction{}, errors.New("component does not exist for this occupancy type")
 }
 
-//UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
+func (o OccupancyTypeDeterministic) GetOccupancyTypeParameter(parameterName string) (OccupancyTypeParameter, error) {
+	p, pok := o.Parameters[parameterName]
+	if pok {
+		return p, nil
+	}
+	return OccupancyTypeParameter{}, fmt.Errorf("Occtype %s has no parameter \"%s\"", o.Name, parameterName)
+}
+
+func (o OccupancyTypeStochastic) GetOccupancyTypeParameter(parameterName string) (OccupancyTypeParameter, error) {
+	p, pok := o.Parameters[parameterName]
+	if pok {
+		return p, nil
+	}
+	return OccupancyTypeParameter{}, fmt.Errorf("Occtype %s has no parameter \"%s\"", o.Name, parameterName)
+}
+
+// UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic
 type UncertaintyOccupancyTypeSampler interface {
 	SampleOccupancyType(rand int64) OccupancyTypeDeterministic
 	CentralTendencyOccupancyType() OccupancyTypeDeterministic
 }
 
-//SampleOccupancyType implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
+// SampleOccupancyType implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
 func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDeterministic {
 	r := rand.New(rand.NewSource(seed))
 	//iterate through damage function family
@@ -258,7 +292,7 @@ func (o OccupancyTypeStochastic) SampleOccupancyType(seed int64) OccupancyTypeDe
 		}
 		cm[ck] = cdf
 	}
-	return OccupancyTypeDeterministic{Name: o.Name, ComponentDamageFunctions: cm}
+	return OccupancyTypeDeterministic{Name: o.Name, ComponentDamageFunctions: cm, Parameters: o.Parameters, SpecifiedParameters: o.SpecifiedParameters}
 }
 func samplePairedDataValueSampler(r *rand.Rand, df interface{}) paireddata.PairedData {
 	retval, ok := df.(paireddata.PairedData)
@@ -296,7 +330,7 @@ func centralTendencyPairedDataValueSampler(df interface{}) paireddata.PairedData
 	return retval
 }
 
-//CentralTendency implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
+// CentralTendency implements the UncertaintyOccupancyTypeSampler on the OccupancyTypeStochastic interface.
 func (o OccupancyTypeStochastic) CentralTendency() OccupancyTypeDeterministic {
 	//iterate through damage function family
 	cm := make(map[string]DamageFunctionFamily)

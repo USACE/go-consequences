@@ -234,6 +234,14 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	return ret, err
 }
 
+// occtype parameter keys
+const (
+	CAN_RAISE            string = "canRaise"
+	MAX_RAISE_HEIGHT     string = "maxRaiseHeight"
+	RAISING_COST         string = "raisingCost"
+	MAX_REBUILDS_ALLOWED string = "maxRebuildsAllowed"
+)
+
 func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	mainHeader := []string{
@@ -285,8 +293,19 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 	maxRebuildsAllowed := 999
 	cumulativeDamageThreshold := math.Inf(1)
 	maxRaiseHeight := 999.0
-	canRaise := true
-	raisingCost := 0.0
+	// canRaise := s.OccType.SpecifiedParameters.CanRaise
+	c, err := s.OccType.GetOccupancyTypeParameter(CAN_RAISE)
+	if err != nil {
+		panic(err)
+	}
+	canRaise := c.Value.(bool)
+
+	r, err := s.OccType.GetOccupancyTypeParameter(RAISING_COST)
+	if err != nil {
+		panic(err)
+	}
+	raisingCost := r.Value.(float64)
+
 	raisingDamageThreshold := 0.5 // G2CRM: Rebuilding with raising to a target elevation is triggered if a structure, on a given damage event, is damaged at >=50% of pre-event value.
 	// toRaise := false // I don't think we will need this
 	isRaised := false
