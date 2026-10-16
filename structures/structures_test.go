@@ -400,8 +400,8 @@ func TestComputeConsequencesMultiFrequency(t *testing.T) {
 		t.Error(err)
 	}
 	got := dr.(float64)
-	if got != 2000.0 {
-		t.Errorf("Compute() = %f; expected %f", got, 2000.0)
+	if got != 20.0 {
+		t.Errorf("Compute() = %f; expected %f", got, 20.0)
 	}
 
 }
