@@ -268,10 +268,10 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 	addMulti := &hazards.ArrivalDepthandDurationEventMulti{Events: events} //need to use the pointer reference because methods on MultiHazardEvent require pointers
 
 	// test that we can sort events by ArrivalTime
-	if !addMulti.IsSorted() {
-		fmt.Println("Sorting...")
-		addMulti.Sort()
-	}
+	// if !addMulti.IsSorted() {
+	// 	fmt.Println("Sorting...")
+	// 	addMulti.Sort()
+	// }
 
 	et1 := time.Date(1984, time.Month(1), 11, 0, 0, 0, 0, time.UTC)
 	et2 := time.Date(1984, time.Month(1), 26, 0, 0, 0, 0, time.UTC)
@@ -287,63 +287,61 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 
 	results, err := s.Compute(addMulti)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	hr, err := results.Fetch("hazard results")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	hazardResults := hr.(consequences.Result)
 
 	for i := range expectedResults {
 		r, err := hazardResults.Fetch(fmt.Sprintf("%d", i))
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		result := r.(consequences.Result)
 		out, err := result.Fetch("completion_date")
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 
 		dif := expectedResults[i].Sub(out.(time.Time))
 		// fmt.Printf("Completion date was %v. Expected: %v. Diff: %v\n", out, expectedResults[i], dif)
 		if math.Abs(float64(dif)) > float64(time.Minute) { // if the error is greater than about 1 minute
 			t.Errorf("Completion date was %v. Expected: %v. Diff: %v\n", out, expectedResults[i], dif)
-
 		}
 
 		dmgout, err := result.Fetch("structure damage")
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
-		// fmt.Printf("Damage was %3.2f. Expected: %3.2f\n", dmgout, expectedDmgs[i])
+		// fmt.Printf("Damage was %3.2f. Expected: %3.2f.\n", dmgout, expectedDmgs[i])
 		if math.Abs(dmgout.(float64)-float64(expectedDmgs[i])) > 0.000000001 {
-			t.Errorf("Damage was %3.2f. Expected: %3.2f\n", dmgout, expectedDmgs[i])
+			t.Errorf("Damage was %3.2f. Expected: %3.2f.\n", dmgout, expectedDmgs[i])
 		}
 
 		svalout, err := result.Fetch("structure_value")
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		// fmt.Printf("Structure Value was %3.2f. Expected: %3.2f.\n", svalout, expectedVals[i])
 		if math.Abs(svalout.(float64)-float64(expectedVals[i])) > 0.000000001 {
 			t.Errorf("Times Rebuilt was %3.2f. Expected: %3.2f.\n", svalout, expectedVals[i])
 		}
-
 	}
 
 	// Check final results
 	eFinalVal := 95.0
 	gFinalVal, err := results.Fetch("final structure value")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	var eTimesRebuilt int32 = 6
 	gTimesRebuilt, err := results.Fetch("times rebuilt")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	if math.Abs(eFinalVal-gFinalVal.(float64)) > 0.000000001 {
@@ -352,6 +350,58 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 
 	if eTimesRebuilt != gTimesRebuilt.(int32) {
 		t.Errorf("Final Structure Value was %d. Expected: %d.\n", gTimesRebuilt, eTimesRebuilt)
+	}
+}
+
+func TestComputeConsequencesMultiFrequency(t *testing.T) {
+
+	//build a basic structure with a defined depth damage relationship.
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	y := []float64{10.0, 20.0, 30.0, 40.0}
+	pd := paireddata.PairedData{Xvals: x, Yvals: y}
+	sm := make(map[hazards.Parameter]DamageFunction)
+	var sdf = DamageFunctionFamily{DamageFunctions: sm}
+
+	df := DamageFunction{}
+	df.Source = "fabricated"
+	df.DamageFunction = pd
+	df.DamageDriver = hazards.Depth
+
+	sdf.DamageFunctions[hazards.Default] = df
+	cm := make(map[hazards.Parameter]DamageFunction)
+	var cdf = DamageFunctionFamily{DamageFunctions: cm}
+	cdf.DamageFunctions[hazards.Default] = df
+	componentmap := make(map[string]DamageFunctionFamily)
+	componentmap["contents"] = cdf
+	componentmap["structure"] = sdf
+	var o = OccupancyTypeDeterministic{Name: "test", ComponentDamageFunctions: componentmap}
+	var s = StructureDeterministic{OccType: o, StructVal: 100.0, ContVal: 100.0, FoundHt: 0.0, BaseStructure: BaseStructure{DamCat: "category"}}
+
+	depths := []float64{-9999, 1, 2, 3, 4}
+	// depths := []float64{-9999, -9999, -9999, -9999, -9999}
+	freqs := []float64{1, .75, .5, .25, 0}
+
+	dmf := &hazards.MultiFrequencyCoastalEvent{} // using coastal event because a DepthEvent always returns True for Has(Depth)
+	for i, d := range depths {
+		df := hazards.CoastalFrequencyEvent{}
+		df.SetDepth(d)
+		df.SetFrequency(freqs[i])
+		df.SetSalinity(true)
+		dmf.Append(df)
+	}
+
+	r, err := s.Compute(dmf)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dr, err := r.Fetch("struct_ead")
+	if err != nil {
+		t.Error(err)
+	}
+	got := dr.(float64)
+	if got != 20.0 {
+		t.Errorf("Compute() = %f; expected %f", got, 20.0)
 	}
 
 }
