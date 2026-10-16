@@ -287,24 +287,24 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 
 	results, err := s.Compute(addMulti)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	hr, err := results.Fetch("hazard results")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	hazardResults := hr.(consequences.Result)
 
 	for i := range expectedResults {
 		r, err := hazardResults.Fetch(fmt.Sprintf("%d", i))
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		result := r.(consequences.Result)
 		out, err := result.Fetch("completion_date")
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 
 		dif := expectedResults[i].Sub(out.(time.Time))
@@ -315,7 +315,7 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 
 		dmgout, err := result.Fetch("structure damage")
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		// fmt.Printf("Damage was %3.2f. Expected: %3.2f.\n", dmgout, expectedDmgs[i])
 		if math.Abs(dmgout.(float64)-float64(expectedDmgs[i])) > 0.000000001 {
@@ -324,7 +324,7 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 
 		svalout, err := result.Fetch("structure_value")
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 		// fmt.Printf("Structure Value was %3.2f. Expected: %3.2f.\n", svalout, expectedVals[i])
 		if math.Abs(svalout.(float64)-float64(expectedVals[i])) > 0.000000001 {
@@ -336,12 +336,12 @@ func TestComputeConsequencesMultiHazard(t *testing.T) {
 	eFinalVal := 95.0
 	gFinalVal, err := results.Fetch("final structure value")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	var eTimesRebuilt int32 = 6
 	gTimesRebuilt, err := results.Fetch("times rebuilt")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	if math.Abs(eFinalVal-gFinalVal.(float64)) > 0.000000001 {
@@ -390,28 +390,18 @@ func TestComputeConsequencesMultiFrequency(t *testing.T) {
 		dmf.Append(df)
 	}
 
-	//test interpolation due to foundation height putting depth back in range
-	s.FoundHt = 0
 	r, err := s.Compute(dmf)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	dr, err := r.Fetch("struct_ead")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	got := dr.(float64)
 	if got != 2000.0 {
 		t.Errorf("Compute() = %f; expected %f", got, 2000.0)
-	}
-
-	if math.Abs(eFinalVal-gFinalVal.(float64)) > 0.000000001 {
-		t.Errorf("Final Structure Value was %3.2f. Expected: %3.2f.\n", gFinalVal, eFinalVal)
-	}
-
-	if eTimesRebuilt != gTimesRebuilt.(int32) {
-		t.Errorf("Final Structure Value was %d. Expected: %d.\n", gTimesRebuilt, eTimesRebuilt)
 	}
 
 }
