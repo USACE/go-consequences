@@ -51,7 +51,7 @@ func TestNassCDLFileFiltered(t *testing.T) {
 func TestCropDamage(t *testing.T) {
 	//get crop
 	cropFromNass := GetCDLValue("2018", "1551565.363", "1909363.537")
-	path := "./" + cropFromNass.GetCropName() + ".crop"
+	path := "../crops/resources/" + cropFromNass.GetCropName() + ".crop"
 	c := crops.ReadFromXML(path)
 	// construct hazard
 	at := time.Date(1984, time.Month(7), 29, 0, 0, 0, 0, time.UTC)
@@ -62,7 +62,7 @@ func TestCropDamage(t *testing.T) {
 	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := crops.Impacted
-	expecteddamage := 1285.98 //Based on corn
+	expecteddamage := 1285.98 //Based on 1 acre of corn
 
 	//test
 	if cd.Result[1] != expectedcase {
@@ -88,7 +88,7 @@ func TestCropDamage_DelayedPlant(t *testing.T) {
 	cd, _ := c.Compute(h)
 	//expected results
 	expectedcase := crops.PlantingDelayed
-	expecteddamage := 0.0 //Based on corn
+	expecteddamage := 0.0 //Based on 1 acre of corn
 
 	//test
 	if cd.Result[1] != expectedcase {

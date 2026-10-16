@@ -57,7 +57,7 @@ func DepthHazardFunctionModified() hazardproviders.HazardFunction {
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
 	dataset := "BourbonCo_Depth"
-	nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitNSISP("nsi2026")
 
 	//initialize a set of frequencies
 	frequencies := []float64{.10, .04, .02, .01, .002}
@@ -173,7 +173,7 @@ func Test_Config(t *testing.T) {
 }
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitNSISP("nsi2026")
 	now := time.Now()
 	fmt.Println(now)
 	//nsp, _ := structureprovider.InitStructureProvider("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower", "GPKG")
@@ -199,7 +199,7 @@ func Test_StreamAbstract(t *testing.T) {
 	fmt.Println(time.Since(now))
 }
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
-	nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitNSISP("nsi2026")
 	filepath := "/workspaces/Go_Consequences/data/Base.tif"
 	w, _ := resultswriters.InitSummaryResultsWriterFromFile("/workspaces/Go_Consequences/data/base_directLosses.csv")
 	defer w.Close()
@@ -207,7 +207,7 @@ func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	StreamAbstractByFIPS_WithECAM("48201", dfr, nsp, w)
 }
 func Test_StreamAbstract_smallDataset(t *testing.T) {
-	nsp := structureprovider.InitNSISP()
+	nsp := structureprovider.InitNSISP("nsi2026")
 	root := "/workspaces/Go_Consequences/data/clipped_sample"
 	filepath := root + ".tif"
 	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.json", "results", "GeoJSON")
