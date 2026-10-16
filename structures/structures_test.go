@@ -405,4 +405,13 @@ func TestComputeConsequencesMultiFrequency(t *testing.T) {
 	if got != 2000.0 {
 		t.Errorf("Compute() = %f; expected %f", got, 2000.0)
 	}
+
+	if math.Abs(eFinalVal-gFinalVal.(float64)) > 0.000000001 {
+		t.Errorf("Final Structure Value was %3.2f. Expected: %3.2f.\n", gFinalVal, eFinalVal)
+	}
+
+	if eTimesRebuilt != gTimesRebuilt.(int32) {
+		t.Errorf("Final Structure Value was %d. Expected: %d.\n", gTimesRebuilt, eTimesRebuilt)
+	}
+
 }

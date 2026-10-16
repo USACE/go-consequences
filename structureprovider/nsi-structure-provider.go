@@ -18,24 +18,25 @@ import (
 
 // NsiProperties is a reflection of the JSON feature property attributes from the NSI-API
 type NsiProperties struct {
-	Name             int     `json:"fd_id"`
-	X                float64 `json:"x"`
-	Y                float64 `json:"y"`
-	Occtype          string  `json:"occtype"`
-	FoundHt          float64 `json:"found_ht"`
-	FoundType        string  `json:"found_type"`
-	DamCat           string  `json:"st_damcat"`
-	StructVal        float64 `json:"val_struct"`
-	ContVal          float64 `json:"val_cont"`
-	CB               string  `json:"cbfips"`
-	Pop2amu65        int32   `json:"pop2amu65"`
-	Pop2amo65        int32   `json:"pop2amo65"`
-	Pop2pmu65        int32   `json:"pop2pmu65"`
-	Pop2pmo65        int32   `json:"pop2pmo65"`
-	NumStories       int32   `json:"num_story"`
-	FirmZone         string  `json:"firmzone"`
-	GroundElevation  float64 `json:"ground_elv"`
-	ConstructionType string  `json:"bldgtype"`
+	Name               int     `json:"fd_id"`
+	X                  float64 `json:"x"`
+	Y                  float64 `json:"y"`
+	Occtype            string  `json:"occtype"`
+	FoundHt            float64 `json:"found_ht"`
+	FoundType          string  `json:"found_type"`
+	DamCat             string  `json:"st_damcat"`
+	StructVal          float64 `json:"val_struct"`
+	ContVal            float64 `json:"val_cont"`
+	CB                 string  `json:"cbfips"`
+	Pop2amu65          int32   `json:"pop2amu65"`
+	Pop2amo65          int32   `json:"pop2amo65"`
+	Pop2pmu65          int32   `json:"pop2pmu65"`
+	Pop2pmo65          int32   `json:"pop2pmo65"`
+	NumStories         int32   `json:"num_story"`
+	FirmZone           string  `json:"firmzone"`
+	BaseFloodElevation float64 `json:"static_bfe"`
+	GroundElevation    float64 `json:"ground_elv"`
+	ConstructionType   string  `json:"bldgtype"`
 }
 
 // NsiFeature is a feature which contains the properties of a structure from the NSI API
@@ -83,22 +84,41 @@ func (rsfr recordSeparatorFilterReader) Read(p []byte) (int, error) {
 	}
 }
 
-func InitNSISP() nsiStreamProvider {
+// year can be "nsi2022" or "nsi2026"
+func InitNSISP(year string) nsiStreamProvider {
 	//this will only work with go1.16+
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitDefault()
 	//url := urlFinder()
-	url := "https://nsi.sec.usace.army.mil/nsiapi/structures"
+
+	if !(year == "" || year == "nsi2022" || year == "nsi2026") {
+		err := fmt.Errorf("InitNSISP: Invalid nsi year supplied. Expected \"\", \"nsi2022\", or \"nsi2026\". Got: %s", year)
+		panic(err)
+	}
+	url_year := "nsi2026"
+	if year == "nsi2022" {
+		url_year = year
+	}
+	url := fmt.Sprintf("https://nsi.sec.usace.army.mil/nsiapi/%s/structures", url_year)
 	// TODO probably don't hard code a possibly changing url
 	fh, _ := structures.InitFoundationUncertainty()
 	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp, FoundationUncertainty: fh}
 }
-func InitNSISPwithOcctypeFilePath(occtypefp string) nsiStreamProvider {
+func InitNSISPwithOcctypeFilePath(occtypefp string, year string) nsiStreamProvider {
 	//this will only work with go1.16+
 	otp := structures.JsonOccupancyTypeProvider{}
 	otp.InitLocalPath(occtypefp)
 	//url := urlFinder()
-	url := "https://nsi.sec.usace.army.mil/nsiapi/structures"
+
+	if !(year == "" || year == "nsi2022" || year == "nsi2026") {
+		err := fmt.Errorf("InitNSISP: Invalid nsi year supplied. Expected \"\", \"nsi2022\", or \"nsi2026\". Got: %s", year)
+		panic(err)
+	}
+	url_year := "nsi2026"
+	if year == "nsi2022" {
+		url_year = year
+	}
+	url := fmt.Sprintf("https://nsi.sec.usace.army.mil/nsiapi/%s/structures", url_year)
 	// TODO probably don't hard code a possibly changing url
 	fh, _ := structures.InitFoundationUncertainty()
 	return nsiStreamProvider{ApiURL: url, OccTypeProvider: otp, FoundationUncertainty: fh}
@@ -223,13 +243,14 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 		}
 	}
 	s := structures.StructureStochastic{
-		OccType:          occtype,
-		StructVal:        consequences.ParameterValue{Value: f.Properties.StructVal},
-		ContVal:          consequences.ParameterValue{Value: f.Properties.ContVal},
-		FoundHt:          consequences.ParameterValue{Value: f.Properties.FoundHt},
-		FoundType:        f.Properties.FoundType,
-		ConstructionType: f.Properties.ConstructionType,
-		FirmZone:         f.Properties.FirmZone,
+		OccType:            occtype,
+		StructVal:          consequences.ParameterValue{Value: f.Properties.StructVal},
+		ContVal:            consequences.ParameterValue{Value: f.Properties.ContVal},
+		FoundHt:            consequences.ParameterValue{Value: f.Properties.FoundHt},
+		FoundType:          f.Properties.FoundType,
+		ConstructionType:   f.Properties.ConstructionType,
+		FirmZone:           f.Properties.FirmZone,
+		BaseFloodElevation: f.Properties.BaseFloodElevation,
 		PopulationSet: structures.PopulationSet{
 			Pop2pmo65: f.Properties.Pop2pmo65,
 			Pop2pmu65: f.Properties.Pop2pmu65,
