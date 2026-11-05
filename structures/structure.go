@@ -1,6 +1,7 @@
 package structures
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -130,9 +131,13 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result
 
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
 func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Result, error) {
-	addMulti, ok := d.(hazards.MultiHazardEvent)
+	multi, ok := d.(hazards.MultiHazardEvent)
 	if ok {
-		return computeConsequencesMultiHazard(addMulti, s)
+		multiFrequency, ok2 := multi.(hazards.MultiFrequencyHazardEvent)
+		if ok2 {
+			return computeConsequencesMultiFrequency(multiFrequency, s)
+		}
+		return computeConsequencesMultiHazard(multi, s)
 	}
 	return computeConsequences(d, s)
 }
@@ -451,4 +456,159 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 	}
 	// ret.Result[20] = fmt.Sprintf("%v", subResult) // saving the results as a string
 	return ret, err
+}
+
+// ComputeEAD takes an array of damages and frequencies and integrates the curve. we should probably refactor this into paired data as a function.
+// This func is copied from the compute module to prevent cyclical import
+func ComputeEAD(damages []float64, freq []float64) float64 {
+	triangle := 0.0
+	square := 0.0
+	x1 := 1.0 // create a triangle to the first probability space - linear interpolation is probably a problem, maybe use log linear interpolation for the triangle
+	y1 := 0.0
+	eadT := 0.0
+	for i := 0; i < len(freq); i++ {
+		xdelta := x1 - freq[i]
+		square = xdelta * y1
+		triangle = ((xdelta) * (damages[i] - y1)) / 2.0
+		eadT += square + triangle
+		x1 = freq[i]
+		y1 = damages[i]
+	}
+	if x1 != 0.0 {
+		xdelta := x1 - 0.0
+		eadT += xdelta * y1 //no extrapolation, just continue damages out as if it were truth for all remaining probability.
+
+	}
+	return eadT
+}
+
+func computeConsequencesMultiFrequency(event hazards.MultiFrequencyHazardEvent, s StructureDeterministic) (consequences.Result, error) {
+
+	header := []string{"fd_id", "x", "y", "damage category", "occupancy type", "val_structure", "val_contents", "struct_ead", "cont_ead", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips"}
+	results := []interface{}{"updateme", 0.0, 0.0, "dc", "ot", 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS"}
+	var ret = consequences.Result{Headers: header, Result: results}
+	sval := s.StructVal
+	conval := s.ContVal
+	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", event)
+	if sderr != nil {
+		return ret, sderr
+	}
+	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("contents", event)
+	if cderr != nil {
+		return ret, cderr
+	}
+
+	if sDamFun.DamageDriver == hazards.Depth {
+		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
+		representativeStories := math.Ceil(damagefunctionMax / 9.0)
+		if s.NumStories > int32(representativeStories) {
+			//there is great potential that the value of the structure is not representative of the damage function range.
+			modifier := representativeStories / float64(s.NumStories)
+			sval *= modifier
+			conval *= modifier
+		}
+	} //else dont modify value because damage is not driven by depth
+	sdams := make([]float64, len(event.Frequencies()))
+	cdams := make([]float64, len(event.Frequencies()))
+	successes := 0
+	for {
+
+		freq := event.Frequency()
+		ret.Headers = append(ret.Headers, fmt.Sprintf("%2.6fS", freq))
+		ret.Headers = append(ret.Headers, fmt.Sprintf("%2.6fC", freq))
+		ret.Headers = append(ret.Headers, fmt.Sprintf("%2.6fH", freq))
+
+		if event.Has(sDamFun.DamageDriver) && event.Has(cDamFun.DamageDriver) {
+			switch sDamFun.DamageDriver {
+			case hazards.Depth:
+				depthAboveFFE := event.Depth() - s.FoundHt
+				spct := sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
+				cpct := cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
+				sdam := spct * sval
+				cdam := cpct * conval
+				sdams[event.Index()] = sdam
+				cdams[event.Index()] = cdam
+
+				ret.Result = append(ret.Result, sdam)
+				ret.Result = append(ret.Result, cdam)
+				hazardstring := ""
+				bytes, err := json.Marshal(event.This())
+				if err == nil {
+					hazardstring = string(bytes)
+				}
+				ret.Result = append(ret.Result, hazardstring)
+				successes++
+			case hazards.Erosion:
+				spct := sDamFun.DamageFunction.SampleValue(event.Erosion()) / 100 //assumes what type the damage array is in
+				cpct := cDamFun.DamageFunction.SampleValue(event.Erosion()) / 100
+				sdam := spct * sval
+				cdam := cpct * conval
+				sdams[event.Index()] = sdam
+				cdams[event.Index()] = cdam
+
+				ret.Result = append(ret.Result, sdam)
+				ret.Result = append(ret.Result, cdam)
+				hazardstring := ""
+				bytes, err := json.Marshal(event.This())
+				if err == nil {
+					hazardstring = string(bytes)
+				}
+				ret.Result = append(ret.Result, hazardstring)
+				successes++
+			default:
+				sdams[event.Index()] = 0.0
+				cdams[event.Index()] = 0.0
+				ret.Result = append(ret.Result, 0.0)
+				ret.Result = append(ret.Result, 0.0)
+				hazardstring := ""
+				bytes, err := json.Marshal(event.This())
+				if err == nil {
+					hazardstring = string(bytes)
+				}
+				ret.Result = append(ret.Result, hazardstring)
+				// Do we want to error out on this? Is it possible that one but not all of the hazards in the series could have an invalid damage driver?
+				return consequences.Result{}, fmt.Errorf("structures: could not understand the damage driver for event in MultiFrequencyEvent at Index %v", event.Index())
+			}
+		} else {
+			// We don't raise an error here because there might be no hazard for a high frequency event (e.g. 2yr flood), but there may still be one for the
+			// lower frequency events
+			sdams[event.Index()] = 0.0
+			cdams[event.Index()] = 0.0
+			ret.Result = append(ret.Result, -9999)
+			ret.Result = append(ret.Result, -9999)
+			hazardstring := ""
+			bytes, err := json.Marshal(event.This())
+			if err == nil {
+				hazardstring = string(bytes)
+			}
+			ret.Result = append(ret.Result, hazardstring)
+		}
+
+		if event.HasNext() {
+			event.Increment()
+		} else {
+			break
+		}
+	}
+	sEAD := ComputeEAD(sdams, event.Frequencies())
+	cEAD := ComputeEAD(cdams, event.Frequencies())
+	ret.Result[0] = s.BaseStructure.Name
+	ret.Result[1] = s.BaseStructure.X
+	ret.Result[2] = s.BaseStructure.Y
+	ret.Result[3] = s.BaseStructure.DamCat
+	ret.Result[4] = s.OccType.Name
+	ret.Result[5] = sval
+	ret.Result[6] = conval
+	ret.Result[7] = sEAD
+	ret.Result[8] = cEAD
+	ret.Result[9] = s.Pop2amu65
+	ret.Result[10] = s.Pop2amo65
+	ret.Result[11] = s.Pop2pmu65
+	ret.Result[12] = s.Pop2pmo65
+	ret.Result[13] = s.CBFips
+	if successes == 0 {
+		return ret, errors.New("structure: hazard did not contain valid parameters to impact a structure")
+	}
+	return ret, nil
 }

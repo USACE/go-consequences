@@ -186,3 +186,65 @@ func TestADDMulti(t *testing.T) {
 		}
 	}
 }
+
+func TestDepthMultiFrequency(t *testing.T) {
+	depths := []float64{1, 10, 30, 45, 59, 78, 89, 102, 140, 180, 240, 330, 350, 370}
+	freqs := []float64{.99, .95, .9, .8, .7, .6, .5, .4, .3, .2, .1, .01, .002, .001}
+
+	depthEvents := make([]hazards.DepthFrequencyEvent, len(depths))
+	for i, d := range depths {
+		di := hazards.DepthFrequencyEvent{}
+		di.SetDepth(d)
+		di.SetFrequency(freqs[i])
+		depthEvents[i] = di
+	}
+
+	dmf := hazards.DepthEventMultiFrequency{Events: depthEvents}
+
+	testAllFreqs := dmf.Frequencies()
+	testFreqs := make([]float64, len(freqs))
+	testDepths := make([]float64, len(depths))
+	for {
+		testFreqs[dmf.Index()] = dmf.Frequency()
+		testDepths[dmf.Index()] = dmf.Depth()
+		if dmf.HasNext() {
+			dmf.Increment()
+		} else {
+			if !(dmf.Index() == len(depthEvents)-1) {
+				t.Errorf("Length mismatch between input hazards and output hazards")
+			}
+			break
+		}
+	}
+
+	for i := range testFreqs {
+		if testFreqs[i] != freqs[i] {
+			t.Errorf("Wrong Frequency from Frequency(). Expected: %v. Got: %v\n", testFreqs[i], freqs[i])
+		}
+		if testAllFreqs[i] != freqs[i] {
+			t.Errorf("Wrong Frequency from HazardFrequencies(). Expected: %v. Got: %v\n", testFreqs[i], freqs[i])
+		}
+		if testDepths[i] != depths[i] {
+			t.Errorf("Wrong Depth from Depth(). Expected: %v. Got: %v\n", testDepths[i], depths[i])
+		}
+	}
+}
+
+// func TestInterfaceMatch(t *testing.T) {
+// 	depths := []float64{1, 2, 3, 4}
+// 	freqs := []float64{.75, .5, .25, 0}
+
+// 	dmf := hazards.DepthEventMultiFrequency{}
+// 	for i, d := range depths {
+// 		df := hazards.DepthFrequencyEvent{}
+// 		df.SetDepth(d)
+// 		df.SetFrequency(freqs[i])
+// 		dmf.Append(df)
+// 	}
+
+// 	var _ hazards.HazardEvent = hazards.DepthEventMultiFrequency{}
+// 	var _ hazards.FrequencyEvent = hazards.DepthEventMultiFrequency{}
+// 	var _ hazards.MultiHazardEvent = (*hazards.DepthEventMultiFrequency)(nil)
+// 	var _ hazards.MultiFrequencyHazardEvent = (*hazards.DepthEventMultiFrequency)(nil)
+
+// }

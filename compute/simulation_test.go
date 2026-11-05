@@ -106,6 +106,10 @@ func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)
 }
 
+// func Test_StreamAbstract_MultiFrequencyHazard(t *testing.T) {
+
+// }
+
 // func Test_StreamAbstract_MultiHazard(t *testing.T) {
 // 	//initialize the NSI API structure provider
 // 	nsp := structureprovider.InitNSISPwithOcctypeFilePath("/workspaces/go-consequences/data/lifecycle/occtypes_reconstruction.json")

@@ -14,6 +14,11 @@ type DepthEvent struct {
 	depth float64
 }
 
+type DepthFrequencyEvent struct {
+	DepthEvent
+	frequency float64
+}
+
 func (h DepthEvent) Depth() float64 {
 	return h.depth
 }
@@ -64,6 +69,13 @@ func (h DepthEvent) Has(p Parameter) bool {
 func (d DepthEvent) MarshalJSON() ([]byte, error) {
 	s := fmt.Sprintf("{\"depthevent\":{\"depth\":%f}}", d.Depth())
 	return []byte(s), nil
+}
+func (d DepthFrequencyEvent) Frequency() float64 {
+	return d.frequency
+}
+func (h *DepthFrequencyEvent) SetFrequency(f float64) {
+	//fmt.Println(d)
+	h.frequency = f
 }
 
 // ArrivalandDurationEvent describes an event with an arrival time and a duration in days
@@ -129,6 +141,7 @@ func (ad ArrivalandDurationEvent) Has(p Parameter) bool {
 
 // ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
 type ArrivalDepthandDurationEvent struct {
+	stormevent_id  string //EXPERIMENTAL
 	arrivalTime    time.Time
 	depth          float64
 	durationInDays float64
@@ -169,7 +182,10 @@ func (h ArrivalDepthandDurationEvent) Salinity() bool {
 	return false
 }
 func (h ArrivalDepthandDurationEvent) Qualitative() string {
-	return ""
+	return h.stormevent_id //EXPERIMENTAL
+}
+func (h *ArrivalDepthandDurationEvent) SetQualitative(id string) {
+	h.stormevent_id = id //EXPERIMENTAL
 }
 func (h ArrivalDepthandDurationEvent) DV() float64 {
 	return -901.0
@@ -592,6 +608,150 @@ func (h ArrivalDepthandDurationEventMulti) Swap(i, j int) {
 func (h ArrivalDepthandDurationEventMulti) Less(i, j int) bool {
 	return h.Events[i].ArrivalTime().Before(h.Events[j].ArrivalTime())
 }
+
 func (d ArrivalDepthandDurationEventMulti) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.Events)
+}
+
+type DepthEventMultiFrequency struct {
+	index  int
+	Events []DepthFrequencyEvent
+}
+
+func (h DepthEventMultiFrequency) Depth() float64 {
+	return h.Events[h.index].Depth()
+}
+
+func (h DepthEventMultiFrequency) Velocity() float64 {
+	return h.Events[h.index].Velocity()
+}
+
+func (h DepthEventMultiFrequency) ArrivalTime() time.Time {
+	return h.Events[h.index].ArrivalTime()
+}
+
+func (h DepthEventMultiFrequency) Erosion() float64 {
+	return h.Events[h.index].Erosion()
+}
+
+func (h DepthEventMultiFrequency) Duration() float64 {
+	return h.Events[h.index].Duration()
+}
+
+func (h DepthEventMultiFrequency) WaveHeight() float64 {
+	return h.Events[h.index].WaveHeight()
+}
+
+func (h DepthEventMultiFrequency) Salinity() bool {
+	return h.Events[h.index].Salinity()
+}
+
+func (h DepthEventMultiFrequency) Qualitative() string {
+	return h.Events[h.index].Qualitative()
+}
+
+func (h DepthEventMultiFrequency) DV() float64 {
+	return h.Events[h.index].DV()
+}
+func (h DepthEventMultiFrequency) WSE() float64 {
+	return h.Events[h.index].WSE()
+}
+func (h DepthEventMultiFrequency) Parameters() Parameter {
+	return h.Events[h.index].Parameters()
+}
+
+func (h DepthEventMultiFrequency) Has(p Parameter) bool {
+	return h.Events[h.index].Has(p)
+}
+
+func (h DepthEventMultiFrequency) Index() int {
+	return h.index
+}
+
+func (h DepthEventMultiFrequency) HasNext() bool {
+	return h.index < (len(h.Events) - 1)
+}
+
+func (h DepthEventMultiFrequency) HasPrevious() bool {
+	return h.index > 0
+}
+
+func (h DepthEventMultiFrequency) This() HazardEvent {
+	return h.Events[h.index]
+}
+
+func (h DepthEventMultiFrequency) Next() (HazardEvent, error) {
+	var err error = nil
+	if h.HasNext() {
+		return h.Events[h.index+1], err
+	} else {
+		return ArrivalDepthandDurationEvent{}, errors.New("hazards: ArrivalDepthandDurationEventMulti does not have Next event")
+	}
+}
+
+func (h DepthEventMultiFrequency) Previous() (HazardEvent, error) {
+	var err error = nil
+	if h.HasPrevious() {
+		return h.Events[h.index-1], err
+	} else {
+		return ArrivalDepthandDurationEvent{}, errors.New("hazards: ArrivalDepthandDurationEventMulti does not have Previous event")
+	}
+}
+
+func (h *DepthEventMultiFrequency) Increment() {
+	if h.HasNext() {
+		h.index++
+	}
+}
+
+func (h *DepthEventMultiFrequency) ResetIndex() {
+	h.index = 0
+}
+
+func (h *DepthEventMultiFrequency) Append(n HazardEvent) {
+	newEvent := n.(DepthFrequencyEvent)
+	h.Events = append(h.Events, newEvent)
+}
+
+func (h DepthEventMultiFrequency) Sort() { // ensure the hazard events are in order of arrival time
+	sort.Sort(h)
+}
+
+func (h DepthEventMultiFrequency) IsSorted() bool {
+	return sort.IsSorted(h)
+}
+
+// Len is part of sort.Interface.
+func (h DepthEventMultiFrequency) Len() int {
+	return len(h.Events)
+}
+
+// Swap is part of sort.Interface.
+func (h DepthEventMultiFrequency) Swap(i, j int) {
+	h.Events[i], h.Events[j] = h.Events[j], h.Events[i]
+}
+
+// Less is part of sort.Interface
+func (h DepthEventMultiFrequency) Less(i, j int) bool {
+	return h.Events[i].Frequency() < h.Events[j].Frequency() // This means the 500-year flood is "Less" than the 100-year event because we are sorting on frequency
+}
+
+func (h *DepthEventMultiFrequency) SetIndex(i int) error {
+	if i < (len(h.Events)) {
+		h.index = i
+		return nil
+	}
+	return errors.New("hazards: Attempted to set out of bounds index on DepthEventMultiFrequency event.")
+}
+
+func (h DepthEventMultiFrequency) Frequency() float64 {
+	return h.Events[h.index].Frequency()
+}
+
+func (h DepthEventMultiFrequency) Frequencies() []float64 {
+	f := make([]float64, len(h.Events))
+	for i, e := range h.Events {
+		f[i] = e.Frequency()
+	}
+	return f
 }
