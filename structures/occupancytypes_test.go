@@ -238,12 +238,41 @@ func Test_OccupancyType_COM1(t *testing.T) {
 	}
 	fmt.Println(o2.ComponentDamageFunctions["contents"].DamageFunctions[hazards.Depth].Source)
 }
+
+func Test_GetMultipleDamageFunctions_COM1(t *testing.T) {
+	jotp := JsonOccupancyTypeProvider{}
+	jotp.InitDefault()
+	m := jotp.occupancyTypesContainer.OccupancyTypes
+	o := m["COM1"]
+
+	d := hazards.CoastalEvent{}
+	d.SetDepth(2.5)
+	d.SetErosion(20)
+
+	df, err := o.CentralTendency().GetComponentDamageFunctionForDamageDriver("structure", hazards.Erosion)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var p hazards.Parameter = hazards.Depth | hazards.Salinity
+	df2, err := o.CentralTendency().GetComponentDamageFunctionForDamageDriver("structure", p)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(df.DamageDriver)
+	fmt.Println(df.Source)
+	fmt.Println(df2.DamageDriver)
+	fmt.Println(df2.Source)
+}
+
 func Test_OccupancyType_Report(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.InitDefault()
 	b, _ := jotp.occupancyTypesContainer.OcctypeReport()
 	fmt.Println(string(b))
 }
+
 /*
 func Test_OccupancyType_Report_Inland_damageFunctions(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
