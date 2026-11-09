@@ -239,6 +239,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	return ret, err
 }
 
+// computeConsequencesMultiHazard computes lifecycle consequences for a structure exposed to multiple potential damage drivers (flood depth, erosion, wave attack).
 func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	mainHeader := []string{
@@ -261,16 +262,27 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 	var ret = consequences.Result{Headers: mainHeader, Result: mainResults}
 	var err error = nil
 
-	// damage functions for structure
-	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", event)
+	sDepthDamFun, sderr := s.OccType.GetComponentDamageFunctionForDamageDriver("structure", event.Parameters()^hazards.Erosion) // can't simple use hazards.Depth as hazard may have salinity or waveheight params (^ is bitwise XOR operator)
 	if sderr != nil {
 		return ret, sderr
 	}
-	cDamFun, cderr := s.OccType.GetComponentDamageFunctionForHazard("contents", event)
+	sErosionDamFun, seerr := s.OccType.GetComponentDamageFunctionForDamageDriver("structure", hazards.Erosion)
+	if seerr != nil {
+		// GetComponentDamageFunctionForDamageDriver does not return a default damage function if the Parameter argument does not include Depth.
+		// Should we define a default erosion damage function for the function to return when an Erosion df is requested?
+		return ret, seerr
+	}
+
+	cDepthDamFun, cderr := s.OccType.GetComponentDamageFunctionForDamageDriver("contents", event.Parameters()^hazards.Erosion) // can't simple use hazards.Depth as hazard may have salinity or waveheight params (^ is bitwise XOR operator)
 	if cderr != nil {
 		return ret, cderr
 	}
-	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForHazard("reconstruction", event)
+	cErosionDamFun, ceerr := s.OccType.GetComponentDamageFunctionForDamageDriver("contents", hazards.Erosion)
+	if ceerr != nil {
+		return ret, ceerr
+	}
+
+	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForDamageDriver("reconstruction", hazards.Depth) // Would it make more sense for reconstruction to be treated as a damage driver rather than a component?
 	if rderr != nil {
 		return ret, cderr
 	}
@@ -286,18 +298,16 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 	cumulativeContentLoss := 0.0
 	timesRebuilt := 0
 
-	// adjust value for tall structures
-	if sDamFun.DamageDriver == hazards.Depth {
-		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
-		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
-		representativeStories := math.Ceil(damagefunctionMax / 9.0)
-		if s.NumStories > int32(representativeStories) {
-			//there is great potential that the value of the structure is not representative of the damage function range.
-			modifier := representativeStories / float64(s.NumStories)
-			sval *= modifier
-			conval *= modifier
-		}
-	} //else dont modify value because damage is not driven by depth
+	// instead of adjusting the structure value of tall structures for depth-damage calcs, we will modify the damage factor
+	// returned by the depth damage function. This will leave structure value unmodified for erosion calculations
+	depthDamageModifier := 1.0
+	damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+	damagefunctionMax = sDepthDamFun.DamageFunction.Xvals[len(sDepthDamFun.DamageFunction.Xvals)-1]
+	representativeStories := math.Ceil(damagefunctionMax / 9.0)
+	if s.NumStories > int32(representativeStories) {
+		//there is great potential that the value of the structure is not representative of the damage function range.
+		depthDamageModifier = representativeStories / float64(s.NumStories)
+	}
 
 	for {
 		// Calculate reconstruction from previous hazard if we aren't on the first one
@@ -356,59 +366,64 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		values := []interface{}{event.This(), 0.0, 0.0, 0.0, 0.0, 0.0, time.Time{}, 0.0, 0.0}
 		result := consequences.Result{Headers: header, Result: values}
 
-		if event.Has(sDamFun.DamageDriver) && event.Has(cDamFun.DamageDriver) && event.Has(rDamFun.DamageDriver) {
-			//they exist!
+		if event.Has(sDepthDamFun.DamageDriver) && event.Has(sErosionDamFun.DamageDriver) &&
+			event.Has(cDepthDamFun.DamageDriver) && event.Has(cErosionDamFun.DamageDriver) &&
+			event.Has(rDamFun.DamageDriver) {
+
+			s_depth_dam_pct := 0.0
+			c_depth_dam_pct := 0.0
+			s_erosion_dam_pct := 0.0
+			c_erosion_dam_pct := 0.0
+			s_wave_dam_pct := 0.0 // will we have specific wave attack damage functions, or are we getting adjusted depth damage functions based on WaveHeight parameter?
+			c_wave_dam_pct := 0.0
+
 			sdampercent := 0.0
-			sdamage := 0.0
 			cdampercent := 0.0
+			sdamage := 0.0
 			cdamage := 0.0
 
 			reconstruction_days := 0.0
 			completion_date := time.Time{}
 
-			switch sDamFun.DamageDriver {
-			case hazards.Depth:
-				depthAboveFFE := event.Depth() - s.FoundHt
-				sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-				cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-				sdamage = svalcurr * sdampercent
-				cdamage = convalcurr * cdampercent
+			depthAboveFFE := event.Depth() - s.FoundHt
+			erosion_pct := event.Erosion()
+			//1. get damage pct for each damage driver
+			//2. multiply depth damage pct by depthDamageModifier
+			//3. combine damage pcts according to equation to get event damage pct (sdampercent = depthpct + erosionpct + wavepct - (d*w) - (d*e) - (w*e) + (d*w*e))
+			//4. update structure damage factor sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
+			//5. calculate reconstruction days
+			s_depth_dam_pct = sDepthDamFun.DamageFunction.SampleValue(depthAboveFFE)
+			c_depth_dam_pct = cDepthDamFun.DamageFunction.SampleValue(depthAboveFFE)
+			s_depth_dam_pct = s_depth_dam_pct * depthDamageModifier
+			c_depth_dam_pct = c_depth_dam_pct * depthDamageModifier
 
-				sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
-				cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
-				// total time to complete reconstruction consists of three parts
-				//	1. Time between the start and end of the event. This is e.Duration()
-				//	2. Time between the end of the event and the beginning of reconstruction.
-				//		- In reality, this would depend on a lot but simplest assumption is that reconstruction can begin as soon as event ends.
-				//	3. Time between reconstruction start and reconstruction end. This is the value returned from the damage function
+			s_erosion_dam_pct = sErosionDamFun.DamageFunction.SampleValue(erosion_pct)
+			c_erosion_dam_pct = cErosionDamFun.DamageFunction.SampleValue(erosion_pct)
 
-				arrival := event.ArrivalTime() // do we need a check that the ArrivalTime is not just the default time.Time{}?
+			sdampercent = s_depth_dam_pct + s_erosion_dam_pct + s_wave_dam_pct -
+				(s_depth_dam_pct * s_erosion_dam_pct) - (s_depth_dam_pct * s_wave_dam_pct) - (s_erosion_dam_pct * s_wave_dam_pct) +
+				(s_depth_dam_pct * s_erosion_dam_pct * s_wave_dam_pct)
 
-				duration := 0.0
-				if event.Duration() > 0.0 { // nodata value for e.Duration == -901.0
-					duration = event.Duration()
-				}
+			cdampercent = c_depth_dam_pct + c_erosion_dam_pct + c_wave_dam_pct -
+				(c_depth_dam_pct * c_erosion_dam_pct) - (c_depth_dam_pct * c_wave_dam_pct) - (c_erosion_dam_pct * c_wave_dam_pct) +
+				(c_depth_dam_pct * c_erosion_dam_pct * c_wave_dam_pct)
 
-				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
-				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
-				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+			sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
+			cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
 
-			case hazards.Erosion:
-				sdampercent = sDamFun.DamageFunction.SampleValue(event.Erosion()) / 100 //assumes what type the damage array is in
-				cdampercent = cDamFun.DamageFunction.SampleValue(event.Erosion()) / 100
-				sdamage = svalcurr * sdampercent
-				cdamage = convalcurr * cdampercent
+			sdamage = svalcurr - (svalcurr * sDamageFactor)
+			cdamage = convalcurr - (convalcurr * cDamageFactor)
 
-				sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
-				cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
-				arrival := event.ArrivalTime()
-				// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
-				reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor))
-				completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+			arrival := event.ArrivalTime() // do we need a check that the ArrivalTime is not just the default time.Time{}?
 
-			default:
-				return ret, errors.New("structures: could not understand the damage driver")
+			duration := 0.0
+			if event.Duration() > 0.0 { // nodata value for e.Duration == -901.0
+				duration = event.Duration()
 			}
+
+			// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
+			reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
+			completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
 
 			svalcurr = sval * (1 - sDamageFactor)
 			convalcurr = conval * (1 - cDamageFactor)
@@ -454,7 +469,6 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			break
 		}
 	}
-	// ret.Result[20] = fmt.Sprintf("%v", subResult) // saving the results as a string
 	return ret, err
 }
 
