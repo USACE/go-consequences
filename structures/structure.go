@@ -371,7 +371,7 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 				depthAboveFFE := event.Depth() - s.FoundHt
 				sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 				cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-				sdamage = svalcurr * sdampercent
+				sdamage = svalcurr * sdampercent // SHOULD THIS be svalcurr - (svalcurr * sDamageFactor)?
 				cdamage = convalcurr * cdampercent
 
 				sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
@@ -455,6 +455,239 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 		}
 	}
 	// ret.Result[20] = fmt.Sprintf("%v", subResult) // saving the results as a string
+	return ret, err
+}
+
+// computeConsequencesMultiParameterMultiHazard computes lifecycle consequences for a structure exposed to multiple potential damage drivers (flood depth, erosion, wave attack).
+func computeConsequencesMultiParameterMultiHazard(event hazards.MultiHazardEvent, s StructureDeterministic) (consequences.Result, error) {
+
+	mainHeader := []string{
+		"fd_id", "x", "y", "damage category", "occupancy type",
+		"pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips",
+		"original structure value", "original content value", "final structure value", "final content value", //
+		"original ffe", "final ffe", "times rebuilt", "times raised", "StructureTotalLoss", "ContentsTotalLoss",
+		"hazard results",
+	}
+	subResultsHeader := make([]string, 0)
+	subResultsResult := make([]interface{}, 0)
+	subResult := consequences.Result{Headers: subResultsHeader, Result: subResultsResult}
+	mainResults := []interface{}{
+		"updateme", 0.0, 0.0, "damcat", "occtype",
+		0.0, 0.0, 0.0, 0.0, "cbfips",
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		subResult,
+	}
+	var ret = consequences.Result{Headers: mainHeader, Result: mainResults}
+	var err error = nil
+
+	sDepthDamFun, sderr := s.OccType.GetComponentDamageFunctionForDamageDriver("structure", event.Parameters()^hazards.Erosion) // can't simple use hazards.Depth as hazard may have salinity or waveheight params (^ is bitwise XOR operator)
+	if sderr != nil {
+		return ret, sderr
+	}
+	sErosionDamFun, seerr := s.OccType.GetComponentDamageFunctionForDamageDriver("structure", hazards.Erosion)
+	if seerr != nil {
+		// GetComponentDamageFunctionForDamageDriver does not return a default damage function if the Parameter argument does not include Depth.
+		// Should we define a default erosion damage function for the function to return when an Erosion df is requested?
+		return ret, seerr
+	}
+
+	cDepthDamFun, cderr := s.OccType.GetComponentDamageFunctionForDamageDriver("contents", event.Parameters()^hazards.Erosion) // can't simple use hazards.Depth as hazard may have salinity or waveheight params (^ is bitwise XOR operator)
+	if cderr != nil {
+		return ret, cderr
+	}
+	cErosionDamFun, ceerr := s.OccType.GetComponentDamageFunctionForDamageDriver("contents", hazards.Erosion)
+	if ceerr != nil {
+		return ret, ceerr
+	}
+
+	rDamFun, rderr := s.OccType.GetComponentDamageFunctionForDamageDriver("reconstruction", hazards.Depth) // Would it make more sense for reconstruction to be treated as a damage driver rather than a component?
+	if rderr != nil {
+		return ret, cderr
+	}
+
+	// variables for tracking value and damage across hazards
+	sval := s.StructVal
+	svalcurr := sval
+	sDamageFactor := 0.0 // this is the current pct_damage to the structure
+	conval := s.ContVal
+	convalcurr := conval
+	cDamageFactor := 0.0 // this is the current pct_damage to the contents
+	cumulativeStructureLoss := 0.0
+	cumulativeContentLoss := 0.0
+	timesRebuilt := 0
+
+	// instead of adjusting the structure value of tall structures for depth-damage calcs, we will modify the damage factor
+	// returned by the depth damage function. This will leave structure value unmodified for erosion calculations
+	depthDamageModifier := 1.0
+	damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
+	damagefunctionMax = sDepthDamFun.DamageFunction.Xvals[len(sDepthDamFun.DamageFunction.Xvals)-1]
+	representativeStories := math.Ceil(damagefunctionMax / 9.0)
+	if s.NumStories > int32(representativeStories) {
+		//there is great potential that the value of the structure is not representative of the damage function range.
+		depthDamageModifier = representativeStories / float64(s.NumStories)
+	}
+
+	for {
+		// Calculate reconstruction from previous hazard if we aren't on the first one
+		if event.HasPrevious() {
+
+			pr, err := subResult.Fetch(fmt.Sprintf("%d", event.Index()-1))
+			// pr, err := ret.Fetch(fmt.Sprintf("%d", event.Index()-1))
+			if err != nil {
+				return ret, fmt.Errorf("structures: Unable to fetch previous result at index = %v", event.Index())
+			}
+			previous_result := pr.(consequences.Result)
+			tc0, err := previous_result.Fetch("completion_date")
+			if err != nil {
+				return ret, errors.New("structures: unable to get completion date for previous hazard event")
+			}
+			last_completion_time := tc0.(time.Time)
+
+			previous_event, err := event.Previous()
+			if err != nil {
+				return ret, err
+			}
+
+			// calculate reconstruction progress assuming linear rebuild
+			t0 := previous_event.ArrivalTime().AddDate(0, 0, int(previous_event.Duration()))               // this is the time reconstruction began
+			pct_complete := (float64(event.ArrivalTime().Sub(t0)) / float64(last_completion_time.Sub(t0))) // this is the percentage of the reconstruction that is complete
+
+			if pct_complete > 1.0 {
+				pct_complete = 1.0
+			}
+
+			sPctloss_rebuilt := sDamageFactor * pct_complete
+			cPctloss_rebuilt := cDamageFactor * pct_complete
+
+			if sPctloss_rebuilt > 0 || cPctloss_rebuilt > 0 {
+				timesRebuilt++
+			}
+
+			// update structure damage factor to reflect completed construction
+			sDamageFactor = sDamageFactor - sPctloss_rebuilt
+			if sDamageFactor < 0.0 {
+				sDamageFactor = 0
+			}
+
+			cDamageFactor = cDamageFactor - cPctloss_rebuilt
+			if cDamageFactor < 0.0 {
+				cDamageFactor = 0
+			}
+
+			// update structure value to reflect completed construction
+			svalcurr = sval * (1 - sDamageFactor)
+			convalcurr = conval * (1 - cDamageFactor)
+
+		}
+
+		header := []string{"hazard", "structure damage", "content damage", "s_dam_per", "c_dam_per", "reconstruction_days", "completion_date", "structure_value", "content_value"}
+		values := []interface{}{event.This(), 0.0, 0.0, 0.0, 0.0, 0.0, time.Time{}, 0.0, 0.0}
+		result := consequences.Result{Headers: header, Result: values}
+
+		if event.Has(sDepthDamFun.DamageDriver) && event.Has(sErosionDamFun.DamageDriver) &&
+			event.Has(cDepthDamFun.DamageDriver) && event.Has(cErosionDamFun.DamageDriver) &&
+			event.Has(rDamFun.DamageDriver) {
+
+			s_depth_dam_pct := 0.0
+			c_depth_dam_pct := 0.0
+			s_erosion_dam_pct := 0.0
+			c_erosion_dam_pct := 0.0
+			s_wave_dam_pct := 0.0 // will we have specific wave attack damage functions, or are we getting adjusted depth damage functions based on WaveHeight parameter?
+			c_wave_dam_pct := 0.0
+
+			sdampercent := 0.0
+			cdampercent := 0.0
+			sdamage := 0.0
+			cdamage := 0.0
+
+			reconstruction_days := 0.0
+			completion_date := time.Time{}
+
+			depthAboveFFE := event.Depth() - s.FoundHt
+			erosion_pct := event.Erosion()
+			//1. get damage pct for each damage driver
+			//2. multiply depth damage pct by depthDamageModifier
+			//3. combine damage pcts according to equation to get event damage pct (sdampercent = depthpct + erosionpct + wavepct - (d*w) - (d*e) - (w*e) + (d*w*e))
+			//4. update structure damage factor sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
+			//5. calculate reconstruction days
+			s_depth_dam_pct = sDepthDamFun.DamageFunction.SampleValue(depthAboveFFE)
+			c_depth_dam_pct = cDepthDamFun.DamageFunction.SampleValue(depthAboveFFE)
+			s_depth_dam_pct = s_depth_dam_pct * depthDamageModifier
+			c_depth_dam_pct = c_depth_dam_pct * depthDamageModifier
+
+			s_erosion_dam_pct = sErosionDamFun.DamageFunction.SampleValue(erosion_pct)
+			c_erosion_dam_pct = cErosionDamFun.DamageFunction.SampleValue(erosion_pct)
+
+			sdampercent = s_depth_dam_pct + s_erosion_dam_pct + s_wave_dam_pct -
+				(s_depth_dam_pct * s_erosion_dam_pct) - (s_depth_dam_pct * s_wave_dam_pct) - (s_erosion_dam_pct * s_wave_dam_pct) +
+				(s_depth_dam_pct * s_erosion_dam_pct * s_wave_dam_pct)
+
+			cdampercent = c_depth_dam_pct + c_erosion_dam_pct + c_wave_dam_pct -
+				(c_depth_dam_pct * c_erosion_dam_pct) - (c_depth_dam_pct * c_wave_dam_pct) - (c_erosion_dam_pct * c_wave_dam_pct) +
+				(c_depth_dam_pct * c_erosion_dam_pct * c_wave_dam_pct)
+
+			sDamageFactor = 1 - (1-sDamageFactor)*(1-sdampercent)
+			cDamageFactor = 1 - (1-cDamageFactor)*(1-cdampercent)
+
+			sdamage = svalcurr - (svalcurr * sDamageFactor)
+			cdamage = convalcurr - (convalcurr * cDamageFactor)
+
+			arrival := event.ArrivalTime() // do we need a check that the ArrivalTime is not just the default time.Time{}?
+
+			duration := 0.0
+			if event.Duration() > 0.0 { // nodata value for e.Duration == -901.0
+				duration = event.Duration()
+			}
+
+			// calculate reconstruction_days based on damageFactor to account for potential remaining damage from previous events
+			reconstruction_days = math.Ceil(rDamFun.DamageFunction.SampleValue(sDamageFactor) + duration)
+			completion_date = arrival.AddDate(0, 0, int(reconstruction_days))
+
+			svalcurr = sval * (1 - sDamageFactor)
+			convalcurr = conval * (1 - cDamageFactor)
+			cumulativeContentLoss += cdamage
+			cumulativeStructureLoss += sdamage
+			result.Result[1] = sdamage
+			result.Result[2] = cdamage
+			result.Result[3] = sdampercent
+			result.Result[4] = cdampercent
+			result.Result[5] = math.Ceil(reconstruction_days)
+			result.Result[6] = completion_date
+			result.Result[7] = svalcurr
+			result.Result[8] = convalcurr
+
+		} else {
+			err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
+		}
+		subResultsHeader = append(subResultsHeader, fmt.Sprintf("%d", event.Index()))
+		subResultsResult = append(subResultsResult, result)
+		subResult = consequences.Result{Headers: subResultsHeader, Result: subResultsResult}
+		ret.Result[0] = s.BaseStructure.Name
+		ret.Result[1] = s.BaseStructure.X
+		ret.Result[2] = s.BaseStructure.Y
+		ret.Result[3] = s.BaseStructure.DamCat
+		ret.Result[4] = s.OccType.Name
+		ret.Result[5] = s.Pop2amu65
+		ret.Result[6] = s.Pop2amo65
+		ret.Result[7] = s.Pop2pmu65
+		ret.Result[8] = s.Pop2pmo65
+		ret.Result[9] = s.CBFips
+		ret.Result[10] = sval
+		ret.Result[11] = conval
+		ret.Result[12] = svalcurr
+		ret.Result[13] = convalcurr
+		ret.Result[16] = int32(timesRebuilt)
+		ret.Result[18] = cumulativeStructureLoss
+		ret.Result[19] = cumulativeContentLoss
+		ret.Result[20] = subResult
+
+		if event.HasNext() {
+			event.Increment() // go to the next event and restart loop
+		} else {
+			break
+		}
+	}
 	return ret, err
 }
 

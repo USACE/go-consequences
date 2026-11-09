@@ -242,7 +242,10 @@ func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForDamageDriver(co
 		r, rok := c.DamageFunctions[p]
 		if rok {
 			return r, nil
+		} else if p&hazards.Depth == hazards.Depth { // if the parameter has the Depth bitflag turned on
+			return c.DamageFunctions[hazards.Default], nil // return the default depth damage function
 		}
+		// It may be desireable to return a default erosion damage function here instead of an error.
 		return DamageFunction{}, fmt.Errorf("Occupancy type %s does not have a damage function for component, %s, with damage driver %s.", o.Name, component, p)
 	}
 	return DamageFunction{}, fmt.Errorf("component, %s, does not exist for this occupancy type (%s)", component, o.Name)
